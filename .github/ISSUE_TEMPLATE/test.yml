@@ -31,16 +31,32 @@ body:
   - type: dropdown
     id: component
     attributes:
-      label: 対象コンポーネント
+      label: 対象範囲
       description: 主にどの部分のテストですか？
       options:
-        - Frontend（コンポーネント・hooks）
-        - Backend（API・サービス）
-        - Database（リポジトリ・クエリ）
-        - 両方（Frontend + Backend）
+        - Frontend（コンポーネント・フックス・UI）
+        - Backend（API・サービス・ハンドラー）
+        - Database（リポジトリ・クエリ・マイグレーション）
+        - E2E（エンドツーエンド・シナリオ）
+        - 統合（Frontend + Backend + DB）
+        - パフォーマンス（負荷・ストレス）
         - その他
     validations:
       required: true
+
+  - type: textarea
+    id: test_exclusions
+    attributes:
+      label: テスト対象外
+      description: 今回のテスト作成では対象外とする範囲を明記してください。
+      placeholder: |
+        例：
+        - 外部API呼び出しはモックで対応
+        - UI の詳細なスタイリングは対象外
+        - パフォーマンステストは別途実施
+        - 管理者機能は今回対象外
+    validations:
+      required: false
 
   - type: textarea
     id: motivation

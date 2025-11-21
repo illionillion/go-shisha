@@ -22,6 +22,20 @@ body:
       required: true
 
   - type: textarea
+    id: scope_limitations
+    attributes:
+      label: 対象外・制限事項
+      description: 今回の問い合わせ・提案では対象外とする範囲や制限事項を明記してください。
+      placeholder: |
+        例：
+        - 本番環境への直接的な影響は対象外
+        - 他チームの管轄範囲は含まない
+        - 予算・リソースの制約あり
+        - 特定の技術スタックは除外
+    validations:
+      required: false
+
+  - type: textarea
     id: details
     attributes:
       label: 内容詳細

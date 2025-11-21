@@ -6,7 +6,7 @@ body:
   - type: textarea
     id: overview
     attributes:
-      label: 機能概要https://github.com/illionillion/mermaid-editor/tree/main/.github/ISSUE_TEMPLATE
+      label: 機能概要
       description: 実装したい機能の概要を記載してください。
       placeholder: 例：投稿にタグ機能を追加したい
     validations:
@@ -15,17 +15,33 @@ body:
   - type: dropdown
     id: component
     attributes:
-      label: 対象コンポーネント
-      description: 主にどの部分に関わる機能ですか？
+      label: 対象範囲
+      description: 主にどの部分の機能実装ですか？
       options:
-        - Frontend（UI/UX）
-        - Backend（API）
-        - Database（データ設計）
-        - 両方（Frontend + Backend）
-        - インフラ・DevOps
+        - Frontend（コンポーネント・フック）
+        - Backend（API・サービス・ハンドラー）
+        - Database（スキーマ・マイグレーション）
+        - 全スタック（Frontend + Backend + DB）
+        - インフラ（Docker・CI/CD・デプロイ）
+        - 共通（型定義・ユーティリティ）
+        - テスト（単体・結合・E2E）
         - その他
     validations:
       required: true
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: 対象外範囲
+      description: 今回の機能実装では対象外とする範囲を明記してください。
+      placeholder: |
+        例：
+        - 管理者機能は対象外
+        - モバイル対応は別Issue
+        - パフォーマンス最適化は後回し
+        - 外部API連携は含まない
+    validations:
+      required: false
 
   - type: textarea
     id: motivation

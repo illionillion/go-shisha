@@ -15,19 +15,33 @@ body:
   - type: dropdown
     id: component
     attributes:
-      label: 対象コンポーネント
+      label: 対象範囲
       description: 主にどの部分のリファクタリングですか？
       options:
-        - Frontend（コンポーネント・hooks）
-        - Backend（ハンドラー・サービス）
-        - Database（クエリ・スキーマ）
-        - 共通（型定義・ユーティリティ）
-        - テスト
-        - ドキュメント
-        - 設定・環境
+        - Frontend（コンポーネント・フックス・状態管理）
+        - Backend（ハンドラー・サービス・モデル）
+        - Database（クエリ・スキーマ・インデックス）
+        - 共通（型定義・ユーティリティ・定数）
+        - テスト（単体・結合・E2E）
+        - ドキュメント（README・API仕様）
+        - 設定（環境・ビルド・デプロイ）
         - その他
     validations:
       required: true
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: リファクタリング対象外
+      description: 今回のリファクタリングでは対象外とする範囲を明記してください。
+      placeholder: |
+        例：
+        - レガシーコードは保持
+        - 外部ライブラリは変更しない
+        - 既存のAPIインターフェースは維持
+        - テストコードは別途対応
+    validations:
+      required: false
 
   - type: textarea
     id: motivation

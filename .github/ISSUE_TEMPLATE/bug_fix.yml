@@ -15,16 +15,31 @@ body:
   - type: dropdown
     id: component
     attributes:
-      label: 発生箇所
-      description: バグが発生している場所を選択してください。
+      label: 発生範囲
+      description: バグが発生している範囲を選択してください。
       options:
-        - Frontend（画面表示・UI）
-        - Backend（API・サーバー処理）
-        - Database（データ関連）
-        - インフラ・環境
+        - Frontend（コンポーネント・フックス・UI）
+        - Backend（API・サービス・ハンドラー・モデル）
+        - Database（クエリ・スキーマ・マイグレーション）
+        - インフラ（Docker・環境設定・デプロイ）
+        - テスト（単体・結合・E2E）
         - その他
     validations:
       required: true
+
+  - type: textarea
+    id: unaffected_areas
+    attributes:
+      label: 影響範囲外
+      description: このバグ修正で影響を受けない・修正対象外とする範囲を明記してください。
+      placeholder: |
+        例：
+        - 管理画面は影響なし
+        - モバイル版は別途確認が必要
+        - 他のAPIエンドポイントは正常
+        - 過去データには影響しない
+    validations:
+      required: false
 
   - type: dropdown
     id: severity

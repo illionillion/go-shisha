@@ -8,7 +8,7 @@ body:
     attributes:
       label: 対象ドキュメント
       description: 作成・更新するドキュメントを記載してください。
-      placeholder: 例：API仕様書、コンポーネントStorybook、セットアップガイド
+      placeholder: 例：API仕様書、開発者ガイド、セットアップガイド
     validations:
       required: true
 
@@ -24,11 +24,25 @@ body:
         - セットアップ・環境構築
         - 使用方法・チュートリアル
         - 開発者向けガイド
-        - Storybook（コンポーネント）
+        - コードサンプル・デモ
         - README・概要
         - その他
     validations:
       required: true
+
+  - type: textarea
+    id: doc_exclusions
+    attributes:
+      label: ドキュメント対象外
+      description: 今回のドキュメント作成では対象外とする範囲を明記してください。
+      placeholder: |
+        例：
+        - 内部実装の詳細は含まない
+        - 管理者向け機能は別ドキュメント
+        - 高度な設定方法は対象外
+        - 他システムとの連携は別途記載
+    validations:
+      required: false
 
   - type: textarea
     id: motivation
