@@ -1,0 +1,88 @@
+name: ドキュメント
+description: ドキュメントの作成・更新
+title: "[Docs] "
+labels: ["documentation"]
+body:
+  - type: textarea
+    id: target
+    attributes:
+      label: 対象ドキュメント
+      description: 作成・更新するドキュメントを記載してください。
+      placeholder: 例：API仕様書、コンポーネントStorybook、セットアップガイド
+    validations:
+      required: true
+
+  - type: dropdown
+    id: doc_type
+    attributes:
+      label: ドキュメントの種類
+      description: 作成・更新するドキュメントの種類を選択してください。
+      options:
+        - API仕様（OpenAPI/Swagger）
+        - コードドキュメント（JSDoc等）
+        - 設計書・アーキテクチャ
+        - セットアップ・環境構築
+        - 使用方法・チュートリアル
+        - 開発者向けガイド
+        - Storybook（コンポーネント）
+        - README・概要
+        - その他
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: 作成・更新の理由
+      description: なぜこのドキュメントが必要なのかを記載してください。
+      placeholder: |
+        例：
+        - 新機能の使い方を説明したい
+        - 既存ドキュメントが古くなっている
+        - 新しいメンバーのオンボーディング用
+        - API仕様が明確でない
+    validations:
+      required: true
+
+  - type: textarea
+    id: content_outline
+    attributes:
+      label: 内容の概要
+      description: ドキュメントに含める内容の概要を記載してください。
+      placeholder: |
+        例：
+        - 機能の概要説明
+        - 使用方法の手順
+        - サンプルコード
+        - 注意事項・制限事項
+    validations:
+      required: true
+
+  - type: textarea
+    id: target_audience
+    attributes:
+      label: 対象読者
+      description: このドキュメントの主な読者を記載してください。
+      placeholder: 例：開発者、新しいチームメンバー、エンドユーザー、API利用者
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: このドキュメント作成の優先度を選択してください。
+      options:
+        - High（緊急・重要）
+        - Medium（通常）
+        - Low（時間があるときに）
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: その他・備考
+      description: 参考資料や関連する既存ドキュメントがあれば記載してください。
+    validations:
+      required: false

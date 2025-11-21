@@ -1,0 +1,98 @@
+name: バグ修正
+description: バグや不具合の報告
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: バグの概要
+      description: バグの内容を簡潔に記載してください。
+      placeholder: 例：投稿の削除ボタンをクリックしても削除されない
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: 発生箇所
+      description: バグが発生している場所を選択してください。
+      options:
+        - Frontend（画面表示・UI）
+        - Backend（API・サーバー処理）
+        - Database（データ関連）
+        - インフラ・環境
+        - その他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 重要度
+      description: バグの影響度を選択してください。
+      options:
+        - Critical（システム停止・データ損失）
+        - High（主要機能が使用不可）
+        - Medium（一部機能に影響）
+        - Low（軽微な問題）
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: バグを再現する手順を詳しく記載してください。
+      placeholder: |
+        1. ログイン後、投稿一覧画面に移動
+        2. 自分の投稿の削除ボタンをクリック
+        3. 確認ダイアログで「削除」を選択
+        4. 投稿が削除されない
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待される動作
+      description: 本来どのような動作になるべきかを記載してください。
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の動作
+      description: 実際にどうなったかを記載してください。
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 環境情報
+      description: OS、ブラウザ、バージョン等の環境情報を記載してください。
+      placeholder: |
+        - OS: Windows 11 / macOS Sonoma / Ubuntu 22.04
+        - ブラウザ: Chrome 119 / Firefox 120 / Safari 17
+        - Node.js: v18.17.0
+        - Go: v1.21.5
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: ログ・エラーメッセージ
+      description: 関連するエラーログやコンソール出力があれば貼り付けてください。
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: その他・備考
+      description: スクリーンショットや追加情報があれば記載してください。
+    validations:
+      required: false

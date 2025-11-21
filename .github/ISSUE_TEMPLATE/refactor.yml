@@ -1,0 +1,87 @@
+name: リファクタリング
+description: コードの改善・リファクタリング
+title: "[Refactor] "
+labels: ["refactor", "improvement"]
+body:
+  - type: textarea
+    id: target
+    attributes:
+      label: 対象範囲
+      description: リファクタリングする対象を記載してください。
+      placeholder: 例：認証関連のAPIハンドラー、投稿コンポーネントの状態管理
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: 対象コンポーネント
+      description: 主にどの部分のリファクタリングですか？
+      options:
+        - Frontend（コンポーネント・hooks）
+        - Backend（ハンドラー・サービス）
+        - Database（クエリ・スキーマ）
+        - 共通（型定義・ユーティリティ）
+        - テスト
+        - ドキュメント
+        - 設定・環境
+        - その他
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: リファクタリングの理由
+      description: なぜリファクタリングが必要なのかを記載してください。
+      placeholder: |
+        例：
+        - コードの重複が多い
+        - 可読性が低い
+        - パフォーマンスの問題
+        - 型安全性の向上
+        - アーキテクチャの改善
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_issues
+    attributes:
+      label: 現在の問題点
+      description: 現在のコードの具体的な問題点を記載してください。
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: 改善案
+      description: どのように改善したいかの具体案を記載してください。
+      placeholder: 例：共通のhooksに切り出し、型定義を強化、クラス設計の見直しなど
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: 影響範囲・リスク
+      description: リファクタリングによる他への影響やリスクがあれば記載してください。
+    validations:
+      required: false
+
+  - type: textarea
+    id: testing_strategy
+    attributes:
+      label: テスト戦略
+      description: リファクタリング時のテスト方針があれば記載してください。
+      placeholder: 例：既存のテストケースで動作確認、新規テストケース追加
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: その他・備考
+      description: 参考資料や補足情報があれば記載してください。
+    validations:
+      required: false
