@@ -3,10 +3,10 @@ name: Frontend Quality Check
 on:
   push:
     branches: ["main"]
-    paths: ["frontend/**"]
+    paths: ["frontend/**", '.github/workflows/fe-quality-check.yml']
   pull_request:
     branches: ["main"]
-    paths: ["frontend/**"]
+    paths: ["frontend/**", '.github/workflows/fe-quality-check.yml']
 
 jobs:
   # Stage 1: Code Quality and Type Check (all parallel)
