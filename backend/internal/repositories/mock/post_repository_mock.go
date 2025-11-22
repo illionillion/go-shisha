@@ -41,9 +41,9 @@ func (r *PostRepositoryMock) GetAll() ([]models.Post, error) {
  * GetByID returns a post by ID
  */
 func (r *PostRepositoryMock) GetByID(id int) (*models.Post, error) {
-	for _, post := range r.posts {
-		if post.ID == id {
-			return &post, nil
+	for i := range r.posts {
+		if r.posts[i].ID == id {
+			return &r.posts[i], nil
 		}
 	}
 	return nil, errors.New("post not found")

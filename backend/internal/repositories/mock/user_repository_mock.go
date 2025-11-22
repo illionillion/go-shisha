@@ -35,18 +35,10 @@ func (r *UserRepositoryMock) GetAll() ([]models.User, error) {
  * GetByID returns a user by ID
  */
 func (r *UserRepositoryMock) GetByID(id int) (*models.User, error) {
-	for _, user := range r.users {
-		if user.ID == id {
-			return &user, nil
+	for i := range r.users {
+		if r.users[i].ID == id {
+			return &r.users[i], nil
 		}
 	}
 	return nil, errors.New("user not found")
-}
-
-/**
- * GetPostsByUserID returns all posts by a specific user
- */
-func (r *UserRepositoryMock) GetPostsByUserID(userID int) ([]models.Post, error) {
-	// This will be handled by PostRepository in the service layer
-	return nil, errors.New("not implemented in user repository")
 }

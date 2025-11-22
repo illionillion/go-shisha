@@ -11,7 +11,4 @@ type UserRepository interface {
 	
 	// GetByID returns a user by ID
 	GetByID(id int) (*models.User, error)
-	
-	// GetPostsByUserID returns all posts by a specific user
-	GetPostsByUserID(userID int) ([]models.Post, error)
 }
