@@ -1,8 +1,8 @@
-name: "Setup Frontend Environment"
-description: "Setup Node.js, PNPM, cache, and install dependencies for frontend"
+name: 'Setup Frontend Environment'
+description: 'Setup Node.js, PNPM, cache, and install dependencies for frontend'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Setup Node.js
       uses: actions/setup-node@v4
