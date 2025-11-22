@@ -9,14 +9,5 @@
   "arrowParens": "always",
   "bracketSpacing": true,
   "bracketSameLine": false,
-  "quoteProps": "as-needed",
-  "overrides": [
-    {
-      "files": "*.{yml,yaml}",
-      "options": {
-        "tabWidth": 2,
-        "printWidth": 80
-      }
-    }
-  ]
+  "quoteProps": "as-needed"
 }
