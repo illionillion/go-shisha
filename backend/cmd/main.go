@@ -33,7 +33,7 @@ func main() {
 	// Dependency Injection
 	// Repository層（モック実装）
 	userRepo := mock.NewUserRepositoryMock()
-	postRepo := mock.NewPostRepositoryMock(userRepo)
+	postRepo := mock.NewPostRepositoryMock()
 
 	// Service層
 	userService := services.NewUserService(userRepo, postRepo)

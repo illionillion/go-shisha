@@ -9,24 +9,48 @@ import (
  * PostRepositoryMock is an in-memory mock implementation of PostRepository
  */
 type PostRepositoryMock struct {
-	posts   []models.Post
-	nextID  int
-	userRepo *UserRepositoryMock
+	posts  []models.Post
+	nextID int
 }
 
 /**
  * NewPostRepositoryMock creates a new mock post repository with sample data
  */
-func NewPostRepositoryMock(userRepo *UserRepositoryMock) *PostRepositoryMock {
-	users, _ := userRepo.GetAll()
-	
+func NewPostRepositoryMock() *PostRepositoryMock {
 	return &PostRepositoryMock{
 		posts: []models.Post{
-			{ID: 1, UserID: 1, Message: "今日のシーシャは最高でした！ミント系のフレーバーが爽やかで最高", ImageURL: "https://via.placeholder.com/400x600", Likes: 12, User: users[0]},
-			{ID: 2, UserID: 2, Message: "新しいお店を発見！雰囲気も良くて味も抜群でした", ImageURL: "https://via.placeholder.com/400x600", Likes: 8, User: users[1]},
+			{
+				ID:       1,
+				UserID:   1,
+				Message:  "今日のシーシャは最高でした！ミント系のフレーバーが爽やかで最高",
+				ImageURL: "https://via.placeholder.com/400x600",
+				Likes:    12,
+				User: models.User{
+					ID:          1,
+					Email:       "test@example.com",
+					DisplayName: "テストユーザー",
+					Description: "シーシャ大好き！",
+					IconURL:     "",
+					ExternalURL: "",
+				},
+			},
+			{
+				ID:       2,
+				UserID:   2,
+				Message:  "新しいお店を発見！雰囲気も良くて味も抜群でした",
+				ImageURL: "https://via.placeholder.com/400x600",
+				Likes:    8,
+				User: models.User{
+					ID:          2,
+					Email:       "shisha@example.com",
+					DisplayName: "シーシャマスター",
+					Description: "毎日シーシャ吸ってます",
+					IconURL:     "",
+					ExternalURL: "https://twitter.com/shishamaster",
+				},
+			},
 		},
-		nextID:  3,
-		userRepo: userRepo,
+		nextID: 3,
 	}
 }
 
@@ -53,14 +77,7 @@ func (r *PostRepositoryMock) GetByID(id int) (*models.Post, error) {
  * Create creates a new post
  */
 func (r *PostRepositoryMock) Create(post *models.Post) error {
-	// Get user information
-	user, err := r.userRepo.GetByID(post.UserID)
-	if err != nil {
-		return errors.New("user not found")
-	}
-	
 	post.ID = r.nextID
-	post.User = *user
 	post.Likes = 0
 	
 	r.posts = append(r.posts, *post)
