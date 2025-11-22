@@ -1,0 +1,84 @@
+name: Frontend Quality Check
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: ["main"]
+    paths: ["frontend/**", ".github/workflows/fe-quality-check.yml", ".github/actions/setup-frontend/**"]
+  pull_request:
+    branches: ["main"]
+    paths: ["frontend/**", ".github/workflows/fe-quality-check.yml", ".github/actions/setup-frontend/**"]
+
+jobs:
+  # Stage 1: Code Quality and Type Check (all parallel)
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Frontend Environment
+        uses: ./.github/actions/setup-frontend
+
+      - name: Run ESLint
+        run: pnpm lint
+
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Frontend Environment
+        uses: ./.github/actions/setup-frontend
+
+      - name: Check code formatting
+        run: pnpm format:check
+
+  type_check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Frontend Environment
+        uses: ./.github/actions/setup-frontend
+
+      - name: Run type check
+        run: pnpm type-check
+
+  # Stage 2: Build (depends on quality checks)
+  build_next:
+    name: Build Next.js
+    runs-on: ubuntu-latest
+    needs: [eslint, prettier, type_check]
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Frontend Environment
+        uses: ./.github/actions/setup-frontend
+
+      - name: Build application
+        run: pnpm build
