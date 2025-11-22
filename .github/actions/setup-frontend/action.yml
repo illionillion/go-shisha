@@ -1,5 +1,5 @@
 name: 'Setup Frontend Environment'
-description: 'Setup Node.js, PNPM, cache, and install dependencies for frontend'
+description: 'Setup Node.js, PNPM, cache, and install dependencies for frontend. This action should be called from the repository root.'
 
 runs:
   using: 'composite'
@@ -12,7 +12,7 @@ runs:
     - name: Setup PNPM
       uses: pnpm/action-setup@v4
       with:
-        version: latest
+        version: 9
         run_install: false
 
     - name: Get pnpm store directory
