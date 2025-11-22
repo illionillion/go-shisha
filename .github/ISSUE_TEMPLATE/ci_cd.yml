@@ -1,0 +1,159 @@
+name: CI/CD
+description: CI/CDパイプライン・自動化の設定・改善
+title: "[CI/CD] "
+labels: ["ci/cd", "infra"]
+body:
+  - type: textarea
+    id: target
+    attributes:
+      label: 対象システム
+      description: 設定・改善するCI/CDの対象を記載してください。
+      placeholder: 例：GitHub Actions ワークフロー、ビルド設定、デプロイパイプライン、テスト自動化
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ci_cd_type
+    attributes:
+      label: CI/CDの種類
+      description: 主にどの種類のCI/CD作業ですか？
+      options:
+        - GitHub Actions ワークフロー作成・更新
+        - ビルド設定・最適化・高速化
+        - テスト自動化（単体・結合・E2E）
+        - デプロイメント設定・自動化
+        - セキュリティスキャン・品質チェック
+        - 環境設定（開発・ステージング・本番）
+        - パフォーマンス・監視設定
+        - Docker設定（Dockerfile・Compose）
+        - 依存関係管理・更新自動化
+        - リリース管理・バージョニング
+        - その他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: 対象範囲
+      description: 主にどの部分のCI/CD作業ですか？
+      options:
+        - Frontend（Next.js・React・TypeScript）
+        - Backend（Go・API・サーバー）
+        - Database（PostgreSQL・マイグレーション）
+        - 全スタック（Frontend + Backend + DB）
+        - インフラ全般（環境・デプロイ・監視）
+        - 共通設定（lint・format・security）
+        - テスト環境（モック・テストDB・CI用設定）
+        - その他
+    validations:
+      required: true
+
+  - type: textarea
+    id: exclusions
+    attributes:
+      label: 対象外範囲
+      description: 今回のCI/CD作業では対象外とする範囲を明記してください。
+      placeholder: |
+        例：
+        - 本番環境のデプロイは手動のまま
+        - 外部サービス連携は別途設定
+        - パフォーマンステストは後回し
+        - セキュリティ監査は別Issue
+        - 特定のブランチは対象外
+    validations:
+      required: false
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: 背景・目的
+      description: なぜこのCI/CD改善が必要なのか、どんな課題を解決したいかを記載してください。
+      placeholder: |
+        例：
+        - ビルド時間が長すぎる（現在10分 → 目標5分）
+        - 手動デプロイでミスが発生しやすい
+        - テストが自動化されていない
+        - セキュリティチェックが不足
+        - 新メンバーの環境構築が困難
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: 完了条件
+      description: このCI/CD作業が完了したとみなす条件を箇条書きで記載してください。
+      placeholder: |
+        - [ ] GitHub Actions ワークフローが正常に動作する
+        - [ ] ビルド時間が目標時間内に収まる
+        - [ ] テストが自動実行され、結果が確認できる
+        - [ ] デプロイが自動化され、エラー時にロールバックできる
+        - [ ] セキュリティチェックが組み込まれている
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_state
+    attributes:
+      label: 現在の状態
+      description: 現在のCI/CD設定の状況を記載してください。
+      placeholder: |
+        例：
+        - GitHub Actions: 未設定 / 基本的なCI のみ / 一部動作
+        - ビルド時間: X分程度
+        - テスト: 手動実行 / 一部自動化
+        - デプロイ: 完全手動 / 半自動化
+    validations:
+      required: false
+
+  - type: textarea
+    id: technical_requirements
+    attributes:
+      label: 技術的要件
+      description: 実装時に考慮すべき技術的要件があれば記載してください。
+      placeholder: |
+        例：
+        - Node.js バージョン指定
+        - Go バージョン・モジュール設定
+        - PostgreSQL テスト用設定
+        - 環境変数・シークレット管理
+        - キャッシュ戦略
+        - 並列実行設定
+        - 特定のAction・ツール使用
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment_info
+    attributes:
+      label: 環境・デプロイ情報
+      description: デプロイ先環境や関連する設定情報があれば記載してください。
+      placeholder: |
+        例：
+        - デプロイ先: 未定 / AWS / GCP / Azure / VPS
+        - 環境: 開発・ステージング・本番
+        - ドメイン・URL設定
+        - 外部サービス連携（DB・ストレージ等）
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: このCI/CD作業の優先度を選択してください。
+      options:
+        - High（緊急・重要・ブロッカー）
+        - Medium（通常・計画的）
+        - Low（改善・最適化・時間があるときに）
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: その他・備考
+      description: 参考資料、関連するIssue・PR、制約事項があれば記載してください。
+    validations:
+      required: false
