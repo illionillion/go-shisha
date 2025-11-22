@@ -21,11 +21,12 @@ export default tseslint.config(
       "build/**",
       "*.config.js",
       "*.config.mjs",
+      "*.config.ts",
     ],
   },
   js.configs.recommended,
-  // Prettierとの競合を解決
   ...tseslint.configs.recommended,
+  // Prettierとの競合を解決
   eslintConfigPrettier,
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
