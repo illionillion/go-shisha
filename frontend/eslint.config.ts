@@ -24,7 +24,8 @@ export default tseslint.config(
     ],
   },
   js.configs.recommended,
-  ...tseslint.configs.recommended, // Prettierとの競合を解決
+  // Prettierとの競合を解決
+  ...tseslint.configs.recommended,
   eslintConfigPrettier,
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
@@ -95,7 +96,7 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": "off", // unused-importsが処理
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/explicit-module-boundary-types": "off",
-      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-explicit-any": "error",
 
       // import typeを強制
       "@typescript-eslint/consistent-type-imports": [
