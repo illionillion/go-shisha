@@ -1,0 +1,71 @@
+package main
+
+import (
+	"net/http"
+
+	"go-shisha-backend/internal/handlers"
+	"go-shisha-backend/internal/repositories/mock"
+	"go-shisha-backend/internal/services"
+
+	"github.com/gin-gonic/gin"
+)
+
+func main() {
+	// Ginのデバッグモードを設定（本番環境ではgin.ReleaseMode）
+	gin.SetMode(gin.DebugMode)
+
+	r := gin.Default()
+
+	// CORS設定（開発環境用）
+	r.Use(func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	})
+
+	// Dependency Injection
+	// Repository層（モック実装）
+	userRepo := mock.NewUserRepositoryMock()
+	postRepo := mock.NewPostRepositoryMock(userRepo)
+
+	// Service層
+	userService := services.NewUserService(userRepo, postRepo)
+	postService := services.NewPostService(postRepo, userRepo)
+
+	// Handler層
+	userHandler := handlers.NewUserHandler(userService)
+	postHandler := handlers.NewPostHandler(postService)
+
+	// API routes
+	api := r.Group("/api/v1")
+	{
+		// Health check
+		api.GET("/health", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"status":  "ok",
+				"message": "Go-Shisha API is running",
+			})
+		})
+
+		// Posts endpoints
+		api.GET("/posts", postHandler.GetAllPosts)
+		api.GET("/posts/:id", postHandler.GetPost)
+		api.POST("/posts", postHandler.CreatePost)
+		api.POST("/posts/:id/like", postHandler.LikePost)
+
+		// Users endpoints
+		api.GET("/users", userHandler.GetAllUsers)
+		api.GET("/users/:id", userHandler.GetUser)
+		api.GET("/users/:id/posts", userHandler.GetUserPosts)
+	}
+
+	// サーバーを8081ポートで起動
+	r.Run(":8081")
+}
