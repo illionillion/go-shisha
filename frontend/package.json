@@ -10,6 +10,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "format:yaml": "prettier --write '../.github/**/*.yml'",
+    "format:yaml:check": "prettier --check '../.github/**/*.yml'",
     "type-check": "tsc --noEmit",
     "check": "pnpm type-check && pnpm lint && pnpm format:check",
     "fix": "pnpm type-check && pnpm lint:fix && pnpm format"
