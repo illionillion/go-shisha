@@ -10,6 +10,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @title Go-Shisha API
+// @version 1.0
+// @description シーシャSNSアプリケーションのバックエンドAPI
+// @description このAPIはシーシャの投稿、ユーザー管理を行います
+//
+// @contact.name API Support
+// @contact.url https://github.com/illionillion/go-shisha
+//
+// @host localhost:8081
+// @BasePath /api/v1
+// @schemes http
+
 func main() {
 	// Ginのデバッグモードを設定（本番環境ではgin.ReleaseMode）
 	gin.SetMode(gin.DebugMode)
