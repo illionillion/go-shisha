@@ -1,0 +1,253 @@
+basePath: /api/v1
+definitions:
+  go-shisha-backend_internal_models.CreatePostInput:
+    properties:
+      image_url:
+        type: string
+      message:
+        maxLength: 100
+        type: string
+      user_id:
+        type: integer
+    required:
+    - image_url
+    - message
+    - user_id
+    type: object
+  go-shisha-backend_internal_models.Post:
+    properties:
+      id:
+        type: integer
+      image_url:
+        type: string
+      likes:
+        type: integer
+      message:
+        type: string
+      user:
+        $ref: '#/definitions/go-shisha-backend_internal_models.User'
+      user_id:
+        type: integer
+    type: object
+  go-shisha-backend_internal_models.User:
+    properties:
+      description:
+        type: string
+      display_name:
+        type: string
+      email:
+        type: string
+      external_url:
+        type: string
+      icon_url:
+        type: string
+      id:
+        type: integer
+    type: object
+host: localhost:8081
+info:
+  contact:
+    name: API Support
+    url: https://github.com/illionillion/go-shisha
+  description: |-
+    シーシャSNSアプリケーションのバックエンドAPI
+    このAPIはシーシャの投稿、ユーザー管理を行います
+  title: Go-Shisha API
+  version: "1.0"
+paths:
+  /posts:
+    get:
+      consumes:
+      - application/json
+      description: 全ての投稿の一覧を取得します
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 投稿一覧
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: サーバーエラー
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 投稿一覧取得
+      tags:
+      - posts
+    post:
+      consumes:
+      - application/json
+      description: 新しい投稿を作成します
+      parameters:
+      - description: 投稿情報
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/go-shisha-backend_internal_models.CreatePostInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 作成された投稿
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.Post'
+        "400":
+          description: バリデーションエラー
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 投稿作成
+      tags:
+      - posts
+  /posts/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 指定されたIDの投稿情報を取得します
+      parameters:
+      - description: 投稿ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 投稿情報
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.Post'
+        "400":
+          description: 無効な投稿ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 投稿が見つかりません
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 投稿詳細取得
+      tags:
+      - posts
+  /posts/{id}/like:
+    post:
+      consumes:
+      - application/json
+      description: 指定された投稿にいいねを追加します
+      parameters:
+      - description: 投稿ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: いいねが追加された投稿
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.Post'
+        "400":
+          description: 無効な投稿ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: 投稿が見つかりません
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 投稿にいいね
+      tags:
+      - posts
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: 全てのユーザーの一覧を取得します
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ユーザー一覧
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: サーバーエラー
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ユーザー一覧取得
+      tags:
+      - users
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 指定されたIDのユーザー情報を取得します
+      parameters:
+      - description: ユーザーID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ユーザー情報
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.User'
+        "400":
+          description: 無効なユーザーID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: ユーザーが見つかりません
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ユーザー詳細取得
+      tags:
+      - users
+  /users/{id}/posts:
+    get:
+      consumes:
+      - application/json
+      description: 指定されたユーザーの全ての投稿を取得します
+      parameters:
+      - description: ユーザーID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 投稿一覧
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 無効なユーザーID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: ユーザーが見つかりません
+          schema:
+            additionalProperties: true
+            type: object
+      summary: ユーザーの投稿一覧取得
+      tags:
+      - users
+schemes:
+- http
+swagger: "2.0"
