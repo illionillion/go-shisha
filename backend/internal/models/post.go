@@ -1,9 +1,6 @@
 package models
 
 // Post represents a shisha post
-/**
- * Post represents a shisha post
- */
 type Post struct {
 	ID       int    `json:"id"`
 	UserID   int    `json:"user_id"`
@@ -13,10 +10,7 @@ type Post struct {
 	User     User   `json:"user"`
 }
 
-// CreatePostInput represents input for creating a new post
-/**
- * CreatePostInput represents input for creating a new post
- */
+// CreatePostInput represents the input for creating a post
 type CreatePostInput struct {
 	UserID   int    `json:"user_id" binding:"required"`
 	Message  string `json:"message" binding:"required,max=100"`
