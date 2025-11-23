@@ -34,7 +34,7 @@ func NewPostHandler(postService *services.PostService) *PostHandler {
 // @Tags posts
 // @Accept json
 // @Produce json
-// @Success 200 {object} map[string]interface{} "投稿一覧"
+// @Success 200 {array} models.Post "投稿一覧"
 // @Failure 500 {object} map[string]interface{} "サーバーエラー"
 // @Router /posts [get]
 func (h *PostHandler) GetAllPosts(c *gin.Context) {

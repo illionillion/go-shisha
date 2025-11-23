@@ -35,8 +35,10 @@ const docTemplate = `{
                     "200": {
                         "description": "投稿一覧",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/go-shisha-backend_internal_models.Post"
+                            }
                         }
                     },
                     "500": {
@@ -197,8 +199,10 @@ const docTemplate = `{
                     "200": {
                         "description": "ユーザー一覧",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/go-shisha-backend_internal_models.User"
+                            }
                         }
                     },
                     "500": {
@@ -283,8 +287,10 @@ const docTemplate = `{
                     "200": {
                         "description": "投稿一覧",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/go-shisha-backend_internal_models.Post"
+                            }
                         }
                     },
                     "400": {

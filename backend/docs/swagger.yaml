@@ -66,8 +66,9 @@ paths:
         "200":
           description: 投稿一覧
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/go-shisha-backend_internal_models.Post'
+            type: array
         "500":
           description: サーバーエラー
           schema:
@@ -175,8 +176,9 @@ paths:
         "200":
           description: ユーザー一覧
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/go-shisha-backend_internal_models.User'
+            type: array
         "500":
           description: サーバーエラー
           schema:
@@ -233,8 +235,9 @@ paths:
         "200":
           description: 投稿一覧
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/go-shisha-backend_internal_models.Post'
+            type: array
         "400":
           description: 無効なユーザーID
           schema:

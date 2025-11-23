@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"go-shisha-backend/internal/models"
+	_ "go-shisha-backend/internal/models" // Required for Swagger annotations
 	"go-shisha-backend/internal/services"
 
 	"github.com/gin-gonic/gin"
@@ -34,7 +34,7 @@ func NewUserHandler(userService *services.UserService) *UserHandler {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Success 200 {object} map[string]interface{} "ユーザー一覧"
+// @Success 200 {array} models.User "ユーザー一覧"
 // @Failure 500 {object} map[string]interface{} "サーバーエラー"
 // @Router /users [get]
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
@@ -88,7 +88,7 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "ユーザーID"
-// @Success 200 {object} map[string]interface{} "投稿一覧"
+// @Success 200 {array} models.Post "投稿一覧"
 // @Failure 400 {object} map[string]interface{} "無効なユーザーID"
 // @Failure 404 {object} map[string]interface{} "ユーザーが見つかりません"
 // @Router /users/{id}/posts [get]
