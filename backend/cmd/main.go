@@ -1,13 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
+	_ "go-shisha-backend/docs" // Swagger docs
 	"go-shisha-backend/internal/handlers"
 	"go-shisha-backend/internal/repositories/mock"
 	"go-shisha-backend/internal/services"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // @title Go-Shisha API
@@ -54,6 +58,12 @@ func main() {
 	// Handler層
 	userHandler := handlers.NewUserHandler(userService)
 	postHandler := handlers.NewPostHandler(postService)
+
+	// Swagger UI
+	// Note: gin-swaggerは/swagger/index.htmlでのアクセスのみサポート
+	// /swagger/でのリダイレクトは未サポート (関連Issue: https://github.com/swaggo/gin-swagger/issues/323)
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/swagger/doc.json")))
+	fmt.Println("Swagger UI: http://localhost:8081/swagger/index.html")
 
 	// API routes
 	api := r.Group("/api/v1")
