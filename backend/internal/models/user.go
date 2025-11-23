@@ -1,5 +1,6 @@
 package models
 
+// User represents a user in the system
 /**
  * User represents a user in the system
  */

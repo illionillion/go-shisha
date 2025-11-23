@@ -1,5 +1,6 @@
 package models
 
+// Post represents a shisha post
 /**
  * Post represents a shisha post
  */
@@ -12,6 +13,7 @@ type Post struct {
 	User     User   `json:"user"`
 }
 
+// CreatePostInput represents input for creating a new post
 /**
  * CreatePostInput represents input for creating a new post
  */
