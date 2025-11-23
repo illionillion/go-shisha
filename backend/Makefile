@@ -9,8 +9,8 @@ build:
 	go build -o ./tmp/main ./cmd/main.go
 
 # 実行
-run: build
-	./tmp/main
+run:
+	go run cmd/main.go
 
-# 開発用（swagger生成 + ビルド + 実行）
-dev: swagger build run
+# 開発用（swagger生成 + 実行）
+dev: swagger run
