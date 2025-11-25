@@ -23,4 +23,32 @@ curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/insta
 - バージョン確認: `./backend/bin/golangci-lint --version`
 
 ---
+
+## Swagger のセットアップ
+
+Swagger ドキュメント生成ツール `swag` をインストールする必要があります。
+
+### 手順
+1. 依存関係を整理する:
+   ```bash
+   go mod tidy
+   ```
+
+2. `swag` をインストールする:
+   ```bash
+   go install github.com/swaggo/swag/cmd/swag@latest
+   ```
+
+3. インストール確認:
+   ```bash
+   swag --version
+   ```
+   正常にインストールされていれば、バージョン情報が表示されます。
+
+4. Swagger ドキュメントを生成する:
+   ```bash
+   make swagger
+   ```
+
+---
 品質チェックは必ず上記手順でセットアップした上で実施してください。

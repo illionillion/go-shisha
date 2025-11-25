@@ -2,7 +2,7 @@
 
 # Swagger ドキュメント生成
 swagger:
-	swag init -g cmd/main.go --parseDependency --parseInternal -o docs
+	~/go/bin/swag init -g cmd/main.go --parseDependency --parseInternal -o docs
 
 # ビルド
 build:
