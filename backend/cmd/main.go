@@ -89,5 +89,9 @@ func main() {
 	}
 
 	// サーバーを8081ポートで起動
-	r.Run(":8081")
+if err := r.Run(":8081"); err != nil {
+	// サーバー起動失敗時はエラーログ出力して終了
+	fmt.Printf("server error: %v\n", err)
+	// 必要ならos.Exit(1)やlog.Fatalも可
+}
 }
