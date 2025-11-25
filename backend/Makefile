@@ -1,4 +1,4 @@
-.PHONY: swagger build run
+.PHONY: swagger build run test
 
 # Swagger ドキュメント生成
 swagger:
@@ -11,6 +11,10 @@ build:
 # 実行
 run:
 	go run cmd/main.go
+
+# テスト
+test:
+	go test ./... -v
 
 # 開発用（swagger生成 + 実行）
 dev: swagger run
