@@ -5,6 +5,7 @@
 ## 開発を始めるには
 
 1. **依存関係のインストール**
+
    ```bash
    pnpm install
    ```
@@ -27,6 +28,7 @@
    # プロジェクトルートで実行
    sh scripts/copy-openapi.sh
    ```
+
    backendからOpenAPI仕様（swagger.yaml）をコピーします。
 
 2. **型とAPIクライアントの生成**
