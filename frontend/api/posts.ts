@@ -14,215 +14,185 @@ import type {
   GoShishaBackendInternalModelsPost,
   PostPosts400,
   PostPostsIdLike400,
-  PostPostsIdLike404
-} from './model';
-
-
+  PostPostsIdLike404,
+} from "./model";
 
 /**
  * 全ての投稿の一覧を取得します
  * @summary 投稿一覧取得
  */
 export type getPostsResponse200 = {
-  data: GoShishaBackendInternalModelsPost[]
-  status: 200
-}
+  data: GoShishaBackendInternalModelsPost[];
+  status: 200;
+};
 
 export type getPostsResponse500 = {
-  data: GetPosts500
-  status: 500
-}
-    
-export type getPostsResponseSuccess = (getPostsResponse200) & {
+  data: GetPosts500;
+  status: 500;
+};
+
+export type getPostsResponseSuccess = getPostsResponse200 & {
   headers: Headers;
 };
-export type getPostsResponseError = (getPostsResponse500) & {
+export type getPostsResponseError = getPostsResponse500 & {
   headers: Headers;
 };
 
-export type getPostsResponse = (getPostsResponseSuccess | getPostsResponseError)
+export type getPostsResponse = getPostsResponseSuccess | getPostsResponseError;
 
 export const getGetPostsUrl = () => {
+  return `/posts`;
+};
 
-
-  
-
-  return `/posts`
-}
-
-export const getPosts = async ( options?: RequestInit): Promise<getPostsResponse> => {
-  
-  const res = await fetch(getGetPostsUrl(),
-  {      
+export const getPosts = async (options?: RequestInit): Promise<getPostsResponse> => {
+  const res = await fetch(getGetPostsUrl(), {
     ...options,
-    method: 'GET'
-    
-    
-  }
-)
+    method: "GET",
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getPostsResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getPostsResponse
-}
 
+  const data: getPostsResponse["data"] = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers } as getPostsResponse;
+};
 
 /**
  * 新しい投稿を作成します
  * @summary 投稿作成
  */
 export type postPostsResponse201 = {
-  data: GoShishaBackendInternalModelsPost
-  status: 201
-}
+  data: GoShishaBackendInternalModelsPost;
+  status: 201;
+};
 
 export type postPostsResponse400 = {
-  data: PostPosts400
-  status: 400
-}
-    
-export type postPostsResponseSuccess = (postPostsResponse201) & {
+  data: PostPosts400;
+  status: 400;
+};
+
+export type postPostsResponseSuccess = postPostsResponse201 & {
   headers: Headers;
 };
-export type postPostsResponseError = (postPostsResponse400) & {
+export type postPostsResponseError = postPostsResponse400 & {
   headers: Headers;
 };
 
-export type postPostsResponse = (postPostsResponseSuccess | postPostsResponseError)
+export type postPostsResponse = postPostsResponseSuccess | postPostsResponseError;
 
 export const getPostPostsUrl = () => {
+  return `/posts`;
+};
 
-
-  
-
-  return `/posts`
-}
-
-export const postPosts = async (goShishaBackendInternalModelsCreatePostInput: GoShishaBackendInternalModelsCreatePostInput, options?: RequestInit): Promise<postPostsResponse> => {
-  
-  const res = await fetch(getPostPostsUrl(),
-  {      
+export const postPosts = async (
+  goShishaBackendInternalModelsCreatePostInput: GoShishaBackendInternalModelsCreatePostInput,
+  options?: RequestInit
+): Promise<postPostsResponse> => {
+  const res = await fetch(getPostPostsUrl(), {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      goShishaBackendInternalModelsCreatePostInput,)
-  }
-)
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(goShishaBackendInternalModelsCreatePostInput),
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: postPostsResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as postPostsResponse
-}
 
+  const data: postPostsResponse["data"] = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers } as postPostsResponse;
+};
 
 /**
  * 指定されたIDの投稿情報を取得します
  * @summary 投稿詳細取得
  */
 export type getPostsIdResponse200 = {
-  data: GoShishaBackendInternalModelsPost
-  status: 200
-}
+  data: GoShishaBackendInternalModelsPost;
+  status: 200;
+};
 
 export type getPostsIdResponse400 = {
-  data: GetPostsId400
-  status: 400
-}
+  data: GetPostsId400;
+  status: 400;
+};
 
 export type getPostsIdResponse404 = {
-  data: GetPostsId404
-  status: 404
-}
-    
-export type getPostsIdResponseSuccess = (getPostsIdResponse200) & {
+  data: GetPostsId404;
+  status: 404;
+};
+
+export type getPostsIdResponseSuccess = getPostsIdResponse200 & {
   headers: Headers;
 };
 export type getPostsIdResponseError = (getPostsIdResponse400 | getPostsIdResponse404) & {
   headers: Headers;
 };
 
-export type getPostsIdResponse = (getPostsIdResponseSuccess | getPostsIdResponseError)
+export type getPostsIdResponse = getPostsIdResponseSuccess | getPostsIdResponseError;
 
-export const getGetPostsIdUrl = (id: number,) => {
+export const getGetPostsIdUrl = (id: number) => {
+  return `/posts/${id}`;
+};
 
-
-  
-
-  return `/posts/${id}`
-}
-
-export const getPostsId = async (id: number, options?: RequestInit): Promise<getPostsIdResponse> => {
-  
-  const res = await fetch(getGetPostsIdUrl(id),
-  {      
+export const getPostsId = async (
+  id: number,
+  options?: RequestInit
+): Promise<getPostsIdResponse> => {
+  const res = await fetch(getGetPostsIdUrl(id), {
     ...options,
-    method: 'GET'
-    
-    
-  }
-)
+    method: "GET",
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getPostsIdResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getPostsIdResponse
-}
 
+  const data: getPostsIdResponse["data"] = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers } as getPostsIdResponse;
+};
 
 /**
  * 指定された投稿にいいねを追加します
  * @summary 投稿にいいね
  */
 export type postPostsIdLikeResponse200 = {
-  data: GoShishaBackendInternalModelsPost
-  status: 200
-}
+  data: GoShishaBackendInternalModelsPost;
+  status: 200;
+};
 
 export type postPostsIdLikeResponse400 = {
-  data: PostPostsIdLike400
-  status: 400
-}
+  data: PostPostsIdLike400;
+  status: 400;
+};
 
 export type postPostsIdLikeResponse404 = {
-  data: PostPostsIdLike404
-  status: 404
-}
-    
-export type postPostsIdLikeResponseSuccess = (postPostsIdLikeResponse200) & {
-  headers: Headers;
-};
-export type postPostsIdLikeResponseError = (postPostsIdLikeResponse400 | postPostsIdLikeResponse404) & {
-  headers: Headers;
+  data: PostPostsIdLike404;
+  status: 404;
 };
 
-export type postPostsIdLikeResponse = (postPostsIdLikeResponseSuccess | postPostsIdLikeResponseError)
+export type postPostsIdLikeResponseSuccess = postPostsIdLikeResponse200 & {
+  headers: Headers;
+};
+export type postPostsIdLikeResponseError = (
+  | postPostsIdLikeResponse400
+  | postPostsIdLikeResponse404
+) & {
+  headers: Headers;
+};
 
-export const getPostPostsIdLikeUrl = (id: number,) => {
+export type postPostsIdLikeResponse = postPostsIdLikeResponseSuccess | postPostsIdLikeResponseError;
 
+export const getPostPostsIdLikeUrl = (id: number) => {
+  return `/posts/${id}/like`;
+};
 
-  
-
-  return `/posts/${id}/like`
-}
-
-export const postPostsIdLike = async (id: number, options?: RequestInit): Promise<postPostsIdLikeResponse> => {
-  
-  const res = await fetch(getPostPostsIdLikeUrl(id),
-  {      
+export const postPostsIdLike = async (
+  id: number,
+  options?: RequestInit
+): Promise<postPostsIdLikeResponse> => {
+  const res = await fetch(getPostPostsIdLikeUrl(id), {
     ...options,
-    method: 'POST'
-    
-    
-  }
-)
+    method: "POST",
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: postPostsIdLikeResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as postPostsIdLikeResponse
-}
 
-
+  const data: postPostsIdLikeResponse["data"] = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers } as postPostsIdLikeResponse;
+};

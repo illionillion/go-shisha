@@ -7,17 +7,17 @@
  * OpenAPI spec version: 1.0
  */
 
-export * from './getPosts500';
-export * from './getPostsId400';
-export * from './getPostsId404';
-export * from './getUsers500';
-export * from './getUsersId400';
-export * from './getUsersId404';
-export * from './getUsersIdPosts400';
-export * from './getUsersIdPosts404';
-export * from './goShishaBackendInternalModelsCreatePostInput';
-export * from './goShishaBackendInternalModelsPost';
-export * from './goShishaBackendInternalModelsUser';
-export * from './postPosts400';
-export * from './postPostsIdLike400';
-export * from './postPostsIdLike404';
+export * from "./getPosts500";
+export * from "./getPostsId400";
+export * from "./getPostsId404";
+export * from "./getUsers500";
+export * from "./getUsersId400";
+export * from "./getUsersId404";
+export * from "./getUsersIdPosts400";
+export * from "./getUsersIdPosts404";
+export * from "./goShishaBackendInternalModelsCreatePostInput";
+export * from "./goShishaBackendInternalModelsPost";
+export * from "./goShishaBackendInternalModelsUser";
+export * from "./postPosts400";
+export * from "./postPostsIdLike400";
+export * from "./postPostsIdLike404";

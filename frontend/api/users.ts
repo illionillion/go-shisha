@@ -13,165 +13,141 @@ import type {
   GetUsersIdPosts400,
   GetUsersIdPosts404,
   GoShishaBackendInternalModelsPost,
-  GoShishaBackendInternalModelsUser
-} from './model';
-
-
+  GoShishaBackendInternalModelsUser,
+} from "./model";
 
 /**
  * 全てのユーザーの一覧を取得します
  * @summary ユーザー一覧取得
  */
 export type getUsersResponse200 = {
-  data: GoShishaBackendInternalModelsUser[]
-  status: 200
-}
+  data: GoShishaBackendInternalModelsUser[];
+  status: 200;
+};
 
 export type getUsersResponse500 = {
-  data: GetUsers500
-  status: 500
-}
-    
-export type getUsersResponseSuccess = (getUsersResponse200) & {
+  data: GetUsers500;
+  status: 500;
+};
+
+export type getUsersResponseSuccess = getUsersResponse200 & {
   headers: Headers;
 };
-export type getUsersResponseError = (getUsersResponse500) & {
+export type getUsersResponseError = getUsersResponse500 & {
   headers: Headers;
 };
 
-export type getUsersResponse = (getUsersResponseSuccess | getUsersResponseError)
+export type getUsersResponse = getUsersResponseSuccess | getUsersResponseError;
 
 export const getGetUsersUrl = () => {
+  return `/users`;
+};
 
-
-  
-
-  return `/users`
-}
-
-export const getUsers = async ( options?: RequestInit): Promise<getUsersResponse> => {
-  
-  const res = await fetch(getGetUsersUrl(),
-  {      
+export const getUsers = async (options?: RequestInit): Promise<getUsersResponse> => {
+  const res = await fetch(getGetUsersUrl(), {
     ...options,
-    method: 'GET'
-    
-    
-  }
-)
+    method: "GET",
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getUsersResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getUsersResponse
-}
 
+  const data: getUsersResponse["data"] = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers } as getUsersResponse;
+};
 
 /**
  * 指定されたIDのユーザー情報を取得します
  * @summary ユーザー詳細取得
  */
 export type getUsersIdResponse200 = {
-  data: GoShishaBackendInternalModelsUser
-  status: 200
-}
+  data: GoShishaBackendInternalModelsUser;
+  status: 200;
+};
 
 export type getUsersIdResponse400 = {
-  data: GetUsersId400
-  status: 400
-}
+  data: GetUsersId400;
+  status: 400;
+};
 
 export type getUsersIdResponse404 = {
-  data: GetUsersId404
-  status: 404
-}
-    
-export type getUsersIdResponseSuccess = (getUsersIdResponse200) & {
+  data: GetUsersId404;
+  status: 404;
+};
+
+export type getUsersIdResponseSuccess = getUsersIdResponse200 & {
   headers: Headers;
 };
 export type getUsersIdResponseError = (getUsersIdResponse400 | getUsersIdResponse404) & {
   headers: Headers;
 };
 
-export type getUsersIdResponse = (getUsersIdResponseSuccess | getUsersIdResponseError)
+export type getUsersIdResponse = getUsersIdResponseSuccess | getUsersIdResponseError;
 
-export const getGetUsersIdUrl = (id: number,) => {
+export const getGetUsersIdUrl = (id: number) => {
+  return `/users/${id}`;
+};
 
-
-  
-
-  return `/users/${id}`
-}
-
-export const getUsersId = async (id: number, options?: RequestInit): Promise<getUsersIdResponse> => {
-  
-  const res = await fetch(getGetUsersIdUrl(id),
-  {      
+export const getUsersId = async (
+  id: number,
+  options?: RequestInit
+): Promise<getUsersIdResponse> => {
+  const res = await fetch(getGetUsersIdUrl(id), {
     ...options,
-    method: 'GET'
-    
-    
-  }
-)
+    method: "GET",
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getUsersIdResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getUsersIdResponse
-}
 
+  const data: getUsersIdResponse["data"] = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers } as getUsersIdResponse;
+};
 
 /**
  * 指定されたユーザーの全ての投稿を取得します
  * @summary ユーザーの投稿一覧取得
  */
 export type getUsersIdPostsResponse200 = {
-  data: GoShishaBackendInternalModelsPost[]
-  status: 200
-}
+  data: GoShishaBackendInternalModelsPost[];
+  status: 200;
+};
 
 export type getUsersIdPostsResponse400 = {
-  data: GetUsersIdPosts400
-  status: 400
-}
+  data: GetUsersIdPosts400;
+  status: 400;
+};
 
 export type getUsersIdPostsResponse404 = {
-  data: GetUsersIdPosts404
-  status: 404
-}
-    
-export type getUsersIdPostsResponseSuccess = (getUsersIdPostsResponse200) & {
-  headers: Headers;
-};
-export type getUsersIdPostsResponseError = (getUsersIdPostsResponse400 | getUsersIdPostsResponse404) & {
-  headers: Headers;
+  data: GetUsersIdPosts404;
+  status: 404;
 };
 
-export type getUsersIdPostsResponse = (getUsersIdPostsResponseSuccess | getUsersIdPostsResponseError)
+export type getUsersIdPostsResponseSuccess = getUsersIdPostsResponse200 & {
+  headers: Headers;
+};
+export type getUsersIdPostsResponseError = (
+  | getUsersIdPostsResponse400
+  | getUsersIdPostsResponse404
+) & {
+  headers: Headers;
+};
 
-export const getGetUsersIdPostsUrl = (id: number,) => {
+export type getUsersIdPostsResponse = getUsersIdPostsResponseSuccess | getUsersIdPostsResponseError;
 
+export const getGetUsersIdPostsUrl = (id: number) => {
+  return `/users/${id}/posts`;
+};
 
-  
-
-  return `/users/${id}/posts`
-}
-
-export const getUsersIdPosts = async (id: number, options?: RequestInit): Promise<getUsersIdPostsResponse> => {
-  
-  const res = await fetch(getGetUsersIdPostsUrl(id),
-  {      
+export const getUsersIdPosts = async (
+  id: number,
+  options?: RequestInit
+): Promise<getUsersIdPostsResponse> => {
+  const res = await fetch(getGetUsersIdPostsUrl(id), {
     ...options,
-    method: 'GET'
-    
-    
-  }
-)
+    method: "GET",
+  });
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  
-  const data: getUsersIdPostsResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getUsersIdPostsResponse
-}
 
-
+  const data: getUsersIdPostsResponse["data"] = body ? JSON.parse(body) : {};
+  return { data, status: res.status, headers: res.headers } as getUsersIdPostsResponse;
+};
