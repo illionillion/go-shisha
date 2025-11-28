@@ -90,14 +90,8 @@ func main() {
 		api.GET("/users/:id/posts", userHandler.GetUserPosts)
 	}
 
-	// 環境変数からポート番号を取得（未指定なら8081）
-import "os"
-
-	port := os.Getenv("BACKEND_PORT")
-	if port == "" {
-		port = "8081"
-	}
-	if err := r.Run(":" + port); err != nil {
+	// サーバーを8080ポートで起動
+	if err := r.Run(":8080"); err != nil {
 		fmt.Printf("server error: %v\n", err)
 	}
 }
