@@ -1,8 +1,10 @@
 package main
 
+
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	_ "go-shisha-backend/docs" // Swagger docs
 	"go-shisha-backend/internal/handlers"
