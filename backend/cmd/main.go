@@ -4,7 +4,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
 
 	_ "go-shisha-backend/docs" // Swagger docs
 	"go-shisha-backend/internal/handlers"
@@ -24,7 +23,7 @@ import (
 // @contact.name API Support
 // @contact.url https://github.com/illionillion/go-shisha
 //
-// @host localhost:8081
+// @host localhost:8080
 // @BasePath /api/v1
 // @schemes http
 
