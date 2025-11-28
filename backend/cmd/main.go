@@ -64,7 +64,7 @@ func main() {
 	// Note: gin-swaggerは/swagger/index.htmlでのアクセスのみサポート
 	// /swagger/でのリダイレクトは未サポート (関連Issue: https://github.com/swaggo/gin-swagger/issues/323)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/swagger/doc.json")))
-	fmt.Println("Swagger UI: http://localhost:8081/swagger/index.html")
+	fmt.Println("Swagger UI: http://localhost:8080/swagger/index.html")
 
 	// API routes
 	api := r.Group("/api/v1")
