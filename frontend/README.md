@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# フロントエンド開発ガイド
 
-## Getting Started
+このプロジェクトは、Next.jsを使用したフロントエンドアプリケーションです。
 
-First, run the development server:
+## 開発を始めるには
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. **依存関係のインストール**
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+   ```bash
+   pnpm install
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. **開発サーバーの起動**
+   ```bash
+   pnpm dev
+   ```
+   ブラウザで [http://localhost:3000](http://localhost:3000) を開いて動作を確認してください。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## OpenAPI連携
 
-## Learn More
+このプロジェクトでは、[orval](https://orval.dev/) を使用してOpenAPI仕様からTypeScriptの型とAPIクライアントを自動生成しています。
 
-To learn more about Next.js, take a look at the following resources:
+### 手順
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **OpenAPI仕様のコピー**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   # プロジェクトルートで実行
+   sh scripts/copy-openapi.sh
+   ```
 
-## Deploy on Vercel
+   backendからOpenAPI仕様（swagger.yaml）をコピーします。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. **型とAPIクライアントの生成**
+   ```bash
+   pnpm gen:api
+   ```
+   コピーしたOpenAPI仕様を元に、`api`ディレクトリに型とクライアントを生成します。
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 注意点
+
+- `openapi/openapi.yml` はgit管理対象外です。必ずスクリプトを使用してコピーしてください。
+- `api`ディレクトリ内の生成物はgit管理対象です。変更があればコミットしてください。
+- 設定ファイルは `orval.config.ts` にあります。必要に応じてクライアントの種類（例: `fetch`, `react-query`）や出力先を変更してください。
+
+## その他
+
+- Next.jsの詳細なドキュメントは [公式サイト](https://nextjs.org/docs) を参照してください。
+- 質問や問題があればプロジェクトのIssueに投稿してください。
