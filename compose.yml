@@ -1,0 +1,10 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "${BACKEND_PORT}:8080"
+    volumes:
+      - ./backend:/app
+    environment:
+      - TZ=${TZ}
+      - BACKEND_PORT=${BACKEND_PORT}

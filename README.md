@@ -44,6 +44,21 @@ go-shisha/
 - Go 1.21+
 - PostgreSQL 14+
 
+### 環境変数
+
+`.env`ファイルを作成し、以下の内容を記載してください。
+
+```env
+TZ=Asia/Tokyo           # タイムゾーン（例: Asia/Tokyo）
+BACKEND_PORT=8080       # バックエンドの公開ポート（例: 8080）
+```
+
+### 各変数の説明
+- `TZ`: バックエンドDockerコンテナのタイムゾーン設定。`compose.yml`の`environment`で渡されます。
+- `BACKEND_PORT`: バックエンドAPIの公開ポート。`compose.yml`の`ports`および`environment`で使用されます。
+
+> 例: ローカル開発の場合は `TZ=Asia/Tokyo` `BACKEND_PORT=8080` でOKです。
+
 ## プロジェクト詳細
 
 詳細な要件定義については [REQUIREMENTS.md](./REQUIREMENTS.md) を参照してください。
