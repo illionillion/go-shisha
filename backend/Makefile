@@ -2,7 +2,7 @@
 
 # Swagger ドキュメント生成
 swagger:
-	~/go/bin/swag init -g cmd/main.go --parseDependency --parseInternal -o docs
+	swag init -g cmd/main.go --parseDependency --parseInternal -o docs
 
 # ビルド
 build:
@@ -16,5 +16,7 @@ run:
 test:
 	go test ./... -v
 
-# 開発用（swagger生成 + 実行）
-dev: swagger run
+# 開発用（swagger生成 + airでホットリロード実行）
+dev:
+	make swagger
+	air 

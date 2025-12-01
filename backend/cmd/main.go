@@ -1,5 +1,6 @@
 package main
 
+
 import (
 	"fmt"
 	"net/http"
@@ -22,7 +23,7 @@ import (
 // @contact.name API Support
 // @contact.url https://github.com/illionillion/go-shisha
 //
-// @host localhost:8081
+// @host localhost:8080
 // @BasePath /api/v1
 // @schemes http
 
@@ -63,7 +64,7 @@ func main() {
 	// Note: gin-swaggerは/swagger/index.htmlでのアクセスのみサポート
 	// /swagger/でのリダイレクトは未サポート (関連Issue: https://github.com/swaggo/gin-swagger/issues/323)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/swagger/doc.json")))
-	fmt.Println("Swagger UI: http://localhost:8081/swagger/index.html")
+	fmt.Println("Swagger UI: http://localhost:8080/swagger/index.html")
 
 	// API routes
 	api := r.Group("/api/v1")
@@ -88,10 +89,8 @@ func main() {
 		api.GET("/users/:id/posts", userHandler.GetUserPosts)
 	}
 
-	// サーバーを8081ポートで起動
-if err := r.Run(":8081"); err != nil {
-	// サーバー起動失敗時はエラーログ出力して終了
-	fmt.Printf("server error: %v\n", err)
-	// 必要ならos.Exit(1)やlog.Fatalも可
-}
+	// サーバーを8080ポートで起動
+	if err := r.Run(":8080"); err != nil {
+		fmt.Printf("server error: %v\n", err)
+	}
 }
