@@ -26,6 +26,7 @@
 2. **型安全性の徹底**: any禁止、型安全に実装する
 3. **コメント記述規則**:
    - **Frontend（TypeScript/JavaScript）**: 関数と定数にコメントを書く場合は必ずJSDoc形式`/**...*/`を使用する。詳細な説明・例・制約を記載する
+4. **Frontend変更時のLint・型チェック・フォーマット確認**: Frontend（TypeScript/Next.js）のコードを変更した場合、コミット前に必ず`cd frontend && pnpm type-check`で型エラーがないこと、`pnpm lint`でlintが通ること、`pnpm format:check`でフォーマットが正しいことを確認する。CIで検出されるエラーをローカルで事前に防ぐ
 
 ## Backend基本ルール
 
