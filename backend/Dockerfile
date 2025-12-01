@@ -16,4 +16,4 @@ COPY . .
 
 COPY .air.toml .
 
-CMD ["air"]
+CMD ["make", "dev"]

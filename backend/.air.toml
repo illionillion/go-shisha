@@ -3,8 +3,8 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-  cmd = "make reload"
-  bin = ""
+  cmd = "make build"
+  bin = "./tmp/main"
   include_ext = ["go", "tpl", "tmpl", "html"]
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "docs"]
   exclude_file = ["_test.go"]

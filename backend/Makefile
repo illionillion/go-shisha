@@ -16,10 +16,7 @@ run:
 test:
 	go test ./... -v
 
-# 開発用（swagger生成 + 実行）
-
-# ホットリロード用（swagger生成→ビルド→実行）
-reload:
+# 開発用（swagger生成 + airでホットリロード実行）
+dev:
 	make swagger
-	make build
-	./tmp/main
+	air 
