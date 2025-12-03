@@ -13,6 +13,7 @@ import type {
   GetPostsId404,
   GoShishaBackendInternalModelsCreatePostInput,
   GoShishaBackendInternalModelsPost,
+  InternalHandlersPostsListResponse,
   PostPosts400,
   PostPostsIdLike400,
   PostPostsIdLike404,
@@ -23,7 +24,7 @@ import type {
  * @summary 投稿一覧取得
  */
 export type getPostsResponse200 = {
-  data: GoShishaBackendInternalModelsPost[];
+  data: InternalHandlersPostsListResponse;
   status: 200;
 };
 

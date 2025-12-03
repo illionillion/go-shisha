@@ -21,3 +21,4 @@ export * from "./goShishaBackendInternalModelsUser";
 export * from "./postPosts400";
 export * from "./postPostsIdLike400";
 export * from "./postPostsIdLike404";
+export * from "./internalHandlersPostsListResponse";
