@@ -11,10 +11,12 @@
 export function getApiBaseUrl(): string {
   // サーバーサイド（RSC、Server Actions等）
   if (typeof window === "undefined") {
-    const apiUrl = process.env.API_URL;
+    // Docker環境: 内部通信用のAPI_URLを優先
+    // 本番環境: NEXT_PUBLIC_API_URLと同じ外部URLを使用
+    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
     if (!apiUrl) {
       throw new Error(
-        "API_URL environment variable is not set. Please set it in your .env file."
+        "API_URL or NEXT_PUBLIC_API_URL environment variable is not set. Please set it in your .env file."
       );
     }
     return apiUrl;
@@ -36,9 +38,14 @@ export function getApiBaseUrl(): string {
  * @param options fetch options
  * @returns fetch Promise
  */
-export async function apiFetch(path: string, options?: RequestInit): Promise<Response> {
+export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const baseUrl = getApiBaseUrl();
   const url = `${baseUrl}${path}`;
 
-  return fetch(url, options);
+  const res = await fetch(url, options);
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const data = body ? JSON.parse(body) : {};
+
+  return { data, status: res.status, headers: res.headers } as T;
 }
