@@ -8,6 +8,12 @@ export default defineConfig({
       target: "./api/generated.ts",
       schemas: "./api/model",
       client: "fetch",
+      override: {
+        mutator: {
+          path: "./lib/api-client.ts",
+          name: "apiFetch",
+        },
+      },
     },
   },
 });
