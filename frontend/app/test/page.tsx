@@ -6,7 +6,10 @@ export default async function TestPage() {
   // RSC（サーバー側）でAPIを呼び出し
   let serverData = null;
   let serverError = null;
+  let apiBaseUrl = "未設定";
+
   try {
+    apiBaseUrl = getApiBaseUrl();
     const response = await getPosts();
     serverData = response.data;
   } catch (error) {
@@ -19,7 +22,7 @@ export default async function TestPage() {
 
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-2">🖥️ サーバー側（RSC）からのAPI呼び出し</h2>
-        <p className="text-sm text-gray-600 mb-2">使用URL: {getApiBaseUrl()}</p>
+        <p className="text-sm text-gray-600 mb-2">使用URL: {apiBaseUrl}</p>
         {serverError ? (
           <div className="bg-red-100 p-4 rounded">
             <p className="text-red-700">エラー: {serverError}</p>
