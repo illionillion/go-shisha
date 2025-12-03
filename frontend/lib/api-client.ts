@@ -37,12 +37,17 @@ export function getApiBaseUrl(): string {
  * @param path APIパス（例: "/posts"）
  * @param options fetch options
  * @returns fetch Promise
+ * @throws {Error} HTTPエラー（4xx, 5xx）が発生した場合
  */
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const baseUrl = getApiBaseUrl();
   const url = `${baseUrl}${path}`;
 
   const res = await fetch(url, options);
+
+  if (!res.ok) {
+    throw new Error(`API Error: ${res.status} ${res.statusText}`);
+  }
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
   const data = body ? JSON.parse(body) : {};
