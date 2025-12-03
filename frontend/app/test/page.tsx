@@ -1,4 +1,5 @@
 import { getPosts } from "@/api/posts";
+import { getApiBaseUrl } from "@/lib/api-client";
 import { ClientComponent } from "./client-component";
 
 export default async function TestPage() {
@@ -18,9 +19,7 @@ export default async function TestPage() {
 
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-2">🖥️ サーバー側（RSC）からのAPI呼び出し</h2>
-        <p className="text-sm text-gray-600 mb-2">
-          使用URL: {process.env.API_URL || process.env.NEXT_PUBLIC_API_URL}
-        </p>
+        <p className="text-sm text-gray-600 mb-2">使用URL: {getApiBaseUrl()}</p>
         {serverError ? (
           <div className="bg-red-100 p-4 rounded">
             <p className="text-red-700">エラー: {serverError}</p>
