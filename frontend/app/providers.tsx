@@ -24,10 +24,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       })
   );
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      {/* 将来的に他のProvider（認証、テーマなど）もここに追加 */}
-      {children}
-    </QueryClientProvider>
-  );
+  // 将来的に他のProvider（認証、テーマなど）もここに追加
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }

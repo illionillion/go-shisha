@@ -53,11 +53,16 @@ export async function apiFetch<T>(
   const baseUrl = getApiBaseUrl();
   const url = `${baseUrl}${config.url}`;
 
+  // ヘッダーマージ: 明示的指定を優先（config.headers > 自動Content-Type > options.headers）
+  const hasContentType =
+    (config.headers && typeof config.headers === "object" && "Content-Type" in config.headers) ||
+    (options?.headers && typeof options.headers === "object" && "Content-Type" in options.headers);
+
   const res = await fetch(url, {
     ...options,
     method: config.method,
     headers: {
-      ...(config.data ? { "Content-Type": "application/json" } : {}),
+      ...(config.data && !hasContentType ? { "Content-Type": "application/json" } : {}),
       ...config.headers,
       ...options?.headers,
     },
