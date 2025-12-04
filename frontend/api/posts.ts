@@ -6,7 +6,25 @@
 このAPIはシーシャの投稿、ユーザー管理を行います
  * OpenAPI spec version: 1.0
  */
-import { apiFetch } from "../lib/api-client";
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
+import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
+
 import type {
   GetPosts500,
   GetPostsId400,
@@ -16,165 +34,329 @@ import type {
   InternalHandlersPostsListResponse,
   PostPosts400,
   PostPostsIdLike400,
-  PostPostsIdLike404,
-} from "./model";
+  PostPostsIdLike404
+} from './model';
+
+import { apiFetch } from '../lib/api-client';
+
+
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+
 
 /**
  * 全ての投稿の一覧を取得します
  * @summary 投稿一覧取得
  */
-export type getPostsResponse200 = {
-  data: InternalHandlersPostsListResponse;
-  status: 200;
-};
+export const getPosts = (
+    
+ options?: SecondParameter<typeof apiFetch>,signal?: AbortSignal
+) => {
+      
+      
+      return apiFetch<InternalHandlersPostsListResponse>(
+      {url: `/posts`, method: 'GET', signal
+    },
+      options);
+    }
+  
 
-export type getPostsResponse500 = {
-  data: GetPosts500;
-  status: 500;
-};
 
-export type getPostsResponseSuccess = getPostsResponse200 & {
-  headers: Headers;
-};
-export type getPostsResponseError = getPostsResponse500 & {
-  headers: Headers;
-};
 
-export type getPostsResponse = getPostsResponseSuccess | getPostsResponseError;
+export const getGetPostsQueryKey = () => {
+    return [
+    `/posts`
+    ] as const;
+    }
 
-export const getGetPostsUrl = () => {
-  return `/posts`;
-};
+    
+export const getGetPostsQueryOptions = <TData = Awaited<ReturnType<typeof getPosts>>, TError = GetPosts500>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
 
-export const getPosts = async (options?: RequestInit): Promise<getPostsResponse> => {
-  return apiFetch<getPostsResponse>(getGetPostsUrl(), {
-    ...options,
-    method: "GET",
-  });
-};
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPostsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPosts>>> = ({ signal }) => getPosts(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPostsQueryResult = NonNullable<Awaited<ReturnType<typeof getPosts>>>
+export type GetPostsQueryError = GetPosts500
+
+
+export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError = GetPosts500>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPosts>>,
+          TError,
+          Awaited<ReturnType<typeof getPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError = GetPosts500>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPosts>>,
+          TError,
+          Awaited<ReturnType<typeof getPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError = GetPosts500>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 投稿一覧取得
+ */
+
+export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError = GetPosts500>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPostsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
 
 /**
  * 新しい投稿を作成します
  * @summary 投稿作成
  */
-export type postPostsResponse201 = {
-  data: GoShishaBackendInternalModelsPost;
-  status: 201;
-};
+export const postPosts = (
+    goShishaBackendInternalModelsCreatePostInput: GoShishaBackendInternalModelsCreatePostInput,
+ options?: SecondParameter<typeof apiFetch>,signal?: AbortSignal
+) => {
+      
+      
+      return apiFetch<GoShishaBackendInternalModelsPost>(
+      {url: `/posts`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: goShishaBackendInternalModelsCreatePostInput, signal
+    },
+      options);
+    }
+  
 
-export type postPostsResponse400 = {
-  data: PostPosts400;
-  status: 400;
-};
 
-export type postPostsResponseSuccess = postPostsResponse201 & {
-  headers: Headers;
-};
-export type postPostsResponseError = postPostsResponse400 & {
-  headers: Headers;
-};
+export const getPostPostsMutationOptions = <TError = PostPosts400,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPosts>>, TError,{data: GoShishaBackendInternalModelsCreatePostInput}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postPosts>>, TError,{data: GoShishaBackendInternalModelsCreatePostInput}, TContext> => {
 
-export type postPostsResponse = postPostsResponseSuccess | postPostsResponseError;
+const mutationKey = ['postPosts'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
 
-export const getPostPostsUrl = () => {
-  return `/posts`;
-};
+      
 
-export const postPosts = async (
-  goShishaBackendInternalModelsCreatePostInput: GoShishaBackendInternalModelsCreatePostInput,
-  options?: RequestInit
-): Promise<postPostsResponse> => {
-  return apiFetch<postPostsResponse>(getPostPostsUrl(), {
-    ...options,
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(goShishaBackendInternalModelsCreatePostInput),
-  });
-};
 
-/**
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postPosts>>, {data: GoShishaBackendInternalModelsCreatePostInput}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postPosts(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostPostsMutationResult = NonNullable<Awaited<ReturnType<typeof postPosts>>>
+    export type PostPostsMutationBody = GoShishaBackendInternalModelsCreatePostInput
+    export type PostPostsMutationError = PostPosts400
+
+    /**
+ * @summary 投稿作成
+ */
+export const usePostPosts = <TError = PostPosts400,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPosts>>, TError,{data: GoShishaBackendInternalModelsCreatePostInput}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postPosts>>,
+        TError,
+        {data: GoShishaBackendInternalModelsCreatePostInput},
+        TContext
+      > => {
+
+      const mutationOptions = getPostPostsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    /**
  * 指定されたIDの投稿情報を取得します
  * @summary 投稿詳細取得
  */
-export type getPostsIdResponse200 = {
-  data: GoShishaBackendInternalModelsPost;
-  status: 200;
-};
+export const getPostsId = (
+    id: number,
+ options?: SecondParameter<typeof apiFetch>,signal?: AbortSignal
+) => {
+      
+      
+      return apiFetch<GoShishaBackendInternalModelsPost>(
+      {url: `/posts/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
 
-export type getPostsIdResponse400 = {
-  data: GetPostsId400;
-  status: 400;
-};
 
-export type getPostsIdResponse404 = {
-  data: GetPostsId404;
-  status: 404;
-};
 
-export type getPostsIdResponseSuccess = getPostsIdResponse200 & {
-  headers: Headers;
-};
-export type getPostsIdResponseError = (getPostsIdResponse400 | getPostsIdResponse404) & {
-  headers: Headers;
-};
+export const getGetPostsIdQueryKey = (id?: number,) => {
+    return [
+    `/posts/${id}`
+    ] as const;
+    }
 
-export type getPostsIdResponse = getPostsIdResponseSuccess | getPostsIdResponseError;
+    
+export const getGetPostsIdQueryOptions = <TData = Awaited<ReturnType<typeof getPostsId>>, TError = GetPostsId400 | GetPostsId404>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+) => {
 
-export const getGetPostsIdUrl = (id: number) => {
-  return `/posts/${id}`;
-};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-export const getPostsId = async (
-  id: number,
-  options?: RequestInit
-): Promise<getPostsIdResponse> => {
-  return apiFetch<getPostsIdResponse>(getGetPostsIdUrl(id), {
-    ...options,
-    method: "GET",
-  });
-};
+  const queryKey =  queryOptions?.queryKey ?? getGetPostsIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPostsId>>> = ({ signal }) => getPostsId(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPostsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getPostsId>>>
+export type GetPostsIdQueryError = GetPostsId400 | GetPostsId404
+
+
+export function useGetPostsId<TData = Awaited<ReturnType<typeof getPostsId>>, TError = GetPostsId400 | GetPostsId404>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPostsId>>,
+          TError,
+          Awaited<ReturnType<typeof getPostsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPostsId<TData = Awaited<ReturnType<typeof getPostsId>>, TError = GetPostsId400 | GetPostsId404>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPostsId>>,
+          TError,
+          Awaited<ReturnType<typeof getPostsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPostsId<TData = Awaited<ReturnType<typeof getPostsId>>, TError = GetPostsId400 | GetPostsId404>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary 投稿詳細取得
+ */
+
+export function useGetPostsId<TData = Awaited<ReturnType<typeof getPostsId>>, TError = GetPostsId400 | GetPostsId404>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData>>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPostsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
 
 /**
  * 指定された投稿にいいねを追加します
  * @summary 投稿にいいね
  */
-export type postPostsIdLikeResponse200 = {
-  data: GoShishaBackendInternalModelsPost;
-  status: 200;
-};
+export const postPostsIdLike = (
+    id: number,
+ options?: SecondParameter<typeof apiFetch>,signal?: AbortSignal
+) => {
+      
+      
+      return apiFetch<GoShishaBackendInternalModelsPost>(
+      {url: `/posts/${id}/like`, method: 'POST', signal
+    },
+      options);
+    }
+  
 
-export type postPostsIdLikeResponse400 = {
-  data: PostPostsIdLike400;
-  status: 400;
-};
 
-export type postPostsIdLikeResponse404 = {
-  data: PostPostsIdLike404;
-  status: 404;
-};
+export const getPostPostsIdLikeMutationOptions = <TError = PostPostsIdLike400 | PostPostsIdLike404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPostsIdLike>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postPostsIdLike>>, TError,{id: number}, TContext> => {
 
-export type postPostsIdLikeResponseSuccess = postPostsIdLikeResponse200 & {
-  headers: Headers;
-};
-export type postPostsIdLikeResponseError = (
-  | postPostsIdLikeResponse400
-  | postPostsIdLikeResponse404
-) & {
-  headers: Headers;
-};
+const mutationKey = ['postPostsIdLike'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
 
-export type postPostsIdLikeResponse = postPostsIdLikeResponseSuccess | postPostsIdLikeResponseError;
+      
 
-export const getPostPostsIdLikeUrl = (id: number) => {
-  return `/posts/${id}/like`;
-};
 
-export const postPostsIdLike = async (
-  id: number,
-  options?: RequestInit
-): Promise<postPostsIdLikeResponse> => {
-  return apiFetch<postPostsIdLikeResponse>(getPostPostsIdLikeUrl(id), {
-    ...options,
-    method: "POST",
-  });
-};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postPostsIdLike>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  postPostsIdLike(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostPostsIdLikeMutationResult = NonNullable<Awaited<ReturnType<typeof postPostsIdLike>>>
+    
+    export type PostPostsIdLikeMutationError = PostPostsIdLike400 | PostPostsIdLike404
+
+    /**
+ * @summary 投稿にいいね
+ */
+export const usePostPostsIdLike = <TError = PostPostsIdLike400 | PostPostsIdLike404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPostsIdLike>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof apiFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postPostsIdLike>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+
+      const mutationOptions = getPostPostsIdLikeMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
