@@ -15,7 +15,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            // デフォルトでは5分間キャッシュ
+            // デフォルトでは60秒間キャッシュ
             staleTime: 60 * 1000,
             // リトライは1回のみ
             retry: 1,

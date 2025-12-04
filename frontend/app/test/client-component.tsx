@@ -19,7 +19,9 @@ export function ClientComponent() {
         </div>
       ) : error ? (
         <div className="bg-red-100 p-4 rounded">
-          <p className="text-red-700">エラー: {String(error)}</p>
+          <p className="text-red-700">
+            エラー: {error instanceof Error ? error.message : String(error)}
+          </p>
         </div>
       ) : (
         <div className="bg-blue-100 p-4 rounded">
