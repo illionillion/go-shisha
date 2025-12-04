@@ -75,7 +75,7 @@ export async function apiFetch<T>(
   }
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  const data = body ? JSON.parse(body) : {};
+  const data = body ? JSON.parse(body) : null;
 
   return data as T;
 }
