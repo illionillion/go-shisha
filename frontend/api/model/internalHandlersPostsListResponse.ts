@@ -6,7 +6,7 @@
 このAPIはシーシャの投稿、ユーザー管理を行います
  * OpenAPI spec version: 1.0
  */
-import type { GoShishaBackendInternalModelsPost } from './goShishaBackendInternalModelsPost';
+import type { GoShishaBackendInternalModelsPost } from "./goShishaBackendInternalModelsPost";
 
 export interface InternalHandlersPostsListResponse {
   posts?: GoShishaBackendInternalModelsPost[];
