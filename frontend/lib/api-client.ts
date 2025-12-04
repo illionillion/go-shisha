@@ -34,16 +34,35 @@ export function getApiBaseUrl(): string {
 
 /**
  * orvalで生成されたAPI関数をラップし、適切なベースURLでfetchを実行する
- * @param path APIパス（例: "/posts"）
- * @param options fetch options
+ * react-queryモード対応: 第1引数にリクエスト設定オブジェクトを受け取る
+ * @param config リクエスト設定（url, method, data, headers等）
+ * @param options 追加のfetchオプション
  * @returns fetch Promise
  * @throws {Error} HTTPエラー（4xx, 5xx）が発生した場合
  */
-export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+export async function apiFetch<T>(
+  config: {
+    url: string;
+    method: string;
+    headers?: HeadersInit;
+    data?: unknown;
+    signal?: AbortSignal;
+  },
+  options?: RequestInit
+): Promise<T> {
   const baseUrl = getApiBaseUrl();
-  const url = `${baseUrl}${path}`;
+  const url = `${baseUrl}${config.url}`;
 
-  const res = await fetch(url, options);
+  const res = await fetch(url, {
+    ...options,
+    method: config.method,
+    headers: {
+      ...config.headers,
+      ...options?.headers,
+    },
+    body: config.data ? JSON.stringify(config.data) : undefined,
+    signal: config.signal,
+  });
 
   if (!res.ok) {
     throw new Error(`API Error: ${res.status} ${res.statusText}`);
