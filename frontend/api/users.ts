@@ -6,6 +6,18 @@
 このAPIはシーシャの投稿、ユーザー管理を行います
  * OpenAPI spec version: 1.0
  */
+import { useQuery } from "@tanstack/react-query";
+import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseQueryOptions,
+  UseQueryResult,
+} from "@tanstack/react-query";
 import { apiFetch } from "../lib/api-client";
 import type {
   GetUsers500,
@@ -17,123 +29,344 @@ import type {
   GoShishaBackendInternalModelsUser,
 } from "./model";
 
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
 /**
  * 全てのユーザーの一覧を取得します
  * @summary ユーザー一覧取得
  */
-export type getUsersResponse200 = {
-  data: GoShishaBackendInternalModelsUser[];
-  status: 200;
+export const getUsers = (options?: SecondParameter<typeof apiFetch>, signal?: AbortSignal) => {
+  return apiFetch<GoShishaBackendInternalModelsUser[]>(
+    { url: `/users`, method: "GET", signal },
+    options
+  );
 };
 
-export type getUsersResponse500 = {
-  data: GetUsers500;
-  status: 500;
+export const getGetUsersQueryKey = () => {
+  return [`/users`] as const;
 };
 
-export type getUsersResponseSuccess = getUsersResponse200 & {
-  headers: Headers;
-};
-export type getUsersResponseError = getUsersResponse500 & {
-  headers: Headers;
+export const getGetUsersQueryOptions = <
+  TData = Awaited<ReturnType<typeof getUsers>>,
+  TError = GetUsers500,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>>;
+  request?: SecondParameter<typeof apiFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetUsersQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsers>>> = ({ signal }) =>
+    getUsers(requestOptions, signal);
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getUsers>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
-export type getUsersResponse = getUsersResponseSuccess | getUsersResponseError;
+export type GetUsersQueryResult = NonNullable<Awaited<ReturnType<typeof getUsers>>>;
+export type GetUsersQueryError = GetUsers500;
 
-export const getGetUsersUrl = () => {
-  return `/users`;
-};
+export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError = GetUsers500>(
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUsers>>,
+          TError,
+          Awaited<ReturnType<typeof getUsers>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError = GetUsers500>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUsers>>,
+          TError,
+          Awaited<ReturnType<typeof getUsers>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError = GetUsers500>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary ユーザー一覧取得
+ */
 
-export const getUsers = async (options?: RequestInit): Promise<getUsersResponse> => {
-  return apiFetch<getUsersResponse>(getGetUsersUrl(), {
-    ...options,
-    method: "GET",
-  });
-};
+export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError = GetUsers500>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetUsersQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
 
 /**
  * 指定されたIDのユーザー情報を取得します
  * @summary ユーザー詳細取得
  */
-export type getUsersIdResponse200 = {
-  data: GoShishaBackendInternalModelsUser;
-  status: 200;
-};
-
-export type getUsersIdResponse400 = {
-  data: GetUsersId400;
-  status: 400;
-};
-
-export type getUsersIdResponse404 = {
-  data: GetUsersId404;
-  status: 404;
-};
-
-export type getUsersIdResponseSuccess = getUsersIdResponse200 & {
-  headers: Headers;
-};
-export type getUsersIdResponseError = (getUsersIdResponse400 | getUsersIdResponse404) & {
-  headers: Headers;
-};
-
-export type getUsersIdResponse = getUsersIdResponseSuccess | getUsersIdResponseError;
-
-export const getGetUsersIdUrl = (id: number) => {
-  return `/users/${id}`;
-};
-
-export const getUsersId = async (
+export const getUsersId = (
   id: number,
-  options?: RequestInit
-): Promise<getUsersIdResponse> => {
-  return apiFetch<getUsersIdResponse>(getGetUsersIdUrl(id), {
-    ...options,
-    method: "GET",
-  });
+  options?: SecondParameter<typeof apiFetch>,
+  signal?: AbortSignal
+) => {
+  return apiFetch<GoShishaBackendInternalModelsUser>(
+    { url: `/users/${id}`, method: "GET", signal },
+    options
+  );
 };
+
+export const getGetUsersIdQueryKey = (id?: number) => {
+  return [`/users/${id}`] as const;
+};
+
+export const getGetUsersIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getUsersId>>,
+  TError = GetUsersId400 | GetUsersId404,
+>(
+  id: number,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  }
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetUsersIdQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersId>>> = ({ signal }) =>
+    getUsersId(id, requestOptions, signal);
+
+  return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getUsersId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetUsersIdQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersId>>>;
+export type GetUsersIdQueryError = GetUsersId400 | GetUsersId404;
+
+export function useGetUsersId<
+  TData = Awaited<ReturnType<typeof getUsersId>>,
+  TError = GetUsersId400 | GetUsersId404,
+>(
+  id: number,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUsersId>>,
+          TError,
+          Awaited<ReturnType<typeof getUsersId>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetUsersId<
+  TData = Awaited<ReturnType<typeof getUsersId>>,
+  TError = GetUsersId400 | GetUsersId404,
+>(
+  id: number,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUsersId>>,
+          TError,
+          Awaited<ReturnType<typeof getUsersId>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetUsersId<
+  TData = Awaited<ReturnType<typeof getUsersId>>,
+  TError = GetUsersId400 | GetUsersId404,
+>(
+  id: number,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary ユーザー詳細取得
+ */
+
+export function useGetUsersId<
+  TData = Awaited<ReturnType<typeof getUsersId>>,
+  TError = GetUsersId400 | GetUsersId404,
+>(
+  id: number,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetUsersIdQueryOptions(id, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
 
 /**
  * 指定されたユーザーの全ての投稿を取得します
  * @summary ユーザーの投稿一覧取得
  */
-export type getUsersIdPostsResponse200 = {
-  data: GoShishaBackendInternalModelsPost[];
-  status: 200;
-};
-
-export type getUsersIdPostsResponse400 = {
-  data: GetUsersIdPosts400;
-  status: 400;
-};
-
-export type getUsersIdPostsResponse404 = {
-  data: GetUsersIdPosts404;
-  status: 404;
-};
-
-export type getUsersIdPostsResponseSuccess = getUsersIdPostsResponse200 & {
-  headers: Headers;
-};
-export type getUsersIdPostsResponseError = (
-  | getUsersIdPostsResponse400
-  | getUsersIdPostsResponse404
-) & {
-  headers: Headers;
-};
-
-export type getUsersIdPostsResponse = getUsersIdPostsResponseSuccess | getUsersIdPostsResponseError;
-
-export const getGetUsersIdPostsUrl = (id: number) => {
-  return `/users/${id}/posts`;
-};
-
-export const getUsersIdPosts = async (
+export const getUsersIdPosts = (
   id: number,
-  options?: RequestInit
-): Promise<getUsersIdPostsResponse> => {
-  return apiFetch<getUsersIdPostsResponse>(getGetUsersIdPostsUrl(id), {
-    ...options,
-    method: "GET",
-  });
+  options?: SecondParameter<typeof apiFetch>,
+  signal?: AbortSignal
+) => {
+  return apiFetch<GoShishaBackendInternalModelsPost[]>(
+    { url: `/users/${id}/posts`, method: "GET", signal },
+    options
+  );
 };
+
+export const getGetUsersIdPostsQueryKey = (id?: number) => {
+  return [`/users/${id}/posts`] as const;
+};
+
+export const getGetUsersIdPostsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getUsersIdPosts>>,
+  TError = GetUsersIdPosts400 | GetUsersIdPosts404,
+>(
+  id: number,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersIdPosts>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  }
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetUsersIdPostsQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersIdPosts>>> = ({ signal }) =>
+    getUsersIdPosts(id, requestOptions, signal);
+
+  return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getUsersIdPosts>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetUsersIdPostsQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersIdPosts>>>;
+export type GetUsersIdPostsQueryError = GetUsersIdPosts400 | GetUsersIdPosts404;
+
+export function useGetUsersIdPosts<
+  TData = Awaited<ReturnType<typeof getUsersIdPosts>>,
+  TError = GetUsersIdPosts400 | GetUsersIdPosts404,
+>(
+  id: number,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersIdPosts>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUsersIdPosts>>,
+          TError,
+          Awaited<ReturnType<typeof getUsersIdPosts>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetUsersIdPosts<
+  TData = Awaited<ReturnType<typeof getUsersIdPosts>>,
+  TError = GetUsersIdPosts400 | GetUsersIdPosts404,
+>(
+  id: number,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersIdPosts>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUsersIdPosts>>,
+          TError,
+          Awaited<ReturnType<typeof getUsersIdPosts>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetUsersIdPosts<
+  TData = Awaited<ReturnType<typeof getUsersIdPosts>>,
+  TError = GetUsersIdPosts400 | GetUsersIdPosts404,
+>(
+  id: number,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersIdPosts>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary ユーザーの投稿一覧取得
+ */
+
+export function useGetUsersIdPosts<
+  TData = Awaited<ReturnType<typeof getUsersIdPosts>>,
+  TError = GetUsersIdPosts400 | GetUsersIdPosts404,
+>(
+  id: number,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersIdPosts>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetUsersIdPostsQueryOptions(id, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}

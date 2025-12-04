@@ -7,7 +7,7 @@ export default defineConfig({
       mode: "tags",
       target: "./api/generated.ts",
       schemas: "./api/model",
-      client: "fetch",
+      client: "react-query",
       override: {
         mutator: {
           path: "./lib/api-client.ts",
