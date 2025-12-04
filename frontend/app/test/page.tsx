@@ -11,7 +11,7 @@ export default async function TestPage() {
   try {
     apiBaseUrl = getApiBaseUrl();
     const response = await getPosts();
-    serverData = response.data;
+    serverData = response;
   } catch (error) {
     serverError = error instanceof Error ? error.message : "Unknown error";
   }
