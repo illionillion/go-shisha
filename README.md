@@ -49,15 +49,21 @@ go-shisha/
 `.env`ファイルを作成し、以下の内容を記載してください。
 
 ```env
-TZ=Asia/Tokyo           # タイムゾーン（例: Asia/Tokyo）
-BACKEND_PORT=8080       # バックエンドの公開ポート（例: 8080）
+TZ=Asia/Tokyo                                      # タイムゾーン
+BACKEND_PORT=8080                                  # バックエンドの公開ポート
+FRONTEND_PORT=3000                                 # フロントエンドの公開ポート
+NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1   # API URL（ブラウザ用）
+API_URL=http://backend:8080/api/v1                 # API URL（Docker内部通信用）
 ```
 
 ### 各変数の説明
-- `TZ`: バックエンドDockerコンテナのタイムゾーン設定。`compose.yml`の`environment`で渡されます。
-- `BACKEND_PORT`: バックエンドAPIの公開ポート。`compose.yml`の`ports`および`environment`で使用されます。
+- `TZ`: Dockerコンテナのタイムゾーン設定
+- `BACKEND_PORT`: バックエンドAPIの公開ポート
+- `FRONTEND_PORT`: フロントエンドの公開ポート
+- `NEXT_PUBLIC_API_URL`: ブラウザからアクセスする際のAPI URL
+- `API_URL`: Next.jsサーバー側（RSC）がDocker内部通信で使用するAPI URL（オプション）
 
-> 例: ローカル開発の場合は `TZ=Asia/Tokyo` `BACKEND_PORT=8080` でOKです。
+> 詳細は `.env.example` を参照してください。
 
 ## プロジェクト詳細
 

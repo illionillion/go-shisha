@@ -4,6 +4,20 @@
 
 ## 開発を始めるには
 
+### Docker Compose を使用する場合（推奨）
+
+プロジェクトルートで以下を実行：
+
+```bash
+docker compose up
+```
+
+- Frontend: [http://localhost:3000](http://localhost:3000)
+- Backend: [http://localhost:8080](http://localhost:8080)
+- OpenAPI仕様の変更を自動検知してAPI型を再生成します
+
+### ローカル環境で直接実行する場合
+
 1. **依存関係のインストール**
 
    ```bash
@@ -20,13 +34,17 @@
 
 このプロジェクトでは、[orval](https://orval.dev/) を使用してOpenAPI仕様からTypeScriptの型とAPIクライアントを自動生成しています。
 
-### 手順
+### 自動生成（Docker環境）
+
+Docker Compose環境では、`openapi/openapi.yml`の変更を`nodemon`が自動検知し、API型を再生成します。
+
+### 手動生成
 
 1. **OpenAPI仕様のコピー**
 
    ```bash
    # プロジェクトルートで実行
-   sh scripts/copy-openapi.sh
+   ./scripts/copy-openapi.sh
    ```
 
    backendからOpenAPI仕様（swagger.yaml）をコピーします。
