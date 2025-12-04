@@ -6,12 +6,14 @@
 このAPIはシーシャの投稿、ユーザー管理を行います
  * OpenAPI spec version: 1.0
  */
+import { apiFetch } from "../lib/api-client";
 import type {
   GetPosts500,
   GetPostsId400,
   GetPostsId404,
   GoShishaBackendInternalModelsCreatePostInput,
   GoShishaBackendInternalModelsPost,
+  InternalHandlersPostsListResponse,
   PostPosts400,
   PostPostsIdLike400,
   PostPostsIdLike404,
@@ -22,7 +24,7 @@ import type {
  * @summary 投稿一覧取得
  */
 export type getPostsResponse200 = {
-  data: GoShishaBackendInternalModelsPost[];
+  data: InternalHandlersPostsListResponse;
   status: 200;
 };
 
@@ -45,15 +47,10 @@ export const getGetPostsUrl = () => {
 };
 
 export const getPosts = async (options?: RequestInit): Promise<getPostsResponse> => {
-  const res = await fetch(getGetPostsUrl(), {
+  return apiFetch<getPostsResponse>(getGetPostsUrl(), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getPostsResponse["data"] = body ? JSON.parse(body) : {};
-  return { data, status: res.status, headers: res.headers } as getPostsResponse;
 };
 
 /**
@@ -87,17 +84,12 @@ export const postPosts = async (
   goShishaBackendInternalModelsCreatePostInput: GoShishaBackendInternalModelsCreatePostInput,
   options?: RequestInit
 ): Promise<postPostsResponse> => {
-  const res = await fetch(getPostPostsUrl(), {
+  return apiFetch<postPostsResponse>(getPostPostsUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
     body: JSON.stringify(goShishaBackendInternalModelsCreatePostInput),
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: postPostsResponse["data"] = body ? JSON.parse(body) : {};
-  return { data, status: res.status, headers: res.headers } as postPostsResponse;
 };
 
 /**
@@ -136,15 +128,10 @@ export const getPostsId = async (
   id: number,
   options?: RequestInit
 ): Promise<getPostsIdResponse> => {
-  const res = await fetch(getGetPostsIdUrl(id), {
+  return apiFetch<getPostsIdResponse>(getGetPostsIdUrl(id), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getPostsIdResponse["data"] = body ? JSON.parse(body) : {};
-  return { data, status: res.status, headers: res.headers } as getPostsIdResponse;
 };
 
 /**
@@ -186,13 +173,8 @@ export const postPostsIdLike = async (
   id: number,
   options?: RequestInit
 ): Promise<postPostsIdLikeResponse> => {
-  const res = await fetch(getPostPostsIdLikeUrl(id), {
+  return apiFetch<postPostsIdLikeResponse>(getPostPostsIdLikeUrl(id), {
     ...options,
     method: "POST",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: postPostsIdLikeResponse["data"] = body ? JSON.parse(body) : {};
-  return { data, status: res.status, headers: res.headers } as postPostsIdLikeResponse;
 };

@@ -6,6 +6,7 @@
 このAPIはシーシャの投稿、ユーザー管理を行います
  * OpenAPI spec version: 1.0
  */
+import { apiFetch } from "../lib/api-client";
 import type {
   GetUsers500,
   GetUsersId400,
@@ -44,15 +45,10 @@ export const getGetUsersUrl = () => {
 };
 
 export const getUsers = async (options?: RequestInit): Promise<getUsersResponse> => {
-  const res = await fetch(getGetUsersUrl(), {
+  return apiFetch<getUsersResponse>(getGetUsersUrl(), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getUsersResponse["data"] = body ? JSON.parse(body) : {};
-  return { data, status: res.status, headers: res.headers } as getUsersResponse;
 };
 
 /**
@@ -91,15 +87,10 @@ export const getUsersId = async (
   id: number,
   options?: RequestInit
 ): Promise<getUsersIdResponse> => {
-  const res = await fetch(getGetUsersIdUrl(id), {
+  return apiFetch<getUsersIdResponse>(getGetUsersIdUrl(id), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getUsersIdResponse["data"] = body ? JSON.parse(body) : {};
-  return { data, status: res.status, headers: res.headers } as getUsersIdResponse;
 };
 
 /**
@@ -141,13 +132,8 @@ export const getUsersIdPosts = async (
   id: number,
   options?: RequestInit
 ): Promise<getUsersIdPostsResponse> => {
-  const res = await fetch(getGetUsersIdPostsUrl(id), {
+  return apiFetch<getUsersIdPostsResponse>(getGetUsersIdPostsUrl(id), {
     ...options,
     method: "GET",
   });
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getUsersIdPostsResponse["data"] = body ? JSON.parse(body) : {};
-  return { data, status: res.status, headers: res.headers } as getUsersIdPostsResponse;
 };

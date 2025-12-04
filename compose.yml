@@ -8,3 +8,16 @@ services:
     environment:
       - TZ=${TZ}
       - BACKEND_PORT=${BACKEND_PORT}
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    volumes:
+      - ./frontend:/app
+    environment:
+      - TZ=${TZ}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - API_URL=${API_URL}
+    depends_on:
+      - backend
