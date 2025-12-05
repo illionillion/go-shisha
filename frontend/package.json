@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:docker": "pnpm gen:api && run-p dev:next dev:watch",
+    "dev:docker": "pnpm gen:api && run-p dev:next dev:watch storybook",
     "dev:next": "next dev",
     "dev:watch": "nodemon --watch openapi/openapi.yml --exec pnpm gen:api",
     "build": "next build",
