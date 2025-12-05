@@ -16,7 +16,9 @@
     "type-check": "tsc --noEmit",
     "check": "pnpm type-check && pnpm lint && pnpm format:check",
     "fix": "pnpm type-check && pnpm lint:fix && pnpm format",
-    "gen:api": "pnpm exec orval --config orval.config.ts"
+    "gen:api": "pnpm exec orval --config orval.config.ts",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.12",
@@ -45,6 +47,11 @@
     "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "typescript-eslint": "^8.38.0"
+    "typescript-eslint": "^8.38.0",
+    "storybook": "^10.1.4",
+    "@storybook/nextjs-vite": "^10.1.4",
+    "@storybook/addon-a11y": "^10.1.4",
+    "@storybook/addon-docs": "^10.1.4",
+    "@storybook/addon-onboarding": "^10.1.4"
   }
 }
