@@ -13,6 +13,7 @@ services:
     build: ./frontend
     ports:
       - "${FRONTEND_PORT}:3000"
+      - "${STORYBOOK_PORT}:6006"
     volumes:
       - ./frontend:/app
     environment:
