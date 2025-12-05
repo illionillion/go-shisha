@@ -46,6 +46,31 @@
    - **Frontend（TypeScript/JavaScript）**: 関数と定数にコメントを書く場合は必ずJSDoc形式`/**...*/`を使用する。詳細な説明・例・制約を記載する
    - **例外**: JSX内のコメントは`{/* ... */}`形式を許可する。ただし、可能であればコンポーネント外に通常のコメント`//`で記述することを推奨する
 4. **Frontend変更時のLint・型チェック・フォーマット確認**: Frontend（TypeScript/Next.js）のコードを変更した場合、コミット前に必ず`cd frontend && pnpm check`を実行し、全てのチェックが通ることを確認する。エラーがある場合は`pnpm fix`で自動修正を試みる。CIで検出されるエラーをローカルで事前に防ぐ
+5. **コンポーネント作成ルール**:
+   - **CVA（class-variance-authority）使用**: バリアント管理が必要なコンポーネントはCVAを使用し、型安全にスタイルを管理する
+   - **clsx使用**: クラス名は`clsx`で配列形式で記述する。各クラスを配列要素として分割し、可読性を向上させる
+   - **配列形式の徹底**: CVAのベースクラス・バリアントクラス、通常のclassNameすべてで配列形式を使用する
+   - **例**:
+     ```tsx
+     // CVA定義
+     const cardVariants = cva(
+       ["rounded-lg", "overflow-hidden", "bg-white"],
+       {
+         variants: {
+           size: {
+             sm: ["w-32", "h-32"],
+             lg: ["w-64", "h-64"],
+           },
+         },
+       }
+     );
+     
+     // コンポーネント内
+     <div className={clsx(cardVariants({ size }), "追加クラス")}>
+       <span className={clsx(["text-sm", "font-bold"])}>テキスト</span>
+     </div>
+     ```
+   - **静的クラスのみの場合**: CVAやclsxを使わず通常のclassNameでも可。ただし、将来的に条件分岐が予想される場合はclsx配列形式を推奨
 
 ## Backend基本ルール
 
