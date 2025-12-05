@@ -36,7 +36,7 @@ type Story = StoryObj<typeof meta>;
  */
 export const Default: Story = {
   args: {
-    imageUrl: "https://via.placeholder.com/300x400/8B4513/FFFFFF?text=Shisha",
+    imageUrl: "https://via.placeholder.com/300x400/CCCCCC/666666?text=Shisha",
     message: "今日のシーシャは最高でした！フルーツミックスの味が絶妙で、煙もたっぷり楽しめました。",
     likes: 42,
     user: {
@@ -52,7 +52,7 @@ export const Default: Story = {
  */
 export const Compact: Story = {
   args: {
-    imageUrl: "https://via.placeholder.com/300x400/9B59B6/FFFFFF?text=Shisha",
+    imageUrl: "https://via.placeholder.com/300x400/AAAAAA/555555?text=Shisha",
     message: "新しいフレーバーを試してみました！",
     likes: 15,
     user: {
@@ -68,7 +68,7 @@ export const Compact: Story = {
  */
 export const WithoutUserIcon: Story = {
   args: {
-    imageUrl: "https://via.placeholder.com/300x400/3498DB/FFFFFF?text=Shisha",
+    imageUrl: "https://via.placeholder.com/300x400/999999/444444?text=Shisha",
     message: "リラックスタイム🌙",
     likes: 128,
     user: {
@@ -83,7 +83,7 @@ export const WithoutUserIcon: Story = {
  */
 export const PopularPost: Story = {
   args: {
-    imageUrl: "https://via.placeholder.com/300x400/E74C3C/FFFFFF?text=Popular",
+    imageUrl: "https://via.placeholder.com/300x400/BBBBBB/555555?text=Popular",
     message: "超人気店で撮影！この組み合わせは本当におすすめです。みんなもぜひ試してみてください！",
     likes: 9999,
     user: {
@@ -99,7 +99,7 @@ export const PopularPost: Story = {
  */
 export const ShortMessage: Story = {
   args: {
-    imageUrl: "https://via.placeholder.com/300x400/F39C12/FFFFFF?text=Shisha",
+    imageUrl: "https://via.placeholder.com/300x400/DDDDDD/666666?text=Shisha",
     message: "最高！",
     likes: 7,
     user: {
@@ -115,7 +115,7 @@ export const ShortMessage: Story = {
  */
 export const WithClickHandler: Story = {
   args: {
-    imageUrl: "https://via.placeholder.com/300x400/27AE60/FFFFFF?text=Click+Me",
+    imageUrl: "https://via.placeholder.com/300x400/888888/333333?text=Click+Me",
     message: "クリックしてみてください！",
     likes: 25,
     user: {
