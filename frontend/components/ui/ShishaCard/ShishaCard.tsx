@@ -43,23 +43,55 @@ const imageVariants = cva(["w-full", "object-cover"], {
 });
 
 /**
- * シーシャ投稿を表示するカードコンポーネント
+ * シーシャ投稿を表示するカードコンポーネントのProps
+ *
+ * @description
+ * シーシャ投稿の画像、メッセージ、いいね数、ユーザー情報を表示するカードコンポーネント。
+ * クリック可能にすることもでき、キーボード操作（Enter/Space）にも対応している。
+ *
+ * @example
+ * ```tsx
+ * // 基本的な使用方法
+ * <ShishaCard
+ *   imageUrl="https://example.com/shisha.jpg"
+ *   message="美味しいシーシャでした！"
+ *   likes={42}
+ *   user={{ displayName: "山田太郎", iconUrl: "https://example.com/icon.jpg" }}
+ *   variant="default"
+ * />
+ *
+ * // クリック可能なカード（詳細ページへの遷移など）
+ * <ShishaCard
+ *   imageUrl="https://example.com/shisha.jpg"
+ *   message="新しいフレーバーを試しました"
+ *   likes={15}
+ *   user={{ displayName: "佐藤花子" }}
+ *   variant="compact"
+ *   onClick={() => router.push('/posts/123')}
+ * />
+ * ```
  */
 export interface ShishaCardProps extends VariantProps<typeof cardVariants> {
-  /** 画像URL */
+  /** 投稿画像のURL（remotePatterns設定済みのドメインを使用すること） */
   imageUrl: string;
-  /** 投稿の説明テキスト */
+  /** 投稿の説明テキスト（最大200文字推奨） */
   message: string;
-  /** いいね数 */
+  /** いいね数（0以上の整数） */
   likes: number;
   /** 投稿ユーザー情報 */
   user: {
     /** ユーザー表示名 */
     displayName: string;
-    /** ユーザーアイコンURL */
+    /** ユーザーアイコンURL（未設定の場合はデフォルトアイコンを表示） */
     iconUrl?: string;
   };
-  /** クリックハンドラ */
+  /**
+   * クリックハンドラ
+   * 設定すると以下の動作が有効になる:
+   * - カーソルがポインターになる
+   * - Enterキー・Spaceキーでの操作が可能
+   * - role="button"とaria-labelが自動設定される
+   */
   onClick?: () => void;
 }
 
@@ -87,7 +119,7 @@ export const ShishaCard = ({
 }: ShishaCardProps) => {
   return (
     <div
-      className={clsx(cardVariants({ variant, clickable: !!onClick }))}
+      className={cardVariants({ variant, clickable: !!onClick })}
       onClick={onClick}
       onKeyDown={
         onClick
@@ -107,14 +139,14 @@ export const ShishaCard = ({
       <Image
         src={imageUrl}
         alt={`${user.displayName}さんの投稿画像`}
-        className={clsx(imageVariants({ variant }))}
+        className={imageVariants({ variant })}
         width={400}
         height={variant === "compact" ? 240 : 320}
         style={{ objectFit: "cover" }}
       />
 
       {/* 情報エリア */}
-      <div className={clsx(["p-4"])}>
+      <div className="p-4">
         {/* 投稿者情報 */}
         <div className={clsx(["mb-3", "flex", "items-center", "gap-2"])}>
           {user.iconUrl ? (
@@ -161,7 +193,7 @@ export const ShishaCard = ({
           >
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
           </svg>
-          <span className={clsx(["font-medium"])}>{likes.toLocaleString()}</span>
+          <span className="font-medium">{likes.toLocaleString()}</span>
         </div>
       </div>
     </div>
