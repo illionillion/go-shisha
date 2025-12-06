@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 import { ShishaCard } from "./ShishaCard";
 
 /**
- * ShishaCardはシーシャ投稿を表示するカードコンポーネントです。
+ * シーシャ投稿を表示するカードコンポーネント
  *
  * ## 使用例
  * - フィード画面での投稿表示
@@ -26,6 +26,7 @@ const meta = {
       description: "いいね数",
     },
     onClick: {
+      action: "clicked",
       description: "カードクリック時のハンドラ（設定するとカーソルがポインターになる）",
     },
   },
@@ -35,7 +36,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * デフォルトのShishaCard表示（クリック不可）
+ * デフォルトのShishaCard（クリック不可）
  */
 export const Default: Story = {
   args: {
@@ -51,7 +52,7 @@ export const Default: Story = {
 };
 
 /**
- * コンパクトバリアント
+ * コンパクトバリアントのShishaCard
  */
 export const Compact: Story = {
   args: {
@@ -67,7 +68,7 @@ export const Compact: Story = {
 };
 
 /**
- * アイコンなしユーザー
+ * アイコンなしユーザーのShishaCard
  */
 export const WithoutUserIcon: Story = {
   args: {
@@ -82,7 +83,7 @@ export const WithoutUserIcon: Story = {
 };
 
 /**
- * いいね数が多い投稿
+ * いいね数が多いShishaCard
  */
 export const PopularPost: Story = {
   args: {
@@ -98,7 +99,7 @@ export const PopularPost: Story = {
 };
 
 /**
- * 短いメッセージ
+ * 短いメッセージのShishaCard
  */
 export const ShortMessage: Story = {
   args: {
@@ -114,8 +115,7 @@ export const ShortMessage: Story = {
 };
 
 /**
- * クリック可能なカード
- * onClickを設定すると、cursor-pointerが適用され、キーボード操作も可能になります
+ * クリック可能なShishaCard
  */
 export const Clickable: Story = {
   args: {
@@ -128,6 +128,6 @@ export const Clickable: Story = {
       iconUrl: "https://placehold.co/40/8E44AD/FFFFFF?text=NY",
     },
     variant: "default",
-    onClick: () => alert("カードがクリックされました！"),
+    onClick: () => {},
   },
 };
