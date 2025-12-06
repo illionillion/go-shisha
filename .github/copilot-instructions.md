@@ -66,7 +66,7 @@
      );
      
      // コンポーネント内
-     <div className={clsx(cardVariants({ size }), "追加クラス")}>
+     <div className={clsx([cardVariants({ size }), "追加クラス"])}>
        <span className={clsx(["text-sm", "font-bold"])}>テキスト</span>
      </div>
      ```
