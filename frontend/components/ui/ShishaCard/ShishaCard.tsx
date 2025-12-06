@@ -1,5 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { clsx } from "clsx";
+import Image from "next/image";
 
 const cardVariants = cva(
   [
@@ -10,7 +11,6 @@ const cardVariants = cva(
     "hover:shadow-xl",
     "transition-shadow",
     "duration-300",
-    "cursor-pointer",
   ],
   {
     variants: {
@@ -18,9 +18,14 @@ const cardVariants = cva(
         default: ["w-full", "max-w-sm"],
         compact: ["w-full", "max-w-xs"],
       },
+      clickable: {
+        true: ["cursor-pointer"],
+        false: [],
+      },
     },
     defaultVariants: {
       variant: "default",
+      clickable: false,
     },
   }
 );
@@ -82,7 +87,7 @@ export const ShishaCard = ({
 }: ShishaCardProps) => {
   return (
     <div
-      className={clsx(cardVariants({ variant }))}
+      className={clsx(cardVariants({ variant, clickable: !!onClick }))}
       onClick={onClick}
       onKeyDown={
         onClick
@@ -99,10 +104,13 @@ export const ShishaCard = ({
       aria-label={onClick ? `${user.displayName}さんの投稿: ${message}` : undefined}
     >
       {/* 画像エリア */}
-      <img
+      <Image
         src={imageUrl}
         alt={`${user.displayName}さんの投稿画像`}
         className={clsx(imageVariants({ variant }))}
+        width={400}
+        height={variant === "compact" ? 240 : 320}
+        style={{ objectFit: "cover" }}
       />
 
       {/* 情報エリア */}
@@ -110,10 +118,12 @@ export const ShishaCard = ({
         {/* 投稿者情報 */}
         <div className={clsx(["mb-3", "flex", "items-center", "gap-2"])}>
           {user.iconUrl ? (
-            <img
+            <Image
               src={user.iconUrl}
               alt={user.displayName}
               className={clsx(["h-8", "w-8", "rounded-full", "object-cover"])}
+              width={32}
+              height={32}
             />
           ) : (
             <div
