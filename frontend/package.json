@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:docker": "pnpm gen:api && run-p dev:next dev:watch",
+    "dev:docker": "pnpm gen:api && run-p dev:next dev:watch storybook:docker",
     "dev:next": "next dev",
     "dev:watch": "nodemon --watch openapi/openapi.yml --exec pnpm gen:api",
     "build": "next build",
@@ -16,16 +16,27 @@
     "type-check": "tsc --noEmit",
     "check": "pnpm type-check && pnpm lint && pnpm format:check",
     "fix": "pnpm type-check && pnpm lint:fix && pnpm format",
-    "gen:api": "pnpm exec orval --config orval.config.ts"
+    "gen:api": "pnpm exec orval --config orval.config.ts",
+    "storybook": "storybook dev -p 6006",
+    "storybook:docker": "storybook dev -p 6006 --no-open",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.12",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "next": "16.0.3",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@storybook/addon-a11y": "^10.1.4",
+    "@storybook/addon-docs": "^10.1.4",
+    "@storybook/addon-onboarding": "^10.1.4",
+    "@storybook/nextjs": "^10.1.4",
+    "@storybook/nextjs-vite": "^10.1.4",
+    "@storybook/react": "^10.1.4",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -43,6 +54,7 @@
     "npm-run-all": "^4.1.5",
     "orval": "^7.17.0",
     "prettier": "^3.6.2",
+    "storybook": "^10.1.4",
     "tailwindcss": "^4",
     "typescript": "^5",
     "typescript-eslint": "^8.38.0"

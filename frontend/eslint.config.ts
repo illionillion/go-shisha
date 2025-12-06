@@ -22,6 +22,7 @@ export default tseslint.config(
       "*.config.js",
       "*.config.mjs",
       "*.config.ts",
+      "storybook-static/**",
     ],
   },
   js.configs.recommended,

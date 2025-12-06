@@ -52,6 +52,7 @@ go-shisha/
 TZ=Asia/Tokyo                                      # タイムゾーン
 BACKEND_PORT=8080                                  # バックエンドの公開ポート
 FRONTEND_PORT=3000                                 # フロントエンドの公開ポート
+STORYBOOK_PORT=6006                               # Storybookの公開ポート
 NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1   # API URL（ブラウザ用）
 API_URL=http://backend:8080/api/v1                 # API URL（Docker内部通信用）
 ```

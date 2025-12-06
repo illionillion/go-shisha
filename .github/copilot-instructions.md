@@ -45,7 +45,33 @@
 3. **コメント記述規則**:
    - **Frontend（TypeScript/JavaScript）**: 関数と定数にコメントを書く場合は必ずJSDoc形式`/**...*/`を使用する。詳細な説明・例・制約を記載する
    - **例外**: JSX内のコメントは`{/* ... */}`形式を許可する。ただし、可能であればコンポーネント外に通常のコメント`//`で記述することを推奨する
-4. **Frontend変更時のLint・型チェック・フォーマット確認**: Frontend（TypeScript/Next.js）のコードを変更した場合、コミット前に必ず`cd frontend && pnpm check`を実行し、全てのチェックが通ることを確認する。エラーがある場合は`pnpm fix`で自動修正を試みる。CIで検出されるエラーをローカルで事前に防ぐ
+4. **Frontend変更時のLint・型チェック・フォーマット確認**: Frontend（TypeScript/Next.js）のコードを変更した場合、まず`pnpm fix`で自動修正を試み、失敗した場合のみ`pnpm check`で詳細調査する。`pnpm fix`は自動修正機能により大半の問題を瞬時に解決できるため時間効率が高い。`pnpm check`は詳細なエラー情報を提供するが実行に時間がかかるため、fixで解決できない問題がある場合のみ使用する。CIで検出されるエラーをローカルで事前に防ぐ
+5. **コンポーネント作成ルール**:
+   - **CVA（class-variance-authority）使用**: バリアント管理が必要なコンポーネントはCVAを使用し、型安全にスタイルを管理する
+   - **clsx使用**: クラス名が2つ以上ある場合は`clsx`で配列形式で記述する。各クラスを配列要素として分割し、可読性を向上させる
+   - **CVA結果の使用**: CVAのバリアント関数の結果は既にクラス名文字列なので、直接classNameに指定する（clsxでラップしない）
+   - **配列形式の徹底**: CVAのベースクラス・バリアントクラスは配列形式を使用する
+   - **例**:
+     ```tsx
+     // CVA定義
+     const cardVariants = cva(
+       ["rounded-lg", "overflow-hidden", "bg-white"],
+       {
+         variants: {
+           size: {
+             sm: ["w-32", "h-32"],
+             lg: ["w-64", "h-64"],
+           },
+         },
+       }
+     );
+     
+     // コンポーネント内
+     <div className={cardVariants({ size })}>
+       <span className={clsx(["text-sm", "font-bold"])}>テキスト</span>
+     </div>
+     ```
+   - **クラスが1つの場合**: clsxを使わず通常のclassName文字列で記述する（例: `className="p-4"`）
 
 ## Backend基本ルール
 
