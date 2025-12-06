@@ -6,7 +6,9 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "placehold.co",
+        pathname: "/**",
       },
+      // TODO: 本番環境用の画像ホストをここに追加する
     ],
   },
 };
