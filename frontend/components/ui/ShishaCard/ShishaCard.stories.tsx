@@ -25,6 +25,9 @@ const meta = {
       control: "number",
       description: "いいね数",
     },
+    onClick: {
+      description: "カードクリック時のハンドラ（設定するとカーソルがポインターになる）",
+    },
   },
 } satisfies Meta<typeof ShishaCard>;
 
@@ -32,7 +35,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * デフォルトのShishaCard表示
+ * デフォルトのShishaCard表示（クリック不可）
  */
 export const Default: Story = {
   args: {
@@ -111,12 +114,14 @@ export const ShortMessage: Story = {
 };
 
 /**
- * クリックハンドラ付き
+ * クリック可能なカード
+ * onClickを設定すると、cursor-pointerが適用され、キーボード操作も可能になります
  */
-export const WithClickHandler: Story = {
+export const Clickable: Story = {
   args: {
     imageUrl: "https://placehold.co/300x400/888888/333333?text=Click+Me",
-    message: "クリックしてみてください！",
+    message:
+      "クリックしてみてください！カーソルがポインターになり、EnterキーやSpaceキーでも動作します。",
     likes: 25,
     user: {
       displayName: "中村由美",
