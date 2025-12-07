@@ -25,10 +25,6 @@ const meta = {
       control: "number",
       description: "いいね数",
     },
-    onClick: {
-      action: "clicked",
-      description: "カードクリック時のハンドラ（設定するとカーソルがポインターになる）",
-    },
   },
 } satisfies Meta<typeof ShishaCard>;
 
@@ -39,6 +35,7 @@ type Story = StoryObj<typeof meta>;
  * デフォルトのShishaCard（クリック不可）
  */
 export const Default: Story = {
+  tags: ["vrt"],
   args: {
     imageUrl: "https://placehold.co/300x400/CCCCCC/666666?text=Shisha",
     message: "今日のシーシャは最高でした！フルーツミックスの味が絶妙で、煙もたっぷり楽しめました。",
@@ -55,6 +52,7 @@ export const Default: Story = {
  * コンパクトバリアントのShishaCard
  */
 export const Compact: Story = {
+  tags: ["vrt"],
   args: {
     imageUrl: "https://placehold.co/300x400/AAAAAA/555555?text=Shisha",
     message: "新しいフレーバーを試してみました！",
@@ -71,6 +69,7 @@ export const Compact: Story = {
  * アイコンなしユーザーのShishaCard
  */
 export const WithoutUserIcon: Story = {
+  tags: ["vrt"],
   args: {
     imageUrl: "https://placehold.co/300x400/999999/444444?text=Shisha",
     message: "リラックスタイム🌙",
@@ -102,6 +101,7 @@ export const PopularPost: Story = {
  * 短いメッセージのShishaCard
  */
 export const ShortMessage: Story = {
+  tags: ["vrt"],
   args: {
     imageUrl: "https://placehold.co/300x400/DDDDDD/666666?text=Shisha",
     message: "最高！",
@@ -118,6 +118,9 @@ export const ShortMessage: Story = {
  * クリック可能なShishaCard
  */
 export const Clickable: Story = {
+  argTypes: {
+    onClick: { action: "clicked" },
+  },
   args: {
     imageUrl: "https://placehold.co/300x400/888888/333333?text=Click+Me",
     message:
@@ -128,6 +131,5 @@ export const Clickable: Story = {
       iconUrl: "https://placehold.co/40/8E44AD/FFFFFF?text=NY",
     },
     variant: "default",
-    onClick: () => {},
   },
 };
