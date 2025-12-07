@@ -43,8 +43,8 @@ export default {
             (img) =>
               new Promise((resolve) => {
                 img.onload = img.onerror = resolve;
-              }),
-          ),
+              })
+          )
       );
     });
     // 追加の待機時間（アニメーションやレンダリング完了のため）
