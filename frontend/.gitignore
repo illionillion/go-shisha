@@ -43,3 +43,6 @@ openapi/openapi.yml
 
 *storybook.log
 storybook-static
+
+# VRT差分画像（スナップショット本体はコミット対象）
+__image_snapshots__/__diff_output__

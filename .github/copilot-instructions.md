@@ -186,6 +186,22 @@
   - golangci-lintの`exportloopref`ルールで検出可能
 - **Linter**: golangci-lintを使用し、`exportloopref`、`govet`、`staticcheck`を有効化
 
+#### Visual Regression Test (VRT) 運用
+- **VRTタグ付与方針**: Storybookの story に `tags: ['vrt']` を付与することで、視覚的差分検出の対象になる
+  - **VRT必要**: パネル・モーダル等の親コンポーネント、variant/状態変化が複雑なコンポーネント
+  - **VRT不要**: 親コンポーネントで既にカバーされている小さな共通UI
+- **VRT実行**:
+  - ローカル: `pnpm storybook`起動後、`pnpm vrt`で実行
+  - スナップショット更新: `pnpm vrt:update`（意図的なUI変更時のみ）
+  - スナップショット: `__image_snapshots__`に保存、差分は`__diff_output__`に出力
+- **CI/CD統合**:
+  - PR作成時に自動VRT実行
+  - 差分検出時はArtifactsに差分画像アップロード、PRコメントで通知
+- **運用ルール**:
+  - スナップショット更新後は必ず差分を目視確認
+  - PRで変更内容を明示
+  - 詳細は`frontend/README.md`のVRTセクション参照
+
 <!-- AUTO_RULES_START -->
 <!-- 今後、重要なルールやベストプラクティスが自動で追加されます -->
 <!-- AUTO_RULES_END -->

@@ -61,6 +61,79 @@ Docker Compose環境では、`openapi/openapi.yml`の変更を`nodemon`が自動
 - `api`ディレクトリ内の生成物はgit管理対象です。変更があればコミットしてください。
 - 設定ファイルは `orval.config.ts` にあります。必要に応じてクライアントの種類（例: `fetch`, `react-query`）や出力先を変更してください。
 
+## Storybook
+
+UIコンポーネントの開発と確認にはStorybookを使用します。
+
+### Storybookの起動
+
+```bash
+pnpm storybook
+```
+
+ブラウザで [http://localhost:6006](http://localhost:6006) を開いてStorybookを確認できます。
+
+### Storybookのビルド
+
+```bash
+pnpm build-storybook
+```
+
+## Visual Regression Test (VRT)
+
+UIコンポーネントの視覚的な差分を自動検出するVRT環境が構築されています。
+
+### VRTの実行
+
+**前提条件**: Storybookが起動している必要があります。
+
+```bash
+# 別ターミナルでStorybookを起動
+pnpm storybook
+
+# VRTを実行
+pnpm vrt
+```
+
+### スナップショットの更新
+
+意図的なUI変更を行った場合は、スナップショットを更新します。
+
+```bash
+pnpm vrt:update
+```
+
+**注意**: スナップショット更新後は必ず差分を目視確認し、PRで変更内容を明示してください。
+
+### VRT対象コンポーネント
+
+VRTは `tags: ['vrt']` が付与されたStoryのみが対象となります。
+
+```tsx
+const meta = {
+  title: "UI/MyComponent",
+  component: MyComponent,
+  tags: ["autodocs", "vrt"], // vrtタグを追加
+  // ...
+} satisfies Meta<typeof MyComponent>;
+
+// もしくは各Storyに個別で適用
+export const Default: Story = {
+  tags: ["vrt"],
+  args: {},
+};
+```
+
+### CI/CDでのVRT
+
+- PR作成時に自動的にVRTが実行されます
+- 差分が検出された場合、Artifactsに差分画像がアップロードされます
+- 失敗時はPRコメントで通知されます
+
+### VRT運用ルール
+
+詳細は `.github/copilot-instructions.md` の「VRT運用」セクションを参照してください。
+
 ## その他
 
 - Next.jsの詳細なドキュメントは [公式サイト](https://nextjs.org/docs) を参照してください。
