@@ -23,12 +23,16 @@ export default {
     await page.setViewportSize(VIEWPORT);
     // ライトモードを強制（ダークモードを無効化）
     await page.emulateMedia({ colorScheme: "light" });
+    // Storybookのルート要素が表示されるまで待機
+    await page.waitForSelector("#storybook-root", { state: "visible" });
   },
   async postVisit(page, context) {
     // CSSとフォントの読み込みを待つ
     await page.waitForLoadState("networkidle");
     // DOMContentLoadedも待機
     await page.waitForLoadState("domcontentloaded");
+    // フォント読み込み完了を待機
+    await page.evaluate(() => document.fonts.ready);
     // 画像読み込み完了を待機
     await page.evaluate(() => {
       const images = Array.from(document.images);
@@ -39,8 +43,8 @@ export default {
             (img) =>
               new Promise((resolve) => {
                 img.onload = img.onerror = resolve;
-              })
-          )
+              }),
+          ),
       );
     });
     // 追加の待機時間（アニメーションやレンダリング完了のため）
