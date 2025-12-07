@@ -23,8 +23,6 @@ export default {
     await page.setViewportSize(VIEWPORT);
     // ライトモードを強制（ダークモードを無効化）
     await page.emulateMedia({ colorScheme: "light" });
-    // Storybookのルート要素が表示されるまで待機
-    await page.waitForSelector("#storybook-root", { state: "visible" });
   },
   async postVisit(page, context) {
     // CSSとフォントの読み込みを待つ
