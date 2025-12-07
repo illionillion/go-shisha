@@ -103,7 +103,6 @@ jobs:
   vrt:
     name: Visual Regression Test
     runs-on: ubuntu-latest
-    needs: [eslint, prettier, type_check]
     defaults:
       run:
         working-directory: ./frontend
