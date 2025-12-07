@@ -27,8 +27,24 @@ export default {
   async postVisit(page, context) {
     // CSSとフォントの読み込みを待つ
     await page.waitForLoadState("networkidle");
+    // DOMContentLoadedも待機
+    await page.waitForLoadState("domcontentloaded");
+    // 画像読み込み完了を待機
+    await page.evaluate(() => {
+      const images = Array.from(document.images);
+      return Promise.all(
+        images
+          .filter((img) => !img.complete)
+          .map(
+            (img) =>
+              new Promise((resolve) => {
+                img.onload = img.onerror = resolve;
+              })
+          )
+      );
+    });
     // 追加の待機時間（アニメーションやレンダリング完了のため）
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(2000);
 
     const image = await page.screenshot();
     expect(image).toMatchImageSnapshot({
