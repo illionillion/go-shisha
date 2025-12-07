@@ -191,8 +191,8 @@
   - **VRT必要**: パネル・モーダル等の親コンポーネント、variant/状態変化が複雑なコンポーネント
   - **VRT不要**: 親コンポーネントで既にカバーされている小さな共通UI
 - **VRT実行**:
-  - ローカル: `pnpm storybook`起動後、`pnpm test:vrt`で実行
-  - スナップショット更新: `pnpm test:vrt:update`（意図的なUI変更時のみ）
+  - ローカル: `pnpm storybook`起動後、`pnpm vrt`で実行
+  - スナップショット更新: `pnpm vrt:update`（意図的なUI変更時のみ）
   - スナップショット: `__image_snapshots__`に保存、差分は`__diff_output__`に出力
 - **CI/CD統合**:
   - PR作成時に自動VRT実行
