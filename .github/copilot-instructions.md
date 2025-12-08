@@ -33,6 +33,91 @@
 - トップの共通ルールは唯一の「共通ソース」です。領域別ファイルは補足・運用手順を持ち、重複は避けてください。
 - 各領域ファイルを参照したら、そのファイル名を明示した確認メッセージを回答冒頭に出すことをルール化します（例: `copilot-frontend.md のルールを参照しました！`）。
 
+## Copilotレビュー時の基本ルール
+
+1. **コメントの重要度バッジ**: レビューコメントには必ず以下のバッジを付ける
+   - ![must](https://img.shields.io/badge/review-MUST-red.svg) - 必ず修正が必要（バグ、セキュリティリスク、重大な設計ミス）
+   - ![should](https://img.shields.io/badge/review-SHOULD-orange.svg) - 修正を強く推奨（パフォーマンス、保守性、ベストプラクティス違反）
+   - ![imo](https://img.shields.io/badge/review-IMO-yellowgreen.svg) - 提案・意見（好み、代替案、改善の余地）
+   - ![ask](https://img.shields.io/badge/review-ASK-yellow.svg) - 選択肢の提示・方針確認（複数の実装案がある場合）
+   - ![question](https://img.shields.io/badge/review-QUESTION-blue.svg) - 質問・確認事項（意図を理解したい場合）
+   - ![nits](https://img.shields.io/badge/review-NITS-lightgrey.svg) - 些細な指摘（タイポ、フォーマット、コメント）
+   
+   参考: [Shields.io](https://shields.io/) でカスタムバッジを作成可能。状況に応じて適切なバッジを使い分けること
+
+2. **コンテキストを踏まえたレビュー**: diffだけでなく、関連ファイル全体を読み、変更の意図・影響範囲を理解してからレビューする。部分的な理解で不適切な指摘をしない
+
+3. **PR内の一貫性確保**: 同一PR内の既存レビューコメントを`gh pr view <PR番号> --comments`で確認し、矛盾や重複を避ける。修正済みの箇所に対して逆の指摘をしない
+
+4. **建設的なフィードバック**: 問題を指摘するだけでなく、具体的な修正案やコード例を提示する。「なぜそうすべきか」の理由も説明する
+
+## ディレクトリ構造の理解
+
+### Frontend (`/frontend`)
+- **bulletproof-react構造**を参考にした設計
+- `/app` - Next.js App Routerのルーティング  
+- `/components` - 再利用可能なUIコンポーネント、共通的なものを配置
+- `/features` - 機能ごとのディレクトリ（各機能は独立しており、components・hooks・stories・types・testsを含む）
+- `/lib` - ユーティリティ関数、hooks
+- `/types` - 共通型定義
+
+### Backend (`/backend`)
+- **クリーンアーキテクチャ**で設計
+- `/cmd` - エントリポイント（main.go）
+- `/internal` - アプリケーションコード
+  - `/handlers` - HTTPハンドラー（Controller層）
+  - `/services` - ビジネスロジック（UseCase層）
+  - `/repositories` - データアクセス層（Repository層）
+  - `/models` - エンティティ・ドメインモデル
+  - `/middleware` - ミドルウェア
+- `/pkg` - 外部パッケージ、共通ライブラリ
+- 依存性注入を使用して各層の疎結合を実現
+
+### 共有 (`/shared`)
+- 型定義・設定ファイル
+- API仕様（OpenAPI/Swagger）
+- 定数定義
+
+## 技術スタック
+
+### Frontend
+- **アーキテクチャ**: bulletproof-react
+- **フレームワーク**: Next.js 14 (App Router)
+- **言語**: TypeScript
+- **スタイリング**: Tailwind CSS
+- **状態管理**: TanStack Query + Zustand
+- **テスト**: Vitest + Testing Library + Playwright
+- **コンポーネント**: Storybook + oval
+
+### Backend  
+- **アーキテクチャ**: クリーンアーキテクチャ
+- **言語**: Go 1.21+
+- **フレームワーク**: Gin
+- **データベース**: PostgreSQL + GORM
+- **認証**: JWT
+- **テスト**: 標準testing + testify
+- **依存性注入**: wire (google/wire)
+
+## 開発フロー
+
+1. 該当Issueに「着手開始」コメントを記載（Issue作成時は適切なラベルを必ず紐づける）
+2. `main`ブランチから新しいブランチを作成、変更内容が分かる命名（`ラベル/issue番号-内容`）にする
+3. 開発作業を実施
+   - 基本ルールに従ってコード品質と型安全性を保つ
+   - bulletproof-react（Frontend）、クリーンアーキテクチャ（Backend）の設計原則に従う
+4. 動作確認・セルフレビューの実施
+   - テストを実行し、すべてのテストが通ることを確認する
+5. Pull Requestの作成
+   - タイトル: 変更内容を簡潔に表現（プレフィックス不要）
+   - 説明文: プロジェクトのテンプレートに従う
+   - Commit Message: 基本ルール4に従い日本語でConventional Commits形式を使用
+   - `Closes #issue番号`を書く
+   - ラベル: 該当するラベル（feature、bug、docs等）を必ず紐づける
+6. レビューを受ける
+7. 修正が必要な場合は対応する
+8. 1つ以上のApproveを得たらマージ
+9. IssueをCloseする
+
 <!-- AUTO_RULES_START -->
 <!-- 今後、重要なルールやベストプラクティスが自動で追加されます -->
 <!-- AUTO_RULES_END -->
