@@ -14,9 +14,11 @@
 - 将来的にはCI/CDで自動化予定
 
 ## Go 固有ルール
-- ループ変数のアドレスを返してはいけない（例: `for _, user := range users { return &user }` はNG）。
-  代わりにスライスのインデックスを使う: `for i := range users { return &users[i] }`。
-  golangci-lint の `exportloopref` ルールで検出する設定を推奨する。
+- ループ変数のポインタを取得してはいけない（`for _, item := range` の `&item` は全ループで同じアドレスを指す）。
+  - ❌ NG: `for _, user := range users { return &user }` （ループ変数のアドレスは使い回される）
+  - ❌ NG: `for _, user := range users { list = append(list, &user) }` （全要素が同じアドレス）
+  - ✅ OK: `for i := range users { return &users[i] }` （スライス要素の正しいアドレス）
+  - golangci-lintの`exportloopref`ルールで検出可能
 - `golangci-lint` を導入し、`exportloopref`、`govet`、`staticcheck` を有効にする。
 
 ## クリーンアーキテクチャ詳細
