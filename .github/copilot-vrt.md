@@ -22,7 +22,7 @@
 ### VRT 実行コマンド
 - ローカル実行: `pnpm storybook` を起動した後、`pnpm vrt` でVRTを実行する
 - スナップショット更新: `pnpm vrt:update`（意図的なUI変更時のみ実行）
-- スナップショットは `__image_snapshots__` に保存され、差分は `__diff_output__` に出力される
+- スナップショットは `frontend/__image_snapshots__/` に保存され、差分は `__diff_output__` に出力される
 
 ### CI/CD 統合
 - PR作成時に自動でVRTが実行される
