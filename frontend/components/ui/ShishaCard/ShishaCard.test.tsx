@@ -4,9 +4,9 @@ import { describe, test, expect, vi } from "vitest";
 import { ShishaCard, type ShishaCardProps } from "./ShishaCard";
 
 /**
- * ShishaCard コンポーネントのユニットテスト
+ * ShishaCardコンポーネントのユニットテスト
  */
-describe("ShishaCard", () => {
+describe("ShishaCardコンポーネント", () => {
   const defaultProps: ShishaCardProps = {
     imageUrl: "https://placehold.co/300x400/CCCCCC/666666?text=Shisha",
     message: "今日のシーシャは最高でした！フルーツミックスの味が絶妙で、煙もたっぷり楽しめました。",
