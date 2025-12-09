@@ -285,7 +285,6 @@ export default defineConfig({
         "**/*.stories.tsx",
         "coverage/**",
         "test/**",
-        "api/**",
       ],
     },
   },
