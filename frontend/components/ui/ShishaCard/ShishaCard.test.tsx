@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import { describe, test, expect, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
+import { describe, test, expect, vi } from "vitest";
 import { ShishaCard, type ShishaCardProps } from "./ShishaCard";
 
 /**
@@ -31,7 +31,9 @@ describe("ShishaCard", () => {
 
     // メッセージが表示される
     expect(
-      screen.getByText("今日のシーシャは最高でした！フルーツミックスの味が絶妙で、煙もたっぷり楽しめました。")
+      screen.getByText(
+        "今日のシーシャは最高でした！フルーツミックスの味が絶妙で、煙もたっぷり楽しめました。"
+      )
     ).toBeInTheDocument();
 
     // いいね数が表示される
