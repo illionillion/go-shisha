@@ -72,3 +72,46 @@
 - `/features` - 機能ごとのディレクトリ（各機能は独立しており、components・hooks・stories・types・testsを含む）
 - `/lib` - ユーティリティ関数、hooks
 - `/types` - 共通型定義
+
+## テスト作成ルール
+
+### 修正前のテスト検証
+- コード修正前に既存テストが修正内容をカバーしているか確認する
+- カバレッジが不足している場合は、テストケースを追加してから実装を修正する
+- 手順: `pnpm test:coverage` → 未テスト箇所確認 → テスト追加 → 実装修正
+
+### テストファイル配置
+- テストファイルはコンポーネントと同じディレクトリに配置する（bulletproof-react構造）
+- ファイル名: `ComponentName.test.tsx` または `functionName.test.ts`
+- 例: `components/ui/ShishaCard/ShishaCard.test.tsx`
+
+### テスト実行効率化
+- 全体実行は避け、変更ファイル関連のテストのみ実行する
+- 特定ファイル実行: `pnpm test:run path/to/test.tsx`
+- ウォッチモード: `pnpm test:watch`（開発中推奨）
+
+### CI安定性対策
+- UIアニメーション待機には `findByRole` を使用する（`getByRole` は避ける）
+- 例: `const item = await screen.findByRole("menuitem");`
+- 非同期処理の完了を待つには `waitFor` を使用する
+
+### テストパターン
+- **正常系**: 基本的な動作確認（レンダリング、プロパティ表示）
+- **異常系**: エラーハンドリング、不正な入力値
+- **境界値**: 空文字、null、極値、0、負の値
+- **エッジケース**: 特殊パターン、長い文字列、特殊文字
+- **アクセシビリティ**: aria-label、role、キーボード操作（Enter/Space）
+
+### カバレッジ目標
+- コンポーネント: 80%以上を目標とする
+- 重要なビジネスロジック: 100%を目指す
+- `pnpm test:coverage` でカバレッジレポートを確認する
+
+### テストのベストプラクティス
+- テストは読みやすく、保守しやすく書く
+- 1つのテストケースで1つの動作のみを検証する
+- テストの意図が明確なテスト名を付ける
+- モックは必要最小限にする
+- `beforeEach` で `vi.clearAllMocks()` を実行する
+
+詳細は `frontend/TESTING.md` を参照してください。
