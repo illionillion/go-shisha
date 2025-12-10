@@ -7,7 +7,8 @@ services:
     working_dir: /app
     command: sh -c "pnpm storybook:docker"
     volumes:
+      - ./:/app
       - /app/node_modules
-      - .:/app
+      - ./__image_snapshots__:/app/__image_snapshots__
     ports:
       - "6006:6006"
