@@ -1,0 +1,49 @@
+{
+  "name": "go-shisha",
+  "version": "0.1.0",
+  "private": true,
+  "description": "シーシャSNSアプリケーション - Next.js + Go モノレポ",
+  "license": "MIT",
+  "author": "illionillion",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/illionillion/go-shisha.git"
+  },
+  "bugs": {
+    "url": "https://github.com/illionillion/go-shisha/issues"
+  },
+  "scripts": {
+    "dev": "concurrently \"pnpm watch:openapi\" \"pnpm -F frontend dev\"",
+    "watch:openapi": "tsx scripts/watch-openapi.ts",
+    "build": "pnpm -F frontend build",
+    "lint": "pnpm -F frontend lint",
+    "lint:fix": "pnpm -F frontend lint:fix",
+    "format": "pnpm -F frontend format",
+    "format:check": "pnpm -F frontend format:check",
+    "type-check": "pnpm -F frontend type-check",
+    "check": "pnpm type-check && pnpm lint && pnpm format:check",
+    "fix": "pnpm type-check && pnpm lint:fix && pnpm format",
+    "test": "pnpm -F frontend test",
+    "test:run": "pnpm -F frontend test:run",
+    "test:coverage": "pnpm -F frontend test:coverage",
+    "storybook": "pnpm -F frontend storybook",
+    "build-storybook": "pnpm -F frontend build-storybook",
+    "vrt": "docker compose -f compose.vrt.yml up --build --abort-on-container-exit",
+    "vrt:update": "pnpm -F frontend vrt:update",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.6.2",
+    "@commitlint/config-conventional": "^19.6.0",
+    "chokidar": "^4.0.3",
+    "concurrently": "^9.1.2",
+    "fs-extra": "^11.2.0",
+    "lefthook": "^1.10.8",
+    "tsx": "^4.19.2"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

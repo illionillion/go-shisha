@@ -1,0 +1,38 @@
+pre-commit:
+  parallel: true
+  commands:
+    frontend-lint:
+      glob: "frontend/**/*.{js,jsx,ts,tsx}"
+      run: cd frontend && npx eslint --fix {staged_files}
+      stage_fixed: true
+    frontend-format:
+      glob: "frontend/**/*.{js,jsx,ts,tsx,json,md,yml,yaml}"
+      run: cd frontend && npx prettier --write {staged_files}
+      stage_fixed: true
+    backend-format:
+      glob: "backend/**/*.go"
+      run: cd backend && gofmt -w {staged_files}
+      stage_fixed: true
+
+commit-msg:
+  commands:
+    commitlint:
+      run: npx commitlint --edit
+
+post-checkout:
+  commands:
+    pnpm:
+      glob: "{package.json,pnpm-lock.yaml,frontend/package.json,frontend/pnpm-lock.yaml}"
+      run: pnpm install
+
+post-merge:
+  commands:
+    pnpm:
+      glob: "{package.json,pnpm-lock.yaml,frontend/package.json,frontend/pnpm-lock.yaml}"
+      run: pnpm install
+
+post-rewrite:
+  commands:
+    pnpm:
+      glob: "{package.json,pnpm-lock.yaml,frontend/package.json,frontend/pnpm-lock.yaml}"
+      run: pnpm install
