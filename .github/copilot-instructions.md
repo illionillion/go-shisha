@@ -60,6 +60,9 @@
 - `/features` - 機能ごとのディレクトリ（各機能は独立しており、components・hooks・stories・types・testsを含む）
 - `/lib` - ユーティリティ関数、hooks
 - `/types` - 共通型定義
+- `/api` - Orval自動生成APIクライアント
+- `/openapi` - OpenAPI定義（backendから自動コピー）
+- **VRT環境**: `compose.vrt.yml`、`Dockerfile.vrt`（frontend配下に配置）
 
 ### Backend (`/backend`)
 - **クリーンアーキテクチャ**で設計
@@ -71,12 +74,14 @@
   - `/models` - エンティティ・ドメインモデル
   - `/middleware` - ミドルウェア
 - `/pkg` - 外部パッケージ、共通ライブラリ
+- `/docs` - Swagger自動生成定義
 - 依存性注入を使用して各層の疎結合を実現
 
-### 共有 (`/shared`)
-- 型定義・設定ファイル
-- API仕様（OpenAPI/Swagger）
-- 定数定義
+### Root
+- **モノレポ管理**: pnpm-workspaces
+- `/scripts` - 自動化スクリプト（OpenAPI自動コピー等）
+- **Git Hooks**: lefthook（pre-commit: lint-staged、commit-msg: commitlint）
+- **共有**: `/shared`（型定義・設定ファイル）※今後追加予定
 
 ## 技術スタック
 
@@ -105,12 +110,14 @@
 3. 開発作業を実施
    - 基本ルールに従ってコード品質と型安全性を保つ
    - bulletproof-react（Frontend）、クリーンアーキテクチャ（Backend）の設計原則に従う
+   - Backendで型定義変更時は`make swagger`でSwagger再生成（OpenAPI自動コピー→Orval自動生成が動作）
 4. 動作確認・セルフレビューの実施
    - テストを実行し、すべてのテストが通ることを確認する
+   - lefthookのpre-commitでlint/formatが自動実行される
 5. Pull Requestの作成
    - タイトル: 変更内容を簡潔に表現（プレフィックス不要）
    - 説明文: プロジェクトのテンプレートに従う
-   - Commit Message: 基本ルール4に従い日本語でConventional Commits形式を使用
+   - Commit Message: 基本ルール4に従い日本語でConventional Commits形式を使用（commitlintで検証）
    - `Closes #issue番号`を書く
    - ラベル: 該当するラベル（feature、bug、docs等）を必ず紐づける
 6. レビューを受ける
