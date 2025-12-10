@@ -51,18 +51,11 @@ go-shisha/
 ```env
 TZ=Asia/Tokyo                                      # タイムゾーン
 BACKEND_PORT=8080                                  # バックエンドの公開ポート
-FRONTEND_PORT=3000                                 # フロントエンドの公開ポート
-STORYBOOK_PORT=6006                               # Storybookの公開ポート
-NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1   # API URL（ブラウザ用）
-API_URL=http://backend:8080/api/v1                 # API URL（Docker内部通信用）
 ```
 
 ### 各変数の説明
 - `TZ`: Dockerコンテナのタイムゾーン設定
 - `BACKEND_PORT`: バックエンドAPIの公開ポート
-- `FRONTEND_PORT`: フロントエンドの公開ポート
-- `NEXT_PUBLIC_API_URL`: ブラウザからアクセスする際のAPI URL
-- `API_URL`: Next.jsサーバー側（RSC）がDocker内部通信で使用するAPI URL（オプション）
 
 > 詳細は `.env.example` を参照してください。
 
