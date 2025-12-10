@@ -150,7 +150,7 @@ jobs:
         run: npx wait-on http://localhost:6006 --timeout 180000
 
       - name: Run VRT
-        run: pnpm vrt:test
+        run: pnpm test:vrt
 
       - name: Upload VRT diff images
         if: failure() && hashFiles('frontend/__image_snapshots__/__diff_output__/*.png') != ''
