@@ -1,23 +1,17 @@
 pre-commit:
   parallel: true
   commands:
-    frontend-lint:
-      glob: "frontend/**/*.{js,jsx,ts,tsx}"
-      run: cd frontend && npx eslint --fix {staged_files}
-      stage_fixed: true
-    frontend-format:
-      glob: "frontend/**/*.{js,jsx,ts,tsx,json,md,yml,yaml}"
-      run: cd frontend && npx prettier --write {staged_files}
-      stage_fixed: true
-    backend-format:
-      glob: "backend/**/*.go"
-      run: |
-        if command -v gofmt >/dev/null 2>&1; then
-          cd backend && gofmt -w {staged_files}
-        else
-          echo "⚠️  gofmt not found, skipping backend format check"
-        fi
-      stage_fixed: true
+    lint-staged:
+      run: npx lint-staged
+    # backend-format:
+    #   glob: "backend/**/*.go"
+    #   run: |
+    #     if command -v gofmt >/dev/null 2>&1; then
+    #       cd backend && gofmt -w {staged_files}
+    #     else
+    #       echo "⚠️  gofmt not found, skipping backend format check"
+    #     fi
+    #   stage_fixed: true
 
 commit-msg:
   commands:
