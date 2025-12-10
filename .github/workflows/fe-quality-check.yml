@@ -10,10 +10,10 @@ concurrency:
 on:
   push:
     branches: ["main"]
-    paths: ["frontend/**", ".github/workflows/fe-quality-check.yml", ".github/actions/setup-frontend/**"]
+    paths: ["frontend/**", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", ".github/workflows/fe-quality-check.yml", ".github/actions/setup-frontend/**"]
   pull_request:
     branches: ["main"]
-    paths: ["frontend/**", ".github/workflows/fe-quality-check.yml", ".github/actions/setup-frontend/**"]
+    paths: ["frontend/**", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", ".github/workflows/fe-quality-check.yml", ".github/actions/setup-frontend/**"]
 
 jobs:
   # Stage 1: Code Quality and Type Check (all parallel)

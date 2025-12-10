@@ -1,5 +1,5 @@
 name: 'Setup Frontend Environment'
-description: 'Setup Node.js, PNPM, cache, and install dependencies for frontend. This action should be called from the repository root.'
+description: 'Setup Node.js, PNPM, cache, and install dependencies for monorepo'
 
 runs:
   using: 'composite'
@@ -24,11 +24,10 @@ runs:
       uses: actions/cache@v4
       with:
         path: ${{ env.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
 
     - name: Install dependencies
       shell: bash
-      working-directory: ./frontend
       run: pnpm install --frozen-lockfile
