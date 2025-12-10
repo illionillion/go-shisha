@@ -49,10 +49,10 @@
   },
   "lint-staged": {
     "frontend/**/*.{js,jsx,ts,tsx}": [
-      "eslint --fix"
+      "eslint --config frontend/eslint.config.ts --fix"
     ],
     "frontend/**/*.{js,jsx,ts,tsx,json,md,yml,yaml}": [
-      "prettier --write"
+      "prettier --config frontend/.prettierrc --write"
     ]
   }
 }

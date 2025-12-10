@@ -28,7 +28,7 @@ import type {
   GetPostsId404,
   GoShishaBackendInternalModelsCreatePostInput,
   GoShishaBackendInternalModelsPost,
-  InternalHandlersPostsListResponse,
+  GoShishaBackendInternalModelsPostsResponse,
   PostPosts400,
   PostPostsIdLike400,
   PostPostsIdLike404,
@@ -37,11 +37,11 @@ import type {
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
- * 全ての投稿の一覧を取得します
+ * 全ての投稿の一覧を取得します（総数付き）
  * @summary 投稿一覧取得
  */
 export const getPosts = (options?: SecondParameter<typeof apiFetch>, signal?: AbortSignal) => {
-  return apiFetch<InternalHandlersPostsListResponse>(
+  return apiFetch<GoShishaBackendInternalModelsPostsResponse>(
     { url: `/posts`, method: "GET", signal },
     options
   );
