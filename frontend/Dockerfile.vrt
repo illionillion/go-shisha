@@ -1,0 +1,18 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
+COPY package.json ./
+
+RUN pnpm install --no-frozen-lockfile
+
+COPY . .
+
+RUN apk add --no-cache chromium
+
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+CMD ["pnpm", "storybook:docker"]

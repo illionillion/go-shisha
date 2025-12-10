@@ -1,0 +1,13 @@
+services:
+  vrt:
+    container_name: vrt-storybook
+    build:
+      context: .
+      dockerfile: Dockerfile.vrt
+    working_dir: /app
+    command: sh -c "pnpm storybook:docker"
+    volumes:
+      - /app/node_modules
+      - .:/app
+    ports:
+      - "6006:6006"

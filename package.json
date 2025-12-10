@@ -28,8 +28,13 @@
     "test:coverage": "pnpm -F frontend test:coverage",
     "storybook": "pnpm -F frontend storybook",
     "build-storybook": "pnpm -F frontend build-storybook",
-    "vrt": "docker compose -f compose.vrt.yml up --build --abort-on-container-exit",
+    "vrt:build": "pnpm -F frontend vrt:build",
+    "vrt:up": "pnpm -F frontend vrt:up",
+    "vrt:run": "pnpm -F frontend vrt:run",
     "vrt:update": "pnpm -F frontend vrt:update",
+    "vrt:down": "pnpm -F frontend vrt:down",
+    "test:vrt": "pnpm -F frontend test:vrt",
+    "test:vrt:update": "pnpm -F frontend test:vrt:update",
     "prepare": "lefthook install"
   },
   "devDependencies": {
