@@ -29,6 +29,15 @@ definitions:
       user_id:
         type: integer
     type: object
+  go-shisha-backend_internal_models.PostsResponse:
+    properties:
+      posts:
+        items:
+          $ref: '#/definitions/go-shisha-backend_internal_models.Post'
+        type: array
+      total:
+        type: integer
+    type: object
   go-shisha-backend_internal_models.User:
     properties:
       description:
@@ -43,6 +52,15 @@ definitions:
         type: string
       id:
         type: integer
+    type: object
+  go-shisha-backend_internal_models.UsersResponse:
+    properties:
+      total:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/go-shisha-backend_internal_models.User'
+        type: array
     type: object
 host: localhost:8080
 info:
@@ -59,16 +77,14 @@ paths:
     get:
       consumes:
       - application/json
-      description: 全ての投稿の一覧を取得します
+      description: 全ての投稿の一覧を取得します（総数付き）
       produces:
       - application/json
       responses:
         "200":
-          description: 投稿一覧
+          description: 投稿一覧と総数
           schema:
-            items:
-              $ref: '#/definitions/go-shisha-backend_internal_models.Post'
-            type: array
+            $ref: '#/definitions/go-shisha-backend_internal_models.PostsResponse'
         "500":
           description: サーバーエラー
           schema:
@@ -169,16 +185,14 @@ paths:
     get:
       consumes:
       - application/json
-      description: 全てのユーザーの一覧を取得します
+      description: 全てのユーザーの一覧を取得します（総数付き）
       produces:
       - application/json
       responses:
         "200":
-          description: ユーザー一覧
+          description: ユーザー一覧と総数
           schema:
-            items:
-              $ref: '#/definitions/go-shisha-backend_internal_models.User'
-            type: array
+            $ref: '#/definitions/go-shisha-backend_internal_models.UsersResponse'
         "500":
           description: サーバーエラー
           schema:
@@ -222,7 +236,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 指定されたユーザーの全ての投稿を取得します
+      description: 指定されたユーザーの全ての投稿を取得します（総数付き）
       parameters:
       - description: ユーザーID
         in: path
@@ -233,11 +247,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: 投稿一覧
+          description: 投稿一覧と総数
           schema:
-            items:
-              $ref: '#/definitions/go-shisha-backend_internal_models.Post'
-            type: array
+            $ref: '#/definitions/go-shisha-backend_internal_models.PostsResponse'
         "400":
           description: 無効なユーザーID
           schema:

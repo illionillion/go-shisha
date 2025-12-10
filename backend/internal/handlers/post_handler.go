@@ -30,11 +30,11 @@ func NewPostHandler(postService *services.PostService) *PostHandler {
  * GetAllPosts handles GET /api/v1/posts
  */
 // @Summary 投稿一覧取得
-// @Description 全ての投稿の一覧を取得します
+// @Description 全ての投稿の一覧を取得します（総数付き）
 // @Tags posts
 // @Accept json
 // @Produce json
-// @Success 200 {array} models.Post "投稿一覧"
+// @Success 200 {object} models.PostsResponse "投稿一覧と総数"
 // @Failure 500 {object} map[string]interface{} "サーバーエラー"
 // @Router /posts [get]
 func (h *PostHandler) GetAllPosts(c *gin.Context) {
@@ -44,10 +44,11 @@ func (h *PostHandler) GetAllPosts(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"posts": posts,
-		"total": len(posts),
-	})
+	response := models.PostsResponse{
+		Posts: posts,
+		Total: len(posts),
+	}
+	c.JSON(http.StatusOK, response)
 }
 
 /**

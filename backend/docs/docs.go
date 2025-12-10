@@ -20,7 +20,7 @@ const docTemplate = `{
     "paths": {
         "/posts": {
             "get": {
-                "description": "全ての投稿の一覧を取得します",
+                "description": "全ての投稿の一覧を取得します（総数付き）",
                 "consumes": [
                     "application/json"
                 ],
@@ -33,12 +33,9 @@ const docTemplate = `{
                 "summary": "投稿一覧取得",
                 "responses": {
                     "200": {
-                        "description": "投稿一覧",
+                        "description": "投稿一覧と総数",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/go-shisha-backend_internal_models.Post"
-                            }
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.PostsResponse"
                         }
                     },
                     "500": {
@@ -184,7 +181,7 @@ const docTemplate = `{
         },
         "/users": {
             "get": {
-                "description": "全てのユーザーの一覧を取得します",
+                "description": "全てのユーザーの一覧を取得します（総数付き）",
                 "consumes": [
                     "application/json"
                 ],
@@ -197,12 +194,9 @@ const docTemplate = `{
                 "summary": "ユーザー一覧取得",
                 "responses": {
                     "200": {
-                        "description": "ユーザー一覧",
+                        "description": "ユーザー一覧と総数",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/go-shisha-backend_internal_models.User"
-                            }
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UsersResponse"
                         }
                     },
                     "500": {
@@ -263,7 +257,7 @@ const docTemplate = `{
         },
         "/users/{id}/posts": {
             "get": {
-                "description": "指定されたユーザーの全ての投稿を取得します",
+                "description": "指定されたユーザーの全ての投稿を取得します（総数付き）",
                 "consumes": [
                     "application/json"
                 ],
@@ -285,12 +279,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "投稿一覧",
+                        "description": "投稿一覧と総数",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/go-shisha-backend_internal_models.Post"
-                            }
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.PostsResponse"
                         }
                     },
                     "400": {
@@ -355,6 +346,20 @@ const docTemplate = `{
                 }
             }
         },
+        "go-shisha-backend_internal_models.PostsResponse": {
+            "type": "object",
+            "properties": {
+                "posts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/go-shisha-backend_internal_models.Post"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "go-shisha-backend_internal_models.User": {
             "type": "object",
             "properties": {
@@ -375,6 +380,20 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.UsersResponse": {
+            "type": "object",
+            "properties": {
+                "total": {
+                    "type": "integer"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/go-shisha-backend_internal_models.User"
+                    }
                 }
             }
         }

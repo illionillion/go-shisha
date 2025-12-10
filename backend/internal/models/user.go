@@ -9,3 +9,9 @@ type User struct {
 	IconURL     string `json:"icon_url"`
 	ExternalURL string `json:"external_url"`
 }
+
+// UsersResponse represents the response for user list
+type UsersResponse struct {
+	Users []User `json:"users"`
+	Total int    `json:"total"`
+}
