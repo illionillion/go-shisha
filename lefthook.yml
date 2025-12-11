@@ -21,17 +21,17 @@ commit-msg:
 post-checkout:
   commands:
     pnpm:
-      glob: "{package.json,pnpm-lock.yaml,frontend/package.json,frontend/pnpm-lock.yaml}"
+      glob: "{package.json,pnpm-lock.yaml,frontend/package.json}"
       run: pnpm install
 
 post-merge:
   commands:
     pnpm:
-      glob: "{package.json,pnpm-lock.yaml,frontend/package.json,frontend/pnpm-lock.yaml}"
+      glob: "{package.json,pnpm-lock.yaml,frontend/package.json}"
       run: pnpm install
 
 post-rewrite:
   commands:
     pnpm:
-      glob: "{package.json,pnpm-lock.yaml,frontend/package.json,frontend/pnpm-lock.yaml}"
+      glob: "{package.json,pnpm-lock.yaml,frontend/package.json}"
       run: pnpm install
