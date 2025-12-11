@@ -9,5 +9,6 @@ services:
     volumes:
       - ./:/app
       - /app/node_modules
+      - ./__image_snapshots__:/app/__image_snapshots__
     ports:
       - "6006:6006"
