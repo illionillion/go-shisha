@@ -40,12 +40,14 @@
   "devDependencies": {
     "@commitlint/cli": "^19.6.2",
     "@commitlint/config-conventional": "^19.6.0",
+    "@types/chokidar": "^2.1.7",
+    "@types/node": "^20",
     "chokidar": "^4.0.3",
     "concurrently": "^9.1.2",
-    "fs-extra": "^11.2.0",
     "lefthook": "^1.10.8",
     "lint-staged": "^15.2.11",
-    "tsx": "^4.19.2"
+    "tsx": "^4.19.2",
+    "typescript": "^5"
   },
   "packageManager": "pnpm@9.15.0",
   "engines": {
@@ -54,9 +56,10 @@
   },
   "lint-staged": {
     "frontend/**/*.{js,jsx,ts,tsx}": [
-      "eslint --config frontend/eslint.config.ts --fix"
+      "eslint --config frontend/eslint.config.ts --fix",
+      "prettier --config frontend/.prettierrc --write"
     ],
-    "frontend/**/*.{js,jsx,ts,tsx,json,md,yml,yaml}": [
+    "frontend/**/*.{json,md,yml,yaml}": [
       "prettier --config frontend/.prettierrc --write"
     ]
   }
