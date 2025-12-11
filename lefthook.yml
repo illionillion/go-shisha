@@ -1,0 +1,37 @@
+pre-commit:
+  parallel: true
+  commands:
+    lint-staged:
+      run: npx lint-staged
+    # backend-format:
+    #   glob: "backend/**/*.go"
+    #   run: |
+    #     if command -v gofmt >/dev/null 2>&1; then
+    #       cd backend && gofmt -w {staged_files}
+    #     else
+    #       echo "⚠️  gofmt not found, skipping backend format check"
+    #     fi
+    #   stage_fixed: true
+
+commit-msg:
+  commands:
+    commitlint:
+      run: npx commitlint --edit
+
+post-checkout:
+  commands:
+    pnpm:
+      glob: "{package.json,pnpm-lock.yaml,frontend/package.json}"
+      run: pnpm install
+
+post-merge:
+  commands:
+    pnpm:
+      glob: "{package.json,pnpm-lock.yaml,frontend/package.json}"
+      run: pnpm install
+
+post-rewrite:
+  commands:
+    pnpm:
+      glob: "{package.json,pnpm-lock.yaml,frontend/package.json}"
+      run: pnpm install

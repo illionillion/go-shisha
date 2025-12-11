@@ -16,3 +16,9 @@ type CreatePostInput struct {
 	Message  string `json:"message" binding:"required,max=100"`
 	ImageURL string `json:"image_url" binding:"required"`
 }
+
+// PostsResponse represents the response for post list
+type PostsResponse struct {
+	Posts []Post `json:"posts"`
+	Total int    `json:"total"`
+}

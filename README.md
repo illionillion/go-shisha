@@ -40,9 +40,40 @@ go-shisha/
 ## 開発
 
 ### 要求事項
-- Node.js 18+
+- Node.js 20+
+- pnpm 9+
 - Go 1.21+
 - PostgreSQL 14+
+- Docker & Docker Compose
+
+### セットアップ
+
+1. リポジトリをクローン
+```bash
+git clone https://github.com/illionillion/go-shisha.git
+cd go-shisha
+```
+
+2. 環境変数を設定
+```bash
+cp .env.example .env
+# .envファイルを編集
+```
+
+3. 依存関係をインストール
+```bash
+pnpm install
+```
+
+4. Backendを起動（Docker）
+```bash
+docker compose up -d
+```
+
+5. Frontendを起動
+```bash
+pnpm dev
+```
 
 ### 環境変数
 
@@ -51,20 +82,50 @@ go-shisha/
 ```env
 TZ=Asia/Tokyo                                      # タイムゾーン
 BACKEND_PORT=8080                                  # バックエンドの公開ポート
-FRONTEND_PORT=3000                                 # フロントエンドの公開ポート
-STORYBOOK_PORT=6006                               # Storybookの公開ポート
-NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1   # API URL（ブラウザ用）
-API_URL=http://backend:8080/api/v1                 # API URL（Docker内部通信用）
 ```
 
 ### 各変数の説明
 - `TZ`: Dockerコンテナのタイムゾーン設定
 - `BACKEND_PORT`: バックエンドAPIの公開ポート
-- `FRONTEND_PORT`: フロントエンドの公開ポート
-- `NEXT_PUBLIC_API_URL`: ブラウザからアクセスする際のAPI URL
-- `API_URL`: Next.jsサーバー側（RSC）がDocker内部通信で使用するAPI URL（オプション）
 
 > 詳細は `.env.example` を参照してください。
+
+### 開発コマンド
+
+#### モノレポルート
+```bash
+pnpm dev              # Frontend開発サーバー起動 + OpenAPI自動コピー監視
+pnpm build            # Frontendビルド
+pnpm lint             # Frontendリント
+pnpm format           # Frontendフォーマット
+pnpm test             # Frontendテスト
+pnpm storybook        # Storybook起動
+pnpm vrt:build        # VRT Docker環境ビルド
+pnpm vrt:up           # VRT Docker環境起動
+pnpm vrt:run          # VRT実行
+```
+
+#### Backend（Go）
+```bash
+cd backend
+make dev              # 開発サーバー起動（Air使用）
+make build            # ビルド
+make test             # テスト実行
+make swagger          # Swagger定義再生成
+```
+
+### 開発フロー
+
+1. Backendでswagger定義を更新 → `make swagger`
+2. OpenAPI自動コピー（`scripts/watch-openapi.ts`が自動実行）
+3. Orval自動生成（nodemonが自動実行）
+4. FrontendでAPI型定義が更新される
+
+### Git Hooks（lefthook）
+
+- **pre-commit**: lint-stagedでlint/format自動実行
+- **commit-msg**: commitlint（Conventional Commits検証）
+- **post-checkout/merge/rewrite**: pnpm install自動実行
 
 ## プロジェクト詳細
 

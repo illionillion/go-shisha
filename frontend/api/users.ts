@@ -25,18 +25,19 @@ import type {
   GetUsersId404,
   GetUsersIdPosts400,
   GetUsersIdPosts404,
-  GoShishaBackendInternalModelsPost,
+  GoShishaBackendInternalModelsPostsResponse,
   GoShishaBackendInternalModelsUser,
+  GoShishaBackendInternalModelsUsersResponse,
 } from "./model";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
- * 全てのユーザーの一覧を取得します
+ * 全てのユーザーの一覧を取得します（総数付き）
  * @summary ユーザー一覧取得
  */
 export const getUsers = (options?: SecondParameter<typeof apiFetch>, signal?: AbortSignal) => {
-  return apiFetch<GoShishaBackendInternalModelsUser[]>(
+  return apiFetch<GoShishaBackendInternalModelsUsersResponse>(
     { url: `/users`, method: "GET", signal },
     options
   );
@@ -251,7 +252,7 @@ export function useGetUsersId<
 }
 
 /**
- * 指定されたユーザーの全ての投稿を取得します
+ * 指定されたユーザーの全ての投稿を取得します（総数付き）
  * @summary ユーザーの投稿一覧取得
  */
 export const getUsersIdPosts = (
@@ -259,7 +260,7 @@ export const getUsersIdPosts = (
   options?: SecondParameter<typeof apiFetch>,
   signal?: AbortSignal
 ) => {
-  return apiFetch<GoShishaBackendInternalModelsPost[]>(
+  return apiFetch<GoShishaBackendInternalModelsPostsResponse>(
     { url: `/users/${id}/posts`, method: "GET", signal },
     options
   );

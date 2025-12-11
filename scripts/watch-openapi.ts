@@ -1,0 +1,48 @@
+import chokidar from 'chokidar';
+import fs from 'fs/promises';
+import path from 'path';
+
+const SOURCE_PATH = path.resolve(__dirname, '../backend/docs/swagger.yaml');
+const TARGET_PATH = path.resolve(__dirname, '../frontend/openapi/openapi.yml');
+
+/**
+ * OpenAPI仕様ファイルの監視・自動コピースクリプト
+ * 
+ * Backend側のswagger.yamlの変更を検知し、自動的にFrontendにコピーする。
+ * これによりOrvalの自動生成がトリガーされ、API型定義が最新に保たれる。
+ */
+async function startWatching() {
+  // ターゲットディレクトリを事前に作成
+  await fs.mkdir(path.dirname(TARGET_PATH), { recursive: true });
+
+  const watcher = chokidar.watch(SOURCE_PATH, {
+    persistent: true,
+    ignoreInitial: false,
+  });
+
+  watcher
+    .on('add', async () => {
+      try {
+        await fs.copyFile(SOURCE_PATH, TARGET_PATH);
+        console.log('✅ OpenAPI spec copied to frontend (initial)');
+      } catch (error) {
+        console.error('❌ Failed to copy OpenAPI spec:', error);
+      }
+    })
+    .on('change', async () => {
+      try {
+        await fs.copyFile(SOURCE_PATH, TARGET_PATH);
+        console.log('✅ OpenAPI spec copied to frontend (updated)');
+      } catch (error) {
+        console.error('❌ Failed to copy OpenAPI spec:', error);
+      }
+    })
+    .on('error', (error) => {
+      console.error('❌ Watcher error:', error);
+    });
+
+  console.log('👀 Watching OpenAPI spec:', SOURCE_PATH);
+  console.log('📝 Target:', TARGET_PATH);
+}
+
+startWatching().catch(console.error);

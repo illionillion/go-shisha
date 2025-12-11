@@ -47,3 +47,103 @@
   - `/models` : エンティティ・ドメインモデル
   - `/middleware` : ミドルウェア
 - `/pkg` : 外部パッケージ、共通ライブラリ
+
+## Swagger/OpenAPI生成（swaggo）ルール
+
+### 基本原則
+- **実装とSwagger定義を一致させる**: ハンドラーの実際のレスポンス構造とSwaggerアノテーションの型定義は必ず一致させる
+- **型定義を使用する**: `gin.H{}`で直接JSON構造を作るのではなく、`models`パッケージに構造体を定義して使用する
+- **レスポンス構造体の命名**: `{Entity}Response`形式（例: `UsersResponse`, `PostsResponse`, `ErrorResponse`）
+
+### Swaggerアノテーション記述ルール
+
+#### ハンドラー関数のアノテーション
+```go
+// @Summary 短い概要（日本語OK）
+// @Description 詳細な説明（複数行可、改行は保持される）
+// @Tags タグ名（APIのグループ化に使用）
+// @Accept json
+// @Produce json
+// @Param パラメータ名 in 型 required "説明"
+// @Success ステータスコード {object|array} モデル名 "説明"
+// @Failure ステータスコード {object} モデル名 "説明"
+// @Router /path [method]
+```
+
+#### 型定義の対応例
+
+**❌ NG: 実装とアノテーションが不一致**
+```go
+// @Success 200 {array} models.User "ユーザー一覧"
+func (h *UserHandler) GetAllUsers(c *gin.Context) {
+    // 実際は配列ではなくオブジェクト（users, total）を返している
+    c.JSON(http.StatusOK, gin.H{
+        "users": users,
+        "total": len(users),
+    })
+}
+```
+
+**✅ OK: レスポンス構造体を定義して使用**
+```go
+// models/user.go
+type UsersResponse struct {
+    Users []User `json:"users"`
+    Total int    `json:"total"`
+}
+
+// handlers/user_handler.go
+// @Success 200 {object} models.UsersResponse "ユーザー一覧と総数"
+func (h *UserHandler) GetAllUsers(c *gin.Context) {
+    users, err := h.userService.GetAllUsers()
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    
+    response := models.UsersResponse{
+        Users: users,
+        Total: len(users),
+    }
+    c.JSON(http.StatusOK, response)
+}
+```
+
+### レスポンス構造体の設計指針
+1. **リスト系エンドポイント**: 配列だけでなく総数も含める
+   ```go
+   type UsersResponse struct {
+       Users []User `json:"users"`
+       Total int    `json:"total"`
+   }
+   ```
+
+2. **単一エンティティ取得**: 構造体を直接返す
+   ```go
+   // @Success 200 {object} models.User "ユーザー情報"
+   c.JSON(http.StatusOK, user)
+   ```
+
+3. **エラーレスポンス**: 統一した構造体を使用（将来実装）
+   ```go
+   type ErrorResponse struct {
+       Error   string `json:"error"`
+       Code    string `json:"code,omitempty"`
+       Details string `json:"details,omitempty"`
+   }
+   ```
+
+### Swagger再生成フロー
+1. モデル定義（`internal/models/*.go`）でレスポンス構造体を追加
+2. ハンドラー（`internal/handlers/*.go`）でアノテーションと実装を修正
+3. `cd backend && swag init -g cmd/main.go -o docs` で再生成
+4. `backend/docs/swagger.yaml` が更新される
+5. （モノレポ環境）`scripts/watch-openapi.ts` が自動的にフロントエンドにコピー
+6. （モノレポ環境）nodemon が Orval を実行してフロントエンドの型・API関数を再生成
+
+### チェックリスト
+- [ ] レスポンス構造体を`models`パッケージに定義した
+- [ ] ハンドラーの実装で構造体を使用している（`gin.H{}`を直接使っていない）
+- [ ] Swaggerアノテーションの`@Success`型が実装と一致している
+- [ ] `swag init`を実行してエラーが出ないことを確認した
+- [ ] 生成された`swagger.yaml`でレスポンス定義が正しいことを確認した

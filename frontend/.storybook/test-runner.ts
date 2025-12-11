@@ -1,10 +1,10 @@
-/* global expect */
 // Storybook Test Runner 設定
+import type { TestRunnerConfig } from "@storybook/test-runner";
 import { toMatchImageSnapshot } from "jest-image-snapshot";
 
 const VIEWPORT = { width: 1280, height: 800 };
 
-export default {
+const config: TestRunnerConfig = {
   setup() {
     expect.extend({ toMatchImageSnapshot });
   },
@@ -59,3 +59,5 @@ export default {
     });
   },
 };
+
+export default config;

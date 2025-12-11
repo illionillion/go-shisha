@@ -88,6 +88,21 @@ describe("ShishaCardコンポーネント", () => {
 
       expect(handleClick).toHaveBeenCalledTimes(1);
     });
+
+    test("onClick が設定されている場合、Enter/Space以外のキーではハンドラが呼ばれない", async () => {
+      const handleClick = vi.fn();
+      const user = userEvent.setup();
+
+      render(<ShishaCard {...defaultProps} onClick={handleClick} />);
+
+      const card = screen.getByRole("button");
+      card.focus();
+      await user.keyboard("a");
+      await user.keyboard("Escape");
+      await user.keyboard("Tab");
+
+      expect(handleClick).not.toHaveBeenCalled();
+    });
   });
 
   describe("エッジケース", () => {
