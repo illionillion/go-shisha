@@ -94,7 +94,7 @@ BACKEND_PORT=8080                                  # バックエンドの公開
 
 #### モノレポルート
 ```bash
-pnpm dev              # Backend + Frontend開発サーバー起動（OpenAPI自動コピー付き）
+pnpm dev              # Frontend開発サーバー起動 + OpenAPI自動コピー監視
 pnpm build            # Frontendビルド
 pnpm lint             # Frontendリント
 pnpm format           # Frontendフォーマット
