@@ -49,7 +49,7 @@ export function Timeline({ posts, isLoading = false, error = null, onPostClick }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         {posts.map((post) => (
           <PostCard key={post.id} post={post} onLike={handleLike} onClick={handlePostClick} />
         ))}
