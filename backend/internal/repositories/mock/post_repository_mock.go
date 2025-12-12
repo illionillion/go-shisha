@@ -28,7 +28,7 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 				ID:       1,
 				UserID:   1,
 				Message:  "今日のシーシャは最高でした！ミント系のフレーバーが爽やかで最高",
-				ImageURL: "https://picsum.photos/400/600?random=1",
+				ImageURL: "/images/264971_0.jpg",
 				Likes:    12,
 				User: models.User{
 					ID:          1,
@@ -45,7 +45,7 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 				ID:       2,
 				UserID:   2,
 				Message:  "新しいお店を発見！雰囲気も良くて味も抜群でした",
-				ImageURL: "https://picsum.photos/400/600?random=2",
+				ImageURL: "/images/264972_0.jpg",
 				Likes:    8,
 				User: models.User{
 					ID:          2,
@@ -62,7 +62,7 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 				ID:       3,
 				UserID:   1,
 				Message:  "ベリーの酸味がたまらない。ミックスもいいかも。",
-				ImageURL: "https://picsum.photos/400/600?random=3",
+				ImageURL: "/images/264977_0.jpg",
 				Likes:    22,
 				User: models.User{
 					ID:          1,
@@ -79,7 +79,7 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 				ID:       4,
 				UserID:   2,
 				Message:  "マンゴーのトロピカル感が最高！ 夏にぴったり。",
-				ImageURL: "https://picsum.photos/400/600?random=4",
+				ImageURL: "/images/264974_0.jpg",
 				Likes:    15,
 				User: models.User{
 					ID:          2,
