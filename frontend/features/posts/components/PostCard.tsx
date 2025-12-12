@@ -63,11 +63,21 @@ export function PostCard({ post, onLike, onClick }: PostCardProps) {
     }
   };
 
+  // 画像URLの構築: 相対パスの場合はBACKEND_URLを結合
+  const getImageUrl = (url: string | undefined): string => {
+    if (!url) return "/placeholder.jpg";
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return url;
+    }
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+    return `${backendUrl}${url}`;
+  };
+
   return (
     <div className={cardVariants()} onClick={() => onClick(post)}>
       <div className={imageContainerVariants()}>
         <Image
-          src={post.image_url || "/placeholder.jpg"}
+          src={getImageUrl(post.image_url)}
           alt={post.message || "シーシャ投稿"}
           fill
           className={clsx(["object-cover", "transition-transform", "group-hover:scale-105"])}
