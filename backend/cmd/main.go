@@ -47,6 +47,10 @@ func main() {
 		c.Next()
 	})
 
+	// 静的ファイル配信（画像）
+	r.Static("/images", "./public/images")
+	fmt.Println("Static images: http://localhost:8080/images/")
+
 	// Dependency Injection
 	// Repository層（モック実装）
 	userRepo := mock.NewUserRepositoryMock()
