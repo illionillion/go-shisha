@@ -21,6 +21,8 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 	flavorID2 := 2
 	flavorID3 := 3
 	flavorID4 := 4
+	flavorID5 := 5
+	flavorID6 := 6
 	
 	return &PostRepositoryMock{
 		posts: []models.Post{
@@ -92,8 +94,42 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 				FlavorID: &flavorID4,
 				Flavor:   &mockFlavors[3],
 			},
+			{
+				ID:       5,
+				UserID:   1,
+				Message:  "オレンジの爽やかさがいい感じ。リフレッシュできる〜",
+				ImageURL: "/images/264975_0.jpg",
+				Likes:    18,
+				User: models.User{
+					ID:          1,
+					Email:       "test@example.com",
+					DisplayName: "テストユーザー",
+					Description: "シーシャ大好き！",
+					IconURL:     "",
+					ExternalURL: "",
+				},
+				FlavorID: &flavorID5,
+				Flavor:   &mockFlavors[4],
+			},
+			{
+				ID:       6,
+				UserID:   2,
+				Message:  "グレープの濃厚な味わい。フルーツ系の中でも特におすすめ！",
+				ImageURL: "/images/264976_0.jpg",
+				Likes:    25,
+				User: models.User{
+					ID:          2,
+					Email:       "shisha@example.com",
+					DisplayName: "シーシャマスター",
+					Description: "毎日シーシャ吸ってます",
+					IconURL:     "",
+					ExternalURL: "https://twitter.com/shishamaster",
+				},
+				FlavorID: &flavorID6,
+				Flavor:   &mockFlavors[5],
+			},
 		},
-		nextID: 5,
+		nextID: 7,
 	}
 }
 
