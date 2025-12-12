@@ -10,6 +10,9 @@ export function Header() {
   return (
     <header
       className={clsx([
+        "sticky",
+        "top-0",
+        "z-50",
         "flex",
         "items-center",
         "justify-between",
