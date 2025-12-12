@@ -63,6 +63,19 @@ export function PostCard({ post, onLike, onClick }: PostCardProps) {
     }
   };
 
+  // フレーバー色のマッピング（Tailwind動的クラス対策）
+  const getFlavorColorClass = (color: string | undefined): string => {
+    const colorMap: Record<string, string> = {
+      "bg-green-500": "bg-green-500",
+      "bg-red-500": "bg-red-500",
+      "bg-purple-500": "bg-purple-500",
+      "bg-yellow-500": "bg-yellow-500",
+      "bg-orange-500": "bg-orange-500",
+      "bg-indigo-500": "bg-indigo-500",
+    };
+    return colorMap[color || ""] || "bg-gray-500";
+  };
+
   // 画像URLの構築: 相対パスの場合はBACKEND_URLを結合
   const getImageUrl = (url: string | undefined): string => {
     if (!url) return "/placeholder.jpg";
@@ -96,7 +109,7 @@ export function PostCard({ post, onLike, onClick }: PostCardProps) {
                 "text-xs",
                 "rounded-full",
                 "text-white",
-                post.flavor.color || "bg-gray-500",
+                getFlavorColorClass(post.flavor.color),
               ])}
             >
               {post.flavor.name}
