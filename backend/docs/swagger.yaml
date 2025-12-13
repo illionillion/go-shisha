@@ -14,8 +14,21 @@ definitions:
     - message
     - user_id
     type: object
+  go-shisha-backend_internal_models.Flavor:
+    properties:
+      color:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   go-shisha-backend_internal_models.Post:
     properties:
+      flavor:
+        $ref: '#/definitions/go-shisha-backend_internal_models.Flavor'
+      flavor_id:
+        type: integer
       id:
         type: integer
       image_url:

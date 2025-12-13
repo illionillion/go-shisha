@@ -103,6 +103,49 @@ ls __image_snapshots__
 
 ## 📝 テストの書き方
 
+### Testing Library の優先順位
+
+Testing Library では、**ユーザーが要素を見つける方法に近い順**でクエリを使用します。
+
+#### 推奨されるクエリの優先順位
+
+1. **`getByRole`** ⭐ 最優先
+   - アクセシビリティを保証
+   - スクリーンリーダーでも動作
+   - 例: `getByRole('button', { name: '送信' })`
+
+2. **`getByLabelText`**
+   - フォーム要素に最適
+   - 例: `getByLabelText('メールアドレス')`
+
+3. **`getByPlaceholderText`**
+   - placeholder があるフォーム要素
+   - 例: `getByPlaceholderText('example@email.com')`
+
+4. **`getByText`**
+   - 非インタラクティブ要素（段落、div など）
+   - 例: `getByText('投稿が完了しました')`
+
+5. **`getByAltText`**
+   - 画像、area 要素
+   - 例: `getByAltText('プロフィール画像')`
+
+6. **`getByTitle`**
+   - title 属性を持つ要素
+   - 例: `getByTitle('閉じる')`
+
+#### ❌ 避けるべきクエリ
+
+- **`getByTestId`**: 最終手段としてのみ使用
+  - 実装詳細に依存
+  - アクセシビリティを保証しない
+  - どうしても必要な場合のみ使用
+
+- **`container.querySelector()`**: 原則使用禁止
+  - CSS セレクタは実装詳細
+  - リファクタリングで壊れやすい
+  - 例外: グリッドレイアウトのスタイル検証など、Testing Library のクエリでは取得できない場合のみ
+
 ### 基本構造
 
 ```tsx
@@ -119,6 +162,7 @@ describe("ComponentName", () => {
 
   test("基本的なレンダリング", () => {
     render(<Component {...defaultProps} />);
+    // ✅ role でアクセス
     expect(screen.getByRole("textbox")).toBeInTheDocument();
   });
 
@@ -126,11 +170,48 @@ describe("ComponentName", () => {
     const user = userEvent.setup();
     render(<Component {...defaultProps} />);
 
-    const input = screen.getByRole("textbox");
+    // ✅ role + name で特定
+    const input = screen.getByRole("textbox", { name: "ユーザー名" });
     await user.type(input, "新しい値");
 
     expect(defaultProps.onChange).toHaveBeenCalledWith("新しい値");
   });
+
+  test("複数のボタンがある場合", () => {
+    render(<Component {...defaultProps} />);
+
+    // ✅ getAllByRole + find で識別
+    const buttons = screen.getAllByRole("button");
+    const submitButton = buttons.find((btn) => btn.textContent?.includes("送信"));
+
+    expect(submitButton).toBeInTheDocument();
+  });
+});
+```
+
+### 実践例
+
+```tsx
+// ❌ 悪い例
+test("悪い例", () => {
+  const { container } = render(<PostCard post={mockPost} />);
+  const card = container.querySelector(".post-card");
+  const button = container.querySelector("button[data-testid='like-btn']");
+});
+
+// ✅ 良い例
+test("良い例", () => {
+  render(<PostCard post={mockPost} />);
+
+  // role + name で特定
+  const likeButton = screen.getByRole("button", { name: "いいね" });
+
+  // 複数ある場合は getAllByRole + find
+  const buttons = screen.getAllByRole("button");
+  const card = buttons.find((btn) => btn.textContent?.includes("投稿内容"));
+
+  expect(likeButton).toBeInTheDocument();
+  expect(card).toBeInTheDocument();
 });
 ```
 
@@ -187,6 +268,12 @@ describe("formatDate", () => {
 ```tsx
 test("悪意のあるコードが安全に処理される", () => {
   const maliciousInput = '<script>alert("XSS")</script>';
+  render(<Component value={maliciousInput} />);
+
+  // ✅ getByText でエスケープされた文字列を確認
+  expect(screen.getByText(/script/i)).toBeInTheDocument();
+
+  // script タグが実際に挿入されていないことを確認（例外的に querySelector 使用）
   const { container } = render(<Component value={maliciousInput} />);
   expect(container.querySelector("script")).toBeNull();
 });
@@ -198,12 +285,21 @@ test("悪意のあるコードが安全に処理される", () => {
 
 ### ✅ コンポーネントテスト
 
-- 基本的なレンダリング
-- プロパティの正しい表示
+- 基本的なレンダリング（`getByRole` 優先）
+- プロパティの正しい表示（`getByText`, `getByLabelText`）
 - ユーザー操作（クリック、入力等）
 - コールバック関数の呼び出し
 - エラー状態の処理
-- アクセシビリティ（aria-label、role等）
+- アクセシビリティ（`role`, `aria-label` 等が正しく設定されているか）
+
+### ✅ クエリ選択のチェックポイント
+
+1. `getByRole` を最優先で使用
+2. フォーム要素は `getByLabelText`
+3. 非インタラクティブ要素は `getByText`
+4. 複数要素がある場合は `getAllBy*` + `find()`
+5. `data-testid` は最終手段
+6. `container.querySelector()` は原則禁止（例外: スタイル検証のみ）
 
 ### ✅ ユーティリティ関数テスト
 
@@ -215,6 +311,48 @@ test("悪意のあるコードが安全に処理される", () => {
 ---
 
 ## 🎯 実践的ベストプラクティス
+
+### クエリの選び方
+
+**原則: ユーザーが要素を見つける方法に近い順で選ぶ**
+
+```tsx
+// ✅ 良い例: アクセシビリティを考慮 + userEvent使用
+test("ボタンをクリック", async () => {
+  const user = userEvent.setup();
+  render(<SubmitButton />);
+  const button = screen.getByRole("button", { name: "送信" });
+  await user.click(button);
+});
+
+// ❌ 悪い例: 実装詳細に依存
+test("ボタンをクリック", () => {
+  const { container } = render(<SubmitButton />);
+  const button = container.querySelector(".submit-btn");
+  fireEvent.click(button);
+});
+```
+
+### 複数要素の扱い
+
+```tsx
+// ✅ 良い例: getAllByRole + find で識別
+test("複数のカードから特定のカードを選択", () => {
+  render(<PostList posts={mockPosts} />);
+
+  const cards = screen.getAllByRole("button");
+  const targetCard = cards.find((card) => card.textContent?.includes("特定の投稿"));
+
+  expect(targetCard).toBeInTheDocument();
+});
+
+// ❌ 悪い例: data-testid で識別
+test("複数のカードから特定のカードを選択", () => {
+  render(<PostList posts={mockPosts} />);
+  const card = screen.getByTestId("post-card-1");
+  expect(card).toBeInTheDocument();
+});
+```
 
 ### 修正前のテスト検証
 
@@ -235,6 +373,119 @@ const item = screen.getByRole("menuitem");
 
 // ✅ アニメーション完了を待機
 const item = await screen.findByRole("menuitem");
+```
+
+### ユーザー操作のベストプラクティス
+
+#### userEvent vs fireEvent
+
+**原則: `userEvent` を使用する**（より実際のユーザー操作に近い）
+
+```tsx
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
+// ✅ 良い例: userEvent を使用
+test("入力フォームのテスト", async () => {
+  const user = userEvent.setup();
+  render(<InputForm />);
+
+  const input = screen.getByRole("textbox");
+  await user.type(input, "テキスト入力");
+  await user.click(screen.getByRole("button", { name: "送信" }));
+
+  expect(screen.getByText("送信完了")).toBeInTheDocument();
+});
+
+// ❌ 悪い例: fireEvent を使用（非推奨）
+test("入力フォームのテスト", () => {
+  render(<InputForm />);
+
+  const input = screen.getByRole("textbox");
+  fireEvent.change(input, { target: { value: "テキスト入力" } });
+  fireEvent.click(screen.getByRole("button", { name: "送信" }));
+
+  expect(screen.getByText("送信完了")).toBeInTheDocument();
+});
+```
+
+#### userEvent の主な API
+
+```tsx
+const user = userEvent.setup();
+
+// クリック
+await user.click(element);
+await user.dblClick(element);
+
+// キーボード入力
+await user.type(input, "テキスト");
+await user.clear(input);
+await user.keyboard("{Enter}");
+await user.keyboard("{Escape}");
+
+// 選択
+await user.selectOptions(select, "option-value");
+
+// ホバー
+await user.hover(element);
+await user.unhover(element);
+
+// タブキー
+await user.tab();
+```
+
+#### 非同期操作の待機
+
+```tsx
+// ✅ findBy*: 要素が現れるまで待機（デフォルト1秒）
+test("非同期でロードされる要素", async () => {
+  render(<AsyncComponent />);
+
+  // 要素が現れるまで最大1秒待機
+  const message = await screen.findByText("読み込み完了");
+  expect(message).toBeInTheDocument();
+});
+
+// ✅ waitFor: 条件が満たされるまで待機
+test("状態変化を待機", async () => {
+  const user = userEvent.setup();
+  render(<Counter />);
+
+  await user.click(screen.getByRole("button", { name: "インクリメント" }));
+
+  await waitFor(() => {
+    expect(screen.getByText("カウント: 1")).toBeInTheDocument();
+  });
+});
+
+// ❌ 悪い例: getBy* で非同期要素を取得（失敗する）
+test("非同期でロードされる要素", () => {
+  render(<AsyncComponent />);
+
+  // エラー: 要素がまだ存在しない
+  const message = screen.getByText("読み込み完了");
+  expect(message).toBeInTheDocument();
+});
+```
+
+#### クエリの種類と使い分け
+
+| クエリ     | 戻り値        | 非同期 | タイミング         |
+| ---------- | ------------- | ------ | ------------------ |
+| `getBy*`   | 要素 / エラー | ❌     | 即座に存在する要素 |
+| `queryBy*` | 要素 / null   | ❌     | 要素の不在を確認   |
+| `findBy*`  | Promise<要素> | ✅     | 非同期で現れる要素 |
+
+```tsx
+// getBy*: 即座に存在するはずの要素
+const button = screen.getByRole("button", { name: "送信" });
+
+// queryBy*: 要素が存在しないことを確認
+expect(screen.queryByText("エラー")).not.toBeInTheDocument();
+
+// findBy*: 非同期で現れる要素
+const message = await screen.findByText("読み込み完了");
 ```
 
 ### テスト設計

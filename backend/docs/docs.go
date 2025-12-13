@@ -323,9 +323,29 @@ const docTemplate = `{
                 }
             }
         },
+        "go-shisha-backend_internal_models.Flavor": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "go-shisha-backend_internal_models.Post": {
             "type": "object",
             "properties": {
+                "flavor": {
+                    "$ref": "#/definitions/go-shisha-backend_internal_models.Flavor"
+                },
+                "flavor_id": {
+                    "type": "integer"
+                },
                 "id": {
                     "type": "integer"
                 },

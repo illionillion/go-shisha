@@ -9,27 +9,13 @@
  * @throws {Error} 必要な環境変数が設定されていない場合
  */
 export function getApiBaseUrl(): string {
-  // サーバーサイド（RSC、Server Actions等）
-  if (typeof window === "undefined") {
-    // Docker環境: 内部通信用のAPI_URLを優先
-    // 本番環境: NEXT_PUBLIC_API_URLと同じ外部URLを使用
-    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
-    if (!apiUrl) {
-      throw new Error(
-        "API_URL or NEXT_PUBLIC_API_URL environment variable is not set. Please set it in your .env file."
-      );
-    }
-    return apiUrl;
-  }
-
-  // クライアントサイド（ブラウザ）
-  const publicApiUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!publicApiUrl) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) {
     throw new Error(
       "NEXT_PUBLIC_API_URL environment variable is not set. Please set it in your .env file."
     );
   }
-  return publicApiUrl;
+  return apiUrl;
 }
 
 /**
