@@ -78,16 +78,19 @@ export function PostCard({ post, onLike, onClick }: PostCardProps) {
 
   // 画像URLの構築: 相対パスの場合はBACKEND_URLを結合
   const getImageUrl = (url: string | undefined): string => {
-    if (!url) return "/placeholder.jpg";
+    if (!url) return "https://placehold.co/400x600/CCCCCC/666666?text=No+Image";
     if (url.startsWith("http://") || url.startsWith("https://")) {
       return url;
     }
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    if (!backendUrl) {
+      return "https://placehold.co/400x600/CCCCCC/666666?text=No+Image"; // 環境変数が未設定の場合はフォールバック画像を使用
+    }
     return `${backendUrl}${url}`;
   };
 
   return (
-    <div className={cardVariants()} onClick={() => onClick(post)}>
+    <div className={cardVariants()} onClick={() => onClick(post)} role="button" tabIndex={0}>
       <div className={imageContainerVariants()}>
         <Image
           src={getImageUrl(post.image_url)}

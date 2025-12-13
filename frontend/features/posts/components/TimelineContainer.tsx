@@ -14,7 +14,7 @@ interface TimelineContainerProps {
  * - RSCから initialPosts を受け取った場合はそれを使用（SSR最適化）
  * - initialPosts がない場合は useGetPosts でクライアント取得
  */
-export function TimelineContainer({ initialPosts }: TimelineContainerProps = {}) {
+export function TimelineContainer({ initialPosts }: TimelineContainerProps) {
   const { data, isLoading, error } = useGetPosts({
     query: {
       enabled: !initialPosts, // initialPostsがある場合はfetchしない

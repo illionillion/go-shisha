@@ -128,3 +128,20 @@ export const BerryFlavor: Story = {
     onClick: () => {},
   },
 };
+
+/**
+ * 画像なし投稿カード（フォールバック画像表示）
+ */
+export const WithoutImage: Story = {
+  args: {
+    post: {
+      ...mockPost,
+      id: 4,
+      message: "画像なしの投稿です。フォールバック画像が表示されます。",
+      image_url: undefined,
+      likes: 5,
+    },
+    onLike: () => {},
+    onClick: () => {},
+  },
+};
