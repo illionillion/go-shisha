@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import type { GoShishaBackendInternalModelsPost } from "../../../api/model";
 import { Timeline } from "./Timeline";
@@ -70,15 +71,48 @@ describe("Timeline", () => {
     expect(grid).toBeInTheDocument();
   });
 
-  it("onPostClickが提供された場合に呼ばれる", () => {
+  it("onPostClickが提供された場合に呼ばれる", async () => {
+    const user = userEvent.setup();
     const onPostClick = vi.fn();
-    const { container } = render(<Timeline posts={mockPosts} onPostClick={onPostClick} />);
+    render(<Timeline posts={mockPosts} onPostClick={onPostClick} />);
 
-    const firstCard = container.querySelector(".cursor-pointer");
-    if (firstCard) {
-      firstCard.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    const cards = screen.getAllByRole("button");
+    const firstPostCard = cards.find((card) =>
+      card.textContent?.includes("今日のシーシャは最高でした！")
+    );
+    if (firstPostCard) {
+      await user.click(firstPostCard);
     }
 
     expect(onPostClick).toHaveBeenCalledWith(mockPosts[0]);
+  });
+
+  it("onPostClickが提供されていない場合、デフォルトのログ出力が行われる", async () => {
+    const user = userEvent.setup();
+    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    render(<Timeline posts={mockPosts} />);
+
+    const cards = screen.getAllByRole("button");
+    const firstPostCard = cards.find((card) =>
+      card.textContent?.includes("今日のシーシャは最高でした")
+    );
+    if (firstPostCard) {
+      await user.click(firstPostCard);
+    }
+
+    expect(consoleSpy).toHaveBeenCalledWith("Clicked post:", 1);
+    consoleSpy.mockRestore();
+  });
+
+  it("いいねボタンをクリックするとhandleLikeが呼ばれる", async () => {
+    const user = userEvent.setup();
+    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    render(<Timeline posts={mockPosts} />);
+
+    const likeButton = screen.getAllByLabelText("いいね")[0];
+    await user.click(likeButton);
+
+    expect(consoleSpy).toHaveBeenCalledWith("Liked post:", 1);
+    consoleSpy.mockRestore();
   });
 });
