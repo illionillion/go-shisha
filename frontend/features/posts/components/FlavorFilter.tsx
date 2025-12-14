@@ -42,6 +42,7 @@ export function FlavorFilter({ flavors, selectedFlavorIds, onFlavorToggle }: Fla
                 "font-medium",
                 "transition-all",
                 "border-2",
+                "select-none",
                 isSelected
                   ? "border-gray-800 shadow-md"
                   : "border-transparent hover:border-gray-300",

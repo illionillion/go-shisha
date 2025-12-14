@@ -24,7 +24,9 @@ export function TimelineContainer({ initialPosts }: TimelineContainerProps) {
 
   const { data, isLoading, error } = useGetPosts({
     query: {
-      enabled: !initialPosts, // initialPostsがある場合はfetchしない
+      enabled: true, // 常に有効にしてポーリングを許可
+      initialData: initialPosts ? { posts: initialPosts } : undefined, // 初期データを設定
+      refetchInterval: 60000, // 60秒ごとに自動更新
     },
   });
 

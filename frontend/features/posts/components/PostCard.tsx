@@ -96,7 +96,14 @@ export function PostCard({ post, onLike, onClick }: PostCardProps) {
           src={getImageUrl(post.image_url)}
           alt={post.message || "シーシャ投稿"}
           fill
-          className={clsx(["object-cover", "transition-transform", "group-hover:scale-105"])}
+          className={clsx([
+            "object-cover",
+            "transition-transform",
+            "group-hover:scale-105",
+            "group-active:scale-105",
+            "select-none",
+            "pointer-events-none",
+          ])}
         />
         <div className={overlayVariants()} />
         <div className={clsx(["absolute", "bottom-0", "left-0", "right-0", "p-4", "text-white"])}>
@@ -112,6 +119,7 @@ export function PostCard({ post, onLike, onClick }: PostCardProps) {
                 "text-xs",
                 "rounded-full",
                 "text-white",
+                "select-none",
                 getFlavorColorClass(post.flavor.color),
               ])}
             >
