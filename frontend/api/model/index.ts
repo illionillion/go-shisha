@@ -16,6 +16,7 @@ export * from "./getUsersId404";
 export * from "./getUsersIdPosts400";
 export * from "./getUsersIdPosts404";
 export * from "./goShishaBackendInternalModelsCreatePostInput";
+export * from "./goShishaBackendInternalModelsFlavor";
 export * from "./goShishaBackendInternalModelsPost";
 export * from "./goShishaBackendInternalModelsPostsResponse";
 export * from "./goShishaBackendInternalModelsUser";
