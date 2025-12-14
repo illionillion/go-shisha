@@ -1,6 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import type { GoShishaBackendInternalModelsPost } from "../../../api/model";
+import type {
+  GoShishaBackendInternalModelsFlavor,
+  GoShishaBackendInternalModelsPost,
+} from "../../../api/model";
 import { Timeline } from "./Timeline";
+
+const mockFlavors: GoShishaBackendInternalModelsFlavor[] = [
+  { id: 1, name: "ミント", color: "bg-green-500" },
+  { id: 2, name: "アップル", color: "bg-red-500" },
+  { id: 3, name: "ベリー", color: "bg-purple-500" },
+  { id: 4, name: "マンゴー", color: "bg-yellow-500" },
+];
 
 const mockPosts: GoShishaBackendInternalModelsPost[] = [
   {
@@ -95,7 +105,32 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
-  tags: ["autodocs", "vrt"],
+  tags: ["autodocs"],
+  argTypes: {
+    posts: {
+      description: "投稿一覧",
+    },
+    isLoading: {
+      description: "ローディング状態",
+    },
+    error: {
+      description: "エラー",
+    },
+    availableFlavors: {
+      description: "利用可能なフレーバー一覧",
+    },
+    selectedFlavorIds: {
+      description: "選択中のフレーバーID配列",
+    },
+    onFlavorToggle: {
+      action: "flavor toggled",
+      description: "フレーバー選択切り替えハンドラー",
+    },
+    onPostClick: {
+      action: "post clicked",
+      description: "投稿クリックハンドラー",
+    },
+  },
 } satisfies Meta<typeof Timeline>;
 
 export default meta;
@@ -105,6 +140,7 @@ type Story = StoryObj<typeof meta>;
  * デフォルトのタイムライン表示
  */
 export const Default: Story = {
+  tags: ["vrt"],
   args: {
     posts: mockPosts,
     isLoading: false,
@@ -116,6 +152,7 @@ export const Default: Story = {
  * ローディング状態
  */
 export const Loading: Story = {
+  tags: ["vrt"],
   args: {
     posts: [],
     isLoading: true,
@@ -127,6 +164,7 @@ export const Loading: Story = {
  * エラー状態
  */
 export const Error: Story = {
+  tags: ["vrt"],
   args: {
     posts: [],
     isLoading: false,
@@ -138,6 +176,7 @@ export const Error: Story = {
  * モバイルビューでのタイムライン表示
  */
 export const Mobile: Story = {
+  tags: ["vrt"],
   args: {
     posts: mockPosts,
     isLoading: false,
@@ -147,5 +186,39 @@ export const Mobile: Story = {
     viewport: {
       defaultViewport: "mobile1",
     },
+  },
+};
+
+/**
+ * フレーバーフィルター付き（インタラクティブ）
+ * フィルター選択に応じてタイムラインの投稿が絞り込まれる
+ */
+export const WithFlavorFilterInteractive: Story = {
+  tags: ["vrt"],
+  args: {
+    posts: mockPosts,
+    isLoading: false,
+    error: null,
+    availableFlavors: mockFlavors,
+    selectedFlavorIds: [],
+    onFlavorToggle: () => {},
+    onPostClick: () => {},
+  },
+};
+
+/**
+ * フレーバーフィルター付き（初期選択あり）
+ * ミントとベリーが選択された状態
+ */
+export const WithFlavorFilterPreselected: Story = {
+  tags: ["vrt"],
+  args: {
+    posts: mockPosts.filter((post) => post.flavor_id === 1 || post.flavor_id === 3),
+    isLoading: false,
+    error: null,
+    availableFlavors: mockFlavors,
+    selectedFlavorIds: [1, 3],
+    onFlavorToggle: () => {},
+    onPostClick: () => {},
   },
 };

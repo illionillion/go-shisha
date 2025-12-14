@@ -1,12 +1,19 @@
 "use client";
 
-import type { GoShishaBackendInternalModelsPost } from "../../../api/model";
+import type {
+  GoShishaBackendInternalModelsFlavor,
+  GoShishaBackendInternalModelsPost,
+} from "../../../api/model";
+import { FlavorFilter } from "./FlavorFilter";
 import { PostCard } from "./PostCard";
 
 interface TimelineProps {
   posts: GoShishaBackendInternalModelsPost[];
   isLoading?: boolean;
   error?: unknown;
+  availableFlavors?: GoShishaBackendInternalModelsFlavor[];
+  selectedFlavorIds?: number[];
+  onFlavorToggle?: (flavorId: number) => void;
   onPostClick?: (post: GoShishaBackendInternalModelsPost) => void;
 }
 
@@ -14,9 +21,18 @@ interface TimelineProps {
  * Timelineコンポーネント
  * REQUIREMENTS.mdの仕様に基づいた投稿タイムライン
  * - 2列グリッドレイアウト
+ * - フレーバーフィルター（オプション）
  * - ローディング・エラーハンドリング
  */
-export function Timeline({ posts, isLoading = false, error = null, onPostClick }: TimelineProps) {
+export function Timeline({
+  posts,
+  isLoading = false,
+  error = null,
+  availableFlavors = [],
+  selectedFlavorIds = [],
+  onFlavorToggle,
+  onPostClick,
+}: TimelineProps) {
   const handleLike = (postId: number) => {
     // TODO: いいねAPI連携
     console.log("Liked post:", postId);
@@ -49,6 +65,13 @@ export function Timeline({ posts, isLoading = false, error = null, onPostClick }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
+      {availableFlavors.length > 0 && onFlavorToggle && (
+        <FlavorFilter
+          flavors={availableFlavors}
+          selectedFlavorIds={selectedFlavorIds}
+          onFlavorToggle={onFlavorToggle}
+        />
+      )}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         {posts.map((post) => (
           <PostCard key={post.id} post={post} onLike={handleLike} onClick={handlePostClick} />
