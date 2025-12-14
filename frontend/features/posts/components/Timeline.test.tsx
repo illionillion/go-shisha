@@ -1,8 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
-import type { GoShishaBackendInternalModelsPost } from "../../../api/model";
+import type {
+  GoShishaBackendInternalModelsFlavor,
+  GoShishaBackendInternalModelsPost,
+} from "../../../api/model";
 import { Timeline } from "./Timeline";
+
+const mockFlavors: GoShishaBackendInternalModelsFlavor[] = [
+  { id: 1, name: "ミント", color: "bg-green-500" },
+  { id: 2, name: "アップル", color: "bg-red-500" },
+];
 
 const mockPosts: GoShishaBackendInternalModelsPost[] = [
   {
@@ -114,5 +122,26 @@ describe("Timeline", () => {
 
     expect(consoleSpy).toHaveBeenCalledWith("Liked post:", 1);
     consoleSpy.mockRestore();
+  });
+
+  it("フレーバーフィルターが提供された場合に表示される", () => {
+    render(
+      <Timeline
+        posts={mockPosts}
+        availableFlavors={mockFlavors}
+        selectedFlavorIds={[]}
+        onFlavorToggle={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("フレーバーで絞り込み")).toBeInTheDocument();
+    expect(screen.getAllByText("ミント").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("アップル").length).toBeGreaterThan(0);
+  });
+
+  it("フレーバーフィルターが提供されない場合は表示されない", () => {
+    render(<Timeline posts={mockPosts} />);
+
+    expect(screen.queryByText("フレーバーで絞り込み")).not.toBeInTheDocument();
   });
 });
