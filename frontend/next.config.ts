@@ -26,6 +26,8 @@ const nextConfig: NextConfig = {
       },
       // TODO: 本番環境用の画像ホストをここに追加する
     ],
+    // 開発環境でlocalhostへのアクセスを許可（SSRF保護を無効化）
+    unoptimized: process.env.NODE_ENV === "development",
   },
 };
 
