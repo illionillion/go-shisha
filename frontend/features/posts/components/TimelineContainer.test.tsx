@@ -21,8 +21,8 @@ vi.mock("./Timeline", () => ({
       {/* filteredPosts/handleFlavorToggleテスト用 */}
       {props.onFlavorToggle && (
         <>
-          <button onClick={() => props.onFlavorToggle && props.onFlavorToggle(10)}>toggle10</button>
-          <button onClick={() => props.onFlavorToggle && props.onFlavorToggle(20)}>toggle20</button>
+          <button onClick={() => props.onFlavorToggle?.(10)}>toggle10</button>
+          <button onClick={() => props.onFlavorToggle?.(20)}>toggle20</button>
           <div data-testid="selected">{props.selectedFlavorIds?.join(",")}</div>
           <div data-testid="posts">{props.posts?.map((p) => p.id).join(",")}</div>
         </>
@@ -47,7 +47,6 @@ const mockPosts: GoShishaBackendInternalModelsPost[] = [
     flavor_id: 10,
     flavor: mockFlavors[0],
     user_id: 1,
-    // 必須フィールドを全て埋める
   },
   {
     id: 2,
@@ -64,8 +63,8 @@ describe("TimelineContainer", () => {
     user = userEvent.setup();
   });
 
-  test("SSR: initialPostsありの場合、SSRデータが正しくTimelineに渡る", () => {
-    (useGetPosts as unknown as jest.Mock).mockReturnValue({
+  test("SSR: initialPostsありの場合、SSRデータが正しくTimelineに渡る（isLoadingはfalse）", () => {
+    (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: null,
@@ -78,7 +77,7 @@ describe("TimelineContainer", () => {
   });
 
   test("CSR: initialPostsなしでローディング時はisLoading:trueが渡る", () => {
-    (useGetPosts as unknown as jest.Mock).mockReturnValue({
+    (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,
@@ -88,7 +87,7 @@ describe("TimelineContainer", () => {
   });
 
   test("CSR: データ取得後はposts/availableFlavorsが正しく渡る", () => {
-    (useGetPosts as unknown as jest.Mock).mockReturnValue({
+    (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
       data: { posts: mockPosts },
       isLoading: false,
       error: null,
@@ -99,7 +98,7 @@ describe("TimelineContainer", () => {
   });
 
   test("CSR: エラー時はerrorが正しくTimelineに渡る", () => {
-    (useGetPosts as unknown as jest.Mock).mockReturnValue({
+    (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: { message: "err" },
@@ -109,7 +108,7 @@ describe("TimelineContainer", () => {
   });
 
   test("ガード: posts/flavorが空・異常値でもクラッシュしない", () => {
-    (useGetPosts as unknown as jest.Mock).mockReturnValue({
+    (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
       data: undefined,
       isLoading: false,
       error: null,
@@ -132,7 +131,7 @@ describe("TimelineContainer", () => {
   });
 
   test("filteredPosts/handleFlavorToggle: flavor選択で絞り込み・トグル動作が正しい", async () => {
-    (useGetPosts as unknown as jest.Mock).mockReturnValue({
+    (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
       data: { posts: mockPosts },
       isLoading: false,
       error: null,
