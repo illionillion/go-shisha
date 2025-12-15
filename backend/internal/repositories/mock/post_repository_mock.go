@@ -17,12 +17,6 @@ type PostRepositoryMock struct {
  * NewPostRepositoryMock creates a new mock post repository with sample data
  */
 func NewPostRepositoryMock() *PostRepositoryMock {
-	flavorID1 := 1
-	flavorID2 := 2
-	flavorID3 := 3
-	flavorID4 := 4
-	flavorID5 := 5
-	flavorID6 := 6
 	
 	return &PostRepositoryMock{
 		       posts: []models.Post{
