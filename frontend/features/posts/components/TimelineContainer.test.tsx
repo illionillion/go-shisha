@@ -44,7 +44,6 @@ const mockFlavors: GoShishaBackendInternalModelsFlavor[] = [
 const mockPosts: GoShishaBackendInternalModelsPost[] = [
   {
     id: 1,
-    // title: "投稿1", // 型定義に存在しないため削除
     flavor_id: 10,
     flavor: mockFlavors[0],
     user_id: 1,
@@ -52,7 +51,6 @@ const mockPosts: GoShishaBackendInternalModelsPost[] = [
   },
   {
     id: 2,
-    // title: "投稿2", // 型定義に存在しないため削除
     flavor_id: 20,
     flavor: mockFlavors[1],
     user_id: 2,
