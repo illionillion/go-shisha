@@ -2,15 +2,16 @@ basePath: /api/v1
 definitions:
   go-shisha-backend_internal_models.CreatePostInput:
     properties:
-      image_url:
-        type: string
       message:
         maxLength: 100
         type: string
+      slides:
+        items:
+          $ref: '#/definitions/go-shisha-backend_internal_models.Slide'
+        type: array
       user_id:
         type: integer
     required:
-    - image_url
     - message
     - user_id
     type: object
@@ -25,18 +26,16 @@ definitions:
     type: object
   go-shisha-backend_internal_models.Post:
     properties:
-      flavor:
-        $ref: '#/definitions/go-shisha-backend_internal_models.Flavor'
-      flavor_id:
-        type: integer
       id:
         type: integer
-      image_url:
-        type: string
       likes:
         type: integer
       message:
         type: string
+      slides:
+        items:
+          $ref: '#/definitions/go-shisha-backend_internal_models.Slide'
+        type: array
       user:
         $ref: '#/definitions/go-shisha-backend_internal_models.User'
       user_id:
@@ -50,6 +49,15 @@ definitions:
         type: array
       total:
         type: integer
+    type: object
+  go-shisha-backend_internal_models.Slide:
+    properties:
+      flavor:
+        $ref: '#/definitions/go-shisha-backend_internal_models.Flavor'
+      image_url:
+        type: string
+      text:
+        type: string
     type: object
   go-shisha-backend_internal_models.User:
     properties:
