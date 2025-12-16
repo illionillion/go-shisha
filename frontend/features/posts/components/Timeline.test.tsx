@@ -17,24 +17,34 @@ const mockPosts: GoShishaBackendInternalModelsPost[] = [
     id: 1,
     user_id: 1,
     message: "今日のシーシャは最高でした！",
-    image_url: "https://picsum.photos/400/600?random=1",
+    slides: [
+      {
+        image_url: "https://picsum.photos/400/600?random=1",
+        text: "今日のシーシャは最高でした！",
+        flavor: {
+          id: 1,
+          name: "ミント",
+          color: "bg-green-500",
+        },
+      },
+    ],
     likes: 12,
     user: {
       id: 1,
       email: "test@example.com",
       display_name: "テストユーザー",
     },
-    flavor: {
-      id: 1,
-      name: "ミント",
-      color: "bg-green-500",
-    },
   },
   {
     id: 2,
     user_id: 2,
     message: "新しいお店を発見！",
-    image_url: "https://picsum.photos/400/600?random=2",
+    slides: [
+      {
+        image_url: "https://picsum.photos/400/600?random=2",
+        text: "新しいお店を発見！",
+      },
+    ],
     likes: 8,
     user: {
       id: 2,
