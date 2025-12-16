@@ -26,8 +26,8 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 				       Message:  "今日のシーシャは最高でした！ミント系のフレーバーが爽やかで最高",
 				       Slides: []models.Slide{
 					       {ImageURL: "/images/264971_0.jpg", Text: "最初はミント。爽やかでスッキリ！", Flavor: &mockFlavors[0]},
-					       {ImageURL: "/images/264971_1.jpg", Text: "次はダブルアップル。甘さが絶妙", Flavor: &mockFlavors[1]},
-					       {ImageURL: "/images/264971_2.jpg", Text: "最後はレモン。締めにぴったり", Flavor: &mockFlavors[2]},
+					       {ImageURL: "/images/264972_0.jpg", Text: "次はダブルアップル。甘さが絶妙", Flavor: &mockFlavors[1]},
+					       {ImageURL: "/images/264973_0.jpg", Text: "最後はレモン。締めにぴったり", Flavor: &mockFlavors[2]},
 				       },
 				       Likes:    12,
 				       User: models.User{
@@ -44,8 +44,8 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 				       UserID:   2,
 				       Message:  "新しいお店を発見！雰囲気も良くて味も抜群でした",
 				       Slides: []models.Slide{
-					       {ImageURL: "/images/264972_0.jpg", Text: "グレープの濃厚な香り", Flavor: &mockFlavors[3]},
-					       {ImageURL: "/images/264972_1.jpg", Text: "オレンジでリフレッシュ", Flavor: &mockFlavors[4]},
+					       {ImageURL: "/images/264974_0.jpg", Text: "グレープの濃厚な香り", Flavor: &mockFlavors[3]},
+					       {ImageURL: "/images/264975_0.jpg", Text: "オレンジでリフレッシュ", Flavor: &mockFlavors[4]},
 				       },
 				       Likes:    8,
 				       User: models.User{
@@ -79,8 +79,8 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 				       UserID:   2,
 				       Message:  "マンゴーのトロピカル感が最高！ 夏にぴったり。",
 				       Slides: []models.Slide{
-					       {ImageURL: "/images/264974_0.jpg", Text: "マンゴーで夏気分", Flavor: &mockFlavors[5]},
-					       {ImageURL: "/images/264974_1.jpg", Text: "ミントでクールダウン", Flavor: &mockFlavors[0]},
+					       {ImageURL: "/images/264978_0.jpg", Text: "マンゴーで夏気分", Flavor: &mockFlavors[5]},
+					       {ImageURL: "/images/264979_0.jpg", Text: "ミントでクールダウン", Flavor: &mockFlavors[0]},
 				       },
 				       Likes:    15,
 				       User: models.User{
@@ -115,7 +115,7 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 				       Message:  "グレープの濃厚な味わい。フルーツ系の中でも特におすすめ！",
 				       Slides: []models.Slide{
 					       {ImageURL: "/images/264976_0.jpg", Text: "グレープで濃厚な一服", Flavor: &mockFlavors[3]},
-					       {ImageURL: "/images/264976_1.jpg", Text: "レモンでさっぱり", Flavor: &mockFlavors[2]},
+					       {ImageURL: "/images/264977_0.jpg", Text: "レモンでさっぱり", Flavor: &mockFlavors[2]},
 				       },
 				       Likes:    25,
 				       User: models.User{
