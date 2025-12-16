@@ -6,10 +6,11 @@
 このAPIはシーシャの投稿、ユーザー管理を行います
  * OpenAPI spec version: 1.0
  */
+import type { GoShishaBackendInternalModelsSlide } from "./goShishaBackendInternalModelsSlide";
 
 export interface GoShishaBackendInternalModelsCreatePostInput {
-  image_url: string;
   /** @maxLength 100 */
   message: string;
+  slides?: GoShishaBackendInternalModelsSlide[];
   user_id: number;
 }
