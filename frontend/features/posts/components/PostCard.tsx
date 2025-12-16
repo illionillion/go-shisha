@@ -3,13 +3,15 @@
 import { cva } from "class-variance-authority";
 import { clsx } from "clsx";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { GoShishaBackendInternalModelsPost } from "../../../api/model";
 
 interface PostCardProps {
   post: GoShishaBackendInternalModelsPost;
   onLike: (postId: number) => void;
   onClick: (post: GoShishaBackendInternalModelsPost) => void;
+  /** 自動切り替えのインターバル（ミリ秒）。デフォルト3000ms */
+  autoPlayInterval?: number;
 }
 
 const cardVariants = cva(["relative", "cursor-pointer", "group"], {
@@ -52,9 +54,38 @@ const likeButtonVariants = cva(
  * - フレーバー名の色付きラベル表示
  * - いいねボタン
  * - クリックで投稿詳細ページへ遷移（予定）
+ * - 複数画像スライド対応（インスタストーリー風）
+ * - 自動切り替え＋手動切り替え対応
+ * - 進捗バー表示
  */
-export function PostCard({ post, onLike, onClick }: PostCardProps) {
+export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const slides = post.slides || [];
+  const hasMultipleSlides = slides.length > 1;
+
+  /** 自動切り替えタイマー */
+  useEffect(() => {
+    if (!hasMultipleSlides) return;
+
+    const timer = setInterval(() => {
+      setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
+    }, autoPlayInterval);
+
+    return () => clearInterval(timer);
+  }, [hasMultipleSlides, slides.length, autoPlayInterval]);
+
+  /** 前のスライドへ */
+  const handlePrevSlide = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentSlideIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  /** 次のスライドへ */
+  const handleNextSlide = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
+  };
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -89,12 +120,18 @@ export function PostCard({ post, onLike, onClick }: PostCardProps) {
     return `${backendUrl}${url}`;
   };
 
+  // 現在のスライドデータ
+  const currentSlide = slides[currentSlideIndex];
+  const displayImageUrl = getImageUrl(currentSlide?.image_url);
+  const displayText = currentSlide?.text || post.message || "";
+  const displayFlavor = currentSlide?.flavor;
+
   return (
     <div className={cardVariants()} onClick={() => onClick(post)} role="button" tabIndex={0}>
       <div className={imageContainerVariants()}>
         <Image
-          src={getImageUrl(post.image_url)}
-          alt={post.message || "シーシャ投稿"}
+          src={displayImageUrl}
+          alt={displayText || "シーシャ投稿"}
           fill
           className={clsx([
             "object-cover",
@@ -106,10 +143,99 @@ export function PostCard({ post, onLike, onClick }: PostCardProps) {
           ])}
         />
         <div className={overlayVariants()} />
+
+        {/* 進捗バー（複数スライド時のみ表示） */}
+        {hasMultipleSlides && (
+          <div
+            className={clsx(["absolute", "top-2", "left-2", "right-2", "flex", "gap-1", "z-10"])}
+          >
+            {slides.map((_, index) => (
+              <div
+                key={index}
+                className={clsx([
+                  "h-1",
+                  "flex-1",
+                  "rounded-full",
+                  "transition-colors",
+                  index === currentSlideIndex ? "bg-white" : "bg-white/30",
+                ])}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* 左右切り替えボタン（複数スライド時のみ表示） */}
+        {hasMultipleSlides && (
+          <>
+            <button
+              onClick={handlePrevSlide}
+              className={clsx([
+                "absolute",
+                "left-2",
+                "top-1/2",
+                "-translate-y-1/2",
+                "p-2",
+                "rounded-full",
+                "bg-white/20",
+                "backdrop-blur-sm",
+                "hover:bg-white/30",
+                "transition-colors",
+                "z-10",
+              ])}
+              aria-label="前のスライド"
+            >
+              <svg
+                className="w-4 h-4 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={handleNextSlide}
+              className={clsx([
+                "absolute",
+                "right-2",
+                "top-1/2",
+                "-translate-y-1/2",
+                "p-2",
+                "rounded-full",
+                "bg-white/20",
+                "backdrop-blur-sm",
+                "hover:bg-white/30",
+                "transition-colors",
+                "z-10",
+              ])}
+              aria-label="次のスライド"
+            >
+              <svg
+                className="w-4 h-4 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </>
+        )}
+
         <div className={clsx(["absolute", "bottom-0", "left-0", "right-0", "p-4", "text-white"])}>
           <p className={clsx(["text-sm", "font-medium", "mb-2"])}>{post.user?.display_name}</p>
-          <p className={clsx(["text-sm", "line-clamp-3"])}>{post.message}</p>
-          {post.flavor && (
+          <p className={clsx(["text-sm", "line-clamp-3"])}>{displayText}</p>
+          {displayFlavor && (
             <span
               className={clsx([
                 "inline-block",
@@ -120,10 +246,10 @@ export function PostCard({ post, onLike, onClick }: PostCardProps) {
                 "rounded-full",
                 "text-white",
                 "select-none",
-                getFlavorColorClass(post.flavor.color),
+                getFlavorColorClass(displayFlavor.color),
               ])}
             >
-              {post.flavor.name}
+              {displayFlavor.name}
             </span>
           )}
         </div>

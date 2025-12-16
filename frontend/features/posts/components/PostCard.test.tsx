@@ -8,7 +8,17 @@ const mockPost: GoShishaBackendInternalModelsPost = {
   id: 1,
   user_id: 1,
   message: "今日のシーシャは最高でした！",
-  image_url: "https://picsum.photos/400/600?random=1",
+  slides: [
+    {
+      image_url: "https://picsum.photos/400/600?random=1",
+      text: "今日のシーシャは最高でした！",
+      flavor: {
+        id: 1,
+        name: "ミント",
+        color: "bg-green-500",
+      },
+    },
+  ],
   likes: 12,
   user: {
     id: 1,
@@ -17,12 +27,6 @@ const mockPost: GoShishaBackendInternalModelsPost = {
     description: "シーシャ大好き！",
     icon_url: "",
     external_url: "",
-  },
-  flavor_id: 1,
-  flavor: {
-    id: 1,
-    name: "ミント",
-    color: "bg-green-500",
   },
 };
 
@@ -47,7 +51,16 @@ describe("PostCard", () => {
   });
 
   it("フレーバーがない場合は表示されない", () => {
-    const postWithoutFlavor = { ...mockPost, flavor: undefined };
+    const postWithoutFlavor = {
+      ...mockPost,
+      slides: [
+        {
+          image_url: "https://picsum.photos/400/600?random=1",
+          text: "今日のシーシャは最高でした！",
+          flavor: undefined,
+        },
+      ],
+    };
     const onLike = vi.fn();
     const onClick = vi.fn();
 
@@ -133,7 +146,15 @@ describe("PostCard", () => {
   });
 
   it("image_urlがundefinedの場合、フォールバック画像が表示される", () => {
-    const postWithoutImage = { ...mockPost, image_url: undefined };
+    const postWithoutImage = {
+      ...mockPost,
+      slides: [
+        {
+          image_url: undefined,
+          text: "今日のシーシャは最高でした！",
+        },
+      ],
+    };
     const onLike = vi.fn();
     const onClick = vi.fn();
 
@@ -147,7 +168,15 @@ describe("PostCard", () => {
     const originalEnv = process.env.NEXT_PUBLIC_BACKEND_URL;
     process.env.NEXT_PUBLIC_BACKEND_URL = "http://localhost:8080";
 
-    const postWithRelativeImage = { ...mockPost, image_url: "/images/test.jpg" };
+    const postWithRelativeImage = {
+      ...mockPost,
+      slides: [
+        {
+          image_url: "/images/test.jpg",
+          text: "今日のシーシャは最高でした！",
+        },
+      ],
+    };
     const onLike = vi.fn();
     const onClick = vi.fn();
 
@@ -163,7 +192,15 @@ describe("PostCard", () => {
     const originalEnv = process.env.NEXT_PUBLIC_BACKEND_URL;
     delete process.env.NEXT_PUBLIC_BACKEND_URL;
 
-    const postWithRelativeImage = { ...mockPost, image_url: "/images/test.jpg" };
+    const postWithRelativeImage = {
+      ...mockPost,
+      slides: [
+        {
+          image_url: "/images/test.jpg",
+          text: "今日のシーシャは最高でした！",
+        },
+      ],
+    };
     const onLike = vi.fn();
     const onClick = vi.fn();
 
@@ -188,7 +225,12 @@ describe("PostCard", () => {
   it("フレーバーのcolorがundefinedの場合、デフォルトのbg-gray-500が適用される", () => {
     const postWithUndefinedColor = {
       ...mockPost,
-      flavor: { ...mockPost.flavor, color: undefined },
+      slides: [
+        {
+          ...mockPost.slides?.[0],
+          flavor: { id: 1, name: "ミント", color: undefined },
+        },
+      ],
     };
     const onLike = vi.fn();
     const onClick = vi.fn();
@@ -202,7 +244,12 @@ describe("PostCard", () => {
   it("フレーバーのcolorが未知の場合、デフォルトのbg-gray-500が適用される", () => {
     const postWithUnknownColor = {
       ...mockPost,
-      flavor: { ...mockPost.flavor, color: "bg-unknown-500" },
+      slides: [
+        {
+          ...mockPost.slides?.[0],
+          flavor: { id: 1, name: "ミント", color: "bg-unknown-500" },
+        },
+      ],
     };
     const onLike = vi.fn();
     const onClick = vi.fn();
@@ -214,7 +261,16 @@ describe("PostCard", () => {
   });
 
   it("post.messageがundefinedの場合、alt属性がデフォルト値になる", () => {
-    const postWithoutMessage = { ...mockPost, message: undefined };
+    const postWithoutMessage = {
+      ...mockPost,
+      message: undefined,
+      slides: [
+        {
+          image_url: "https://picsum.photos/400/600?random=1",
+          text: "",
+        },
+      ],
+    };
     const onLike = vi.fn();
     const onClick = vi.fn();
 
@@ -222,5 +278,169 @@ describe("PostCard", () => {
 
     const img = screen.getByAltText("シーシャ投稿");
     expect(img).toBeInTheDocument();
+  });
+
+  // スライド機能のテスト
+  it("単一スライドの場合、進捗バーと切り替えボタンが表示されない", () => {
+    const onLike = vi.fn();
+    const onClick = vi.fn();
+
+    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+
+    expect(screen.queryByLabelText("前のスライド")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("次のスライド")).not.toBeInTheDocument();
+  });
+
+  it("複数スライドの場合、進捗バーと切り替えボタンが表示される", () => {
+    const multiSlidePost = {
+      ...mockPost,
+      slides: [
+        {
+          image_url: "https://picsum.photos/400/600?random=1",
+          text: "1枚目",
+          flavor: { id: 1, name: "ミント", color: "bg-green-500" },
+        },
+        {
+          image_url: "https://picsum.photos/400/600?random=2",
+          text: "2枚目",
+          flavor: { id: 2, name: "ベリー", color: "bg-purple-500" },
+        },
+      ],
+    };
+    const onLike = vi.fn();
+    const onClick = vi.fn();
+
+    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} />);
+
+    expect(screen.getByLabelText("前のスライド")).toBeInTheDocument();
+    expect(screen.getByLabelText("次のスライド")).toBeInTheDocument();
+  });
+
+  it("次のスライドボタンをクリックすると、次のスライドが表示される", async () => {
+    const user = userEvent.setup();
+    const multiSlidePost = {
+      ...mockPost,
+      slides: [
+        {
+          image_url: "https://picsum.photos/400/600?random=1",
+          text: "1枚目",
+          flavor: { id: 1, name: "ミント", color: "bg-green-500" },
+        },
+        {
+          image_url: "https://picsum.photos/400/600?random=2",
+          text: "2枚目",
+          flavor: { id: 2, name: "ベリー", color: "bg-purple-500" },
+        },
+      ],
+    };
+    const onLike = vi.fn();
+    const onClick = vi.fn();
+
+    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} />);
+
+    expect(screen.getByText("1枚目")).toBeInTheDocument();
+    expect(screen.getByText("ミント")).toBeInTheDocument();
+
+    const nextButton = screen.getByLabelText("次のスライド");
+    await user.click(nextButton);
+
+    expect(screen.getByText("2枚目")).toBeInTheDocument();
+    expect(screen.getByText("ベリー")).toBeInTheDocument();
+  });
+
+  it("前のスライドボタンをクリックすると、前のスライドが表示される", async () => {
+    const user = userEvent.setup();
+    const multiSlidePost = {
+      ...mockPost,
+      slides: [
+        {
+          image_url: "https://picsum.photos/400/600?random=1",
+          text: "1枚目",
+          flavor: { id: 1, name: "ミント", color: "bg-green-500" },
+        },
+        {
+          image_url: "https://picsum.photos/400/600?random=2",
+          text: "2枚目",
+          flavor: { id: 2, name: "ベリー", color: "bg-purple-500" },
+        },
+      ],
+    };
+    const onLike = vi.fn();
+    const onClick = vi.fn();
+
+    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} />);
+
+    const prevButton = screen.getByLabelText("前のスライド");
+    await user.click(prevButton);
+
+    // 最初のスライドから前に戻ると最後のスライドに戻る
+    expect(screen.getByText("2枚目")).toBeInTheDocument();
+    expect(screen.getByText("ベリー")).toBeInTheDocument();
+  });
+
+  it("スライド切り替えボタンをクリックしてもonClickは呼ばれない（イベント伝播停止）", async () => {
+    const user = userEvent.setup();
+    const multiSlidePost = {
+      ...mockPost,
+      slides: [
+        {
+          image_url: "https://picsum.photos/400/600?random=1",
+          text: "1枚目",
+        },
+        {
+          image_url: "https://picsum.photos/400/600?random=2",
+          text: "2枚目",
+        },
+      ],
+    };
+    const onLike = vi.fn();
+    const onClick = vi.fn();
+
+    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} />);
+
+    const nextButton = screen.getByLabelText("次のスライド");
+    await user.click(nextButton);
+
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("自動切り替えが動作する（タイマーテスト）", async () => {
+    vi.useFakeTimers();
+
+    const multiSlidePost = {
+      ...mockPost,
+      slides: [
+        {
+          image_url: "https://picsum.photos/400/600?random=1",
+          text: "1枚目",
+        },
+        {
+          image_url: "https://picsum.photos/400/600?random=2",
+          text: "2枚目",
+        },
+      ],
+    };
+    const onLike = vi.fn();
+    const onClick = vi.fn();
+
+    render(
+      <PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} autoPlayInterval={1000} />
+    );
+
+    expect(screen.getByText("1枚目")).toBeInTheDocument();
+
+    // 1秒後に次のスライドに切り替わる
+    vi.advanceTimersByTime(1000);
+    await vi.waitFor(() => {
+      expect(screen.getByText("2枚目")).toBeInTheDocument();
+    });
+
+    // さらに1秒後に最初のスライドに戻る
+    vi.advanceTimersByTime(1000);
+    await vi.waitFor(() => {
+      expect(screen.getByText("1枚目")).toBeInTheDocument();
+    });
+
+    vi.useRealTimers();
   });
 });
