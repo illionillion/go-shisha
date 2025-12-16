@@ -47,18 +47,11 @@ func (s *PostService) CreatePost(input *models.CreatePostInput) (*models.Post, e
 	       return nil, err
        }
 
-       // images配列が空でなければ1枚目をImageURLにセット
-       imageURL := input.ImageURL
-       if len(input.Images) > 0 {
-	       imageURL = input.Images[0]
-       }
-
        post := &models.Post{
-	       UserID:   input.UserID,
-	       Message:  input.Message,
-	       ImageURL: imageURL,
-	       Images:   input.Images,
-	       User:     *user,
+	       UserID:  input.UserID,
+	       Message: input.Message,
+	       Slides:  input.Slides,
+	       User:    *user,
        }
 
        err = s.postRepo.Create(post)
