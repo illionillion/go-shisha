@@ -11,26 +11,53 @@ import { TimelineContainer } from "./TimelineContainer";
 
 // --- Timelineモック（型安全・テスト用props拡張） ---
 vi.mock("./Timeline", () => ({
-  Timeline: (props: TimelineProps) => (
-    <div data-testid="timeline-mock">
-      <div>posts:{props.posts?.length}</div>
-      <div>isLoading:{String(props.isLoading)}</div>
-      <div>error:{props.error ? "true" : ""}</div>
-      <div>availableFlavors:{props.availableFlavors?.length}</div>
-      <div>selectedFlavorIds:{props.selectedFlavorIds?.join(",")}</div>
-      {/* filteredPosts/handleFlavorToggleテスト用 */}
-      {props.onFlavorToggle && (
-        <>
-          <button onClick={() => props.onFlavorToggle?.(10)}>toggle10</button>
-          <button onClick={() => props.onFlavorToggle?.(20)}>toggle20</button>
-          <div data-testid="selected">{props.selectedFlavorIds?.join(",")}</div>
-          <div data-testid="posts">
-            {props.posts?.map((p: GoShishaBackendInternalModelsPost) => p.id).join(",")}
-          </div>
-        </>
-      )}
-    </div>
-  ),
+  Timeline: (props: TimelineProps) => {
+    // isLoadingやerrorが設定されている場合は、それらを優先表示
+    if (props.isLoading) {
+      return (
+        <div data-testid="timeline-mock">
+          <div>isLoading:true</div>
+        </div>
+      );
+    }
+    if (props.error) {
+      return (
+        <div data-testid="timeline-mock">
+          <div>error:true</div>
+        </div>
+      );
+    }
+    // 投稿が空の場合
+    if (props.posts?.length === 0) {
+      return (
+        <div data-testid="timeline-mock">
+          <div>posts:0</div>
+          <p className="text-center text-gray-500">投稿がありません</p>
+        </div>
+      );
+    }
+    // 通常の表示
+    return (
+      <div data-testid="timeline-mock">
+        <div>posts:{props.posts?.length}</div>
+        <div>isLoading:{String(props.isLoading)}</div>
+        <div>error:{props.error ? "true" : ""}</div>
+        <div>availableFlavors:{props.availableFlavors?.length}</div>
+        <div>selectedFlavorIds:{props.selectedFlavorIds?.join(",")}</div>
+        {/* filteredPosts/handleFlavorToggleテスト用 */}
+        {props.onFlavorToggle && (
+          <>
+            <button onClick={() => props.onFlavorToggle?.(10)}>toggle10</button>
+            <button onClick={() => props.onFlavorToggle?.(20)}>toggle20</button>
+            <div data-testid="selected">{props.selectedFlavorIds?.join(",")}</div>
+            <div data-testid="posts">
+              {props.posts?.map((p: GoShishaBackendInternalModelsPost) => p.id).join(",")}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  },
 }));
 
 // --- useGetPostsモック ---
@@ -162,5 +189,10 @@ describe("TimelineContainer", () => {
     await user.click(screen.getByText("toggle10"));
     expect(screen.getByTestId("selected")).toHaveTextContent("20");
     expect(screen.getByTestId("posts")).toHaveTextContent("2");
+  });
+
+  test("initialPostsが空の場合、タイムラインが空であることを表示", () => {
+    render(<TimelineContainer initialPosts={[]} />);
+    expect(screen.getByText("投稿がありません")).toBeInTheDocument();
   });
 });

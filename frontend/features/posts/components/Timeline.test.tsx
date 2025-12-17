@@ -74,14 +74,6 @@ describe("Timeline", () => {
     expect(screen.getByText("エラーが発生しました")).toBeInTheDocument();
   });
 
-  it("投稿がない場合は空のグリッドが表示される", () => {
-    const { container } = render(<Timeline posts={[]} />);
-
-    const grid = container.querySelector(".grid");
-    expect(grid).toBeInTheDocument();
-    expect(grid?.children.length).toBe(0);
-  });
-
   it("2列グリッドレイアウトが適用される", () => {
     const { container } = render(<Timeline posts={mockPosts} />);
 
@@ -153,5 +145,21 @@ describe("Timeline", () => {
     render(<Timeline posts={mockPosts} />);
 
     expect(screen.queryByText("フレーバーで絞り込み")).not.toBeInTheDocument();
+  });
+
+  test("postsが空の場合、タイムラインが空であることを表示", () => {
+    render(<Timeline posts={[]} />);
+    const emptyMessage = screen.getByText("投稿がありません");
+    expect(emptyMessage).toBeInTheDocument();
+  });
+
+  test("postsがある場合、タイムラインに投稿が表示される", () => {
+    const mockPosts = [
+      { id: 1, slides: [], user_id: 1, message: "投稿1" },
+      { id: 2, slides: [], user_id: 2, message: "投稿2" },
+    ];
+    render(<Timeline posts={mockPosts} />);
+    expect(screen.getByText("投稿1")).toBeInTheDocument();
+    expect(screen.getByText("投稿2")).toBeInTheDocument();
   });
 });

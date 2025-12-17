@@ -63,6 +63,10 @@ export function Timeline({
     );
   }
 
+  if (posts.length === 0) {
+    return <p className="text-center text-gray-500">投稿がありません</p>;
+  }
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
       {availableFlavors.length > 0 && onFlavorToggle && (

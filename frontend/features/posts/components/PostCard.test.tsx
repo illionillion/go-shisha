@@ -570,4 +570,13 @@ describe("PostCard", () => {
     const inactiveProgressBar = progressBars[1] as HTMLElement;
     expect(inactiveProgressBar.style.animationDuration).toBe("");
   });
+
+  test("slidesが空の場合、デフォルト画像が表示される", () => {
+    const mockPost = { id: 1, slides: [], user_id: 1, message: "No slides" };
+    render(<PostCard post={mockPost} onLike={() => {}} onClick={() => {}} />);
+    const fallbackImage = screen.getByAltText("No slides");
+    expect(fallbackImage).toBeInTheDocument();
+    // Next.js ImageがURLをエンコードするため、srcにplacehold.coが含まれていることを確認
+    expect(fallbackImage.getAttribute("src")).toContain("placehold.co");
+  });
 });
