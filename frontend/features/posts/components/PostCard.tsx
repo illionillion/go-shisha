@@ -68,12 +68,15 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
   useEffect(() => {
     if (!hasMultipleSlides) return;
 
-    const timer = setInterval(() => {
+    // スライド切り替えタイマー
+    const slideTimer = setTimeout(() => {
       setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
     }, autoPlayInterval);
 
-    return () => clearInterval(timer);
-  }, [hasMultipleSlides, slides.length, autoPlayInterval]);
+    return () => {
+      clearTimeout(slideTimer);
+    };
+  }, [hasMultipleSlides, slides.length, autoPlayInterval, currentSlideIndex]);
 
   /** 前のスライドへ */
   const handlePrevSlide = (e: React.MouseEvent) => {
@@ -144,7 +147,7 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
         />
         <div className={overlayVariants()} />
 
-        {/* 進捗バー（複数スライド時のみ表示） */}
+        {/* プログレスバー（Instagram Stories風） */}
         {hasMultipleSlides && (
           <div
             className={clsx(["absolute", "top-2", "left-2", "right-2", "flex", "gap-1", "z-10"])}
@@ -156,10 +159,26 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
                   "h-1",
                   "flex-1",
                   "rounded-full",
-                  "transition-colors",
-                  index === currentSlideIndex ? "bg-white" : "bg-white/30",
+                  "bg-white/30",
+                  "overflow-hidden",
                 ])}
-              />
+              >
+                <div
+                  className={clsx([
+                    "h-full",
+                    "bg-white",
+                    "rounded-full",
+                    index < currentSlideIndex && "w-full",
+                    index === currentSlideIndex && "w-0 animate-[progress-bar_linear_forwards]",
+                    index > currentSlideIndex && "w-0",
+                  ])}
+                  style={
+                    index === currentSlideIndex
+                      ? { animationDuration: `${autoPlayInterval}ms` }
+                      : undefined
+                  }
+                />
+              </div>
             ))}
           </div>
         )}
