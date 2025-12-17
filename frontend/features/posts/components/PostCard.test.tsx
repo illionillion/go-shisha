@@ -443,4 +443,131 @@ describe("PostCard", () => {
 
     vi.useRealTimers();
   });
+
+  // プログレスバーのテスト
+  it("複数スライドの場合、プログレスバーのスタイルが正しく適用される", () => {
+    const multiSlidePost = {
+      ...mockPost,
+      slides: [
+        {
+          image_url: "https://picsum.photos/400/600?random=1",
+          text: "1枚目",
+        },
+        {
+          image_url: "https://picsum.photos/400/600?random=2",
+          text: "2枚目",
+        },
+        {
+          image_url: "https://picsum.photos/400/600?random=3",
+          text: "3枚目",
+        },
+      ],
+    };
+    const onLike = vi.fn();
+    const onClick = vi.fn();
+
+    const { container } = render(
+      <PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} autoPlayInterval={3000} />
+    );
+
+    // プログレスバーのコンテナを取得
+    const progressBars = container.querySelectorAll(".h-1.flex-1 > div");
+    expect(progressBars).toHaveLength(3);
+
+    // 1つ目（アクティブ）: w-0 + animate-[progress-bar_linear_forwards]
+    expect(progressBars[0]).toHaveClass("w-0");
+    expect(progressBars[0]).toHaveClass("animate-[progress-bar_linear_forwards]");
+
+    // 2つ目（未表示）: w-0のみ
+    expect(progressBars[1]).toHaveClass("w-0");
+    expect(progressBars[1]).not.toHaveClass("w-full");
+
+    // 3つ目（未表示）: w-0のみ
+    expect(progressBars[2]).toHaveClass("w-0");
+    expect(progressBars[2]).not.toHaveClass("w-full");
+  });
+
+  it("スライドを手動で切り替えたとき、プログレスバーが正しく更新される", async () => {
+    const user = userEvent.setup();
+    const multiSlidePost = {
+      ...mockPost,
+      slides: [
+        {
+          image_url: "https://picsum.photos/400/600?random=1",
+          text: "1枚目",
+        },
+        {
+          image_url: "https://picsum.photos/400/600?random=2",
+          text: "2枚目",
+        },
+        {
+          image_url: "https://picsum.photos/400/600?random=3",
+          text: "3枚目",
+        },
+      ],
+    };
+    const onLike = vi.fn();
+    const onClick = vi.fn();
+
+    const { container } = render(
+      <PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} autoPlayInterval={3000} />
+    );
+
+    const nextButton = screen.getByLabelText("次のスライド");
+
+    // 次のスライドへ移動
+    await user.click(nextButton);
+
+    const progressBars = container.querySelectorAll(".h-1.flex-1 > div");
+
+    // 1つ目（完了）: w-fullに変化
+    expect(progressBars[0]).toHaveClass("w-full");
+
+    // 2つ目（アクティブ）: w-0 + animate-[progress-bar_linear_forwards]
+    expect(progressBars[1]).toHaveClass("w-0");
+    expect(progressBars[1]).toHaveClass("animate-[progress-bar_linear_forwards]");
+
+    // 3つ目（未表示）: w-0のみ
+    expect(progressBars[2]).toHaveClass("w-0");
+    expect(progressBars[2]).not.toHaveClass("w-full");
+  });
+
+  it("プログレスバーのアニメーション時間が正しく設定される", () => {
+    const autoPlayInterval = 5000;
+    const multiSlidePost = {
+      ...mockPost,
+      slides: [
+        {
+          image_url: "https://picsum.photos/400/600?random=1",
+          text: "1枚目",
+        },
+        {
+          image_url: "https://picsum.photos/400/600?random=2",
+          text: "2枚目",
+        },
+      ],
+    };
+    const onLike = vi.fn();
+    const onClick = vi.fn();
+
+    const { container } = render(
+      <PostCard
+        post={multiSlidePost}
+        onLike={onLike}
+        onClick={onClick}
+        autoPlayInterval={autoPlayInterval}
+      />
+    );
+
+    // プログレスバーのコンテナを取得
+    const progressBars = container.querySelectorAll(".h-1.flex-1 > div");
+
+    // 1つ目（アクティブ）のアニメーション時間を確認
+    const activeProgressBar = progressBars[0] as HTMLElement;
+    expect(activeProgressBar.style.animationDuration).toBe(`${autoPlayInterval}ms`);
+
+    // 2つ目（未表示）はアニメーション時間が設定されていない
+    const inactiveProgressBar = progressBars[1] as HTMLElement;
+    expect(inactiveProgressBar.style.animationDuration).toBe("");
+  });
 });
