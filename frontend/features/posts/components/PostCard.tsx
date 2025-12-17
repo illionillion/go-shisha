@@ -81,13 +81,17 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
   /** 前のスライドへ */
   const handlePrevSlide = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setCurrentSlideIndex((prev) => (prev - 1 + slides.length) % slides.length);
+    if (slides.length > 0) {
+      setCurrentSlideIndex((prev) => (prev - 1 + slides.length) % slides.length);
+    }
   };
 
   /** 次のスライドへ */
   const handleNextSlide = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
+    if (slides.length > 0) {
+      setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
+    }
   };
 
   const handleLike = () => {
@@ -124,7 +128,7 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
   };
 
   // 現在のスライドデータ
-  const currentSlide = slides[currentSlideIndex];
+  const currentSlide = slides.length > 0 ? slides[currentSlideIndex] : undefined;
   const displayImageUrl = getImageUrl(currentSlide?.image_url);
   const displayText = currentSlide?.text || post.message || "";
   const displayFlavor = currentSlide?.flavor;
@@ -169,6 +173,7 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
                     "bg-white",
                     "rounded-full",
                     index < currentSlideIndex && "w-full",
+                    // Tailwind configでanimate-[progress-bar_linear_forwards]を拡張している前提
                     index === currentSlideIndex && "w-0 animate-[progress-bar_linear_forwards]",
                     index > currentSlideIndex && "w-0",
                   ])}
@@ -187,6 +192,7 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
         {hasMultipleSlides && (
           <>
             <button
+              type="button"
               onClick={handlePrevSlide}
               className={clsx([
                 "absolute",
@@ -218,6 +224,7 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
               </svg>
             </button>
             <button
+              type="button"
               onClick={handleNextSlide}
               className={clsx([
                 "absolute",
