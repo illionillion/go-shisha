@@ -36,9 +36,11 @@ export function TimelineContainer({ initialPosts }: TimelineContainerProps) {
   const availableFlavors = useMemo(() => {
     const flavorMap = new Map<number, GoShishaBackendInternalModelsFlavor>();
     posts.forEach((post) => {
-      if (post.flavor && post.flavor.id) {
-        flavorMap.set(post.flavor.id, post.flavor);
-      }
+      post.slides?.forEach((slide) => {
+        if (slide.flavor && slide.flavor.id) {
+          flavorMap.set(slide.flavor.id, slide.flavor);
+        }
+      });
     });
     return Array.from(flavorMap.values());
   }, [posts]);
@@ -48,7 +50,11 @@ export function TimelineContainer({ initialPosts }: TimelineContainerProps) {
     if (selectedFlavorIds.length === 0) {
       return posts;
     }
-    return posts.filter((post) => post.flavor_id && selectedFlavorIds.includes(post.flavor_id));
+    return posts.filter((post) => {
+      return post.slides?.some(
+        (slide) => slide.flavor?.id && selectedFlavorIds.includes(slide.flavor.id)
+      );
+    });
   }, [posts, selectedFlavorIds]);
 
   /**

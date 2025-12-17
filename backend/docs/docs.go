@@ -306,17 +306,19 @@ const docTemplate = `{
         "go-shisha-backend_internal_models.CreatePostInput": {
             "type": "object",
             "required": [
-                "image_url",
                 "message",
                 "user_id"
             ],
             "properties": {
-                "image_url": {
-                    "type": "string"
-                },
                 "message": {
                     "type": "string",
                     "maxLength": 100
+                },
+                "slides": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/go-shisha-backend_internal_models.Slide"
+                    }
                 },
                 "user_id": {
                     "type": "integer"
@@ -340,23 +342,20 @@ const docTemplate = `{
         "go-shisha-backend_internal_models.Post": {
             "type": "object",
             "properties": {
-                "flavor": {
-                    "$ref": "#/definitions/go-shisha-backend_internal_models.Flavor"
-                },
-                "flavor_id": {
-                    "type": "integer"
-                },
                 "id": {
                     "type": "integer"
-                },
-                "image_url": {
-                    "type": "string"
                 },
                 "likes": {
                     "type": "integer"
                 },
                 "message": {
                     "type": "string"
+                },
+                "slides": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/go-shisha-backend_internal_models.Slide"
+                    }
                 },
                 "user": {
                     "$ref": "#/definitions/go-shisha-backend_internal_models.User"
@@ -377,6 +376,20 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "integer"
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.Slide": {
+            "type": "object",
+            "properties": {
+                "flavor": {
+                    "$ref": "#/definitions/go-shisha-backend_internal_models.Flavor"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
                 }
             }
         },

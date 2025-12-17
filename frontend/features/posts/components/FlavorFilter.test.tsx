@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { FlavorFilter } from "./FlavorFilter";
@@ -114,5 +114,27 @@ describe("FlavorFilter", () => {
     expect(mockOnFlavorToggle).toHaveBeenCalledWith(1);
     expect(mockOnFlavorToggle).toHaveBeenCalledWith(2);
     expect(mockOnFlavorToggle).toHaveBeenCalledTimes(2);
+  });
+
+  test("flavorsが空の場合、フィルタが表示されない", () => {
+    render(<FlavorFilter flavors={[]} selectedFlavorIds={[]} onFlavorToggle={() => {}} />);
+    expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  test("onFlavorToggleが正しく動作する", () => {
+    const mockToggle = vi.fn();
+    const flavors = [
+      { id: 1, name: "ミント" },
+      { id: 2, name: "レモン" },
+    ];
+    render(<FlavorFilter flavors={flavors} selectedFlavorIds={[1]} onFlavorToggle={mockToggle} />);
+
+    // レモンをクリック
+    fireEvent.click(screen.getByText("レモン"));
+    expect(mockToggle).toHaveBeenCalledWith(2);
+
+    // ミントをクリック
+    fireEvent.click(screen.getByText("ミント"));
+    expect(mockToggle).toHaveBeenCalledWith(1);
   });
 });

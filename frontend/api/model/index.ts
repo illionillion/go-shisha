@@ -19,6 +19,7 @@ export * from "./goShishaBackendInternalModelsCreatePostInput";
 export * from "./goShishaBackendInternalModelsFlavor";
 export * from "./goShishaBackendInternalModelsPost";
 export * from "./goShishaBackendInternalModelsPostsResponse";
+export * from "./goShishaBackendInternalModelsSlide";
 export * from "./goShishaBackendInternalModelsUser";
 export * from "./goShishaBackendInternalModelsUsersResponse";
 export * from "./internalHandlersPostsListResponse";

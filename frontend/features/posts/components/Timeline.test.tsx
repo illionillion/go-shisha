@@ -17,24 +17,34 @@ const mockPosts: GoShishaBackendInternalModelsPost[] = [
     id: 1,
     user_id: 1,
     message: "今日のシーシャは最高でした！",
-    image_url: "https://picsum.photos/400/600?random=1",
+    slides: [
+      {
+        image_url: "https://picsum.photos/400/600?random=1",
+        text: "今日のシーシャは最高でした！",
+        flavor: {
+          id: 1,
+          name: "ミント",
+          color: "bg-green-500",
+        },
+      },
+    ],
     likes: 12,
     user: {
       id: 1,
       email: "test@example.com",
       display_name: "テストユーザー",
     },
-    flavor: {
-      id: 1,
-      name: "ミント",
-      color: "bg-green-500",
-    },
   },
   {
     id: 2,
     user_id: 2,
     message: "新しいお店を発見！",
-    image_url: "https://picsum.photos/400/600?random=2",
+    slides: [
+      {
+        image_url: "https://picsum.photos/400/600?random=2",
+        text: "新しいお店を発見！",
+      },
+    ],
     likes: 8,
     user: {
       id: 2,
@@ -62,14 +72,6 @@ describe("Timeline", () => {
     render(<Timeline posts={[]} error="エラーが発生しました" />);
 
     expect(screen.getByText("エラーが発生しました")).toBeInTheDocument();
-  });
-
-  it("投稿がない場合は空のグリッドが表示される", () => {
-    const { container } = render(<Timeline posts={[]} />);
-
-    const grid = container.querySelector(".grid");
-    expect(grid).toBeInTheDocument();
-    expect(grid?.children.length).toBe(0);
   });
 
   it("2列グリッドレイアウトが適用される", () => {
@@ -143,5 +145,21 @@ describe("Timeline", () => {
     render(<Timeline posts={mockPosts} />);
 
     expect(screen.queryByText("フレーバーで絞り込み")).not.toBeInTheDocument();
+  });
+
+  test("postsが空の場合、タイムラインが空であることを表示", () => {
+    render(<Timeline posts={[]} />);
+    const emptyMessage = screen.getByText("投稿がありません");
+    expect(emptyMessage).toBeInTheDocument();
+  });
+
+  test("postsがある場合、タイムラインに投稿が表示される", () => {
+    const mockPosts = [
+      { id: 1, slides: [], user_id: 1, message: "投稿1" },
+      { id: 2, slides: [], user_id: 2, message: "投稿2" },
+    ];
+    render(<Timeline posts={mockPosts} />);
+    expect(screen.getByText("投稿1")).toBeInTheDocument();
+    expect(screen.getByText("投稿2")).toBeInTheDocument();
   });
 });

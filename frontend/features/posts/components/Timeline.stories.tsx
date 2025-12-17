@@ -17,7 +17,17 @@ const mockPosts: GoShishaBackendInternalModelsPost[] = [
     id: 1,
     user_id: 1,
     message: "今日のシーシャは最高でした！ミント系のフレーバーが爽やかで最高",
-    image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Mint",
+    slides: [
+      {
+        image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Mint",
+        text: "今日のシーシャは最高でした！ミント系のフレーバーが爽やかで最高",
+        flavor: {
+          id: 1,
+          name: "ミント",
+          color: "bg-green-500",
+        },
+      },
+    ],
     likes: 12,
     user: {
       id: 1,
@@ -27,18 +37,22 @@ const mockPosts: GoShishaBackendInternalModelsPost[] = [
       icon_url: "",
       external_url: "",
     },
-    flavor_id: 1,
-    flavor: {
-      id: 1,
-      name: "ミント",
-      color: "bg-green-500",
-    },
   },
   {
     id: 2,
     user_id: 2,
     message: "新しいお店を発見！雰囲気も良くて味も抜群でした",
-    image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Apple",
+    slides: [
+      {
+        image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Apple",
+        text: "新しいお店を発見！雰囲気も良くて味も抜群でした",
+        flavor: {
+          id: 2,
+          name: "アップル",
+          color: "bg-red-500",
+        },
+      },
+    ],
     likes: 8,
     user: {
       id: 2,
@@ -48,18 +62,22 @@ const mockPosts: GoShishaBackendInternalModelsPost[] = [
       icon_url: "",
       external_url: "https://twitter.com/shishamaster",
     },
-    flavor_id: 2,
-    flavor: {
-      id: 2,
-      name: "アップル",
-      color: "bg-red-500",
-    },
   },
   {
     id: 3,
     user_id: 1,
     message: "ベリーの酸味がたまらない。ミックスもいいかも。",
-    image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Berry",
+    slides: [
+      {
+        image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Berry",
+        text: "ベリーの酸味がたまらない。ミックスもいいかも。",
+        flavor: {
+          id: 3,
+          name: "ベリー",
+          color: "bg-purple-500",
+        },
+      },
+    ],
     likes: 22,
     user: {
       id: 1,
@@ -69,18 +87,22 @@ const mockPosts: GoShishaBackendInternalModelsPost[] = [
       icon_url: "",
       external_url: "",
     },
-    flavor_id: 3,
-    flavor: {
-      id: 3,
-      name: "ベリー",
-      color: "bg-purple-500",
-    },
   },
   {
     id: 4,
     user_id: 2,
     message: "マンゴーのトロピカル感が最高！ 夏にぴったり。",
-    image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Mango",
+    slides: [
+      {
+        image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Mango",
+        text: "マンゴーのトロピカル感が最高！ 夏にぴったり。",
+        flavor: {
+          id: 4,
+          name: "マンゴー",
+          color: "bg-yellow-500",
+        },
+      },
+    ],
     likes: 15,
     user: {
       id: 2,
@@ -89,12 +111,6 @@ const mockPosts: GoShishaBackendInternalModelsPost[] = [
       description: "毎日シーシャ吸ってます",
       icon_url: "",
       external_url: "https://twitter.com/shishamaster",
-    },
-    flavor_id: 4,
-    flavor: {
-      id: 4,
-      name: "マンゴー",
-      color: "bg-yellow-500",
     },
   },
 ];
@@ -213,7 +229,10 @@ export const WithFlavorFilterInteractive: Story = {
 export const WithFlavorFilterPreselected: Story = {
   tags: ["vrt"],
   args: {
-    posts: mockPosts.filter((post) => post.flavor_id === 1 || post.flavor_id === 3),
+    posts: mockPosts.filter((post) => {
+      const firstSlide = post.slides?.[0];
+      return firstSlide?.flavor?.id === 1 || firstSlide?.flavor?.id === 3;
+    }),
     isLoading: false,
     error: null,
     availableFlavors: mockFlavors,

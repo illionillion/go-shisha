@@ -11,24 +11,53 @@ import { TimelineContainer } from "./TimelineContainer";
 
 // --- Timelineモック（型安全・テスト用props拡張） ---
 vi.mock("./Timeline", () => ({
-  Timeline: (props: TimelineProps) => (
-    <div data-testid="timeline-mock">
-      <div>posts:{props.posts?.length}</div>
-      <div>isLoading:{String(props.isLoading)}</div>
-      <div>error:{props.error ? "true" : ""}</div>
-      <div>availableFlavors:{props.availableFlavors?.length}</div>
-      <div>selectedFlavorIds:{props.selectedFlavorIds?.join(",")}</div>
-      {/* filteredPosts/handleFlavorToggleテスト用 */}
-      {props.onFlavorToggle && (
-        <>
-          <button onClick={() => props.onFlavorToggle?.(10)}>toggle10</button>
-          <button onClick={() => props.onFlavorToggle?.(20)}>toggle20</button>
-          <div data-testid="selected">{props.selectedFlavorIds?.join(",")}</div>
-          <div data-testid="posts">{props.posts?.map((p) => p.id).join(",")}</div>
-        </>
-      )}
-    </div>
-  ),
+  Timeline: (props: TimelineProps) => {
+    // isLoadingやerrorが設定されている場合は、それらを優先表示
+    if (props.isLoading) {
+      return (
+        <div data-testid="timeline-mock">
+          <div>isLoading:true</div>
+        </div>
+      );
+    }
+    if (props.error) {
+      return (
+        <div data-testid="timeline-mock">
+          <div>error:true</div>
+        </div>
+      );
+    }
+    // 投稿が空の場合
+    if (props.posts?.length === 0) {
+      return (
+        <div data-testid="timeline-mock">
+          <div>posts:0</div>
+          <p className="text-center text-gray-500">投稿がありません</p>
+        </div>
+      );
+    }
+    // 通常の表示
+    return (
+      <div data-testid="timeline-mock">
+        <div>posts:{props.posts?.length}</div>
+        <div>isLoading:{String(props.isLoading)}</div>
+        <div>error:{props.error ? "true" : ""}</div>
+        <div>availableFlavors:{props.availableFlavors?.length}</div>
+        <div>selectedFlavorIds:{props.selectedFlavorIds?.join(",")}</div>
+        {/* filteredPosts/handleFlavorToggleテスト用 */}
+        {props.onFlavorToggle && (
+          <>
+            <button onClick={() => props.onFlavorToggle?.(10)}>toggle10</button>
+            <button onClick={() => props.onFlavorToggle?.(20)}>toggle20</button>
+            <div data-testid="selected">{props.selectedFlavorIds?.join(",")}</div>
+            <div data-testid="posts">
+              {props.posts?.map((p: GoShishaBackendInternalModelsPost) => p.id).join(",")}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  },
 }));
 
 // --- useGetPostsモック ---
@@ -44,14 +73,24 @@ const mockFlavors: GoShishaBackendInternalModelsFlavor[] = [
 const mockPosts: GoShishaBackendInternalModelsPost[] = [
   {
     id: 1,
-    flavor_id: 10,
-    flavor: mockFlavors[0],
+    slides: [
+      {
+        image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Mint",
+        text: "ミント系のシーシャ",
+        flavor: mockFlavors[0],
+      },
+    ],
     user_id: 1,
   },
   {
     id: 2,
-    flavor_id: 20,
-    flavor: mockFlavors[1],
+    slides: [
+      {
+        image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Lemon",
+        text: "レモン系のシーシャ",
+        flavor: mockFlavors[1],
+      },
+    ],
     user_id: 2,
   },
 ];
@@ -117,16 +156,15 @@ describe("TimelineContainer", () => {
     const { unmount } = render(<TimelineContainer initialPosts={[]} />);
     expect(screen.getByTestId("timeline-mock")).toHaveTextContent("posts:0");
     unmount();
-    // posts: flavorがundefined
-    const postsWithUndefinedFlavor: GoShishaBackendInternalModelsPost[] = [
+    // posts: slides配列が空
+    const postsWithEmptySlides: GoShishaBackendInternalModelsPost[] = [
       {
         id: 1,
-        flavor_id: 1,
-        flavor: undefined,
+        slides: [],
         user_id: 99,
       },
     ];
-    render(<TimelineContainer initialPosts={postsWithUndefinedFlavor} />);
+    render(<TimelineContainer initialPosts={postsWithEmptySlides} />);
     expect(screen.getAllByTestId("timeline-mock").length).toBeGreaterThan(0);
   });
 
@@ -151,5 +189,10 @@ describe("TimelineContainer", () => {
     await user.click(screen.getByText("toggle10"));
     expect(screen.getByTestId("selected")).toHaveTextContent("20");
     expect(screen.getByTestId("posts")).toHaveTextContent("2");
+  });
+
+  test("initialPostsが空の場合、タイムラインが空であることを表示", () => {
+    render(<TimelineContainer initialPosts={[]} />);
+    expect(screen.getByText("投稿がありません")).toBeInTheDocument();
   });
 });
