@@ -7,7 +7,7 @@ import type {
 import { FlavorFilter } from "./FlavorFilter";
 import { PostCard } from "./PostCard";
 
-interface TimelineProps {
+export interface TimelineProps {
   posts: GoShishaBackendInternalModelsPost[];
   isLoading?: boolean;
   error?: unknown;
