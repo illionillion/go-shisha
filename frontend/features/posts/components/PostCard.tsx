@@ -5,6 +5,7 @@ import { clsx } from "clsx";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { GoShishaBackendInternalModelsPost } from "../../../api/model";
+import { FlavorLabel } from "@/components/FlavorLabel";
 
 interface PostCardProps {
   post: GoShishaBackendInternalModelsPost;
@@ -99,19 +100,6 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
     if (post.id) {
       onLike(post.id);
     }
-  };
-
-  // フレーバー色のマッピング（Tailwind動的クラス対策）
-  const getFlavorColorClass = (color: string | undefined): string => {
-    const colorMap: Record<string, string> = {
-      "bg-green-500": "bg-green-500",
-      "bg-red-500": "bg-red-500",
-      "bg-purple-500": "bg-purple-500",
-      "bg-yellow-500": "bg-yellow-500",
-      "bg-orange-500": "bg-orange-500",
-      "bg-indigo-500": "bg-indigo-500",
-    };
-    return colorMap[color || ""] || "bg-gray-500";
   };
 
   // 画像URLの構築: 相対パスの場合はBACKEND_URLを結合
@@ -261,23 +249,7 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
         <div className={clsx(["absolute", "bottom-0", "left-0", "right-0", "p-4", "text-white"])}>
           <p className={clsx(["text-sm", "font-medium", "mb-2"])}>{post.user?.display_name}</p>
           <p className={clsx(["text-sm", "line-clamp-3"])}>{displayText}</p>
-          {displayFlavor && (
-            <span
-              className={clsx([
-                "inline-block",
-                "mt-2",
-                "px-2",
-                "py-1",
-                "text-xs",
-                "rounded-full",
-                "text-white",
-                "select-none",
-                getFlavorColorClass(displayFlavor.color),
-              ])}
-            >
-              {displayFlavor.name}
-            </span>
-          )}
+          {displayFlavor && <FlavorLabel flavor={displayFlavor} />}
         </div>
         <button
           onClick={(e) => {
