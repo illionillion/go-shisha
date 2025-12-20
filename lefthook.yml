@@ -1,9 +1,6 @@
 pre-commit:
   parallel: true
   commands:
-    frontend-lint-fix:
-      run: pnpm -w -F frontend lint:fix
-      stage_fixed: true
     lint-staged:
       run: npx lint-staged
       # stage_fixed=true ensures files modified by lint-staged are re-staged
