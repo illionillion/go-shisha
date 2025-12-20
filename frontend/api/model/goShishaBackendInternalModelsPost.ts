@@ -12,6 +12,7 @@ import type { GoShishaBackendInternalModelsUser } from "./goShishaBackendInterna
 export interface GoShishaBackendInternalModelsPost {
   created_at?: string;
   id?: number;
+  is_liked?: boolean;
   likes?: number;
   message?: string;
   slides?: GoShishaBackendInternalModelsSlide[];

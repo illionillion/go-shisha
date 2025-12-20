@@ -348,6 +348,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "is_liked": {
+                    "type": "boolean"
+                },
                 "likes": {
                     "type": "integer"
                 },

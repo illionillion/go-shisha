@@ -29,7 +29,8 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 					       {ImageURL: "/images/264972_0.jpg", Text: "次はダブルアップル。甘さが絶妙", Flavor: &mockFlavors[1]},
 					       {ImageURL: "/images/264973_0.jpg", Text: "最後はレモン。締めにぴったり", Flavor: &mockFlavors[2]},
 				       },
-				       Likes:    12,
+					   Likes:    12,
+					   IsLiked:  false,
 				       User: models.User{
 					       ID:          1,
 					       Email:       "test@example.com",
@@ -47,7 +48,8 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 					       {ImageURL: "/images/264974_0.jpg", Text: "グレープの濃厚な香り", Flavor: &mockFlavors[3]},
 					       {ImageURL: "/images/264975_0.jpg", Text: "オレンジでリフレッシュ", Flavor: &mockFlavors[4]},
 				       },
-				       Likes:    8,
+					   Likes:    8,
+					   IsLiked:  false,
 				       User: models.User{
 					       ID:          2,
 					       Email:       "shisha@example.com",
@@ -64,7 +66,8 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 				       Slides: []models.Slide{
 					       {ImageURL: "/images/264977_0.jpg", Text: "ベリー単体で味わい深い", Flavor: &mockFlavors[2]},
 				       },
-				       Likes:    22,
+					   Likes:    22,
+					   IsLiked:  false,
 				       User: models.User{
 					       ID:          1,
 					       Email:       "test@example.com",
@@ -82,7 +85,8 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 					       {ImageURL: "/images/264978_0.jpg", Text: "マンゴーで夏気分", Flavor: &mockFlavors[5]},
 					       {ImageURL: "/images/264979_0.jpg", Text: "ミントでクールダウン", Flavor: &mockFlavors[0]},
 				       },
-				       Likes:    15,
+					   Likes:    15,
+					   IsLiked:  false,
 				       User: models.User{
 					       ID:          2,
 					       Email:       "shisha@example.com",
@@ -99,7 +103,8 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 				       Slides: []models.Slide{
 					       {ImageURL: "/images/264975_0.jpg", Text: "オレンジで元気チャージ", Flavor: &mockFlavors[4]},
 				       },
-				       Likes:    18,
+					   Likes:    18,
+					   IsLiked:  false,
 				       User: models.User{
 					       ID:          1,
 					       Email:       "test@example.com",
@@ -117,7 +122,8 @@ func NewPostRepositoryMock() *PostRepositoryMock {
 					       {ImageURL: "/images/264976_0.jpg", Text: "グレープで濃厚な一服", Flavor: &mockFlavors[3]},
 					       {ImageURL: "/images/264977_0.jpg", Text: "レモンでさっぱり", Flavor: &mockFlavors[2]},
 				       },
-				       Likes:    25,
+					   Likes:    25,
+					   IsLiked:  false,
 				       User: models.User{
 					       ID:          2,
 					       Email:       "shisha@example.com",
@@ -171,6 +177,8 @@ func (r *PostRepositoryMock) IncrementLikes(id int) (*models.Post, error) {
 	for i := range r.posts {
 		if r.posts[i].ID == id {
 			r.posts[i].Likes++
+			// when liking via this mock endpoint, mark as liked
+			r.posts[i].IsLiked = true
 			return &r.posts[i], nil
 		}
 	}

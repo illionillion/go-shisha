@@ -19,6 +19,7 @@ type Post struct {
 	Likes     int       `json:"likes"`
 	User      User      `json:"user"`
 	CreatedAt time.Time `json:"created_at"`
+	IsLiked   bool      `json:"is_liked,omitempty"`
 }
 
 // CreatePostInput represents the input for creating a post

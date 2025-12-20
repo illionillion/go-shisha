@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetPostsId, usePostPostsIdLike } from "../../../api/posts";
 import type { GoShishaBackendInternalModelsPost } from "@/api/model";
+import { FlavorLabel } from "@/components/FlavorLabel";
 import { NextIcon, PrevIcon } from "@/components/icons/";
 import { getImageUrl } from "@/lib/getImageUrl";
 
@@ -26,6 +27,13 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
   const slides = post?.slides || [];
   const [current, setCurrent] = useState(0);
   const [optimisticLikes, setOptimisticLikes] = useState<number | null>(null);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (post) {
+      setIsLiked(post.is_liked ?? false);
+    }
+  }, [post]);
 
   if (isLoading) {
     return (
@@ -55,7 +63,14 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
 
   const handleLike = () => {
     if (!post.id) return;
-    // optimistic
+    if (isLiked) {
+      setIsLiked(false);
+      setOptimisticLikes((prev) => Math.max(0, (prev ?? post.likes ?? 0) - 1));
+      return;
+    }
+
+    // like
+    setIsLiked(true);
     setOptimisticLikes((prev) => (prev ?? post.likes ?? 0) + 1);
     likeMutation.mutate({ id: post.id }, { onError: () => refetch() });
   };
@@ -118,17 +133,36 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
           <p className="mb-4 whitespace-pre-wrap">{currentSlide?.text || post.message}</p>
 
           {currentSlide?.flavor && (
-            <span
-              className="inline-block mb-4 px-2 py-1 text-xs rounded-full text-white"
-              style={{ backgroundColor: currentSlide.flavor.color || "#6b7280" }}
-            >
-              {currentSlide.flavor.name}
-            </span>
+            <div className="mb-4">
+              <FlavorLabel flavor={currentSlide.flavor} />
+            </div>
+          )}
+
+          {/* ドットページネーション */}
+          {slides.length > 1 && (
+            <div className="flex items-center justify-center gap-2 mb-4">
+              {slides.map((_, i) => (
+                <button
+                  key={i}
+                  aria-label={`スライド ${i + 1}`}
+                  onClick={() => setCurrent(i)}
+                  className={
+                    i === current
+                      ? "w-3 h-3 rounded-full bg-white"
+                      : "w-2 h-2 rounded-full bg-white/50"
+                  }
+                />
+              ))}
+            </div>
           )}
 
           <div className="flex items-center gap-3 mt-4">
-            <button onClick={handleLike} className="px-3 py-2 bg-white border rounded">
-              いいね {displayLikes}
+            <button
+              onClick={handleLike}
+              className="px-3 py-2 bg-white border rounded"
+              aria-pressed={isLiked}
+            >
+              {isLiked ? "いいね済み" : "いいね"} {displayLikes}
             </button>
             <button
               onClick={() => {
