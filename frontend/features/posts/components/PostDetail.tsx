@@ -1,10 +1,17 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import Image from "next/image";
 import { useState } from "react";
 import type { GoShishaBackendInternalModelsPost } from "@/api/model";
-import { useGetPostsId } from "@/api/posts";
+import {
+  useGetPostsId,
+  usePostPostsIdLike,
+  usePostPostsIdUnlike,
+  getGetPostsQueryKey,
+  getGetPostsIdQueryKey,
+} from "@/api/posts";
 import { FlavorLabel } from "@/components/FlavorLabel";
 import { NextIcon, PrevIcon } from "@/components/icons/";
 import { getImageUrl } from "@/lib/getImageUrl";
@@ -30,6 +37,98 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
     initialPost?.likes ?? post?.likes ?? 0
   );
   const [isLiked, setIsLiked] = useState<boolean>(initialPost?.is_liked ?? post?.is_liked ?? false);
+
+  const queryClient = useQueryClient();
+
+  const likeMut = usePostPostsIdLike({
+    mutation: {
+      onMutate: async (variables: { id: number }) => {
+        await queryClient.cancelQueries({ queryKey: getGetPostsQueryKey() });
+        const id = variables.id;
+        const detailKey = getGetPostsIdQueryKey(id);
+        const prevDetail = queryClient.getQueryData<GoShishaBackendInternalModelsPost | undefined>(
+          detailKey
+        );
+
+        queryClient.setQueryData<GoShishaBackendInternalModelsPost | undefined>(
+          detailKey,
+          (old) => {
+            if (!old) return old;
+            return { ...old, likes: (old.likes ?? 0) + 1, is_liked: true };
+          }
+        );
+
+        return { prevDetail, id };
+      },
+      onError: (
+        _err: unknown,
+        variables: { id: number } | undefined,
+        context: { prevDetail?: GoShishaBackendInternalModelsPost; id?: number } | undefined
+      ) => {
+        if (context?.prevDetail && variables) {
+          const detailKey = getGetPostsIdQueryKey(variables.id);
+          queryClient.setQueryData<GoShishaBackendInternalModelsPost | undefined>(
+            detailKey,
+            context.prevDetail
+          );
+        }
+      },
+      onSettled: (
+        _data: GoShishaBackendInternalModelsPost | undefined,
+        _err: unknown,
+        variables: { id: number } | undefined
+      ) => {
+        if (!variables) return;
+        queryClient.invalidateQueries({ queryKey: getGetPostsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetPostsIdQueryKey(variables.id) });
+      },
+    },
+  });
+
+  const unlikeMut = usePostPostsIdUnlike({
+    mutation: {
+      onMutate: async (variables: { id: number }) => {
+        await queryClient.cancelQueries({ queryKey: getGetPostsQueryKey() });
+        const id = variables.id;
+        const detailKey = getGetPostsIdQueryKey(id);
+        const prevDetail = queryClient.getQueryData<GoShishaBackendInternalModelsPost | undefined>(
+          detailKey
+        );
+
+        queryClient.setQueryData<GoShishaBackendInternalModelsPost | undefined>(
+          detailKey,
+          (old) => {
+            if (!old) return old;
+            return { ...old, likes: Math.max(0, (old.likes ?? 0) - 1), is_liked: false };
+          }
+        );
+
+        return { prevDetail, id };
+      },
+      onError: (
+        _err: unknown,
+        variables: { id: number } | undefined,
+        context: { prevDetail?: GoShishaBackendInternalModelsPost; id?: number } | undefined
+      ) => {
+        if (context?.prevDetail && variables) {
+          const detailKey = getGetPostsIdQueryKey(variables.id);
+          queryClient.setQueryData<GoShishaBackendInternalModelsPost | undefined>(
+            detailKey,
+            context.prevDetail
+          );
+        }
+      },
+      onSettled: (
+        _data: GoShishaBackendInternalModelsPost | undefined,
+        _err: unknown,
+        variables: { id: number } | undefined
+      ) => {
+        if (!variables) return;
+        queryClient.invalidateQueries({ queryKey: getGetPostsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetPostsIdQueryKey(variables.id) });
+      },
+    },
+  });
 
   if (isLoading) {
     return (
@@ -61,6 +160,7 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
       setIsLiked(false);
       setOptimisticLikes((prev) => Math.max(0, (prev ?? post.likes ?? 0) - 1));
       //   /unlikeのapiを叩く
+      unlikeMut.mutate({ id: post.id });
       return;
     }
 
@@ -68,6 +168,7 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
     setIsLiked(true);
     setOptimisticLikes((prev) => (prev ?? post.likes ?? 0) + 1);
     // /likeのapiを叩く
+    likeMut.mutate({ id: post.id });
   };
 
   const currentSlide = slides.length > 0 ? slides[current] : undefined;
@@ -136,7 +237,7 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
             <div>
               <div className="font-medium">{post.user?.display_name || "匿名"}</div>
               <div className="text-sm text-gray-500">
-                {new Date(post.created_at || Date.now()).toLocaleString()}
+                <time dateTime={post.created_at ?? undefined}>{post.created_at ?? ""}</time>
               </div>
             </div>
           </div>
