@@ -1,9 +1,10 @@
 "use client";
 
+import clsx from "clsx";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { GoShishaBackendInternalModelsPost } from "@/api/model";
-import { useGetPostsId, usePostPostsIdLike } from "@/api/posts";
+import { useGetPostsId } from "@/api/posts";
 import { FlavorLabel } from "@/components/FlavorLabel";
 import { NextIcon, PrevIcon } from "@/components/icons/";
 import { getImageUrl } from "@/lib/getImageUrl";
@@ -22,18 +23,13 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
   } = useGetPostsId(postId, {
     query: { initialData: initialPost },
   });
-  const likeMutation = usePostPostsIdLike();
 
   const slides = post?.slides || [];
   const [current, setCurrent] = useState(0);
-  const [optimisticLikes, setOptimisticLikes] = useState<number | null>(null);
-  const [isLiked, setIsLiked] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (post) {
-      setIsLiked(post.is_liked ?? false);
-    }
-  }, [post]);
+  const [optimisticLikes, setOptimisticLikes] = useState<number>(
+    initialPost?.likes ?? post?.likes ?? 0
+  );
+  const [isLiked, setIsLiked] = useState<boolean>(initialPost?.is_liked ?? post?.is_liked ?? false);
 
   if (isLoading) {
     return (
@@ -56,8 +52,6 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
     );
   }
 
-  const displayLikes = optimisticLikes ?? post.likes ?? 0;
-
   const handlePrev = () => setCurrent((c) => (c - 1 + slides.length) % Math.max(1, slides.length));
   const handleNext = () => setCurrent((c) => (c + 1) % Math.max(1, slides.length));
 
@@ -66,13 +60,14 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
     if (isLiked) {
       setIsLiked(false);
       setOptimisticLikes((prev) => Math.max(0, (prev ?? post.likes ?? 0) - 1));
+      //   /unlikeのapiを叩く
       return;
     }
 
     // like
     setIsLiked(true);
     setOptimisticLikes((prev) => (prev ?? post.likes ?? 0) + 1);
-    likeMutation.mutate({ id: post.id }, { onError: () => refetch() });
+    // /likeのapiを叩く
   };
 
   const currentSlide = slides.length > 0 ? slides[current] : undefined;
@@ -159,19 +154,67 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
           <div className="flex items-center gap-3 mt-4">
             <button
               onClick={handleLike}
-              className="px-3 py-2 bg-white border rounded"
               aria-pressed={isLiked}
+              className={clsx(
+                "inline-flex items-center gap-2 px-3 py-2 border rounded transition-transform transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-1",
+                isLiked ? "text-red-500 bg-white" : "text-gray-700 bg-white"
+              )}
             >
-              {isLiked ? "いいね済み" : "いいね"} {displayLikes}
+              {isLiked ? (
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              ) : (
+                <svg
+                  className="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  aria-hidden
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
+              )}
+              <span className="text-sm">{optimisticLikes}</span>
             </button>
             <button
               onClick={() => {
                 void navigator.clipboard?.writeText(window.location.href);
                 alert("URLをコピーしました");
               }}
-              className="px-3 py-2 bg-white border rounded"
+              aria-label="シェア"
+              className={clsx(
+                "inline-flex items-center gap-2 px-3 py-2 border rounded transition-transform transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-1",
+                "text-gray-700 bg-white"
+              )}
             >
-              シェア
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                aria-hidden
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 6l-4-4-4 4"
+                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2v13" />
+              </svg>
+              <span className="text-sm">シェア</span>
             </button>
           </div>
         </div>
