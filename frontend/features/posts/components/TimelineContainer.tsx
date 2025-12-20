@@ -1,13 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Timeline } from "./Timeline";
 import type {
   GoShishaBackendInternalModelsFlavor,
   GoShishaBackendInternalModelsPost,
 } from "@/api/model";
 import { useGetPosts } from "@/api/posts";
 import { useLike } from "@/features/posts/hooks/useLike";
+import { Timeline } from "./Timeline";
 
 interface TimelineContainerProps {
   initialPosts?: GoShishaBackendInternalModelsPost[];
