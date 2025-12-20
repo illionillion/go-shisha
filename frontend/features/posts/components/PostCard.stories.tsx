@@ -88,6 +88,7 @@ export const WithFlavor: Story = {
     post: mockPost,
     onLike: () => {},
     onClick: () => {},
+    tick: 0,
   },
 };
 
@@ -100,6 +101,7 @@ export const WithoutFlavor: Story = {
     post: mockPostWithoutFlavor,
     onLike: () => {},
     onClick: () => {},
+    tick: 0,
   },
 };
 
@@ -125,6 +127,7 @@ export const LongMessage: Story = {
     },
     onLike: () => {},
     onClick: () => {},
+    tick: 0,
   },
 };
 
@@ -152,6 +155,7 @@ export const BerryFlavor: Story = {
     },
     onLike: () => {},
     onClick: () => {},
+    tick: 0,
   },
 };
 
@@ -175,6 +179,7 @@ export const WithoutImage: Story = {
     },
     onLike: () => {},
     onClick: () => {},
+    tick: 0,
   },
 };
 
@@ -229,6 +234,7 @@ export const MultipleSlides: Story = {
     },
     onLike: () => {},
     onClick: () => {},
+    tick: 0,
   },
 };
 
@@ -276,6 +282,7 @@ export const FiveSlides: Story = {
     },
     onLike: () => {},
     onClick: () => {},
+    tick: 0,
   },
 };
 
@@ -320,12 +327,12 @@ export const ProgressBarStatic: Story = {
           },
         },
       ],
-      likes: 15,
-      user: mockPost.user!,
+      likes: 77,
     },
     autoPlayInterval: 3000,
     onLike: () => {},
     onClick: () => {},
+    tick: 0, // 必須プロパティを追加
   },
   decorators: [
     (Story) => (

@@ -65,29 +65,58 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000, tick 
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const slides = post.slides || [];
   const hasMultipleSlides = slides.length > 1;
+  const [localTick, setLocalTick] = useState(0);
+  const [isManualSlideChange, setIsManualSlideChange] = useState(false);
 
   /** 自動切り替えタイマー */
   useEffect(() => {
-    if (!hasMultipleSlides) return;
+    if (!hasMultipleSlides || isManualSlideChange) return;
 
     // tickを利用してスライドを同期
     setCurrentSlideIndex(tick % slides.length);
   }, [tick, hasMultipleSlides, slides.length]);
 
+  /** 手動切り替え */
+  useEffect(() => {
+    if (!hasMultipleSlides || !isManualSlideChange) return;
+
+    // tickを利用してスライドを同期
+    setCurrentSlideIndex(localTick % slides.length);
+  }, [localTick, hasMultipleSlides, slides.length]);
+
+  // 手動時タイマー
+  useEffect(() => {
+    if (!isManualSlideChange) return;
+    let start: number | null = null;
+    const step = (timestamp: number) => {
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
+      if (elapsed >= autoPlayInterval) {
+        setLocalTick((prev) => prev + 1);
+        start = timestamp; // タイマーをリセット
+      }
+
+      requestAnimationFrame(step);
+    };
+
+    const animationId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animationId);
+  }, [isManualSlideChange, autoPlayInterval]);
+
   /** 前のスライドへ */
   const handlePrevSlide = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (slides.length > 0) {
-      setCurrentSlideIndex((prev) => (prev - 1 + slides.length) % slides.length);
-    }
+    if (slides.length === 0) return;
+    setCurrentSlideIndex((prev) => (prev - 1 + slides.length) % slides.length);
+    setIsManualSlideChange(true);
   };
 
   /** 次のスライドへ */
   const handleNextSlide = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (slides.length > 0) {
-      setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
-    }
+    if (slides.length === 0) return;
+    setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
+    setIsManualSlideChange(true);
   };
 
   const handleLike = () => {
@@ -169,7 +198,6 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000, tick 
                     "bg-white",
                     "rounded-full",
                     index < currentSlideIndex && "w-full",
-                    // Tailwind configでanimate-[progress-bar_linear_forwards]を拡張している前提
                     index === currentSlideIndex && "w-0 animate-[progress-bar_linear_forwards]",
                     index > currentSlideIndex && "w-0",
                   ])}

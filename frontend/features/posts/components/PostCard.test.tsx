@@ -35,7 +35,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} tick={0} />);
 
     expect(screen.getByText("今日のシーシャは最高でした！")).toBeInTheDocument();
     expect(screen.getByText("テストユーザー")).toBeInTheDocument();
@@ -45,7 +45,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} tick={0} />);
 
     expect(screen.getByText("ミント")).toBeInTheDocument();
   });
@@ -64,7 +64,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={postWithoutFlavor} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithoutFlavor} onLike={onLike} onClick={onClick} tick={0} />);
 
     expect(screen.queryByText("ミント")).not.toBeInTheDocument();
   });
@@ -74,7 +74,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} tick={0} />);
     const buttons = screen.getAllByRole("button");
     const card = buttons.find((button) =>
       button.textContent?.includes("今日のシーシャは最高でした！")
@@ -91,7 +91,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} tick={0} />);
 
     const likeButton = screen.getByLabelText("いいね");
     await user.click(likeButton);
@@ -104,7 +104,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} tick={0} />);
 
     const likeButton = screen.getByLabelText("いいね");
     await user.click(likeButton);
@@ -117,7 +117,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} tick={0} />);
 
     const likeButton = screen.getByLabelText("いいね");
     const svg = likeButton.querySelector("svg");
@@ -137,7 +137,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={postWithoutId} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithoutId} onLike={onLike} onClick={onClick} tick={0} />);
 
     const likeButton = screen.getByLabelText("いいね");
     await user.click(likeButton);
@@ -158,7 +158,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={postWithoutImage} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithoutImage} onLike={onLike} onClick={onClick} tick={0} />);
 
     const img = screen.getByAltText("今日のシーシャは最高でした！");
     expect(img).toHaveAttribute("src", expect.stringContaining("placehold.co"));
@@ -180,7 +180,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={postWithRelativeImage} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithRelativeImage} onLike={onLike} onClick={onClick} tick={0} />);
 
     const img = screen.getByAltText("今日のシーシャは最高でした！");
     expect(img).toHaveAttribute("src", expect.stringContaining("localhost%3A8080"));
@@ -204,7 +204,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={postWithRelativeImage} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithRelativeImage} onLike={onLike} onClick={onClick} tick={0} />);
 
     const img = screen.getByAltText("今日のシーシャは最高でした！");
     expect(img).toHaveAttribute("src", expect.stringContaining("placehold.co"));
@@ -216,7 +216,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} tick={0} />);
 
     const img = screen.getByAltText("今日のシーシャは最高でした！");
     expect(img).toHaveAttribute("src", expect.stringContaining("picsum.photos"));
@@ -235,7 +235,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={postWithUndefinedColor} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithUndefinedColor} onLike={onLike} onClick={onClick} tick={0} />);
 
     const flavorBadge = screen.getByText("ミント");
     expect(flavorBadge).toHaveClass("bg-gray-500");
@@ -254,7 +254,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={postWithUnknownColor} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithUnknownColor} onLike={onLike} onClick={onClick} tick={0} />);
 
     const flavorBadge = screen.getByText("ミント");
     expect(flavorBadge).toHaveClass("bg-gray-500");
@@ -274,7 +274,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={postWithoutMessage} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithoutMessage} onLike={onLike} onClick={onClick} tick={0} />);
 
     const img = screen.getByAltText("シーシャ投稿");
     expect(img).toBeInTheDocument();
@@ -285,7 +285,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} tick={0} />);
 
     expect(screen.queryByLabelText("前のスライド")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("次のスライド")).not.toBeInTheDocument();
@@ -310,7 +310,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} tick={0} />);
 
     expect(screen.getByLabelText("前のスライド")).toBeInTheDocument();
     expect(screen.getByLabelText("次のスライド")).toBeInTheDocument();
@@ -336,7 +336,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} tick={0} />);
 
     expect(screen.getByText("1枚目")).toBeInTheDocument();
     expect(screen.getByText("ミント")).toBeInTheDocument();
@@ -368,7 +368,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} tick={0} />);
 
     const prevButton = screen.getByLabelText("前のスライド");
     await user.click(prevButton);
@@ -396,7 +396,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} tick={0} />);
 
     const nextButton = screen.getByLabelText("次のスライド");
     await user.click(nextButton);
@@ -424,7 +424,13 @@ describe("PostCard", () => {
     const onClick = vi.fn();
 
     render(
-      <PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} autoPlayInterval={1000} />
+      <PostCard
+        post={multiSlidePost}
+        onLike={onLike}
+        onClick={onClick}
+        autoPlayInterval={1000}
+        tick={0}
+      />
     );
 
     expect(screen.getByText("1枚目")).toBeInTheDocument();
@@ -467,7 +473,13 @@ describe("PostCard", () => {
     const onClick = vi.fn();
 
     const { container } = render(
-      <PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} autoPlayInterval={3000} />
+      <PostCard
+        post={multiSlidePost}
+        onLike={onLike}
+        onClick={onClick}
+        autoPlayInterval={3000}
+        tick={0}
+      />
     );
 
     // プログレスバーのコンテナを取得
@@ -510,7 +522,13 @@ describe("PostCard", () => {
     const onClick = vi.fn();
 
     const { container } = render(
-      <PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} autoPlayInterval={3000} />
+      <PostCard
+        post={multiSlidePost}
+        onLike={onLike}
+        onClick={onClick}
+        autoPlayInterval={3000}
+        tick={0}
+      />
     );
 
     const nextButton = screen.getByLabelText("次のスライド");
@@ -556,6 +574,7 @@ describe("PostCard", () => {
         onLike={onLike}
         onClick={onClick}
         autoPlayInterval={autoPlayInterval}
+        tick={0}
       />
     );
 
@@ -573,7 +592,7 @@ describe("PostCard", () => {
 
   test("slidesが空の場合、デフォルト画像が表示される", () => {
     const mockPost = { id: 1, slides: [], user_id: 1, message: "No slides" };
-    render(<PostCard post={mockPost} onLike={() => {}} onClick={() => {}} />);
+    render(<PostCard post={mockPost} onLike={() => {}} onClick={() => {}} tick={0} />);
     const fallbackImage = screen.getByAltText("No slides");
     expect(fallbackImage).toBeInTheDocument();
     // Next.js ImageがURLをエンコードするため、srcにplacehold.coが含まれていることを確認
