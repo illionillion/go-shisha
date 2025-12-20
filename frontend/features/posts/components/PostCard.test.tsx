@@ -404,9 +404,7 @@ describe("PostCard", () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it("自動切り替えが動作する（タイマーテスト）", async () => {
-    vi.useFakeTimers();
-
+  it("自動切り替えが動作する（親から渡されたtickで同期する）", async () => {
     const multiSlidePost = {
       ...mockPost,
       slides: [
@@ -423,7 +421,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onClick = vi.fn();
 
-    render(
+    const { rerender } = render(
       <PostCard
         post={multiSlidePost}
         onLike={onLike}
@@ -435,19 +433,29 @@ describe("PostCard", () => {
 
     expect(screen.getByText("1枚目")).toBeInTheDocument();
 
-    // 1秒後に次のスライドに切り替わる
-    vi.advanceTimersByTime(1000);
-    await vi.waitFor(() => {
-      expect(screen.getByText("2枚目")).toBeInTheDocument();
-    });
+    // 親がtickをインクリメントして渡すことでスライドが切り替わる
+    rerender(
+      <PostCard
+        post={multiSlidePost}
+        onLike={onLike}
+        onClick={onClick}
+        autoPlayInterval={1000}
+        tick={1}
+      />
+    );
+    await screen.findByText("2枚目");
 
-    // さらに1秒後に最初のスライドに戻る
-    vi.advanceTimersByTime(1000);
-    await vi.waitFor(() => {
-      expect(screen.getByText("1枚目")).toBeInTheDocument();
-    });
-
-    vi.useRealTimers();
+    // tickが増えて再度戻る（modでループ）
+    rerender(
+      <PostCard
+        post={multiSlidePost}
+        onLike={onLike}
+        onClick={onClick}
+        autoPlayInterval={1000}
+        tick={2}
+      />
+    );
+    await screen.findByText("1枚目");
   });
 
   // プログレスバーのテスト
