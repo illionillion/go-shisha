@@ -12,6 +12,7 @@ import { getImageUrl } from "@/lib/getImageUrl";
 interface PostCardProps {
   post: GoShishaBackendInternalModelsPost;
   onLike: (postId: number) => void;
+  onUnlike?: (postId: number) => void;
   onClick: (post: GoShishaBackendInternalModelsPost) => void;
   /** 自動切り替えのインターバル（ミリ秒）。デフォルト3000ms */
   autoPlayInterval?: number;
@@ -61,8 +62,14 @@ const likeButtonVariants = cva(
  * - 自動切り替え＋手動切り替え対応
  * - 進捗バー表示
  */
-export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: PostCardProps) {
-  const [isLiked, setIsLiked] = useState(false);
+export function PostCard({
+  post,
+  onLike,
+  onUnlike,
+  onClick,
+  autoPlayInterval = 3000,
+}: PostCardProps) {
+  const [isLiked, setIsLiked] = useState(post.is_liked || false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const slides = post.slides || [];
   const hasMultipleSlides = slides.length > 1;
@@ -98,9 +105,15 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
   };
 
   const handleLike = () => {
-    setIsLiked(!isLiked);
+    const nextLiked = !isLiked;
+    setIsLiked(nextLiked);
     if (post.id) {
-      onLike(post.id);
+      if (nextLiked) {
+        onLike(post.id);
+      } else {
+        if (onUnlike) onUnlike(post.id);
+        else onLike(post.id);
+      }
     }
   };
 

@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useLike } from "../hooks/useLike";
+import { Timeline } from "./Timeline";
 import type {
   GoShishaBackendInternalModelsFlavor,
   GoShishaBackendInternalModelsPost,
-} from "../../../api/model";
-import { useGetPosts } from "../../../api/posts";
-import { Timeline } from "./Timeline";
+} from "@/api/model";
+import { useGetPosts } from "@/api/posts";
 
 interface TimelineContainerProps {
   initialPosts?: GoShishaBackendInternalModelsPost[];
@@ -66,6 +67,8 @@ export function TimelineContainer({ initialPosts }: TimelineContainerProps) {
     );
   };
 
+  const { onLike, onUnlike } = useLike();
+
   return (
     <Timeline
       posts={filteredPosts}
@@ -74,6 +77,8 @@ export function TimelineContainer({ initialPosts }: TimelineContainerProps) {
       availableFlavors={availableFlavors}
       selectedFlavorIds={selectedFlavorIds}
       onFlavorToggle={handleFlavorToggle}
+      onLike={onLike}
+      onUnlike={onUnlike}
     />
   );
 }
