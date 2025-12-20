@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import type {
   GoShishaBackendInternalModelsFlavor,
   GoShishaBackendInternalModelsPost,
@@ -34,28 +33,6 @@ export function Timeline({
   onFlavorToggle,
   onPostClick,
 }: TimelineProps) {
-  const [tick, setTick] = useState(0);
-  const autoPlayInterval = 3000; // 3秒ごとに統一
-
-  useEffect(() => {
-    let start: number | null = null;
-
-    const step = (timestamp: number) => {
-      if (!start) start = timestamp;
-      const elapsed = timestamp - start;
-
-      if (elapsed >= autoPlayInterval) {
-        setTick((prev) => prev + 1);
-        start = timestamp; // タイマーをリセット
-      }
-
-      requestAnimationFrame(step);
-    };
-
-    const animationId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(animationId);
-  }, [autoPlayInterval]);
-
   const handleLike = (postId: number) => {
     // TODO: いいねAPI連携
     console.log("Liked post:", postId);
@@ -101,14 +78,7 @@ export function Timeline({
       )}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         {posts.map((post) => (
-          <PostCard
-            key={post.id}
-            post={post}
-            tick={tick}
-            autoPlayInterval={autoPlayInterval}
-            onLike={handleLike}
-            onClick={handlePostClick}
-          />
+          <PostCard key={post.id} post={post} onLike={handleLike} onClick={handlePostClick} />
         ))}
       </div>
     </div>

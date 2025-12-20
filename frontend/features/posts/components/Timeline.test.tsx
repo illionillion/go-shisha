@@ -162,21 +162,4 @@ describe("Timeline", () => {
     expect(screen.getByText("投稿1")).toBeInTheDocument();
     expect(screen.getByText("投稿2")).toBeInTheDocument();
   });
-
-  it("tickがインクリメントされる", async () => {
-    vi.useFakeTimers();
-
-    render(<Timeline posts={mockPosts} />);
-
-    // 初期値確認
-    expect(screen.getByText("今日のシーシャは最高でした！")).toBeInTheDocument();
-
-    // tickがインクリメントされるか確認
-    vi.advanceTimersByTime(3000);
-    // tickに応じたスライド同期の確認（モックデータに応じた期待値を記述）
-    // ここでは簡易的にtickの影響を確認する
-    expect(screen.getByText("今日のシーシャは最高でした！")).toBeInTheDocument();
-
-    vi.useRealTimers();
-  });
 });

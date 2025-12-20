@@ -12,8 +12,6 @@ interface PostCardProps {
   onClick: (post: GoShishaBackendInternalModelsPost) => void;
   /** 自動切り替えのインターバル（ミリ秒）。デフォルト3000ms */
   autoPlayInterval?: number;
-  /** グローバルtick */
-  tick: number;
 }
 
 const cardVariants = cva(["relative", "cursor-pointer", "group"], {
@@ -60,7 +58,7 @@ const likeButtonVariants = cva(
  * - 自動切り替え＋手動切り替え対応
  * - 進捗バー表示
  */
-export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000, tick }: PostCardProps) {
+export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const slides = post.slides || [];
@@ -70,9 +68,15 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000, tick 
   useEffect(() => {
     if (!hasMultipleSlides) return;
 
-    // tickを利用してスライドを同期
-    setCurrentSlideIndex(tick % slides.length);
-  }, [tick, hasMultipleSlides, slides.length]);
+    // スライド切り替えタイマー
+    const slideTimer = setTimeout(() => {
+      setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
+    }, autoPlayInterval);
+
+    return () => {
+      clearTimeout(slideTimer);
+    };
+  }, [hasMultipleSlides, slides.length, autoPlayInterval, currentSlideIndex]);
 
   /** 前のスライドへ */
   const handlePrevSlide = (e: React.MouseEvent) => {
