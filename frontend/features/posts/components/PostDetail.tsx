@@ -3,13 +3,22 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useGetPostsId, usePostPostsIdLike } from "../../../api/posts";
+import type { GoShishaBackendInternalModelsPost } from "@/api/model";
 
 interface PostDetailProps {
   postId: number;
+  initialPost: GoShishaBackendInternalModelsPost;
 }
 
-export function PostDetail({ postId }: PostDetailProps) {
-  const { data: post, isLoading, isError, refetch } = useGetPostsId(postId);
+export function PostDetail({ postId, initialPost }: PostDetailProps) {
+  const {
+    data: post,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetPostsId(postId, {
+    query: { initialData: initialPost },
+  });
   const likeMutation = usePostPostsIdLike();
 
   const slides = post?.slides || [];
