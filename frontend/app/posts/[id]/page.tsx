@@ -1,5 +1,5 @@
-import PostDetail from "../../../../frontend/features/posts/components/PostDetail";
 import { getPostsId } from "@/api/posts";
+import PostDetail from "@/features/posts/components/PostDetail";
 
 interface Props {
   params: { id: string } | Promise<{ id: string }>;
