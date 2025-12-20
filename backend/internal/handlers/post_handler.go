@@ -137,3 +137,32 @@ func (h *PostHandler) LikePost(c *gin.Context) {
 
 	c.JSON(http.StatusOK, post)
 }
+
+/**
+ * UnlikePost handles POST /api/v1/posts/:id/unlike
+ */
+// @Summary 投稿のいいねを取り消す
+// @Description 指定された投稿のいいねを取り消します
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Param id path int true "投稿ID"
+// @Success 200 {object} models.Post "いいねが取り消された投稿"
+// @Failure 400 {object} map[string]interface{} "無効な投稿ID"
+// @Failure 404 {object} map[string]interface{} "投稿が見つかりません"
+// @Router /posts/{id}/unlike [post]
+func (h *PostHandler) UnlikePost(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID"})
+		return
+	}
+
+	post, err := h.postService.UnlikePost(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, post)
+}

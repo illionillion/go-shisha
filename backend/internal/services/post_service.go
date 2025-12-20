@@ -74,3 +74,16 @@ func (s *PostService) LikePost(id int) (*models.Post, error) {
 	post.IsLiked = true
 	return post, nil
 }
+
+/**
+ * UnlikePost decrements the like count for a post and marks it as not liked
+ */
+func (s *PostService) UnlikePost(id int) (*models.Post, error) {
+	post, err := s.postRepo.DecrementLikes(id)
+	if err != nil {
+		return nil, err
+	}
+	// mark as not liked for the current (mock) user
+	post.IsLiked = false
+	return post, nil
+}

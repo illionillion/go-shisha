@@ -86,6 +86,7 @@ func main() {
 		api.GET("/posts/:id", postHandler.GetPost)
 		api.POST("/posts", postHandler.CreatePost)
 		api.POST("/posts/:id/like", postHandler.LikePost)
+		api.POST("/posts/:id/unlike", postHandler.UnlikePost)
 
 		// Users endpoints
 		api.GET("/users", userHandler.GetAllUsers)
