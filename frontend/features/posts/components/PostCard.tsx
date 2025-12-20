@@ -4,7 +4,10 @@ import { cva } from "class-variance-authority";
 import { clsx } from "clsx";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import type { GoShishaBackendInternalModelsPost } from "../../../api/model";
+import type { GoShishaBackendInternalModelsPost } from "@/api/model";
+import { FlavorLabel } from "@/components/FlavorLabel";
+import { NextIcon, PrevIcon } from "@/components/icons";
+import { getImageUrl } from "@/lib/getImageUrl";
 
 interface PostCardProps {
   post: GoShishaBackendInternalModelsPost;
@@ -101,32 +104,6 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
     }
   };
 
-  // フレーバー色のマッピング（Tailwind動的クラス対策）
-  const getFlavorColorClass = (color: string | undefined): string => {
-    const colorMap: Record<string, string> = {
-      "bg-green-500": "bg-green-500",
-      "bg-red-500": "bg-red-500",
-      "bg-purple-500": "bg-purple-500",
-      "bg-yellow-500": "bg-yellow-500",
-      "bg-orange-500": "bg-orange-500",
-      "bg-indigo-500": "bg-indigo-500",
-    };
-    return colorMap[color || ""] || "bg-gray-500";
-  };
-
-  // 画像URLの構築: 相対パスの場合はBACKEND_URLを結合
-  const getImageUrl = (url: string | undefined): string => {
-    if (!url) return "https://placehold.co/400x600/CCCCCC/666666?text=No+Image";
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url;
-    }
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-    if (!backendUrl) {
-      return "https://placehold.co/400x600/CCCCCC/666666?text=No+Image"; // 環境変数が未設定の場合はフォールバック画像を使用
-    }
-    return `${backendUrl}${url}`;
-  };
-
   // 現在のスライドデータ
   const currentSlide = slides.length > 0 ? slides[currentSlideIndex] : undefined;
   const displayImageUrl = getImageUrl(currentSlide?.image_url);
@@ -209,19 +186,7 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
               ])}
               aria-label="前のスライド"
             >
-              <svg
-                className="w-4 h-4 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
+              <PrevIcon />
             </button>
             <button
               type="button"
@@ -241,19 +206,7 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
               ])}
               aria-label="次のスライド"
             >
-              <svg
-                className="w-4 h-4 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
+              <NextIcon />
             </button>
           </>
         )}
@@ -261,23 +214,7 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
         <div className={clsx(["absolute", "bottom-0", "left-0", "right-0", "p-4", "text-white"])}>
           <p className={clsx(["text-sm", "font-medium", "mb-2"])}>{post.user?.display_name}</p>
           <p className={clsx(["text-sm", "line-clamp-3"])}>{displayText}</p>
-          {displayFlavor && (
-            <span
-              className={clsx([
-                "inline-block",
-                "mt-2",
-                "px-2",
-                "py-1",
-                "text-xs",
-                "rounded-full",
-                "text-white",
-                "select-none",
-                getFlavorColorClass(displayFlavor.color),
-              ])}
-            >
-              {displayFlavor.name}
-            </span>
-          )}
+          {displayFlavor && <FlavorLabel flavor={displayFlavor} />}
         </div>
         <button
           onClick={(e) => {

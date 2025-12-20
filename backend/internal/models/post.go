@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 // Post represents a shisha post
 // Slide represents a single image + text + flavor in a post
 type Slide struct {
@@ -10,12 +12,14 @@ type Slide struct {
 
 // Post represents a shisha post
 type Post struct {
-	ID        int      `json:"id"`
-	UserID    int      `json:"user_id"`
-	Message   string   `json:"message"`
-	Slides    []Slide  `json:"slides"`
-	Likes     int      `json:"likes"`
-	User      User     `json:"user"`
+	ID        int       `json:"id"`
+	UserID    int       `json:"user_id"`
+	Message   string    `json:"message"`
+	Slides    []Slide   `json:"slides"`
+	Likes     int       `json:"likes"`
+	User      User      `json:"user"`
+	CreatedAt time.Time `json:"created_at"`
+	IsLiked   bool      `json:"is_liked,omitempty"`
 }
 
 // CreatePostInput represents the input for creating a post

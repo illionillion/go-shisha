@@ -66,5 +66,11 @@ func (s *PostService) CreatePost(input *models.CreatePostInput) (*models.Post, e
  * LikePost increments the like count for a post
  */
 func (s *PostService) LikePost(id int) (*models.Post, error) {
-	return s.postRepo.IncrementLikes(id)
+	post, err := s.postRepo.IncrementLikes(id)
+	if err != nil {
+		return nil, err
+	}
+	// mark as liked for the current (mock) user
+	post.IsLiked = true
+	return post, nil
 }
