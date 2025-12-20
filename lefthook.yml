@@ -3,6 +3,8 @@ pre-commit:
   commands:
     lint-staged:
       run: npx lint-staged
+      # stage_fixed=true ensures files modified by lint-staged are re-staged
+      stage_fixed: true
     # backend-format:
     #   glob: "backend/**/*.go"
     #   run: |

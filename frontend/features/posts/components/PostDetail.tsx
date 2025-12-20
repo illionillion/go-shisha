@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useGetPostsId, usePostPostsIdLike } from "../../../api/posts";
 import type { GoShishaBackendInternalModelsPost } from "@/api/model";
+import { useGetPostsId, usePostPostsIdLike } from "@/api/posts";
 import { FlavorLabel } from "@/components/FlavorLabel";
 import { NextIcon, PrevIcon } from "@/components/icons/";
 import { getImageUrl } from "@/lib/getImageUrl";

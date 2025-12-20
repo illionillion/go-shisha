@@ -4,7 +4,7 @@ import { cva } from "class-variance-authority";
 import { clsx } from "clsx";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import type { GoShishaBackendInternalModelsPost } from "../../../api/model";
+import type { GoShishaBackendInternalModelsPost } from "@/api/model";
 import { FlavorLabel } from "@/components/FlavorLabel";
 import { NextIcon, PrevIcon } from "@/components/icons";
 import { getImageUrl } from "@/lib/getImageUrl";
