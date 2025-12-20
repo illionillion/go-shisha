@@ -26,6 +26,8 @@ definitions:
     type: object
   go-shisha-backend_internal_models.Post:
     properties:
+      created_at:
+        type: string
       id:
         type: integer
       likes:

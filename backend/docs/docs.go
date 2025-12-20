@@ -342,6 +342,9 @@ const docTemplate = `{
         "go-shisha-backend_internal_models.Post": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
