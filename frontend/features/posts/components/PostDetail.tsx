@@ -4,10 +4,11 @@ import Image from "next/image";
 import { useState } from "react";
 import { useGetPostsId, usePostPostsIdLike } from "../../../api/posts";
 import type { GoShishaBackendInternalModelsPost } from "@/api/model";
+import { getImageUrl } from "@/lib/getImageUrl";
 
 interface PostDetailProps {
   postId: number;
-  initialPost: GoShishaBackendInternalModelsPost;
+  initialPost?: GoShishaBackendInternalModelsPost;
 }
 
 export function PostDetail({ postId, initialPost }: PostDetailProps) {
@@ -67,10 +68,7 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
           <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden bg-gray-100">
             {currentSlide ? (
               <Image
-                src={
-                  currentSlide.image_url ||
-                  "https://placehold.co/400x600/CCCCCC/666666?text=No+Image"
-                }
+                src={getImageUrl(currentSlide.image_url)}
                 alt={currentSlide.text || post.message || "投稿画像"}
                 fill
                 className="object-cover"
@@ -104,7 +102,7 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
         <div className="md:w-96">
           <div className="flex items-center gap-3 mb-3">
             <img
-              src={post.user?.icon_url || "https://placehold.co/40x40/CCCCCC/666666?text=U"}
+              src={getImageUrl(post.user?.icon_url)}
               alt={post.user?.display_name || "ユーザー"}
               className="w-10 h-10 rounded-full object-cover"
             />
