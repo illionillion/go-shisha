@@ -73,7 +73,7 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
   const currentSlide = slides.length > 0 ? slides[current] : undefined;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6">
+    <div className="mx-auto max-w-3xl px-4 py-6">
       <div className="flex flex-col md:flex-row gap-6">
         <div className="md:flex-1">
           <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden bg-gray-100">
@@ -105,6 +105,22 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
                 >
                   <NextIcon />
                 </button>
+                {/* ドットページネーション（画像上に重ねる） */}
+                <div className="absolute left-1/2 bottom-3 -translate-x-1/2 flex items-center gap-2 bg-black/30 px-2 py-1 rounded">
+                  {slides.map((_, i) => (
+                    <button
+                      key={i}
+                      aria-label={`スライド ${i + 1}`}
+                      aria-current={i === current}
+                      onClick={() => setCurrent(i)}
+                      className={
+                        i === current
+                          ? "w-3 h-3 rounded-full bg-white"
+                          : "w-2 h-2 rounded-full bg-white/50"
+                      }
+                    />
+                  ))}
+                </div>
               </>
             )}
           </div>
@@ -130,24 +146,6 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
           {currentSlide?.flavor && (
             <div className="mb-4">
               <FlavorLabel flavor={currentSlide.flavor} />
-            </div>
-          )}
-
-          {/* ドットページネーション */}
-          {slides.length > 1 && (
-            <div className="flex items-center justify-center gap-2 mb-4">
-              {slides.map((_, i) => (
-                <button
-                  key={i}
-                  aria-label={`スライド ${i + 1}`}
-                  onClick={() => setCurrent(i)}
-                  className={
-                    i === current
-                      ? "w-3 h-3 rounded-full bg-white"
-                      : "w-2 h-2 rounded-full bg-white/50"
-                  }
-                />
-              ))}
             </div>
           )}
 
