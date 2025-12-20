@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { GoShishaBackendInternalModelsPost } from "../../../api/model";
 import { FlavorLabel } from "@/components/FlavorLabel";
+import { NextIcon, PrevIcon } from "@/components/icons";
 import { getImageUrl } from "@/lib/getImageUrl";
 
 interface PostCardProps {
@@ -185,19 +186,7 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
               ])}
               aria-label="前のスライド"
             >
-              <svg
-                className="w-4 h-4 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
+              <PrevIcon />
             </button>
             <button
               type="button"
@@ -217,19 +206,7 @@ export function PostCard({ post, onLike, onClick, autoPlayInterval = 3000 }: Pos
               ])}
               aria-label="次のスライド"
             >
-              <svg
-                className="w-4 h-4 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
+              <NextIcon />
             </button>
           </>
         )}

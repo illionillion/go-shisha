@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useGetPostsId, usePostPostsIdLike } from "../../../api/posts";
 import type { GoShishaBackendInternalModelsPost } from "@/api/model";
+import { NextIcon, PrevIcon } from "@/components/icons/";
 import { getImageUrl } from "@/lib/getImageUrl";
 
 interface PostDetailProps {
@@ -85,14 +86,14 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
                   onClick={handlePrev}
                   className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-white/20 rounded-full"
                 >
-                  ◀
+                  <PrevIcon />
                 </button>
                 <button
                   aria-label="次のスライド"
                   onClick={handleNext}
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-white/20 rounded-full"
                 >
-                  ▶
+                  <NextIcon />
                 </button>
               </>
             )}
