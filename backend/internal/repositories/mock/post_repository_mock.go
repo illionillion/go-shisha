@@ -186,6 +186,23 @@ func (r *PostRepositoryMock) IncrementLikes(id int) (*models.Post, error) {
 }
 
 /**
+ * DecrementLikes decrements the like count for a post
+ */
+func (r *PostRepositoryMock) DecrementLikes(id int) (*models.Post, error) {
+	for i := range r.posts {
+		if r.posts[i].ID == id {
+			if r.posts[i].Likes > 0 {
+				r.posts[i].Likes--
+			}
+			// when unliking via this mock endpoint, mark as not liked
+			r.posts[i].IsLiked = false
+			return &r.posts[i], nil
+		}
+	}
+	return nil, errors.New("post not found")
+}
+
+/**
  * GetByUserID returns all posts by a specific user
  */
 func (r *PostRepositoryMock) GetByUserID(userID int) ([]models.Post, error) {

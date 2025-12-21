@@ -176,6 +176,52 @@
                 }
             }
         },
+        "/posts/{id}/unlike": {
+            "post": {
+                "description": "指定された投稿のいいねを取り消します",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "投稿のいいねを取り消す",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "投稿ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "いいねが取り消された投稿",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.Post"
+                        }
+                    },
+                    "400": {
+                        "description": "無効な投稿ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "投稿が見つかりません",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "全てのユーザーの一覧を取得します（総数付き）",

@@ -15,6 +15,8 @@ export interface TimelineProps {
   selectedFlavorIds?: number[];
   onFlavorToggle?: (flavorId: number) => void;
   onPostClick?: (post: GoShishaBackendInternalModelsPost) => void;
+  onLike?: (postId: number) => void;
+  onUnlike?: (postId: number) => void;
 }
 
 /**
@@ -32,9 +34,12 @@ export function Timeline({
   selectedFlavorIds = [],
   onFlavorToggle,
   onPostClick,
+  onLike,
+  onUnlike,
 }: TimelineProps) {
   const handleLike = (postId: number) => {
-    // TODO: いいねAPI連携
+    if (onLike) return onLike(postId);
+    // fallback: basic log
     console.log("Liked post:", postId);
   };
 
@@ -78,7 +83,13 @@ export function Timeline({
       )}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} onLike={handleLike} onClick={handlePostClick} />
+          <PostCard
+            key={post.id}
+            post={post}
+            onLike={handleLike}
+            onClick={handlePostClick}
+            onUnlike={onUnlike}
+          />
         ))}
       </div>
     </div>

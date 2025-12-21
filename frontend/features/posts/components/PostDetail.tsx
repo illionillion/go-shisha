@@ -7,6 +7,7 @@ import type { GoShishaBackendInternalModelsPost } from "@/api/model";
 import { useGetPostsId } from "@/api/posts";
 import { FlavorLabel } from "@/components/FlavorLabel";
 import { NextIcon, PrevIcon } from "@/components/icons/";
+import { useLike } from "@/features/posts/hooks/useLike";
 import { getImageUrl } from "@/lib/getImageUrl";
 
 interface PostDetailProps {
@@ -30,6 +31,8 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
     initialPost?.likes ?? post?.likes ?? 0
   );
   const [isLiked, setIsLiked] = useState<boolean>(initialPost?.is_liked ?? post?.is_liked ?? false);
+
+  const { onLike, onUnlike } = useLike();
 
   if (isLoading) {
     return (
@@ -60,14 +63,14 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
     if (isLiked) {
       setIsLiked(false);
       setOptimisticLikes((prev) => Math.max(0, (prev ?? post.likes ?? 0) - 1));
-      //   /unlikeのapiを叩く
+      onUnlike(post.id);
       return;
     }
 
     // like
     setIsLiked(true);
     setOptimisticLikes((prev) => (prev ?? post.likes ?? 0) + 1);
-    // /likeのapiを叩く
+    onLike(post.id);
   };
 
   const currentSlide = slides.length > 0 ? slides[current] : undefined;
@@ -136,7 +139,7 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
             <div>
               <div className="font-medium">{post.user?.display_name || "匿名"}</div>
               <div className="text-sm text-gray-500">
-                {new Date(post.created_at || Date.now()).toLocaleString()}
+                <time dateTime={post.created_at ?? undefined}>{post.created_at ?? ""}</time>
               </div>
             </div>
           </div>

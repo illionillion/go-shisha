@@ -56,11 +56,11 @@
   },
   "lint-staged": {
     "frontend/**/*.{js,jsx,ts,tsx}": [
-      "eslint --config frontend/eslint.config.ts --fix",
-      "prettier --config frontend/.prettierrc --write"
+      "pnpm -w -F frontend lint:fix --",
+      "pnpm -w -F frontend format --"
     ],
     "frontend/**/*.{json,md,yml,yaml}": [
-      "prettier --config frontend/.prettierrc --write"
+      "pnpm -w -F frontend format --"
     ]
   }
 }

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import type { GoShishaBackendInternalModelsPost } from "../../../api/model";
@@ -430,18 +430,39 @@ describe("PostCard", () => {
     expect(screen.getByText("1枚目")).toBeInTheDocument();
 
     // 1秒後に次のスライドに切り替わる
-    vi.advanceTimersByTime(1000);
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
     await vi.waitFor(() => {
       expect(screen.getByText("2枚目")).toBeInTheDocument();
     });
 
     // さらに1秒後に最初のスライドに戻る
-    vi.advanceTimersByTime(1000);
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
     await vi.waitFor(() => {
       expect(screen.getByText("1枚目")).toBeInTheDocument();
     });
 
     vi.useRealTimers();
+  });
+
+  it("onUnlikeが未定義の場合、いいね解除でonLikeが呼ばれる", async () => {
+    const user = userEvent.setup();
+    const onLike = vi.fn();
+    const onClick = vi.fn();
+
+    // onUnlike を未定義でレンダリング
+    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+
+    const likeButton = screen.getByLabelText("いいね");
+    // いいね (onLike を呼ぶ)
+    await user.click(likeButton);
+    // 解除 (onUnlike undefined -> fallback to onLike)
+    await user.click(likeButton);
+
+    expect(onLike).toHaveBeenCalledTimes(2);
   });
 
   // プログレスバーのテスト

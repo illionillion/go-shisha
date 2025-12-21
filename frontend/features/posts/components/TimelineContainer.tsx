@@ -4,8 +4,9 @@ import { useMemo, useState } from "react";
 import type {
   GoShishaBackendInternalModelsFlavor,
   GoShishaBackendInternalModelsPost,
-} from "../../../api/model";
-import { useGetPosts } from "../../../api/posts";
+} from "@/api/model";
+import { useGetPosts } from "@/api/posts";
+import { useLike } from "@/features/posts/hooks/useLike";
 import { Timeline } from "./Timeline";
 
 interface TimelineContainerProps {
@@ -66,6 +67,8 @@ export function TimelineContainer({ initialPosts }: TimelineContainerProps) {
     );
   };
 
+  const { onLike, onUnlike } = useLike();
+
   return (
     <Timeline
       posts={filteredPosts}
@@ -74,6 +77,8 @@ export function TimelineContainer({ initialPosts }: TimelineContainerProps) {
       availableFlavors={availableFlavors}
       selectedFlavorIds={selectedFlavorIds}
       onFlavorToggle={handleFlavorToggle}
+      onLike={onLike}
+      onUnlike={onUnlike}
     />
   );
 }

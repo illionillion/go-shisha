@@ -20,4 +20,7 @@ type PostRepository interface {
 	
 	// IncrementLikes increments the like count for a post
 	IncrementLikes(id int) (*models.Post, error)
+
+	// DecrementLikes decrements the like count for a post
+	DecrementLikes(id int) (*models.Post, error)
 }

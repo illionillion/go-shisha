@@ -32,6 +32,8 @@ import type {
   PostPosts400,
   PostPostsIdLike400,
   PostPostsIdLike404,
+  PostPostsIdUnlike400,
+  PostPostsIdUnlike404,
 } from "./model";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -418,6 +420,90 @@ export const usePostPostsIdLike = <
   TContext
 > => {
   const mutationOptions = getPostPostsIdLikeMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * 指定された投稿のいいねを取り消します
+ * @summary 投稿のいいねを取り消す
+ */
+export const postPostsIdUnlike = (
+  id: number,
+  options?: SecondParameter<typeof apiFetch>,
+  signal?: AbortSignal
+) => {
+  return apiFetch<GoShishaBackendInternalModelsPost>(
+    { url: `/posts/${id}/unlike`, method: "POST", signal },
+    options
+  );
+};
+
+export const getPostPostsIdUnlikeMutationOptions = <
+  TError = PostPostsIdUnlike400 | PostPostsIdUnlike404,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postPostsIdUnlike>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postPostsIdUnlike>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["postPostsIdUnlike"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postPostsIdUnlike>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return postPostsIdUnlike(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostPostsIdUnlikeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postPostsIdUnlike>>
+>;
+
+export type PostPostsIdUnlikeMutationError = PostPostsIdUnlike400 | PostPostsIdUnlike404;
+
+/**
+ * @summary 投稿のいいねを取り消す
+ */
+export const usePostPostsIdUnlike = <
+  TError = PostPostsIdUnlike400 | PostPostsIdUnlike404,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postPostsIdUnlike>>,
+      TError,
+      { id: number },
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof postPostsIdUnlike>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationOptions = getPostPostsIdUnlikeMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

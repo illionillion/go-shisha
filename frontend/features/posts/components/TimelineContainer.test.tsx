@@ -65,6 +65,11 @@ vi.mock("../../../api/posts", () => ({
   useGetPosts: vi.fn(),
 }));
 
+// --- useLike モック (QueryClientProvider がテストにないため) ---
+vi.mock("../hooks/useLike", () => ({
+  useLike: () => ({ onLike: vi.fn(), onUnlike: vi.fn() }),
+}));
+
 const mockFlavors: GoShishaBackendInternalModelsFlavor[] = [
   { id: 10, name: "ミント" },
   { id: 20, name: "レモン" },
