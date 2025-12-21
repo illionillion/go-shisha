@@ -1,0 +1,199 @@
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, test, expect, vi, beforeEach } from "vitest";
+import type { GoShishaBackendInternalModelsPost } from "../../../api/model";
+import { useGetPostsId } from "../../../api/posts";
+import { PostDetail } from "./PostDetail";
+
+// モック対象
+vi.mock("../../../api/posts", () => ({
+  useGetPostsId: vi.fn(),
+}));
+
+let onLikeSpy = vi.fn();
+let onUnlikeSpy = vi.fn();
+vi.mock("../hooks/useLike", () => ({
+  useLike: () => ({ onLike: onLikeSpy, onUnlike: onUnlikeSpy }),
+}));
+
+const mockPost: GoShishaBackendInternalModelsPost = {
+  id: 11,
+  user_id: 2,
+  message: "テスト投稿",
+  slides: [
+    {
+      image_url: "https://placehold.co/400x600",
+      text: "スライドテキスト",
+      flavor: { id: 1, name: "ミント" },
+    },
+  ],
+  likes: 5,
+  is_liked: false,
+  user: {
+    id: 2,
+    display_name: "投稿者",
+    email: "a@b",
+    description: "",
+    icon_url: "",
+    external_url: "",
+  },
+};
+
+describe("PostDetail", () => {
+  let user: ReturnType<typeof userEvent.setup>;
+  beforeEach(() => {
+    vi.clearAllMocks();
+    onLikeSpy = vi.fn();
+    onUnlikeSpy = vi.fn();
+    user = userEvent.setup();
+  });
+
+  test("エラー時に再試行ボタンが表示され refetch が呼ばれる", async () => {
+    const refetch = vi.fn();
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch,
+    });
+
+    render(<PostDetail postId={11} />);
+    expect(screen.getByText("投稿を取得できませんでした。")).toBeInTheDocument();
+
+    await user.click(screen.getByText("再試行"));
+    expect(refetch).toHaveBeenCalled();
+  });
+
+  test("ローディング時はスケルトンが表示される", () => {
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    render(<PostDetail postId={11} />);
+    // スケルトン要素が存在すること
+    expect(document.querySelectorAll(".bg-gray-200").length).toBeGreaterThan(0);
+  });
+
+  test("slidesが空のとき No Image とシェア動作を確認", async () => {
+    const clipboardWrite = vi.fn().mockResolvedValue(undefined);
+    // define clipboard on navigator for jsdom
+    Object.defineProperty(global.navigator, "clipboard", {
+      value: { writeText: clipboardWrite },
+      configurable: true,
+    });
+    (globalThis as unknown as { alert?: (message?: string) => void }).alert = vi.fn();
+
+    const refetch = vi.fn();
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: { id: 2, slides: [], user_id: 1, message: "No slides", likes: 0 },
+      isLoading: false,
+      isError: false,
+      refetch,
+    });
+
+    render(<PostDetail postId={2} />);
+
+    expect(screen.getByText("No Image")).toBeInTheDocument();
+
+    // シェアボタンをクリックして clipboard.writeText と alert が呼ばれる
+    const shareBtn = screen.getByRole("button", { name: /シェア/ });
+    await userEvent.click(shareBtn);
+    expect(clipboardWrite).toHaveBeenCalled();
+    expect(global.alert).toHaveBeenCalledWith("URLをコピーしました");
+  });
+
+  test("複数スライド時に Prev/Next ボタンで画像が切り替わる", async () => {
+    const multi = {
+      id: 3,
+      slides: [
+        { image_url: "a.jpg", text: "S1", flavor: undefined },
+        { image_url: "b.jpg", text: "S2", flavor: { id: 5, name: "ベリー" } },
+      ],
+      user_id: 1,
+      likes: 0,
+    } as unknown as GoShishaBackendInternalModelsPost;
+
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: multi,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    render(<PostDetail postId={3} />);
+
+    expect(screen.getByText("S1")).toBeInTheDocument();
+
+    const next = screen.getByLabelText("次のスライド");
+    await userEvent.click(next);
+    expect(screen.getByText("S2")).toBeInTheDocument();
+
+    const prev = screen.getByLabelText("前のスライド");
+    await userEvent.click(prev);
+    expect(screen.getByText("S1")).toBeInTheDocument();
+  });
+
+  test("投稿表示といいね動作（onLike/onUnlikeが呼ばれる）", async () => {
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: mockPost,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    render(<PostDetail postId={mockPost.id!} />);
+
+    // 投稿内容の表示
+    expect(screen.getByText("投稿者")).toBeInTheDocument();
+    expect(screen.getByText("スライドテキスト")).toBeInTheDocument();
+
+    // 初期いいね数
+    expect(screen.getByText(String(mockPost.likes ?? 0))).toBeInTheDocument();
+
+    // いいね押下 -> optimistic update と onLike 呼び出し
+    const countNode = screen.getByText(String(mockPost.likes ?? 0));
+    const likeBtn = countNode.closest("button");
+    if (!likeBtn) throw new Error("like button not found");
+    await user.click(likeBtn);
+
+    expect(onLikeSpy).toHaveBeenCalledWith(mockPost.id);
+    // optimisticLikes が増えていることを確認
+    expect(screen.getByText(String((mockPost.likes ?? 0) + 1))).toBeInTheDocument();
+
+    // 再度クリック -> unlike
+    await user.click(likeBtn);
+    expect(onUnlikeSpy).toHaveBeenCalledWith(mockPost.id);
+    expect(screen.getByText(String(mockPost.likes ?? 0))).toBeInTheDocument();
+  });
+
+  test("ドットページネーションのボタンをクリックすると該当スライドに切り替わる", async () => {
+    const multi = {
+      id: 4,
+      slides: [
+        { image_url: "a.jpg", text: "D1", flavor: undefined },
+        { image_url: "b.jpg", text: "D2", flavor: undefined },
+        { image_url: "c.jpg", text: "D3", flavor: undefined },
+      ],
+      user_id: 1,
+      likes: 0,
+    } as unknown as GoShishaBackendInternalModelsPost;
+
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: multi,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    render(<PostDetail postId={4} />);
+
+    expect(screen.getByText("D1")).toBeInTheDocument();
+
+    const dot2 = screen.getByRole("button", { name: /スライド 2/ });
+    await userEvent.click(dot2);
+    expect(screen.getByText("D2")).toBeInTheDocument();
+  });
+});
