@@ -431,6 +431,33 @@ describe("PostCard", () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it("前ボタンで先頭から最後に戻り、次ボタンで最後から先頭に戻るラップ動作を確認する", async () => {
+    const user = userEvent.setup();
+    const multiSlidePost = {
+      ...mockPost,
+      slides: [
+        { image_url: "https://picsum.photos/400/600?random=1", text: "S1" },
+        { image_url: "https://picsum.photos/400/600?random=2", text: "S2" },
+        { image_url: "https://picsum.photos/400/600?random=3", text: "S3" },
+      ],
+    } as unknown as GoShishaBackendInternalModelsPost;
+
+    render(<PostCard post={multiSlidePost} onLike={() => {}} onClick={() => {}} />);
+
+    // 初期は S1
+    expect(screen.getByText("S1")).toBeInTheDocument();
+
+    // 前ボタンを押すと最後のスライド S3 に戻る
+    const prev = screen.getByLabelText("前のスライド");
+    await user.click(prev);
+    expect(screen.getByText("S3")).toBeInTheDocument();
+
+    // 次ボタンを押すと S1 に戻る
+    const next = screen.getByLabelText("次のスライド");
+    await user.click(next);
+    expect(screen.getByText("S1")).toBeInTheDocument();
+  });
+
   it("自動切り替えが動作する（タイマーテスト）", async () => {
     vi.useFakeTimers();
 
