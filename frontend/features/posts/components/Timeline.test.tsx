@@ -126,6 +126,18 @@ describe("Timeline", () => {
     consoleSpy.mockRestore();
   });
 
+  it("onLike が渡されている場合、handleLike は onLike を呼び出す", async () => {
+    const user = userEvent.setup();
+    const onLike = vi.fn();
+
+    render(<Timeline posts={mockPosts} onLike={onLike} />);
+
+    const likeButton = screen.getAllByLabelText("いいね")[0];
+    await user.click(likeButton);
+
+    expect(onLike).toHaveBeenCalledWith(1);
+  });
+
   it("フレーバーフィルターが提供された場合に表示される", () => {
     render(
       <Timeline
