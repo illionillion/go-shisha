@@ -64,6 +64,23 @@ describe("PostDetail", () => {
     expect(refetch).toHaveBeenCalled();
   });
 
+  test("data が undefined で isError が false のときも再試行UIが表示され refetch が呼ばれる", async () => {
+    const refetch = vi.fn();
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      refetch,
+    });
+
+    render(<PostDetail postId={123} />);
+    expect(screen.getByText("投稿を取得できませんでした。")).toBeInTheDocument();
+
+    const user = userEvent.setup();
+    await user.click(screen.getByText("再試行"));
+    expect(refetch).toHaveBeenCalled();
+  });
+
   test("ローディング時はスケルトンが表示される", () => {
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       data: undefined,
