@@ -654,4 +654,26 @@ describe("PostCard", () => {
     // Next.js ImageがURLをエンコードするため、srcにplacehold.coが含まれていることを確認
     expect(fallbackImage.getAttribute("src")).toContain("placehold.co");
   });
+
+  it("slidesプロパティが未定義の場合、デフォルト画像が表示される（slides === undefined をカバー）", () => {
+    const mockPostNoSlides: Partial<GoShishaBackendInternalModelsPost> = {
+      id: 2,
+      user_id: 2,
+      message: "No slides prop",
+      // slides を意図的に含めない
+    };
+
+    render(
+      // 型を合わせるため as unknown を経由
+      <PostCard
+        post={mockPostNoSlides as unknown as GoShishaBackendInternalModelsPost}
+        onLike={() => {}}
+        onClick={() => {}}
+      />
+    );
+
+    const fallbackImage = screen.getByAltText("No slides prop");
+    expect(fallbackImage).toBeInTheDocument();
+    expect(fallbackImage.getAttribute("src")).toContain("placehold.co");
+  });
 });
