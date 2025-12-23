@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import type { GoShishaBackendInternalModelsFlavor } from "../../../api/model";
 import { FlavorFilter } from "./FlavorFilter";
 
 const mockFlavors = [
@@ -114,6 +115,24 @@ describe("FlavorFilter", () => {
     expect(mockOnFlavorToggle).toHaveBeenCalledWith(1);
     expect(mockOnFlavorToggle).toHaveBeenCalledWith(2);
     expect(mockOnFlavorToggle).toHaveBeenCalledTimes(2);
+  });
+
+  it("flavor.id が undefined の場合 onFlavorToggle に 0 が渡される", async () => {
+    const user = userEvent.setup();
+    const mockOnFlavorToggle = vi.fn();
+    const flavors: GoShishaBackendInternalModelsFlavor[] = [
+      { id: undefined as unknown as number, name: "不明", color: "bg-red-500" },
+    ];
+
+    render(
+      <FlavorFilter flavors={flavors} selectedFlavorIds={[]} onFlavorToggle={mockOnFlavorToggle} />
+    );
+
+    const label = screen.getByText("不明").closest("label");
+    if (!label) throw new Error("label not found");
+    await user.click(label);
+
+    expect(mockOnFlavorToggle).toHaveBeenCalledWith(0);
   });
 
   test("flavorsが空の場合、フィルタが表示されない", () => {

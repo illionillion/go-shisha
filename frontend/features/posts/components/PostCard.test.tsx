@@ -131,6 +131,33 @@ describe("PostCard", () => {
     expect(svg).toHaveClass("fill-current");
   });
 
+  it("初期 is_liked=true のとき SVG に fill-current が付与される", () => {
+    const postLiked = { ...mockPost, is_liked: true } as GoShishaBackendInternalModelsPost;
+    const onLike = vi.fn();
+    const onClick = vi.fn();
+
+    render(<PostCard post={postLiked} onLike={onLike} onClick={onClick} />);
+
+    const likeButton = screen.getByLabelText("いいね");
+    const svg = likeButton.querySelector("svg");
+    expect(svg).toHaveClass("fill-current");
+  });
+
+  it("onUnlike が渡されているとき、解除クリックで onUnlike が呼ばれる", async () => {
+    const user = userEvent.setup();
+    const onLike = vi.fn();
+    const onUnlike = vi.fn();
+    const onClick = vi.fn();
+
+    const likedPost = { ...mockPost, is_liked: true } as GoShishaBackendInternalModelsPost;
+    render(<PostCard post={likedPost} onLike={onLike} onUnlike={onUnlike} onClick={onClick} />);
+
+    const likeButton = screen.getByLabelText("いいね");
+    await user.click(likeButton);
+
+    expect(onUnlike).toHaveBeenCalledWith(1);
+  });
+
   it("post.idがundefinedの場合、onLikeが呼ばれない", async () => {
     const user = userEvent.setup();
     const postWithoutId = { ...mockPost, id: undefined };

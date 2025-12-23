@@ -196,4 +196,61 @@ describe("PostDetail", () => {
     await userEvent.click(dot2);
     expect(screen.getByText("D2")).toBeInTheDocument();
   });
+
+  test("initialPost が優先されて optimisticLikes / isLiked が初期化される", () => {
+    const initialPost = {
+      id: 99,
+      likes: 10,
+      is_liked: true,
+      user_id: 1,
+    } as unknown as GoShishaBackendInternalModelsPost;
+
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: { id: 99, likes: 0, is_liked: false } as GoShishaBackendInternalModelsPost,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    render(<PostDetail postId={99} initialPost={initialPost} />);
+
+    // optimisticLikes が initialPost の likes を使っている
+    expect(screen.getByText(String(initialPost.likes))).toBeInTheDocument();
+  });
+
+  test("post.id が undefined のときいいね操作は何もしない", async () => {
+    const user = userEvent.setup();
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: { id: undefined, likes: 0 } as unknown as GoShishaBackendInternalModelsPost,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    render(<PostDetail postId={0} />);
+
+    const likeBtn = screen.getByRole("button", { pressed: false });
+    await user.click(likeBtn);
+
+    expect(onLikeSpy).not.toHaveBeenCalled();
+    expect(onUnlikeSpy).not.toHaveBeenCalled();
+  });
+
+  test("ユーザー名がない場合、匿名が表示される", () => {
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: {
+        id: 2,
+        likes: 0,
+        user: undefined,
+        message: "m",
+      } as unknown as GoShishaBackendInternalModelsPost,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    render(<PostDetail postId={2} />);
+
+    expect(screen.getByText("匿名")).toBeInTheDocument();
+  });
 });
