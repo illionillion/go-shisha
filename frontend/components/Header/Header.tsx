@@ -1,4 +1,5 @@
 import { clsx } from "clsx";
+import Link from "next/link";
 
 /**
  * Headerコンポーネント
@@ -22,7 +23,7 @@ export function Header() {
         "border-gray-200",
       ])}
     >
-      <div className={clsx(["flex", "items-center", "space-x-2"])}>
+      <Link href="/" className={clsx(["flex", "items-center", "space-x-2"])}>
         <div
           className={clsx([
             "w-8",
@@ -39,7 +40,7 @@ export function Header() {
           <span className={clsx(["text-white", "font-bold", "text-sm"])}>S</span>
         </div>
         <h1 className={clsx(["text-xl", "font-bold", "text-gray-900"])}>シーシャ行こう</h1>
-      </div>
+      </Link>
       <div
         className={clsx([
           "w-8",
