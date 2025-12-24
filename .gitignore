@@ -1,7 +1,7 @@
 .env
 .DS_Store
 node_modules
-.github/ISSUE_DRAFTS
+.github/DRAFTS
 
 # Backend
 backend/bin/
