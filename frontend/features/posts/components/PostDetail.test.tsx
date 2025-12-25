@@ -214,6 +214,40 @@ describe("PostDetail", () => {
     expect(screen.getByText("D2")).toBeInTheDocument();
   });
 
+  test("ドットの aria-current が切り替わることを確認する", async () => {
+    const multi = {
+      id: 10,
+      slides: [
+        { image_url: "a.jpg", text: "D1", flavor: undefined },
+        { image_url: "b.jpg", text: "D2", flavor: undefined },
+      ],
+      user_id: 1,
+      likes: 0,
+    } as unknown as GoShishaBackendInternalModelsPost;
+
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: multi,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    render(<PostDetail postId={10} />);
+
+    const dot1 = screen.getByRole("button", { name: /スライド 1/ });
+    const dot2 = screen.getByRole("button", { name: /スライド 2/ });
+
+    // 初期は dot1 がアクティブ
+    expect(dot1).toHaveAttribute("aria-current", "true");
+    expect(dot2).not.toHaveAttribute("aria-current", "true");
+
+    await userEvent.click(dot2);
+
+    // dot2 がアクティブに切り替わる
+    expect(dot2).toHaveAttribute("aria-current", "true");
+    expect(dot1).not.toHaveAttribute("aria-current", "true");
+  });
+
   test("initialPost が優先されて optimisticLikes / isLiked が初期化される", () => {
     const initialPost = {
       id: 99,

@@ -676,4 +676,45 @@ describe("PostCard", () => {
     expect(fallbackImage).toBeInTheDocument();
     expect(fallbackImage.getAttribute("src")).toContain("placehold.co");
   });
+
+  it("プログレスバーの完了/アクティブ/未表示状態が手動切替で正しく反映される", async () => {
+    const user = userEvent.setup();
+    const multiSlidePost = {
+      ...mockPost,
+      slides: [
+        { image_url: "https://picsum.photos/400/600?random=1", text: "A1" },
+        { image_url: "https://picsum.photos/400/600?random=2", text: "A2" },
+        { image_url: "https://picsum.photos/400/600?random=3", text: "A3" },
+      ],
+    } as unknown as GoShishaBackendInternalModelsPost;
+
+    const { container } = render(
+      <PostCard
+        post={multiSlidePost}
+        onLike={() => {}}
+        onClick={() => {}}
+        autoPlayInterval={2000}
+      />
+    );
+
+    // 初期は A1 が表示される
+    expect(screen.getByText("A1")).toBeInTheDocument();
+
+    // 次ボタンで A2 に切り替え
+    const next = screen.getByLabelText("次のスライド");
+    await user.click(next);
+
+    // プログレスバー要素を取得して各状態を確認
+    const progressBars = container.querySelectorAll(".h-1.flex-1 > div");
+    const first = progressBars[0] as HTMLElement;
+    const second = progressBars[1] as HTMLElement;
+    const third = progressBars[2] as HTMLElement;
+
+    // 1つ目は完了
+    expect(first).toHaveClass("w-full");
+    // 2つ目はアクティブ（アニメーションクラスがある）
+    expect(second).toHaveClass("animate-[progress-bar_linear_forwards]");
+    // 3つ目は未表示
+    expect(third).toHaveClass("w-0");
+  });
 });
