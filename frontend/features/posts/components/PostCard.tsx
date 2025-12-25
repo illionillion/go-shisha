@@ -90,6 +90,7 @@ export function PostCard({
 
   /** 前のスライドへ */
   const handlePrevSlide = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     if (slides.length > 0) {
       setCurrentSlideIndex((prev) => (prev - 1 + slides.length) % slides.length);
@@ -98,13 +99,16 @@ export function PostCard({
 
   /** 次のスライドへ */
   const handleNextSlide = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     if (slides.length > 0) {
       setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
     }
   };
 
-  const handleLike = () => {
+  const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     const nextLiked = !isLiked;
     setIsLiked(nextLiked);
     if (post.id) {
@@ -229,14 +233,7 @@ export function PostCard({
           <p className={clsx(["text-sm", "line-clamp-3"])}>{displayText}</p>
           {displayFlavor && <FlavorLabel flavor={displayFlavor} />}
         </div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleLike();
-          }}
-          className={likeButtonVariants()}
-          aria-label="いいね"
-        >
+        <button onClick={handleLike} className={likeButtonVariants()} aria-label="いいね">
           <svg
             className={clsx([
               "w-5",

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type {
   GoShishaBackendInternalModelsFlavor,
   GoShishaBackendInternalModelsPost,
@@ -83,13 +84,19 @@ export function Timeline({
       )}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         {posts.map((post) => (
-          <PostCard
+          <Link
             key={post.id}
-            post={post}
-            onLike={handleLike}
-            onClick={handlePostClick}
-            onUnlike={onUnlike}
-          />
+            href={`/posts/${post.id}`}
+            className="block"
+            aria-label={`View post ${post.id}`}
+          >
+            <PostCard
+              post={post}
+              onLike={handleLike}
+              onClick={handlePostClick}
+              onUnlike={onUnlike}
+            />
+          </Link>
         ))}
       </div>
     </div>
