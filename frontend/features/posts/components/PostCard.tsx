@@ -229,7 +229,19 @@ export function PostCard({
         )}
 
         <div className={clsx(["absolute", "bottom-0", "left-0", "right-0", "p-4", "text-white"])}>
-          <p className={clsx(["text-sm", "font-medium", "mb-2"])}>{post.user?.display_name}</p>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 relative flex-shrink-0">
+              <Image
+                src={getImageUrl(post.user?.icon_url)}
+                alt={post.user?.display_name ?? "ユーザー"}
+                fill
+                className="rounded-full object-cover"
+                sizes="32px"
+              />
+            </div>
+            <div className="text-sm font-medium">{post.user?.display_name ?? "匿名"}</div>
+          </div>
+
           <p className={clsx(["text-sm", "line-clamp-3"])}>{displayText}</p>
           {displayFlavor && <FlavorLabel flavor={displayFlavor} />}
         </div>
