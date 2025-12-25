@@ -5,6 +5,7 @@ import { clsx } from "clsx";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { GoShishaBackendInternalModelsPost } from "@/api/model";
+import { Avatar } from "@/components/Avatar";
 import { FlavorLabel } from "@/components/FlavorLabel";
 import { NextIcon, PrevIcon } from "@/components/icons";
 import { getImageUrl } from "@/lib/getImageUrl";
@@ -230,15 +231,11 @@ export function PostCard({
 
         <div className={clsx(["absolute", "bottom-0", "left-0", "right-0", "p-4", "text-white"])}>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 relative flex-shrink-0">
-              <Image
-                src={getImageUrl(post.user?.icon_url)}
-                alt={post.user?.display_name ?? "ユーザー"}
-                fill
-                className="rounded-full object-cover"
-                sizes="32px"
-              />
-            </div>
+            <Avatar
+              src={post.user?.icon_url ?? null}
+              alt={post.user?.display_name ?? "ユーザー"}
+              size={32}
+            />
             <div className="text-sm font-medium">{post.user?.display_name ?? "匿名"}</div>
           </div>
 
