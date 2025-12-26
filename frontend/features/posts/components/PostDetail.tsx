@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import type { GoShishaBackendInternalModelsPost } from "@/api/model";
 import { useGetPostsId } from "@/api/posts";
+import { Avatar } from "@/components/Avatar";
 import { FlavorLabel } from "@/components/FlavorLabel";
 import { NextIcon, PrevIcon } from "@/components/icons/";
 import { useLike } from "@/features/posts/hooks/useLike";
@@ -131,10 +132,10 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
 
         <div className="md:w-96">
           <div className="flex items-center gap-3 mb-3">
-            <img
-              src={getImageUrl(post.user?.icon_url)}
+            <Avatar
+              src={post.user?.icon_url ?? null}
               alt={post.user?.display_name || "ユーザー"}
-              className="w-10 h-10 rounded-full object-cover"
+              size={40}
             />
             <div>
               <div className="font-medium">{post.user?.display_name || "匿名"}</div>
