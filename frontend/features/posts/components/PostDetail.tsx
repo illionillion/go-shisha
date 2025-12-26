@@ -58,6 +58,16 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
   const handlePrev = () => setCurrent((c) => (c - 1 + slides.length) % Math.max(1, slides.length));
   const handleNext = () => setCurrent((c) => (c + 1) % Math.max(1, slides.length));
 
+  // 共通の戻るハンドラ: 履歴があれば戻る、なければトップへ
+  const handleBack = () => {
+    if (typeof window === "undefined") return;
+    if (window.history?.length && window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = "/";
+    }
+  };
+
   const handleLike = () => {
     if (!post.id) return;
     if (isLiked) {
@@ -79,7 +89,19 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
     <div className="mx-auto max-w-3xl px-4 py-6">
       <div className="flex flex-col md:flex-row gap-6">
         <div className="md:flex-1">
-          <div className="relative w-full aspect-[2/3] rounded-lg overflow-hidden bg-gray-100">
+          <div className="relative w-full md:w-80 aspect-[2/3] rounded-lg overflow-hidden bg-gray-100">
+            <div className="absolute left-2 top-2 z-30 md:hidden flex items-center gap-2 bg-black/40 text-white px-3 py-2 rounded-md backdrop-blur-sm pointer-events-auto">
+              <button
+                type="button"
+                aria-label="戻る"
+                onClick={handleBack}
+                className="inline-flex items-center gap-2 p-1 rounded focus:outline-none"
+              >
+                <PrevIcon />
+                <span className="text-sm">戻る</span>
+              </button>
+            </div>
+
             {currentSlide ? (
               <Image
                 src={getImageUrl(currentSlide.image_url)}
@@ -130,6 +152,18 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
         </div>
 
         <div className="md:w-96">
+          <div className="hidden md:flex items-center gap-3 mb-3">
+            <button
+              type="button"
+              onClick={handleBack}
+              aria-label="戻る"
+              className="inline-flex items-center gap-2 text-sm text-gray-700 focus:outline-none"
+            >
+              <PrevIcon className="w-4 h-4 text-black" />
+              <span>戻る</span>
+            </button>
+          </div>
+
           <div className="flex items-center gap-3 mb-3">
             <img
               src={getImageUrl(post.user?.icon_url)}
