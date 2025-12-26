@@ -4,7 +4,15 @@ import type { GoShishaBackendInternalModelsPost } from "@/api/model";
 import PostDetail from "./PostDetail";
 
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: false } },
+  defaultOptions: {
+    queries: {
+      retry: false,
+      // Prevent automatic refetches in Storybook / CI; stories provide `initialData`
+      staleTime: Infinity,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+    },
+  },
 });
 
 const mockPost: GoShishaBackendInternalModelsPost = {
@@ -16,7 +24,7 @@ const mockPost: GoShishaBackendInternalModelsPost = {
   user: {
     id: 10,
     display_name: "テストユーザー",
-    icon_url: "/images/sample-avatar.png",
+    icon_url: "",
   },
   slides: [
     {
