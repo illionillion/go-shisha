@@ -15,7 +15,6 @@ export interface TimelineProps {
   availableFlavors?: GoShishaBackendInternalModelsFlavor[];
   selectedFlavorIds?: number[];
   onFlavorToggle?: (flavorId: number) => void;
-  onPostClick?: (post: GoShishaBackendInternalModelsPost) => void;
   onLike?: (postId: number) => void;
   onUnlike?: (postId: number) => void;
 }
@@ -34,7 +33,6 @@ export function Timeline({
   availableFlavors = [],
   selectedFlavorIds = [],
   onFlavorToggle,
-  onPostClick,
   onLike,
   onUnlike,
 }: TimelineProps) {
@@ -42,15 +40,6 @@ export function Timeline({
     if (onLike) return onLike(postId);
     // fallback: basic log
     console.log("Liked post:", postId);
-  };
-
-  const handlePostClick = (post: GoShishaBackendInternalModelsPost) => {
-    if (onPostClick) {
-      onPostClick(post);
-    } else {
-      // TODO: 投稿詳細ページ遷移
-      console.log("Clicked post:", post.id);
-    }
   };
 
   if (isLoading) {
@@ -90,12 +79,7 @@ export function Timeline({
             className="block"
             aria-label={`View post ${post.id}`}
           >
-            <PostCard
-              post={post}
-              onLike={handleLike}
-              onClick={handlePostClick}
-              onUnlike={onUnlike}
-            />
+            <PostCard post={post} onLike={handleLike} onUnlike={onUnlike} />
           </Link>
         ))}
       </div>

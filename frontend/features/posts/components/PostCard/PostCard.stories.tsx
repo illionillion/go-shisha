@@ -63,9 +63,6 @@ const meta = {
     onLike: {
       action: "liked",
     },
-    onClick: {
-      action: "clicked",
-    },
   },
   decorators: [
     (Story) => (
@@ -87,7 +84,6 @@ export const WithFlavor: Story = {
   args: {
     post: mockPost,
     onLike: () => {},
-    onClick: () => {},
   },
 };
 
@@ -99,7 +95,6 @@ export const WithoutFlavor: Story = {
   args: {
     post: mockPostWithoutFlavor,
     onLike: () => {},
-    onClick: () => {},
   },
 };
 
@@ -124,7 +119,6 @@ export const LongMessage: Story = {
       ],
     },
     onLike: () => {},
-    onClick: () => {},
   },
 };
 
@@ -151,7 +145,6 @@ export const BerryFlavor: Story = {
       likes: 22,
     },
     onLike: () => {},
-    onClick: () => {},
   },
 };
 
@@ -174,7 +167,6 @@ export const WithoutImage: Story = {
       likes: 5,
     },
     onLike: () => {},
-    onClick: () => {},
   },
 };
 
@@ -228,7 +220,6 @@ export const MultipleSlides: Story = {
       },
     },
     onLike: () => {},
-    onClick: () => {},
   },
 };
 
@@ -275,7 +266,6 @@ export const FiveSlides: Story = {
       },
     },
     onLike: () => {},
-    onClick: () => {},
   },
 };
 
@@ -325,7 +315,6 @@ export const ProgressBarStatic: Story = {
     },
     autoPlayInterval: 3000,
     onLike: () => {},
-    onClick: () => {},
   },
   decorators: [
     (Story) => (
