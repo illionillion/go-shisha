@@ -4,9 +4,9 @@ import Link from "next/link";
 import type {
   GoShishaBackendInternalModelsFlavor,
   GoShishaBackendInternalModelsPost,
-} from "../../../api/model";
-import { FlavorFilter } from "./FlavorFilter";
-import { PostCard } from "./PostCard";
+} from "../../../../api/model";
+import { FlavorFilter } from "../FlavorFilter/FlavorFilter";
+import { PostCard } from "../PostCard";
 
 export interface TimelineProps {
   posts: GoShishaBackendInternalModelsPost[];

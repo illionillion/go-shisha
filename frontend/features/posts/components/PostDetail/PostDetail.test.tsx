@@ -1,18 +1,18 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, test, expect, vi, beforeEach } from "vitest";
-import type { GoShishaBackendInternalModelsPost } from "../../../api/model";
-import { useGetPostsId } from "../../../api/posts";
+import type { GoShishaBackendInternalModelsPost } from "../../../../api/model";
+import { useGetPostsId } from "../../../../api/posts";
 import { PostDetail } from "./PostDetail";
 
 // モック対象
-vi.mock("../../../api/posts", () => ({
+vi.mock("../../../../api/posts", () => ({
   useGetPostsId: vi.fn(),
 }));
 
 let onLikeSpy = vi.fn();
 let onUnlikeSpy = vi.fn();
-vi.mock("../hooks/useLike", () => ({
+vi.mock("../../hooks/useLike", () => ({
   useLike: () => ({ onLike: onLikeSpy, onUnlike: onUnlikeSpy }),
 }));
 

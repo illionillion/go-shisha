@@ -1,6 +1,6 @@
 import type { GoShishaBackendInternalModelsPost } from "../api/model";
 import { getPosts } from "../api/posts";
-import { TimelineContainer } from "../features/posts/components/TimelineContainer";
+import { TimelineContainer } from "../features/posts/components/Timeline/TimelineContainer";
 
 /**
  * ホームページ（トップページ）
