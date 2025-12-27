@@ -1,0 +1,114 @@
+"use client";
+
+import { useState } from "react";
+import type { GoShishaBackendInternalModelsPost } from "@/api/model";
+import { useGetPostsId } from "@/api/posts";
+import { useLike } from "@/features/posts/hooks/useLike";
+import PostDetailCarousel from "./PostDetailCarousel";
+import PostDetailFooter from "./PostDetailFooter";
+import PostDetailHeader from "./PostDetailHeader";
+
+interface PostDetailProps {
+  postId: number;
+  initialPost?: GoShishaBackendInternalModelsPost;
+}
+
+export function PostDetail({ postId, initialPost }: PostDetailProps) {
+  const {
+    data: post,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetPostsId(postId, {
+    query: { initialData: initialPost },
+  });
+
+  const slides = post?.slides || [];
+  const [current, setCurrent] = useState(0);
+  const [optimisticLikes, setOptimisticLikes] = useState<number>(
+    initialPost?.likes ?? post?.likes ?? 0
+  );
+  const [isLiked, setIsLiked] = useState<boolean>(initialPost?.is_liked ?? post?.is_liked ?? false);
+
+  const { onLike, onUnlike } = useLike();
+
+  if (isLoading) {
+    return (
+      <div className="p-4">
+        <div className="h-80 bg-gray-200 rounded-lg mb-4" />
+        <div className="h-6 bg-gray-200 rounded w-3/4 mb-2" />
+        <div className="h-4 bg-gray-200 rounded w-1/2" />
+      </div>
+    );
+  }
+
+  if (isError || !post) {
+    return (
+      <div className="p-4 text-center">
+        <p className="text-red-600 mb-2">投稿を取得できませんでした。</p>
+        <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={() => refetch()}>
+          再試行
+        </button>
+      </div>
+    );
+  }
+
+  const handlePrev = () => setCurrent((c) => (c - 1 + slides.length) % Math.max(1, slides.length));
+  const handleNext = () => setCurrent((c) => (c + 1) % Math.max(1, slides.length));
+
+  // 共通の戻るハンドラ: 履歴があれば戻る、なければトップへ
+  const handleBack = () => {
+    if (typeof window === "undefined") return;
+    if (window.history?.length && window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = "/";
+    }
+  };
+
+  const handleLike = () => {
+    if (!post.id) return;
+    if (isLiked) {
+      setIsLiked(false);
+      setOptimisticLikes((prev) => Math.max(0, (prev ?? post.likes ?? 0) - 1));
+      onUnlike(post.id);
+      return;
+    }
+
+    // like
+    setIsLiked(true);
+    setOptimisticLikes((prev) => (prev ?? post.likes ?? 0) + 1);
+    onLike(post.id);
+  };
+
+  const currentSlide = slides.length > 0 ? slides[current] : undefined;
+
+  return (
+    <div className="mx-auto max-w-3xl px-4 py-6">
+      <div className="flex flex-col md:flex-row gap-6">
+        <PostDetailCarousel
+          slides={slides}
+          current={current}
+          onPrev={handlePrev}
+          onNext={handleNext}
+          onDotClick={(i) => setCurrent(i)}
+          handleBack={handleBack}
+        />
+
+        <div>
+          <PostDetailHeader user={post.user} createdAt={post.created_at} onBack={handleBack} />
+
+          <PostDetailFooter
+            post={post}
+            currentSlide={currentSlide}
+            optimisticLikes={optimisticLikes}
+            isLiked={isLiked}
+            onLike={handleLike}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default PostDetail;

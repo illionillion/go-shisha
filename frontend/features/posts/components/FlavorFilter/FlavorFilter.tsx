@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import type { GoShishaBackendInternalModelsFlavor } from "../../../api/model";
+import type { GoShishaBackendInternalModelsFlavor } from "../../../../api/model";
 
 interface FlavorFilterProps {
   flavors: GoShishaBackendInternalModelsFlavor[];

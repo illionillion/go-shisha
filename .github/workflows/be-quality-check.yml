@@ -5,15 +5,15 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 on:
   push:
     branches: ["main"]
-    paths: ["backend/**", ".github/workflows/backend-quality-check.yml"]
+    paths: ["backend/**", ".github/workflows/be-quality-check.yml"]
   pull_request:
     branches: ["main"]
-    paths: ["backend/**", ".github/workflows/backend-quality-check.yml"]
+    paths: ["backend/**", ".github/workflows/be-quality-check.yml"]
 
 jobs:
   build:

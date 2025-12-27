@@ -1,5 +1,6 @@
 import { clsx } from "clsx";
 import Link from "next/link";
+import Avatar from "../Avatar";
 
 /**
  * Headerコンポーネント
@@ -41,31 +42,7 @@ export function Header() {
         </div>
         <h1 className={clsx(["text-xl", "font-bold", "text-gray-900"])}>シーシャ行こう</h1>
       </Link>
-      <div
-        className={clsx([
-          "w-8",
-          "h-8",
-          "bg-gray-200",
-          "rounded-full",
-          "flex",
-          "items-center",
-          "justify-center",
-        ])}
-      >
-        <svg
-          className={clsx(["w-5", "h-5", "text-gray-600"])}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-          />
-        </svg>
-      </div>
+      <Avatar />
     </header>
   );
 }
