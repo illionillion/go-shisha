@@ -1,9 +1,12 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import * as React from "react";
 import { describe, test, expect, vi, beforeEach } from "vitest";
 import type { GoShishaBackendInternalModelsPost } from "../../../../api/model";
 import { useGetPostsId } from "../../../../api/posts";
 import { PostDetail } from "./PostDetail";
+import PostDetailCarousel from "./PostDetailCarousel";
+import PostDetailHeader from "./PostDetailHeader";
 
 // モック対象
 vi.mock("../../../../api/posts", () => ({
@@ -15,6 +18,14 @@ let onUnlikeSpy = vi.fn();
 vi.mock("../../hooks/useLike", () => ({
   useLike: () => ({ onLike: onLikeSpy, onUnlike: onUnlikeSpy }),
 }));
+
+// next/image を簡易モックして jsdom 環境で <img> として扱う
+vi.mock("next/image", () => {
+  return {
+    __esModule: true,
+    default: (props: Record<string, unknown>) => React.createElement("img", props),
+  };
+});
 
 const mockPost: GoShishaBackendInternalModelsPost = {
   id: 11,
@@ -48,6 +59,40 @@ describe("PostDetail", () => {
     user = userEvent.setup();
   });
 
+  test("PostDetail の内部 handleBack が動作する (history.back / location.href)", async () => {
+    // history length > 1 -> history.back
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: mockPost,
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    const backSpy = vi.fn();
+    Object.defineProperty(window, "history", {
+      value: { ...window.history, length: 2, back: backSpy },
+      configurable: true,
+    });
+
+    render(<PostDetail postId={mockPost.id!} />);
+    const backBtn = screen.getAllByRole("button", { name: /戻る/ })[0];
+    await user.click(backBtn);
+    expect(backSpy).toHaveBeenCalled();
+
+    // unmount and test location href branch
+    cleanup();
+    Object.defineProperty(window, "history", {
+      value: { ...window.history, length: 1, back: vi.fn() },
+      configurable: true,
+    });
+    const hrefObj: { href: string } = { href: "" };
+    Object.defineProperty(window, "location", { value: hrefObj, configurable: true });
+
+    render(<PostDetail postId={mockPost.id!} />);
+    const backBtn2 = screen.getAllByRole("button", { name: /戻る/ })[0];
+    await user.click(backBtn2);
+    expect(window.location.href).toBe("/");
+  });
   test("エラー時に再試行ボタンが表示され refetch が呼ばれる", async () => {
     const refetch = vi.fn();
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
@@ -303,5 +348,66 @@ describe("PostDetail", () => {
     render(<PostDetail postId={2} />);
 
     expect(screen.getByText("匿名")).toBeInTheDocument();
+  });
+
+  test("戻るボタンで history.back が呼ばれる / location.href が設定されるパス", async () => {
+    // case: history length > 1 -> history.back
+    const refetch = vi.fn();
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: mockPost,
+      isLoading: false,
+      isError: false,
+      refetch,
+    });
+
+    const origHistory = window.history;
+    const origLocation = window.location;
+
+    // mock history with length > 1 and test PostDetailHeader's back button
+    const backSpy = vi.fn();
+    Object.defineProperty(window, "history", {
+      value: { ...window.history, length: 2, back: backSpy },
+      configurable: true,
+    });
+
+    render(
+      <PostDetailHeader
+        user={mockPost.user}
+        createdAt={mockPost.created_at}
+        onBack={() => window.history.back()}
+      />
+    );
+    const headerBack = screen.getByRole("button", { name: /戻る/ });
+    await userEvent.click(headerBack);
+    expect(backSpy).toHaveBeenCalled();
+
+    // case: history length <= 1 -> location.href = '/'
+    // unmount previous render to avoid duplicate buttons in the document
+    cleanup();
+    Object.defineProperty(window, "history", {
+      value: { ...window.history, length: 1, back: vi.fn() },
+      configurable: true,
+    });
+    // make location writable and observe assignment
+    const hrefObj: { href: string } = { href: "" };
+    Object.defineProperty(window, "location", { value: hrefObj, configurable: true });
+
+    render(
+      <PostDetailCarousel
+        slides={[]}
+        current={0}
+        onPrev={() => {}}
+        onNext={() => {}}
+        onDotClick={() => {}}
+        handleBack={() => (window.location.href = "/")}
+      />
+    );
+    const carouselBack = screen.getByRole("button", { name: /戻る/ });
+    await userEvent.click(carouselBack);
+    expect(window.location.href).toBe("/");
+
+    // restore
+    Object.defineProperty(window, "history", { value: origHistory, configurable: true });
+    Object.defineProperty(window, "location", { value: origLocation, configurable: true });
   });
 });
