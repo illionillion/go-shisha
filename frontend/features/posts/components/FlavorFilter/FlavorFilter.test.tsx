@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import type { GoShishaBackendInternalModelsFlavor } from "../../../api/model";
+import type { GoShishaBackendInternalModelsFlavor } from "../../../../api/model";
 import { FlavorFilter } from "./FlavorFilter";
 
 const mockFlavors = [
