@@ -16,8 +16,7 @@ const mockPost = {
 describe("PostCard interactions", () => {
   test("Prev/Next ボタンでスライドが切り替わる", async () => {
     const onLike = vi.fn();
-    const onClick = vi.fn();
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} />);
 
     // 初期は A が表示
     expect(screen.getByText("A") || screen.getByText("m")).toBeTruthy();
