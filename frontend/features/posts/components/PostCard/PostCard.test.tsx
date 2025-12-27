@@ -1,8 +1,8 @@
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
-import type { GoShishaBackendInternalModelsPost } from "../../../api/model";
-import { PostCard } from "./PostCard";
+import type { GoShishaBackendInternalModelsPost } from "../../../../api/model";
+import { PostCard } from ".";
 
 const mockPost: GoShishaBackendInternalModelsPost = {
   id: 1,

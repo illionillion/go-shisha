@@ -54,7 +54,7 @@ const config: TestRunnerConfig = {
       // スナップショットをfrontend直下の__image_snapshots__に集約
       customSnapshotsDir: "__image_snapshots__",
       customDiffDir: "__image_snapshots__/__diff_output__",
-      failureThreshold: 0.01, // 1%の差分を許容（フォント・アンチエイリアシング差異対応）
+      failureThreshold: 0.001, // 0.1%の差分を許容（フォント・アンチエイリアシング差異対応）
       failureThresholdType: "percent",
     });
   },

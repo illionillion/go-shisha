@@ -4,8 +4,8 @@ import { describe, test, expect, vi, beforeEach } from "vitest";
 import type {
   GoShishaBackendInternalModelsPost,
   GoShishaBackendInternalModelsFlavor,
-} from "../../../api/model";
-import { useGetPosts } from "../../../api/posts";
+} from "../../../../api/model";
+import { useGetPosts } from "../../../../api/posts";
 import type { TimelineProps } from "./Timeline";
 import { TimelineContainer } from "./TimelineContainer";
 
@@ -61,12 +61,12 @@ vi.mock("./Timeline", () => ({
 }));
 
 // --- useGetPostsモック ---
-vi.mock("../../../api/posts", () => ({
+vi.mock("../../../../api/posts", () => ({
   useGetPosts: vi.fn(),
 }));
 
 // --- useLike モック (QueryClientProvider がテストにないため) ---
-vi.mock("../hooks/useLike", () => ({
+vi.mock("../../hooks/useLike", () => ({
   useLike: () => ({ onLike: vi.fn(), onUnlike: vi.fn() }),
 }));
 

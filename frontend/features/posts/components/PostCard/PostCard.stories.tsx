@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import type { GoShishaBackendInternalModelsPost } from "../../../api/model";
-import { PostCard } from "./PostCard";
+import type { GoShishaBackendInternalModelsPost } from "../../../../api/model";
+import { PostCard } from ".";
 
 const mockPost: GoShishaBackendInternalModelsPost = {
   id: 1,

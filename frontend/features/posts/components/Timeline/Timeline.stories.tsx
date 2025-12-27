@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 import type {
   GoShishaBackendInternalModelsFlavor,
   GoShishaBackendInternalModelsPost,
-} from "../../../api/model";
+} from "../../../../api/model";
 import { Timeline } from "./Timeline";
 
 const mockFlavors: GoShishaBackendInternalModelsFlavor[] = [
