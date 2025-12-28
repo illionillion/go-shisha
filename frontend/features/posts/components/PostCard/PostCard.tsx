@@ -4,14 +4,14 @@ import { cva } from "class-variance-authority";
 import { clsx } from "clsx";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import type { GoShishaBackendInternalModelsPost } from "@/api/model";
 import { Avatar } from "@/components/Avatar";
 import { FlavorLabel } from "@/components/FlavorLabel";
 import { NextIcon, PrevIcon } from "@/components/icons";
 import { getImageUrl } from "@/lib/getImageUrl";
+import type { Post } from "@/types/domain";
 
 interface PostCardProps {
-  post: GoShishaBackendInternalModelsPost;
+  post: Post;
   onLike: (postId: number) => void;
   onUnlike?: (postId: number) => void;
   /** 自動切り替えのインターバル（ミリ秒）。デフォルト3000ms */

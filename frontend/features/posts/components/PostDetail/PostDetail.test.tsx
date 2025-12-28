@@ -2,7 +2,7 @@ import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { describe, test, expect, vi, beforeEach } from "vitest";
-import type { GoShishaBackendInternalModelsPost } from "../../../../api/model";
+import type { Post } from "@/types/domain";
 import { useGetPostsId } from "../../../../api/posts";
 import { PostDetail } from "./PostDetail";
 import PostDetailCarousel from "./PostDetailCarousel";
@@ -27,7 +27,7 @@ vi.mock("next/image", () => {
   };
 });
 
-const mockPost: GoShishaBackendInternalModelsPost = {
+const mockPost: Post = {
   id: 11,
   user_id: 2,
   message: "テスト投稿",
@@ -176,7 +176,7 @@ describe("PostDetail", () => {
       ],
       user_id: 1,
       likes: 0,
-    } as unknown as GoShishaBackendInternalModelsPost;
+    } as unknown as Post;
 
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       data: multi,
@@ -241,7 +241,7 @@ describe("PostDetail", () => {
       ],
       user_id: 1,
       likes: 0,
-    } as unknown as GoShishaBackendInternalModelsPost;
+    } as unknown as Post;
 
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       data: multi,
@@ -268,7 +268,7 @@ describe("PostDetail", () => {
       ],
       user_id: 1,
       likes: 0,
-    } as unknown as GoShishaBackendInternalModelsPost;
+    } as unknown as Post;
 
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       data: multi,
@@ -299,10 +299,10 @@ describe("PostDetail", () => {
       likes: 10,
       is_liked: true,
       user_id: 1,
-    } as unknown as GoShishaBackendInternalModelsPost;
+    } as unknown as Post;
 
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: { id: 99, likes: 0, is_liked: false } as GoShishaBackendInternalModelsPost,
+      data: { id: 99, likes: 0, is_liked: false } as Post,
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
@@ -317,7 +317,7 @@ describe("PostDetail", () => {
   test("post.id が undefined のときいいね操作は何もしない", async () => {
     const user = userEvent.setup();
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: { id: undefined, likes: 0 } as unknown as GoShishaBackendInternalModelsPost,
+      data: { id: undefined, likes: 0 } as unknown as Post,
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
@@ -339,7 +339,7 @@ describe("PostDetail", () => {
         likes: 0,
         user: undefined,
         message: "m",
-      } as unknown as GoShishaBackendInternalModelsPost,
+      } as unknown as Post,
       isLoading: false,
       isError: false,
       refetch: vi.fn(),

@@ -1,14 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import type { GoShishaBackendInternalModelsFlavor } from "@/api/model";
 import { NextIcon, PrevIcon } from "@/components/icons/";
 import { getImageUrl } from "@/lib/getImageUrl";
+import type { Flavor } from "@/types/domain";
 
 interface Slide {
   image_url?: string;
   text?: string;
-  flavor?: GoShishaBackendInternalModelsFlavor;
+  flavor?: Flavor;
 }
 
 interface Props {

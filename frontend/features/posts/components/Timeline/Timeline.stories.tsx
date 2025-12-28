@@ -1,18 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import type {
-  GoShishaBackendInternalModelsFlavor,
-  GoShishaBackendInternalModelsPost,
-} from "../../../../api/model";
+import type { Flavor, Post } from "@/types/domain";
 import { Timeline } from "./Timeline";
 
-const mockFlavors: GoShishaBackendInternalModelsFlavor[] = [
+const mockFlavors: Flavor[] = [
   { id: 1, name: "ミント", color: "bg-green-500" },
   { id: 2, name: "アップル", color: "bg-red-500" },
   { id: 3, name: "ベリー", color: "bg-purple-500" },
   { id: 4, name: "マンゴー", color: "bg-yellow-500" },
 ];
 
-const mockPosts: GoShishaBackendInternalModelsPost[] = [
+const mockPosts: Post[] = [
   {
     id: 1,
     user_id: 1,

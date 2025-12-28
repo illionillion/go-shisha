@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import type { GoShishaBackendInternalModelsPost } from "@/api/model";
 import { useGetPostsId } from "@/api/posts";
 import { useLike } from "@/features/posts/hooks/useLike";
+import type { Post } from "@/types/domain";
 import PostDetailCarousel from "./PostDetailCarousel";
 import PostDetailFooter from "./PostDetailFooter";
 import PostDetailHeader from "./PostDetailHeader";
 
 interface PostDetailProps {
   postId: number;
-  initialPost?: GoShishaBackendInternalModelsPost;
+  initialPost?: Post;
 }
 
 export function PostDetail({ postId, initialPost }: PostDetailProps) {

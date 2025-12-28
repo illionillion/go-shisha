@@ -1,16 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type {
-  GoShishaBackendInternalModelsFlavor,
-  GoShishaBackendInternalModelsPost,
-} from "@/api/model";
 import { useGetPosts } from "@/api/posts";
 import { useLike } from "@/features/posts/hooks/useLike";
+import type { Flavor, Post } from "@/types/domain";
 import { Timeline } from "./Timeline";
 
 interface TimelineContainerProps {
-  initialPosts?: GoShishaBackendInternalModelsPost[];
+  initialPosts?: Post[];
 }
 
 /**
@@ -35,7 +32,7 @@ export function TimelineContainer({ initialPosts }: TimelineContainerProps) {
 
   // 投稿から一意のフレーバー一覧を抽出
   const availableFlavors = useMemo(() => {
-    const flavorMap = new Map<number, GoShishaBackendInternalModelsFlavor>();
+    const flavorMap = new Map<number, Flavor>();
     posts.forEach((post) => {
       post.slides?.forEach((slide) => {
         if (slide.flavor && slide.flavor.id) {

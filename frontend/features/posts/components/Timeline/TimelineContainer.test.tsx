@@ -1,10 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, test, expect, vi, beforeEach } from "vitest";
-import type {
-  GoShishaBackendInternalModelsPost,
-  GoShishaBackendInternalModelsFlavor,
-} from "../../../../api/model";
+import type { Post, Flavor } from "@/types/domain";
 import { useGetPosts } from "../../../../api/posts";
 import type { TimelineProps } from "./Timeline";
 import { TimelineContainer } from "./TimelineContainer";
@@ -50,9 +47,7 @@ vi.mock("./Timeline", () => ({
             <button onClick={() => props.onFlavorToggle?.(10)}>toggle10</button>
             <button onClick={() => props.onFlavorToggle?.(20)}>toggle20</button>
             <div data-testid="selected">{props.selectedFlavorIds?.join(",")}</div>
-            <div data-testid="posts">
-              {props.posts?.map((p: GoShishaBackendInternalModelsPost) => p.id).join(",")}
-            </div>
+            <div data-testid="posts">{props.posts?.map((p: Post) => p.id).join(",")}</div>
           </>
         )}
       </div>
@@ -70,12 +65,12 @@ vi.mock("../../hooks/useLike", () => ({
   useLike: () => ({ onLike: vi.fn(), onUnlike: vi.fn() }),
 }));
 
-const mockFlavors: GoShishaBackendInternalModelsFlavor[] = [
+const mockFlavors: Flavor[] = [
   { id: 10, name: "ミント" },
   { id: 20, name: "レモン" },
 ];
 
-const mockPosts: GoShishaBackendInternalModelsPost[] = [
+const mockPosts: Post[] = [
   {
     id: 1,
     slides: [
@@ -162,7 +157,7 @@ describe("TimelineContainer", () => {
     expect(screen.getByTestId("timeline-mock")).toHaveTextContent("posts:0");
     unmount();
     // posts: slides配列が空
-    const postsWithEmptySlides: GoShishaBackendInternalModelsPost[] = [
+    const postsWithEmptySlides: Post[] = [
       {
         id: 1,
         slides: [],
@@ -180,7 +175,7 @@ describe("TimelineContainer", () => {
       error: null,
     });
 
-    const postsWithUndefinedFlavor: GoShishaBackendInternalModelsPost[] = [
+    const postsWithUndefinedFlavor: Post[] = [
       {
         id: 10,
         slides: [

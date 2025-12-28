@@ -1,11 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
-import type { GoShishaBackendInternalModelsPost } from "@/api/model";
 import {
   usePostPostsIdLike,
   usePostPostsIdUnlike,
   getGetPostsIdQueryKey,
   getGetPostsQueryKey,
 } from "@/api/posts";
+import type { Post } from "@/types/domain";
 
 export function useLike() {
   const queryClient = useQueryClient();
@@ -14,10 +14,10 @@ export function useLike() {
 
   const onLike = (postId: number) => {
     const detailKey = getGetPostsIdQueryKey(postId);
-    const prev = queryClient.getQueryData<GoShishaBackendInternalModelsPost | undefined>(detailKey);
+    const prev = queryClient.getQueryData<Post | undefined>(detailKey);
 
     // optimistic update: increment
-    queryClient.setQueryData<GoShishaBackendInternalModelsPost | undefined>(detailKey, (old) =>
+    queryClient.setQueryData<Post | undefined>(detailKey, (old) =>
       old ? { ...old, likes: (old.likes ?? 0) + 1, is_liked: true } : old
     );
 
@@ -37,10 +37,10 @@ export function useLike() {
 
   const onUnlike = (postId: number) => {
     const detailKey = getGetPostsIdQueryKey(postId);
-    const prev = queryClient.getQueryData<GoShishaBackendInternalModelsPost | undefined>(detailKey);
+    const prev = queryClient.getQueryData<Post | undefined>(detailKey);
 
     // optimistic update: decrement
-    queryClient.setQueryData<GoShishaBackendInternalModelsPost | undefined>(detailKey, (old) =>
+    queryClient.setQueryData<Post | undefined>(detailKey, (old) =>
       old ? { ...old, likes: Math.max(0, (old.likes ?? 0) - 1), is_liked: false } : old
     );
 

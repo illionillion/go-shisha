@@ -120,6 +120,27 @@ export default tseslint.config(
       "no-debugger": "error",
       "prefer-const": "error",
       "no-var": "error",
+      // Disallow direct imports from generated API model in most of frontend
+      // Components and hooks should use `frontend/types/domain.ts` aliases instead.
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "@/api/model",
+                "@/api/model/*",
+                "**/api/model",
+                "**/api/model/*",
+                "*/api/model",
+                "*/api/model/*",
+              ],
+              message:
+                "コンポーネント/フックは直接 API 生成型を import せず、frontend/types/domain.ts を利用してください。例外は frontend/api (生成コード) と frontend/services / frontend/lib/adapters のみです。",
+            },
+          ],
+        },
+      ],
     },
     settings: {
       react: {
@@ -130,6 +151,30 @@ export default tseslint.config(
           alwaysTryTypes: true,
         },
       },
+    },
+  },
+  // Allow imports from generated API and service/adapters within those folders
+  {
+    files: ["api/**", "api/**/*.{js,ts,jsx,tsx}"],
+    rules: {
+      "no-restricted-imports": "off",
+    },
+  },
+  {
+    files: [
+      "services/**",
+      "services/**/*.{js,ts,jsx,tsx}",
+      "lib/adapters/**",
+      "lib/adapters/**/*.{js,ts,jsx,tsx}",
+    ],
+    rules: {
+      "no-restricted-imports": "off",
+    },
+  },
+  {
+    files: ["types/**", "types/**/*.{js,ts,jsx,tsx}"],
+    rules: {
+      "no-restricted-imports": "off",
     },
   },
   storybook.configs["flat/recommended"]

@@ -1,18 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import type {
-  GoShishaBackendInternalModelsFlavor,
-  GoShishaBackendInternalModelsPost,
-} from "../../../../api/model";
+import type { Flavor, Post } from "@/types/domain";
 import { FlavorFilter } from "../FlavorFilter/FlavorFilter";
 import { PostCard } from "../PostCard";
 
 export interface TimelineProps {
-  posts: GoShishaBackendInternalModelsPost[];
+  posts: Post[];
   isLoading?: boolean;
   error?: unknown;
-  availableFlavors?: GoShishaBackendInternalModelsFlavor[];
+  availableFlavors?: Flavor[];
   selectedFlavorIds?: number[];
   onFlavorToggle?: (flavorId: number) => void;
   onLike?: (postId: number) => void;
