@@ -33,9 +33,8 @@ const mockPost: GoShishaBackendInternalModelsPost = {
 describe("PostCard", () => {
   it("投稿内容が表示される", () => {
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} />);
 
     expect(screen.getByText("今日のシーシャは最高でした！")).toBeInTheDocument();
     expect(screen.getByText("テストユーザー")).toBeInTheDocument();
@@ -43,9 +42,8 @@ describe("PostCard", () => {
 
   it("フレーバーバッジが表示される", () => {
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} />);
 
     expect(screen.getByText("ミント")).toBeInTheDocument();
   });
@@ -62,36 +60,17 @@ describe("PostCard", () => {
       ],
     };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={postWithoutFlavor} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithoutFlavor} onLike={onLike} />);
 
     expect(screen.queryByText("ミント")).not.toBeInTheDocument();
-  });
-
-  it("カードをクリックするとonClickが呼ばれる", async () => {
-    const user = userEvent.setup();
-    const onLike = vi.fn();
-    const onClick = vi.fn();
-
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
-    const buttons = screen.getAllByRole("button");
-    const card = buttons.find((button) =>
-      button.textContent?.includes("今日のシーシャは最高でした！")
-    );
-    if (card) {
-      await user.click(card);
-    }
-
-    expect(onClick).toHaveBeenCalledWith(mockPost);
   });
 
   it("いいねボタンをクリックするとonLikeが呼ばれる", async () => {
     const user = userEvent.setup();
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} />);
 
     const likeButton = screen.getByLabelText("いいね");
     await user.click(likeButton);
@@ -99,25 +78,11 @@ describe("PostCard", () => {
     expect(onLike).toHaveBeenCalledWith(1);
   });
 
-  it("いいねボタンをクリックしてもonClickは呼ばれない（イベント伝播停止）", async () => {
-    const user = userEvent.setup();
-    const onLike = vi.fn();
-    const onClick = vi.fn();
-
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
-
-    const likeButton = screen.getByLabelText("いいね");
-    await user.click(likeButton);
-
-    expect(onClick).not.toHaveBeenCalled();
-  });
-
   it("いいねボタンをクリックすると状態が変化する", async () => {
     const user = userEvent.setup();
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} />);
 
     const likeButton = screen.getByLabelText("いいね");
     const svg = likeButton.querySelector("svg");
@@ -131,13 +96,37 @@ describe("PostCard", () => {
     expect(svg).toHaveClass("fill-current");
   });
 
+  it("初期 is_liked=true のとき SVG に fill-current が付与される", () => {
+    const postLiked = { ...mockPost, is_liked: true } as GoShishaBackendInternalModelsPost;
+    const onLike = vi.fn();
+
+    render(<PostCard post={postLiked} onLike={onLike} />);
+
+    const likeButton = screen.getByLabelText("いいね");
+    const svg = likeButton.querySelector("svg");
+    expect(svg).toHaveClass("fill-current");
+  });
+
+  it("onUnlike が渡されているとき、解除クリックで onUnlike が呼ばれる", async () => {
+    const user = userEvent.setup();
+    const onLike = vi.fn();
+    const onUnlike = vi.fn();
+
+    const likedPost = { ...mockPost, is_liked: true } as GoShishaBackendInternalModelsPost;
+    render(<PostCard post={likedPost} onLike={onLike} onUnlike={onUnlike} />);
+
+    const likeButton = screen.getByLabelText("いいね");
+    await user.click(likeButton);
+
+    expect(onUnlike).toHaveBeenCalledWith(1);
+  });
+
   it("post.idがundefinedの場合、onLikeが呼ばれない", async () => {
     const user = userEvent.setup();
     const postWithoutId = { ...mockPost, id: undefined };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={postWithoutId} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithoutId} onLike={onLike} />);
 
     const likeButton = screen.getByLabelText("いいね");
     await user.click(likeButton);
@@ -156,9 +145,8 @@ describe("PostCard", () => {
       ],
     };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={postWithoutImage} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithoutImage} onLike={onLike} />);
 
     const img = screen.getByAltText("今日のシーシャは最高でした！");
     expect(img).toHaveAttribute("src", expect.stringContaining("placehold.co"));
@@ -178,9 +166,8 @@ describe("PostCard", () => {
       ],
     };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={postWithRelativeImage} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithRelativeImage} onLike={onLike} />);
 
     const img = screen.getByAltText("今日のシーシャは最高でした！");
     expect(img).toHaveAttribute("src", expect.stringContaining("localhost%3A8080"));
@@ -202,9 +189,8 @@ describe("PostCard", () => {
       ],
     };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={postWithRelativeImage} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithRelativeImage} onLike={onLike} />);
 
     const img = screen.getByAltText("今日のシーシャは最高でした！");
     expect(img).toHaveAttribute("src", expect.stringContaining("placehold.co"));
@@ -214,9 +200,8 @@ describe("PostCard", () => {
 
   it("image_urlが絶対パスの場合、そのまま使用される", () => {
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} />);
 
     const img = screen.getByAltText("今日のシーシャは最高でした！");
     expect(img).toHaveAttribute("src", expect.stringContaining("picsum.photos"));
@@ -233,9 +218,8 @@ describe("PostCard", () => {
       ],
     };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={postWithUndefinedColor} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithUndefinedColor} onLike={onLike} />);
 
     const flavorBadge = screen.getByText("ミント");
     expect(flavorBadge).toHaveClass("bg-gray-500");
@@ -252,9 +236,8 @@ describe("PostCard", () => {
       ],
     };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={postWithUnknownColor} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithUnknownColor} onLike={onLike} />);
 
     const flavorBadge = screen.getByText("ミント");
     expect(flavorBadge).toHaveClass("bg-gray-500");
@@ -272,9 +255,8 @@ describe("PostCard", () => {
       ],
     };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={postWithoutMessage} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={postWithoutMessage} onLike={onLike} />);
 
     const img = screen.getByAltText("シーシャ投稿");
     expect(img).toBeInTheDocument();
@@ -283,9 +265,8 @@ describe("PostCard", () => {
   // スライド機能のテスト
   it("単一スライドの場合、進捗バーと切り替えボタンが表示されない", () => {
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} />);
 
     expect(screen.queryByLabelText("前のスライド")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("次のスライド")).not.toBeInTheDocument();
@@ -308,9 +289,8 @@ describe("PostCard", () => {
       ],
     };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={multiSlidePost} onLike={onLike} />);
 
     expect(screen.getByLabelText("前のスライド")).toBeInTheDocument();
     expect(screen.getByLabelText("次のスライド")).toBeInTheDocument();
@@ -334,9 +314,8 @@ describe("PostCard", () => {
       ],
     };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={multiSlidePost} onLike={onLike} />);
 
     expect(screen.getByText("1枚目")).toBeInTheDocument();
     expect(screen.getByText("ミント")).toBeInTheDocument();
@@ -366,9 +345,8 @@ describe("PostCard", () => {
       ],
     };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={multiSlidePost} onLike={onLike} />);
 
     const prevButton = screen.getByLabelText("前のスライド");
     await user.click(prevButton);
@@ -378,30 +356,31 @@ describe("PostCard", () => {
     expect(screen.getByText("ベリー")).toBeInTheDocument();
   });
 
-  it("スライド切り替えボタンをクリックしてもonClickは呼ばれない（イベント伝播停止）", async () => {
+  it("前ボタンで先頭から最後に戻り、次ボタンで最後から先頭に戻るラップ動作を確認する", async () => {
     const user = userEvent.setup();
     const multiSlidePost = {
       ...mockPost,
       slides: [
-        {
-          image_url: "https://picsum.photos/400/600?random=1",
-          text: "1枚目",
-        },
-        {
-          image_url: "https://picsum.photos/400/600?random=2",
-          text: "2枚目",
-        },
+        { image_url: "https://picsum.photos/400/600?random=1", text: "S1" },
+        { image_url: "https://picsum.photos/400/600?random=2", text: "S2" },
+        { image_url: "https://picsum.photos/400/600?random=3", text: "S3" },
       ],
-    };
-    const onLike = vi.fn();
-    const onClick = vi.fn();
+    } as unknown as GoShishaBackendInternalModelsPost;
 
-    render(<PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={multiSlidePost} onLike={() => {}} />);
 
-    const nextButton = screen.getByLabelText("次のスライド");
-    await user.click(nextButton);
+    // 初期は S1
+    expect(screen.getByText("S1")).toBeInTheDocument();
 
-    expect(onClick).not.toHaveBeenCalled();
+    // 前ボタンを押すと最後のスライド S3 に戻る
+    const prev = screen.getByLabelText("前のスライド");
+    await user.click(prev);
+    expect(screen.getByText("S3")).toBeInTheDocument();
+
+    // 次ボタンを押すと S1 に戻る
+    const next = screen.getByLabelText("次のスライド");
+    await user.click(next);
+    expect(screen.getByText("S1")).toBeInTheDocument();
   });
 
   it("自動切り替えが動作する（タイマーテスト）", async () => {
@@ -421,11 +400,8 @@ describe("PostCard", () => {
       ],
     };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
-    render(
-      <PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} autoPlayInterval={1000} />
-    );
+    render(<PostCard post={multiSlidePost} onLike={onLike} autoPlayInterval={1000} />);
 
     expect(screen.getByText("1枚目")).toBeInTheDocument();
 
@@ -451,10 +427,9 @@ describe("PostCard", () => {
   it("onUnlikeが未定義の場合、いいね解除でonLikeが呼ばれる", async () => {
     const user = userEvent.setup();
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
     // onUnlike を未定義でレンダリング
-    render(<PostCard post={mockPost} onLike={onLike} onClick={onClick} />);
+    render(<PostCard post={mockPost} onLike={onLike} />);
 
     const likeButton = screen.getByLabelText("いいね");
     // いいね (onLike を呼ぶ)
@@ -485,10 +460,9 @@ describe("PostCard", () => {
       ],
     };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
     const { container } = render(
-      <PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} autoPlayInterval={3000} />
+      <PostCard post={multiSlidePost} onLike={onLike} autoPlayInterval={3000} />
     );
 
     // プログレスバーのコンテナを取得
@@ -528,10 +502,9 @@ describe("PostCard", () => {
       ],
     };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
     const { container } = render(
-      <PostCard post={multiSlidePost} onLike={onLike} onClick={onClick} autoPlayInterval={3000} />
+      <PostCard post={multiSlidePost} onLike={onLike} autoPlayInterval={3000} />
     );
 
     const nextButton = screen.getByLabelText("次のスライド");
@@ -569,15 +542,9 @@ describe("PostCard", () => {
       ],
     };
     const onLike = vi.fn();
-    const onClick = vi.fn();
 
     const { container } = render(
-      <PostCard
-        post={multiSlidePost}
-        onLike={onLike}
-        onClick={onClick}
-        autoPlayInterval={autoPlayInterval}
-      />
+      <PostCard post={multiSlidePost} onLike={onLike} autoPlayInterval={autoPlayInterval} />
     );
 
     // プログレスバーのコンテナを取得
@@ -594,10 +561,67 @@ describe("PostCard", () => {
 
   test("slidesが空の場合、デフォルト画像が表示される", () => {
     const mockPost = { id: 1, slides: [], user_id: 1, message: "No slides" };
-    render(<PostCard post={mockPost} onLike={() => {}} onClick={() => {}} />);
+    render(<PostCard post={mockPost} onLike={() => {}} />);
     const fallbackImage = screen.getByAltText("No slides");
     expect(fallbackImage).toBeInTheDocument();
     // Next.js ImageがURLをエンコードするため、srcにplacehold.coが含まれていることを確認
     expect(fallbackImage.getAttribute("src")).toContain("placehold.co");
+  });
+
+  it("slidesプロパティが未定義の場合、デフォルト画像が表示される（slides === undefined をカバー）", () => {
+    const mockPostNoSlides: Partial<GoShishaBackendInternalModelsPost> = {
+      id: 2,
+      user_id: 2,
+      message: "No slides prop",
+      // slides を意図的に含めない
+    };
+
+    render(
+      // 型を合わせるため as unknown を経由
+      <PostCard
+        post={mockPostNoSlides as unknown as GoShishaBackendInternalModelsPost}
+        onLike={() => {}}
+      />
+    );
+
+    const fallbackImage = screen.getByAltText("No slides prop");
+    expect(fallbackImage).toBeInTheDocument();
+    expect(fallbackImage.getAttribute("src")).toContain("placehold.co");
+  });
+
+  it("プログレスバーの完了/アクティブ/未表示状態が手動切替で正しく反映される", async () => {
+    const user = userEvent.setup();
+    const multiSlidePost = {
+      ...mockPost,
+      slides: [
+        { image_url: "https://picsum.photos/400/600?random=1", text: "A1" },
+        { image_url: "https://picsum.photos/400/600?random=2", text: "A2" },
+        { image_url: "https://picsum.photos/400/600?random=3", text: "A3" },
+      ],
+    } as unknown as GoShishaBackendInternalModelsPost;
+
+    const { container } = render(
+      <PostCard post={multiSlidePost} onLike={() => {}} autoPlayInterval={2000} />
+    );
+
+    // 初期は A1 が表示される
+    expect(screen.getByText("A1")).toBeInTheDocument();
+
+    // 次ボタンで A2 に切り替え
+    const next = screen.getByLabelText("次のスライド");
+    await user.click(next);
+
+    // プログレスバー要素を取得して各状態を確認
+    const progressBars = container.querySelectorAll(".h-1.flex-1 > div");
+    const first = progressBars[0] as HTMLElement;
+    const second = progressBars[1] as HTMLElement;
+    const third = progressBars[2] as HTMLElement;
+
+    // 1つ目は完了
+    expect(first).toHaveClass("w-full");
+    // 2つ目はアクティブ（アニメーションクラスがある）
+    expect(second).toHaveClass("animate-[progress-bar_linear_forwards]");
+    // 3つ目は未表示
+    expect(third).toHaveClass("w-0");
   });
 });

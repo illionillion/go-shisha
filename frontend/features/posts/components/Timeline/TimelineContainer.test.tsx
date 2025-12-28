@@ -173,6 +173,29 @@ describe("TimelineContainer", () => {
     expect(screen.getAllByTestId("timeline-mock").length).toBeGreaterThan(0);
   });
 
+  test("スライド内の flavor が undefined の場合、availableFlavors 抽出で無視される", () => {
+    (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+    });
+
+    const postsWithUndefinedFlavor: GoShishaBackendInternalModelsPost[] = [
+      {
+        id: 10,
+        slides: [
+          { image_url: "a.jpg", text: "t1", flavor: undefined },
+          { image_url: "b.jpg", text: "t2", flavor: { id: 99, name: "特異" } },
+        ],
+        user_id: 5,
+      },
+    ];
+
+    render(<TimelineContainer initialPosts={postsWithUndefinedFlavor} />);
+    // availableFlavors は flavor が定義されているもののみ抽出される
+    expect(screen.getByTestId("timeline-mock")).toHaveTextContent("availableFlavors:1");
+  });
+
   test("filteredPosts/handleFlavorToggle: flavor選択で絞り込み・トグル動作が正しい", async () => {
     (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
       data: { posts: mockPosts },

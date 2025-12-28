@@ -142,10 +142,6 @@ const meta = {
       action: "flavor toggled",
       description: "フレーバー選択切り替えハンドラー",
     },
-    onPostClick: {
-      action: "post clicked",
-      description: "投稿クリックハンドラー",
-    },
   },
 } satisfies Meta<typeof Timeline>;
 
@@ -218,7 +214,6 @@ export const WithFlavorFilterInteractive: Story = {
     availableFlavors: mockFlavors,
     selectedFlavorIds: [],
     onFlavorToggle: () => {},
-    onPostClick: () => {},
   },
 };
 
@@ -238,6 +233,5 @@ export const WithFlavorFilterPreselected: Story = {
     availableFlavors: mockFlavors,
     selectedFlavorIds: [1, 3],
     onFlavorToggle: () => {},
-    onPostClick: () => {},
   },
 };
