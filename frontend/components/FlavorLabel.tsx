@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import type { FC } from "react";
-import type { GoShishaBackendInternalModelsFlavor } from "@/api/model";
+import type { Flavor } from "@/types/domain";
 
 // フレーバー色のマッピング（Tailwind動的クラス対策）
 const getFlavorColorClass = (color: string | undefined): string => {
@@ -16,7 +16,7 @@ const getFlavorColorClass = (color: string | undefined): string => {
 };
 
 export type FlavorLabelProps = {
-  flavor: GoShishaBackendInternalModelsFlavor;
+  flavor: Flavor;
   className?: string | string[];
 };
 

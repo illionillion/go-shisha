@@ -1,4 +1,4 @@
-import type { GoShishaBackendInternalModelsPost } from "../api/model";
+import type { Post } from "@/types/domain";
 import { getPosts } from "../api/posts";
 import { TimelineContainer } from "../features/posts/components/Timeline/TimelineContainer";
 
@@ -9,7 +9,7 @@ import { TimelineContainer } from "../features/posts/components/Timeline/Timelin
  */
 export default async function Home() {
   // RSCでサーバーサイド取得（SSR）
-  let initialPosts: GoShishaBackendInternalModelsPost[] | undefined;
+  let initialPosts: Post[] | undefined;
   try {
     const data = await getPosts();
     initialPosts = data.posts;

@@ -1,18 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
-import type {
-  GoShishaBackendInternalModelsFlavor,
-  GoShishaBackendInternalModelsPost,
-} from "../../../../api/model";
+import type { Flavor, Post } from "@/types/domain";
 import { Timeline } from "./Timeline";
 
-const mockFlavors: GoShishaBackendInternalModelsFlavor[] = [
+const mockFlavors: Flavor[] = [
   { id: 1, name: "ミント", color: "bg-green-500" },
   { id: 2, name: "アップル", color: "bg-red-500" },
 ];
 
-const mockPosts: GoShishaBackendInternalModelsPost[] = [
+const mockPosts: Post[] = [
   {
     id: 1,
     user_id: 1,

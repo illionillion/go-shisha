@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import type { GoShishaBackendInternalModelsPost } from "../../../../api/model";
+import type { Post } from "@/types/domain";
 import { PostCard } from ".";
 
-const mockPost: GoShishaBackendInternalModelsPost = {
+const mockPost: Post = {
   id: 1,
   user_id: 1,
   message: "今日のシーシャは最高でした！ミント系のフレーバーが爽やかで最高",
@@ -28,7 +28,7 @@ const mockPost: GoShishaBackendInternalModelsPost = {
   },
 };
 
-const mockPostWithoutFlavor: GoShishaBackendInternalModelsPost = {
+const mockPostWithoutFlavor: Post = {
   id: 2,
   user_id: 2,
   message: "新しいお店を発見！雰囲気も良くて味も抜群でした",

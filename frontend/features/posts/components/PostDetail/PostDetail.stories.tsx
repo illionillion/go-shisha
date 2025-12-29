@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { GoShishaBackendInternalModelsPost } from "@/api/model";
+import type { Post } from "@/types/domain";
 import PostDetail from "./PostDetail";
 
 const queryClient = new QueryClient({
@@ -15,7 +15,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const mockPost: GoShishaBackendInternalModelsPost = {
+const mockPost: Post = {
   id: 1,
   message: "これはサンプルの投稿メッセージです。\n長いテキストは改行されることを確認します。",
   created_at: new Date().toISOString(),
@@ -38,7 +38,7 @@ const mockPost: GoShishaBackendInternalModelsPost = {
       flavor: { id: 2, name: "Grape" },
     },
   ],
-} as unknown as GoShishaBackendInternalModelsPost;
+} as unknown as Post;
 
 const meta = {
   title: "Features/Posts/PostDetail",
@@ -82,6 +82,6 @@ export const SingleSlide: Story = {
           flavor: { id: 3, name: "Vanilla" },
         },
       ],
-    } as GoShishaBackendInternalModelsPost,
+    } as Post,
   },
 };

@@ -1,10 +1,10 @@
 "use client";
 
 import clsx from "clsx";
-import type { GoShishaBackendInternalModelsFlavor } from "../../../../api/model";
+import type { Flavor } from "@/types/domain";
 
 interface FlavorFilterProps {
-  flavors: GoShishaBackendInternalModelsFlavor[];
+  flavors: Flavor[];
   selectedFlavorIds: number[];
   onFlavorToggle: (flavorId: number) => void;
 }

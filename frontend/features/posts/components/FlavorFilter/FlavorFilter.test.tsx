@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import type { GoShishaBackendInternalModelsFlavor } from "../../../../api/model";
+import type { Flavor } from "@/types/domain";
 import { FlavorFilter } from "./FlavorFilter";
 
 const mockFlavors = [
@@ -120,7 +120,7 @@ describe("FlavorFilter", () => {
   it("flavor.id が undefined の場合 onFlavorToggle に 0 が渡される", async () => {
     const user = userEvent.setup();
     const mockOnFlavorToggle = vi.fn();
-    const flavors: GoShishaBackendInternalModelsFlavor[] = [
+    const flavors: Flavor[] = [
       { id: undefined as unknown as number, name: "不明", color: "bg-red-500" },
     ];
 

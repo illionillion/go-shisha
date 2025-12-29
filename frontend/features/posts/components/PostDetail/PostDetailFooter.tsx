@@ -1,12 +1,12 @@
 "use client";
 
 import clsx from "clsx";
-import type { GoShishaBackendInternalModelsFlavor } from "@/api/model";
 import { FlavorLabel } from "@/components/FlavorLabel";
+import type { Flavor } from "@/types/domain";
 
 interface Slide {
   text?: string | null;
-  flavor?: GoShishaBackendInternalModelsFlavor;
+  flavor?: Flavor;
 }
 
 interface Post {

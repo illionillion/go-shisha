@@ -1,10 +1,10 @@
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
-import type { GoShishaBackendInternalModelsPost } from "../../../../api/model";
+import type { Post, PostPosts400 } from "@/types/domain";
 import { PostCard } from ".";
 
-const mockPost: GoShishaBackendInternalModelsPost = {
+const mockPost: Post = {
   id: 1,
   user_id: 1,
   message: "今日のシーシャは最高でした！",
@@ -97,7 +97,7 @@ describe("PostCard", () => {
   });
 
   it("初期 is_liked=true のとき SVG に fill-current が付与される", () => {
-    const postLiked = { ...mockPost, is_liked: true } as GoShishaBackendInternalModelsPost;
+    const postLiked = { ...mockPost, is_liked: true } as Post;
     const onLike = vi.fn();
 
     render(<PostCard post={postLiked} onLike={onLike} />);
@@ -112,7 +112,7 @@ describe("PostCard", () => {
     const onLike = vi.fn();
     const onUnlike = vi.fn();
 
-    const likedPost = { ...mockPost, is_liked: true } as GoShishaBackendInternalModelsPost;
+    const likedPost = { ...mockPost, is_liked: true } as Post;
     render(<PostCard post={likedPost} onLike={onLike} onUnlike={onUnlike} />);
 
     const likeButton = screen.getByLabelText("いいね");
@@ -365,7 +365,7 @@ describe("PostCard", () => {
         { image_url: "https://picsum.photos/400/600?random=2", text: "S2" },
         { image_url: "https://picsum.photos/400/600?random=3", text: "S3" },
       ],
-    } as unknown as GoShishaBackendInternalModelsPost;
+    } as unknown as PostPosts400;
 
     render(<PostCard post={multiSlidePost} onLike={() => {}} />);
 
@@ -569,7 +569,7 @@ describe("PostCard", () => {
   });
 
   it("slidesプロパティが未定義の場合、デフォルト画像が表示される（slides === undefined をカバー）", () => {
-    const mockPostNoSlides: Partial<GoShishaBackendInternalModelsPost> = {
+    const mockPostNoSlides: Partial<Post> = {
       id: 2,
       user_id: 2,
       message: "No slides prop",
@@ -578,10 +578,7 @@ describe("PostCard", () => {
 
     render(
       // 型を合わせるため as unknown を経由
-      <PostCard
-        post={mockPostNoSlides as unknown as GoShishaBackendInternalModelsPost}
-        onLike={() => {}}
-      />
+      <PostCard post={mockPostNoSlides as unknown as Post} onLike={() => {}} />
     );
 
     const fallbackImage = screen.getByAltText("No slides prop");
@@ -598,7 +595,7 @@ describe("PostCard", () => {
         { image_url: "https://picsum.photos/400/600?random=2", text: "A2" },
         { image_url: "https://picsum.photos/400/600?random=3", text: "A3" },
       ],
-    } as unknown as GoShishaBackendInternalModelsPost;
+    } as unknown as Post;
 
     const { container } = render(
       <PostCard post={multiSlidePost} onLike={() => {}} autoPlayInterval={2000} />

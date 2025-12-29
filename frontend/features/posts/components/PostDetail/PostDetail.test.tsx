@@ -2,7 +2,7 @@ import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { describe, test, expect, vi, beforeEach } from "vitest";
-import type { GoShishaBackendInternalModelsPost } from "../../../../api/model";
+import type { Post } from "@/types/domain";
 import { useGetPostsId } from "../../../../api/posts";
 import { PostDetail } from "./PostDetail";
 import PostDetailCarousel from "./PostDetailCarousel";
@@ -11,6 +11,12 @@ import PostDetailHeader from "./PostDetailHeader";
 // モック対象
 vi.mock("../../../../api/posts", () => ({
   useGetPostsId: vi.fn(),
+}));
+
+// next/navigation をモックして useRouter().push を提供
+let pushSpy = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushSpy }),
 }));
 
 let onLikeSpy = vi.fn();
@@ -27,7 +33,7 @@ vi.mock("next/image", () => {
   };
 });
 
-const mockPost: GoShishaBackendInternalModelsPost = {
+const mockPost: Post = {
   id: 11,
   user_id: 2,
   message: "テスト投稿",
@@ -85,13 +91,13 @@ describe("PostDetail", () => {
       value: { ...window.history, length: 1, back: vi.fn() },
       configurable: true,
     });
-    const hrefObj: { href: string } = { href: "" };
-    Object.defineProperty(window, "location", { value: hrefObj, configurable: true });
+    // router.push が呼ばれることを期待する
+    pushSpy = vi.fn();
 
     render(<PostDetail postId={mockPost.id!} />);
     const backBtn2 = screen.getAllByRole("button", { name: /戻る/ })[0];
     await user.click(backBtn2);
-    expect(window.location.href).toBe("/");
+    expect(pushSpy).toHaveBeenCalledWith("/");
   });
   test("エラー時に再試行ボタンが表示され refetch が呼ばれる", async () => {
     const refetch = vi.fn();
@@ -176,7 +182,7 @@ describe("PostDetail", () => {
       ],
       user_id: 1,
       likes: 0,
-    } as unknown as GoShishaBackendInternalModelsPost;
+    } as unknown as Post;
 
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       data: multi,
@@ -241,7 +247,7 @@ describe("PostDetail", () => {
       ],
       user_id: 1,
       likes: 0,
-    } as unknown as GoShishaBackendInternalModelsPost;
+    } as unknown as Post;
 
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       data: multi,
@@ -268,7 +274,7 @@ describe("PostDetail", () => {
       ],
       user_id: 1,
       likes: 0,
-    } as unknown as GoShishaBackendInternalModelsPost;
+    } as unknown as Post;
 
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       data: multi,
@@ -299,10 +305,10 @@ describe("PostDetail", () => {
       likes: 10,
       is_liked: true,
       user_id: 1,
-    } as unknown as GoShishaBackendInternalModelsPost;
+    } as unknown as Post;
 
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: { id: 99, likes: 0, is_liked: false } as GoShishaBackendInternalModelsPost,
+      data: { id: 99, likes: 0, is_liked: false } as Post,
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
@@ -317,7 +323,7 @@ describe("PostDetail", () => {
   test("post.id が undefined のときいいね操作は何もしない", async () => {
     const user = userEvent.setup();
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: { id: undefined, likes: 0 } as unknown as GoShishaBackendInternalModelsPost,
+      data: { id: undefined, likes: 0 } as unknown as Post,
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
@@ -339,7 +345,7 @@ describe("PostDetail", () => {
         likes: 0,
         user: undefined,
         message: "m",
-      } as unknown as GoShishaBackendInternalModelsPost,
+      } as unknown as Post,
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
