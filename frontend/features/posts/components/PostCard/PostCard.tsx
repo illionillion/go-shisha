@@ -82,6 +82,10 @@ export function PostCard({ post, onLike, onUnlike, autoPlayInterval = 3000 }: Po
     };
   }, [hasMultipleSlides, slides.length, autoPlayInterval, currentSlideIndex]);
 
+  useEffect(() => {
+    setIsLiked(post.is_liked || false);
+  }, [post.is_liked]);
+
   /** 前のスライドへ */
   const handlePrevSlide = (e: React.MouseEvent) => {
     e.preventDefault();

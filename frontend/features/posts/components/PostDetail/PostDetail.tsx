@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useGetPostsId } from "@/api/posts";
 import { useLike } from "@/features/posts/hooks/useLike";
@@ -22,6 +23,7 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
   } = useGetPostsId(postId, {
     query: { initialData: initialPost },
   });
+  const router = useRouter();
 
   const slides = post?.slides || [];
   const [current, setCurrent] = useState(0);
@@ -62,7 +64,7 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
     if (window.history?.length && window.history.length > 1) {
       window.history.back();
     } else {
-      window.location.href = "/";
+      router.push("/");
     }
   };
 

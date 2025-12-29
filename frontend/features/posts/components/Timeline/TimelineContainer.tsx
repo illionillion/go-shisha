@@ -28,7 +28,9 @@ export function TimelineContainer({ initialPosts }: TimelineContainerProps) {
     },
   });
 
-  const posts = useMemo(() => initialPosts ?? data?.posts ?? [], [initialPosts, data?.posts]);
+  const posts = useMemo(() => {
+    return data?.posts ?? initialPosts ?? [];
+  }, [data?.posts, initialPosts]);
 
   // 投稿から一意のフレーバー一覧を抽出
   const availableFlavors = useMemo(() => {

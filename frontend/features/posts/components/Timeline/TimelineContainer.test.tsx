@@ -98,7 +98,7 @@ const mockPosts: Post[] = [
 describe("TimelineContainer", () => {
   let user: ReturnType<typeof userEvent.setup>;
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
     user = userEvent.setup();
   });
 
@@ -215,6 +215,11 @@ describe("TimelineContainer", () => {
   });
 
   test("initialPostsが空の場合、タイムラインが空であることを表示", () => {
+    (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+    });
     render(<TimelineContainer initialPosts={[]} />);
     expect(screen.getByText("投稿がありません")).toBeInTheDocument();
   });

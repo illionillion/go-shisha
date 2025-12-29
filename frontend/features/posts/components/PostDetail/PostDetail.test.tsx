@@ -13,6 +13,12 @@ vi.mock("../../../../api/posts", () => ({
   useGetPostsId: vi.fn(),
 }));
 
+// next/navigation をモックして useRouter().push を提供
+let pushSpy = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushSpy }),
+}));
+
 let onLikeSpy = vi.fn();
 let onUnlikeSpy = vi.fn();
 vi.mock("../../hooks/useLike", () => ({
@@ -85,13 +91,13 @@ describe("PostDetail", () => {
       value: { ...window.history, length: 1, back: vi.fn() },
       configurable: true,
     });
-    const hrefObj: { href: string } = { href: "" };
-    Object.defineProperty(window, "location", { value: hrefObj, configurable: true });
+    // router.push が呼ばれることを期待する
+    pushSpy = vi.fn();
 
     render(<PostDetail postId={mockPost.id!} />);
     const backBtn2 = screen.getAllByRole("button", { name: /戻る/ })[0];
     await user.click(backBtn2);
-    expect(window.location.href).toBe("/");
+    expect(pushSpy).toHaveBeenCalledWith("/");
   });
   test("エラー時に再試行ボタンが表示され refetch が呼ばれる", async () => {
     const refetch = vi.fn();
