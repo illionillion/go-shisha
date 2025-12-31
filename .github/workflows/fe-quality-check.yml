@@ -149,7 +149,6 @@ jobs:
 
       - name: Run VRT inside container
         run: pnpm vrt:run
-        continue-on-error: true
 
       - name: Upload VRT diff images
         if: failure() && hashFiles('frontend/__image_snapshots__/__diff_output__/**/*.png') != ''
