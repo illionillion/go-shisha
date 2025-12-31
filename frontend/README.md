@@ -132,7 +132,7 @@ export const Default: Story = {
 
 ### VRT運用ルール
 
-詳細は `.github/copilot-instructions.md` の「VRT運用」セクションを参照してください。
+詳細は `.github/copilot-vrt.md` を参照してください。運用ルールに従い、CI/PR の VRT 実行は Docker イメージ上で行います。
 
 ## その他
 

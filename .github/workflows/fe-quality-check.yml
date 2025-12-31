@@ -133,6 +133,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -140,22 +141,23 @@ jobs:
       - name: Setup Frontend Environment
         uses: ./.github/actions/setup-frontend
 
-      - name: Install Playwright Chromium
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Start Storybook server
-        run: pnpm storybook &
+      - name: Build image for VRT & Start Storybook container
+        run: pnpm vrt:build
 
       - name: Wait for Storybook
         run: npx wait-on http://localhost:6006 --timeout 180000
 
-      - name: Run VRT
-        run: pnpm test:vrt
+      - name: Run VRT inside container
+        run: pnpm vrt:run
 
       - name: Upload VRT diff images
-        if: failure() && hashFiles('frontend/__image_snapshots__/__diff_output__/*.png') != ''
+        if: failure() && hashFiles('frontend/__image_snapshots__/__diff_output__/**/*.png') != ''
         uses: ./.github/actions/vrt-upload-diff
 
       - name: Comment VRT failure on PR
-        if: failure() && hashFiles('frontend/__image_snapshots__/__diff_output__/*.png') != '' && github.event_name == 'pull_request'
+        if: failure() && hashFiles('frontend/__image_snapshots__/__diff_output__/**/*.png') != '' && github.event_name == 'pull_request'
         uses: ./.github/actions/vrt-comment-pr
+
+      - name: Tear down Storybook container
+        if: always()
+        run: pnpm vrt:down
