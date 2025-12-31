@@ -149,7 +149,7 @@ type Story = StoryObj<typeof meta>;
  * デフォルトのタイムライン表示
  */
 export const Default: Story = {
-  tags: ["vrt"],
+  tags: ["vrt", "vrt-sp"],
   args: {
     posts: mockPosts,
     isLoading: false,
@@ -182,28 +182,11 @@ export const Error: Story = {
 };
 
 /**
- * モバイルビューでのタイムライン表示
- */
-export const Mobile: Story = {
-  tags: ["vrt"],
-  args: {
-    posts: mockPosts,
-    isLoading: false,
-    error: null,
-  },
-  parameters: {
-    viewport: {
-      defaultViewport: "mobile1",
-    },
-  },
-};
-
-/**
  * フレーバーフィルター付き（インタラクティブ）
  * フィルター選択に応じてタイムラインの投稿が絞り込まれる
  */
 export const WithFlavorFilterInteractive: Story = {
-  tags: ["vrt"],
+  tags: ["vrt", "vrt-sp"],
   args: {
     posts: mockPosts,
     isLoading: false,
@@ -219,7 +202,7 @@ export const WithFlavorFilterInteractive: Story = {
  * ミントとベリーが選択された状態
  */
 export const WithFlavorFilterPreselected: Story = {
-  tags: ["vrt"],
+  tags: ["vrt", "vrt-sp"],
   args: {
     posts: mockPosts.filter((post) => {
       const firstSlide = post.slides?.[0];

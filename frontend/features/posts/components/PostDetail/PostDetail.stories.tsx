@@ -43,7 +43,7 @@ const mockPost: Post = {
 const meta = {
   title: "Features/Posts/PostDetail",
   component: PostDetail,
-  tags: ["autodocs", "vrt"],
+  tags: ["autodocs", "vrt", "vrt-sp"],
   parameters: {
     layout: "centered",
   },

@@ -29,8 +29,12 @@
     "test:watch": "vitest watch",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "test:vrt": "test-storybook --url http://localhost:6006",
-    "test:vrt:update": "test-storybook --url http://localhost:6006 -u"
+    "test:vrt": "concurrently \"pnpm test:vrt:pc\" \"pnpm test:vrt:sp\"",
+    "test:vrt:update": "concurrently \"pnpm test:vrt:pc:update\" \"pnpm test:vrt:sp:update\"",
+    "test:vrt:pc": "VRT_DEVICE=pc test-storybook --url http://localhost:6006",
+    "test:vrt:sp": "VRT_DEVICE=sp test-storybook --url http://localhost:6006",
+    "test:vrt:pc:update": "VRT_DEVICE=pc test-storybook --url http://localhost:6006 -u",
+    "test:vrt:sp:update": "VRT_DEVICE=sp test-storybook --url http://localhost:6006 -u"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.12",
