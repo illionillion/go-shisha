@@ -157,7 +157,7 @@ jobs:
       - name: Build VRT image (if pull failed)
         if: steps.pull_image.outcome == 'failure'
         run: |
-          docker build -t ghcr.io/${{ github.repository }}:vrt-latest -f frontend/Dockerfile.vrt frontend
+          docker build -t ghcr.io/${{ github.repository }}:vrt-latest -f Dockerfile.vrt .
 
       - name: Push VRT image (if built)
         if: steps.pull_image.outcome == 'failure'
