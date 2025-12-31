@@ -13,7 +13,7 @@ const mockPosts: Post[] = [
   {
     id: 1,
     user_id: 1,
-    message: "今日のシーシャは最高でした！ミント系のフレーバーが爽やかで最高！！！！！！！！！hoge",
+    message: "今日のシーシャは最高でした！ミント系のフレーバーが爽やかで最高",
     slides: [
       {
         image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Mint",
