@@ -40,9 +40,7 @@ export function Header() {
         >
           <span className={clsx(["text-white", "font-bold", "text-sm"])}>S</span>
         </div>
-        <h1 className={clsx(["text-xl", "font-bold", "text-gray-900"])}>
-          シーシャ行こう！！！！！！
-        </h1>
+        <h1 className={clsx(["text-xl", "font-bold", "text-gray-900"])}>シーシャ行こう</h1>
       </Link>
       <Avatar />
     </header>
