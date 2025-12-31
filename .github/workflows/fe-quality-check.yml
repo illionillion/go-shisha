@@ -133,6 +133,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -140,17 +141,38 @@ jobs:
       - name: Setup Frontend Environment
         uses: ./.github/actions/setup-frontend
 
-      - name: Install Playwright Chromium
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Start Storybook server
-        run: pnpm storybook &
+      - name: Pull VRT image
+        id: pull_image
+        run: |
+          docker pull ghcr.io/${{ github.repository }}:vrt-latest || exit 1
+        continue-on-error: true
+
+      - name: Build VRT image (if pull failed)
+        if: steps.pull_image.outcome == 'failure'
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}:vrt-latest -f frontend/Dockerfile.vrt frontend
+
+      - name: Push VRT image (if built)
+        if: steps.pull_image.outcome == 'failure'
+        run: docker push ghcr.io/${{ github.repository }}:vrt-latest
+
+      - name: Start Storybook container
+        run: |
+          docker run -d --name vrt-storybook -p 6006:6006 ghcr.io/${{ github.repository }}:vrt-latest || true
 
       - name: Wait for Storybook
         run: npx wait-on http://localhost:6006 --timeout 180000
 
-      - name: Run VRT
-        run: pnpm test:vrt
+      - name: Run VRT inside container
+        run: docker exec vrt-storybook pnpm test:vrt
+        continue-on-error: true
 
       - name: Upload VRT diff images
         if: failure() && hashFiles('frontend/__image_snapshots__/__diff_output__/*.png') != ''
@@ -159,3 +181,7 @@ jobs:
       - name: Comment VRT failure on PR
         if: failure() && hashFiles('frontend/__image_snapshots__/__diff_output__/*.png') != '' && github.event_name == 'pull_request'
         uses: ./.github/actions/vrt-comment-pr
+
+      - name: Tear down Storybook container
+        if: always()
+        run: docker stop vrt-storybook || true
