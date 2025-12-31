@@ -151,7 +151,7 @@ jobs:
       - name: Pull VRT image
         id: pull_image
         run: |
-          docker pull ghcr.io/${{ github.repository }}:vrt-latest || exit 1
+          docker pull ghcr.io/${{ github.repository }}:vrt-latest || true
         continue-on-error: true
 
       - name: Build VRT image (if pull failed)
@@ -175,11 +175,11 @@ jobs:
         continue-on-error: true
 
       - name: Upload VRT diff images
-        if: failure() && hashFiles('frontend/__image_snapshots__/__diff_output__/*.png') != ''
+        if: failure() && hashFiles('frontend/__image_snapshots__/__diff_output__/**/*.png') != ''
         uses: ./.github/actions/vrt-upload-diff
 
       - name: Comment VRT failure on PR
-        if: failure() && hashFiles('frontend/__image_snapshots__/__diff_output__/*.png') != '' && github.event_name == 'pull_request'
+        if: failure() && hashFiles('frontend/__image_snapshots__/__diff_output__/**/*.png') != '' && github.event_name == 'pull_request'
         uses: ./.github/actions/vrt-comment-pr
 
       - name: Tear down Storybook container
