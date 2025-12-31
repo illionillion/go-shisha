@@ -141,37 +141,14 @@ jobs:
       - name: Setup Frontend Environment
         uses: ./.github/actions/setup-frontend
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull VRT image
-        id: pull_image
-        run: |
-          docker pull ghcr.io/${{ github.repository }}:vrt-latest || true
-        continue-on-error: true
-
-      - name: Build VRT image (if pull failed)
-        if: steps.pull_image.outcome == 'failure'
-        run: |
-          docker build -t ghcr.io/${{ github.repository }}:vrt-latest -f Dockerfile.vrt .
-
-      - name: Push VRT image (if built)
-        if: steps.pull_image.outcome == 'failure'
-        run: docker push ghcr.io/${{ github.repository }}:vrt-latest
-
-      - name: Start Storybook container
-        run: |
-          docker run -d --name vrt-storybook -p 6006:6006 ghcr.io/${{ github.repository }}:vrt-latest || true
+      - name: Build image for VRT & Start Storybook container
+        run: pnpm vrt:build
 
       - name: Wait for Storybook
         run: npx wait-on http://localhost:6006 --timeout 180000
 
       - name: Run VRT inside container
-        run: docker exec vrt-storybook pnpm test:vrt
+        run: pnpm vrt:run
         continue-on-error: true
 
       - name: Upload VRT diff images
@@ -184,4 +161,4 @@ jobs:
 
       - name: Tear down Storybook container
         if: always()
-        run: docker stop vrt-storybook || true
+        run: pnpm vrt:down
