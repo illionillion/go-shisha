@@ -17,7 +17,7 @@ const mockPosts: Post[] = [
     slides: [
       {
         image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Mint",
-        text: "今日のシーシャは最高でした！ミント系のフレーバーが爽やかで最高！！！！！",
+        text: "今日のシーシャは最高でした！ミント系のフレーバーが爽やかで最高",
         flavor: {
           id: 1,
           name: "ミント",
