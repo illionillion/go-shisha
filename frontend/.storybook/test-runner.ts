@@ -66,7 +66,8 @@ const config: TestRunnerConfig = {
       // デバイス別にスナップショット格納先を分ける
       customSnapshotsDir: SNAPSHOTS_DIR,
       customDiffDir: SNAPSHOTS_DIFF_DIR,
-      failureThreshold: 0.005, // 0.5%の差分を許容（フォント・アンチエイリアシング差異対応）
+      // failureThreshold: 0.005, // 0.5%の差分を許容（フォント・アンチエイリアシング差異対応）
+      failureThreshold: 0, // 0%の差分を許容（フォント・アンチエイリアシング差異対応）
       failureThresholdType: "percent",
     });
   },
