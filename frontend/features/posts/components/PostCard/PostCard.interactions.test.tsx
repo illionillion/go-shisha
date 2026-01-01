@@ -1,17 +1,17 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, test, expect, vi } from "vitest";
+import type { Post } from "@/types/domain";
 import { PostCard } from "./PostCard";
 
-const mockPost = {
+const mockPost: Post = {
   id: 1,
   slides: [
     { image_url: "https://example.com/a.jpg", text: "A" },
     { image_url: "https://example.com/b.jpg", text: "B" },
   ],
   user: { display_name: "u" },
-  message: "m",
-} as unknown as Record<string, unknown>;
+};
 
 describe("PostCard interactions", () => {
   test("Prev/Next ボタンでスライドが切り替わる", async () => {
@@ -19,7 +19,7 @@ describe("PostCard interactions", () => {
     render(<PostCard post={mockPost} onLike={onLike} />);
 
     // 初期は A が表示
-    expect(screen.getByText("A") || screen.getByText("m")).toBeTruthy();
+    expect(screen.getByText("A")).toBeTruthy();
 
     const next = screen.getByLabelText("次のスライド");
     await userEvent.click(next);

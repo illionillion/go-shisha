@@ -49,7 +49,6 @@ func (s *PostService) CreatePost(input *models.CreatePostInput) (*models.Post, e
 
        post := &models.Post{
 	       UserID:  input.UserID,
-	       Message: input.Message,
 	       Slides:  input.Slides,
 	       User:    *user,
        }

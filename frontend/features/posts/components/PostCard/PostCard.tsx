@@ -122,7 +122,7 @@ export function PostCard({ post, onLike, onUnlike, autoPlayInterval = 3000 }: Po
   // 現在のスライドデータ
   const currentSlide = slides.length > 0 ? slides[currentSlideIndex] : undefined;
   const displayImageUrl = getImageUrl(currentSlide?.image_url);
-  const displayText = currentSlide?.text || post.message || "";
+  const displayText = currentSlide?.text || "";
   const displayFlavor = currentSlide?.flavor;
 
   return (

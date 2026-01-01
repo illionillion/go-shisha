@@ -13,7 +13,6 @@ const mockPosts: Post[] = [
   {
     id: 1,
     user_id: 1,
-    message: "今日のシーシャは最高でした！ミント系のフレーバーが爽やかで最高",
     slides: [
       {
         image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Mint",
@@ -38,7 +37,6 @@ const mockPosts: Post[] = [
   {
     id: 2,
     user_id: 2,
-    message: "新しいお店を発見！雰囲気も良くて味も抜群でした",
     slides: [
       {
         image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Apple",
@@ -63,7 +61,6 @@ const mockPosts: Post[] = [
   {
     id: 3,
     user_id: 1,
-    message: "ベリーの酸味がたまらない。ミックスもいいかも。",
     slides: [
       {
         image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Berry",
@@ -88,7 +85,6 @@ const mockPosts: Post[] = [
   {
     id: 4,
     user_id: 2,
-    message: "マンゴーのトロピカル感が最高！ 夏にぴったり。",
     slides: [
       {
         image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Mango",

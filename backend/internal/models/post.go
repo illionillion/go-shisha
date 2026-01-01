@@ -14,7 +14,6 @@ type Slide struct {
 type Post struct {
 	ID        int       `json:"id"`
 	UserID    int       `json:"user_id"`
-	Message   string    `json:"message"`
 	Slides    []Slide   `json:"slides"`
 	Likes     int       `json:"likes"`
 	User      User      `json:"user"`
@@ -25,7 +24,6 @@ type Post struct {
 // CreatePostInput represents the input for creating a post
 type CreatePostInput struct {
 	UserID   int     `json:"user_id" binding:"required"`
-	Message  string  `json:"message" binding:"required,max=100"`
 	Slides   []Slide `json:"slides"`
 }
 

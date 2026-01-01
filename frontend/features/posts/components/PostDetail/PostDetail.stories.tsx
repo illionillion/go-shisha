@@ -17,7 +17,6 @@ const queryClient = new QueryClient({
 
 const mockPost: Post = {
   id: 1,
-  message: "これはサンプルの投稿メッセージです。\n長いテキストは改行されることを確認します。",
   created_at: new Date().toISOString(),
   likes: 12,
   is_liked: false,
@@ -38,7 +37,7 @@ const mockPost: Post = {
       flavor: { id: 2, name: "Grape" },
     },
   ],
-} as unknown as Post;
+};
 
 const meta = {
   title: "Features/Posts/PostDetail",

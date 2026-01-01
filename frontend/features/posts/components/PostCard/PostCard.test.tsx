@@ -7,7 +7,6 @@ import { PostCard } from ".";
 const mockPost: Post = {
   id: 1,
   user_id: 1,
-  message: "今日のシーシャは最高でした！",
   slides: [
     {
       image_url: "https://picsum.photos/400/600?random=1",
@@ -243,10 +242,9 @@ describe("PostCard", () => {
     expect(flavorBadge).toHaveClass("bg-gray-500");
   });
 
-  it("post.messageがundefinedの場合、alt属性がデフォルト値になる", () => {
-    const postWithoutMessage = {
+  it("スライドのテキストが空の場合、alt属性がデフォルト値になる", () => {
+    const postWithoutMessage: Post = {
       ...mockPost,
-      message: undefined,
       slides: [
         {
           image_url: "https://picsum.photos/400/600?random=1",
@@ -560,9 +558,9 @@ describe("PostCard", () => {
   });
 
   test("slidesが空の場合、デフォルト画像が表示される", () => {
-    const mockPost = { id: 1, slides: [], user_id: 1, message: "No slides" };
+    const mockPost = { id: 1, slides: [], user_id: 1 };
     render(<PostCard post={mockPost} onLike={() => {}} />);
-    const fallbackImage = screen.getByAltText("No slides");
+    const fallbackImage = screen.getByAltText("シーシャ投稿");
     expect(fallbackImage).toBeInTheDocument();
     // Next.js ImageがURLをエンコードするため、srcにplacehold.coが含まれていることを確認
     expect(fallbackImage.getAttribute("src")).toContain("placehold.co");
@@ -572,7 +570,6 @@ describe("PostCard", () => {
     const mockPostNoSlides: Partial<Post> = {
       id: 2,
       user_id: 2,
-      message: "No slides prop",
       // slides を意図的に含めない
     };
 
@@ -581,7 +578,7 @@ describe("PostCard", () => {
       <PostCard post={mockPostNoSlides as unknown as Post} onLike={() => {}} />
     );
 
-    const fallbackImage = screen.getByAltText("No slides prop");
+    const fallbackImage = screen.getByAltText("シーシャ投稿");
     expect(fallbackImage).toBeInTheDocument();
     expect(fallbackImage.getAttribute("src")).toContain("placehold.co");
   });

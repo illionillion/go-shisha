@@ -101,7 +101,6 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
           <PostDetailHeader user={post.user} createdAt={post.created_at} onBack={handleBack} />
 
           <PostDetailFooter
-            post={post}
             currentSlide={currentSlide}
             optimisticLikes={optimisticLikes}
             isLiked={isLiked}
