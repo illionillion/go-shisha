@@ -108,7 +108,7 @@ export const Avatar: FC<AvatarProps> = ({
     <button
       type="button"
       onClick={handleClick}
-      onAuxClick={handleAuxClick as unknown as React.MouseEventHandler}
+      onAuxClick={handleAuxClick}
       onKeyDown={handleKeyDown}
       aria-label={alt}
       className="inline-block"

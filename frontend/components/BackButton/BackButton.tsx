@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { PrevIcon } from "@/components/icons";
 
-export default function BackButton() {
+export const BackButton = () => {
   const router = useRouter();
 
   const handleBack = () => {
@@ -27,4 +27,4 @@ export default function BackButton() {
       </button>
     </div>
   );
-}
+};

@@ -1,5 +1,5 @@
 import { getUsersId, getUsersIdPosts } from "@/api/users";
-import BackButton from "@/components/BackButton/BackButton";
+import { BackButton } from "@/components/BackButton";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { TimelineContainer } from "@/features/posts/components/Timeline";
 

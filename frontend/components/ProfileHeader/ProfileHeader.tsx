@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { FC } from "react";
 import type { User } from "@/types/domain";
-import Avatar from "../Avatar/Avatar";
+import { Avatar } from "../Avatar";
 
 interface Props {
   user: User;
