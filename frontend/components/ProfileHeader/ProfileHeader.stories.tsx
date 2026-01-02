@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import ProfileHeader from "./ProfileHeader";
+import { ProfileHeader } from "./ProfileHeader";
 
 const meta = {
   title: "Components/ProfileHeader",

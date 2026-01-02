@@ -42,5 +42,3 @@ export const ProfileHeader: FC<Props> = ({ user }) => {
     </div>
   );
 };
-
-export default ProfileHeader;
