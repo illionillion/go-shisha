@@ -2,12 +2,15 @@
 
 import { useMemo, useState } from "react";
 import { useGetPosts } from "@/api/posts";
+import { useGetUsersIdPosts } from "@/api/users";
 import { useLike } from "@/features/posts/hooks/useLike";
 import type { Flavor, Post } from "@/types/domain";
 import { Timeline } from "./Timeline";
 
 interface TimelineContainerProps {
   initialPosts?: Post[];
+  /** optional: when provided, load posts for this user */
+  userId?: number;
 }
 
 /**
@@ -17,16 +20,34 @@ interface TimelineContainerProps {
  * - initialPosts がない場合は useGetPosts でクライアント取得
  * - フレーバーによる絞り込み機能を提供
  */
-export function TimelineContainer({ initialPosts }: TimelineContainerProps) {
+export function TimelineContainer({ initialPosts, userId }: TimelineContainerProps) {
   const [selectedFlavorIds, setSelectedFlavorIds] = useState<number[]>([]);
 
-  const { data, isLoading, error } = useGetPosts({
+  // Prepare shared query options
+  const queryOptions = {
+    enabled: true,
+    initialData: initialPosts ? { posts: initialPosts } : undefined,
+    refetchInterval: 60000,
+  } as const;
+
+  // Call both hooks unconditionally to satisfy hooks rules; control fetching via `enabled`.
+  const usersHook = useGetUsersIdPosts(userId ?? 0, {
     query: {
-      enabled: true, // 常に有効にしてポーリングを許可
-      initialData: initialPosts ? { posts: initialPosts } : undefined, // 初期データを設定
-      refetchInterval: 60000, // 60秒ごとに自動更新
+      ...queryOptions,
+      enabled: !!userId,
     },
   });
+
+  const postsHook = useGetPosts({
+    query: {
+      ...queryOptions,
+      enabled: !userId,
+    },
+  });
+
+  const data = userId ? usersHook.data : postsHook.data;
+  const isLoading = userId ? usersHook.isLoading : postsHook.isLoading;
+  const error = userId ? usersHook.error : postsHook.error;
 
   const posts = useMemo(() => {
     return data?.posts ?? initialPosts ?? [];

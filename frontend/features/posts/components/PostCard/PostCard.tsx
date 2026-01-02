@@ -4,7 +4,7 @@ import { cva } from "class-variance-authority";
 import { clsx } from "clsx";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Avatar } from "@/components/Avatar";
+import { Avatar } from "@/components/Avatar/Avatar";
 import { FlavorLabel } from "@/components/FlavorLabel";
 import { NextIcon, PrevIcon } from "@/components/icons";
 import { getImageUrl } from "@/lib/getImageUrl";
@@ -232,6 +232,8 @@ export function PostCard({ post, onLike, onUnlike, autoPlayInterval = 3000 }: Po
               src={post.user?.icon_url ?? null}
               alt={post.user?.display_name ?? "ユーザー"}
               size={32}
+              userId={post.user?.id}
+              linkMode="router"
             />
             <div className="text-sm font-medium">{post.user?.display_name ?? "匿名"}</div>
           </div>
