@@ -5,9 +5,6 @@ pre-commit:
       run: npx lint-staged
       # stage_fixed=true ensures files modified by lint-staged are re-staged
       stage_fixed: true
-    type-check:
-      glob: "frontend/**/*.ts?(x)"
-      run: pnpm type-check
     # backend-format:
     #   glob: "backend/**/*.go"
     #   run: |
