@@ -18,7 +18,7 @@ const sampleUser = {
   display_name: "山田 太郎",
   description: "シーシャ好きのフロントエンドエンジニア\n週末は友人とカフェ巡りをします。",
   external_url: "https://example.com",
-  icon_url: "/images/sample-avatar.png",
+  icon_url: "",
 };
 
 export const Default: Story = {
