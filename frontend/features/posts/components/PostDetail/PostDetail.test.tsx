@@ -36,7 +36,6 @@ vi.mock("next/image", () => {
 const mockPost: Post = {
   id: 11,
   user_id: 2,
-  message: "テスト投稿",
   slides: [
     {
       image_url: "https://placehold.co/400x600",
@@ -156,7 +155,7 @@ describe("PostDetail", () => {
 
     const refetch = vi.fn();
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: { id: 2, slides: [], user_id: 1, message: "No slides", likes: 0 },
+      data: { id: 2, slides: [], user_id: 1, likes: 0 },
       isLoading: false,
       isError: false,
       refetch,
@@ -344,7 +343,6 @@ describe("PostDetail", () => {
         id: 2,
         likes: 0,
         user: undefined,
-        message: "m",
       } as unknown as Post,
       isLoading: false,
       isError: false,

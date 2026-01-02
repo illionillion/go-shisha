@@ -13,7 +13,6 @@ const mockPosts: Post[] = [
   {
     id: 1,
     user_id: 1,
-    message: "今日のシーシャは最高でした！",
     slides: [
       {
         image_url: "https://picsum.photos/400/600?random=1",
@@ -35,7 +34,6 @@ const mockPosts: Post[] = [
   {
     id: 2,
     user_id: 2,
-    message: "新しいお店を発見！",
     slides: [
       {
         image_url: "https://picsum.photos/400/600?random=2",
@@ -142,8 +140,16 @@ describe("Timeline", () => {
 
   test("postsがある場合、タイムラインに投稿が表示される", () => {
     const mockPosts = [
-      { id: 1, slides: [], user_id: 1, message: "投稿1" },
-      { id: 2, slides: [], user_id: 2, message: "投稿2" },
+      {
+        id: 1,
+        slides: [{ image_url: "https://example.com/1.jpg", text: "投稿1" }],
+        user_id: 1,
+      },
+      {
+        id: 2,
+        slides: [{ image_url: "https://example.com/2.jpg", text: "投稿2" }],
+        user_id: 2,
+      },
     ];
     render(<Timeline posts={mockPosts} />);
     expect(screen.getByText("投稿1")).toBeInTheDocument();

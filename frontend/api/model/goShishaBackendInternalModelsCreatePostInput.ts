@@ -9,8 +9,6 @@
 import type { GoShishaBackendInternalModelsSlide } from "./goShishaBackendInternalModelsSlide";
 
 export interface GoShishaBackendInternalModelsCreatePostInput {
-  /** @maxLength 100 */
-  message: string;
   slides?: GoShishaBackendInternalModelsSlide[];
   user_id: number;
 }

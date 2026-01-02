@@ -5,7 +5,6 @@ import { PostCard } from ".";
 const mockPost: Post = {
   id: 1,
   user_id: 1,
-  message: "今日のシーシャは最高でした！ミント系のフレーバーが爽やかで最高",
   slides: [
     {
       image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Mint",
@@ -31,7 +30,6 @@ const mockPost: Post = {
 const mockPostWithoutFlavor: Post = {
   id: 2,
   user_id: 2,
-  message: "新しいお店を発見！雰囲気も良くて味も抜群でした",
   slides: [
     {
       image_url: "https://placehold.co/400x600/CCCCCC/666666?text=Shisha",
@@ -157,7 +155,6 @@ export const WithoutImage: Story = {
     post: {
       ...mockPost,
       id: 4,
-      message: "画像なしの投稿です。フォールバック画像が表示されます。",
       slides: [
         {
           image_url: undefined,
@@ -179,7 +176,6 @@ export const MultipleSlides: Story = {
     post: {
       id: 5,
       user_id: 1,
-      message: "複数画像スライド",
       slides: [
         {
           image_url: "https://placehold.co/400x600/4CAF50/FFFFFF?text=Slide+1+Mint",
@@ -232,7 +228,6 @@ export const FiveSlides: Story = {
     post: {
       id: 6,
       user_id: 1,
-      message: "5枚の画像スライド",
       slides: [
         {
           image_url: "https://placehold.co/400x600/4CAF50/FFFFFF?text=1",
@@ -280,7 +275,6 @@ export const ProgressBarStatic: Story = {
     post: {
       id: 7,
       user_id: 1,
-      message: "プログレスバー表示確認（VRT用）",
       slides: [
         {
           image_url: "https://placehold.co/400x600/4CAF50/FFFFFF?text=1",

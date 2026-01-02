@@ -14,7 +14,6 @@ export interface GoShishaBackendInternalModelsPost {
   id?: number;
   is_liked?: boolean;
   likes?: number;
-  message?: string;
   slides?: GoShishaBackendInternalModelsSlide[];
   user?: GoShishaBackendInternalModelsUser;
   user_id?: number;

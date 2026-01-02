@@ -352,14 +352,9 @@ const docTemplate = `{
         "go-shisha-backend_internal_models.CreatePostInput": {
             "type": "object",
             "required": [
-                "message",
                 "user_id"
             ],
             "properties": {
-                "message": {
-                    "type": "string",
-                    "maxLength": 100
-                },
                 "slides": {
                     "type": "array",
                     "items": {
@@ -399,9 +394,6 @@ const docTemplate = `{
                 },
                 "likes": {
                     "type": "integer"
-                },
-                "message": {
-                    "type": "string"
                 },
                 "slides": {
                     "type": "array",

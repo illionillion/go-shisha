@@ -9,24 +9,17 @@ interface Slide {
   flavor?: Flavor;
 }
 
-interface Post {
-  id?: number;
-  message?: string | null;
-  user?: { display_name?: string; icon_url?: string } | null;
-}
-
 interface Props {
-  post: Post;
   currentSlide?: Slide | undefined;
   optimisticLikes: number;
   isLiked: boolean;
   onLike: () => void;
 }
 
-export function PostDetailFooter({ post, currentSlide, optimisticLikes, isLiked, onLike }: Props) {
+export function PostDetailFooter({ currentSlide, optimisticLikes, isLiked, onLike }: Props) {
   return (
     <div className="md:w-96">
-      <p className="mb-4 whitespace-pre-wrap">{currentSlide?.text || post.message}</p>
+      <p className="mb-4 whitespace-pre-wrap">{currentSlide?.text}</p>
 
       {currentSlide?.flavor && (
         <div className="mb-4">
