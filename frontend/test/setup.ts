@@ -1,5 +1,4 @@
 import "@testing-library/jest-dom";
-import type { QueryClient } from "@tanstack/react-query";
 import type { RenderOptions, RenderResult } from "@testing-library/react";
 import React from "react";
 import { vi } from "vitest";
@@ -82,32 +81,22 @@ vi.mock("next/link", () => ({
   default: (props: LinkProps) => React.createElement("a", props, props.children),
 }));
 
-// Provide a QueryClient for tests that use react-query hooks
-vi.mock("@tanstack/react-query", async () => {
-  const actual =
-    await vi.importActual<typeof import("@tanstack/react-query")>("@tanstack/react-query");
-  const client = new actual.QueryClient();
-  return {
-    ...actual,
-    useQueryClient: () => client,
-  } as typeof actual & { useQueryClient: () => QueryClient };
-});
-
-// Wrap @testing-library/react's render to provide QueryClientProvider globally
+// Wrap @testing-library/react's render to provide a fresh QueryClientProvider per render
 vi.mock("@testing-library/react", async () => {
   const actualRTL =
     await vi.importActual<typeof import("@testing-library/react")>("@testing-library/react");
   const rq = await vi.importActual<typeof import("@tanstack/react-query")>("@tanstack/react-query");
-  const client = new rq.QueryClient();
 
   return {
     ...actualRTL,
-    render: (ui: React.ReactElement, options?: RenderOptions): RenderResult =>
-      actualRTL.render(ui, {
+    render: (ui: React.ReactElement, options?: RenderOptions): RenderResult => {
+      const client = new rq.QueryClient();
+      return actualRTL.render(ui, {
         wrapper: ({ children }: { children?: React.ReactNode }) =>
           React.createElement(rq.QueryClientProvider, { client }, children),
         ...options,
-      }),
+      });
+    },
   } as typeof actualRTL & {
     render: (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
   };
