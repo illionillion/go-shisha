@@ -31,6 +31,10 @@ export function TimelineContainer({ initialPosts, userId }: TimelineContainerPro
   } as const;
 
   // Call both hooks unconditionally to satisfy hooks rules; control fetching via `enabled`.
+  // Do NOT coerce `userId` to 0 when undefined — pass through `undefined` so query key
+  // does not change unexpectedly.
+  // useGetUsersIdPosts expects a number; pass 0 when undefined but disable fetching
+  // via `enabled` to avoid making requests when no userId is provided.
   const usersHook = useGetUsersIdPosts(userId ?? 0, {
     query: {
       ...queryOptions,
@@ -41,13 +45,13 @@ export function TimelineContainer({ initialPosts, userId }: TimelineContainerPro
   const postsHook = useGetPosts({
     query: {
       ...queryOptions,
-      enabled: !userId,
+      enabled: userId == null,
     },
   });
 
-  const data = userId ? usersHook.data : postsHook.data;
-  const isLoading = userId ? usersHook.isLoading : postsHook.isLoading;
-  const error = userId ? usersHook.error : postsHook.error;
+  const data = userId != null ? usersHook.data : postsHook.data;
+  const isLoading = userId != null ? usersHook.isLoading : postsHook.isLoading;
+  const error = userId != null ? usersHook.error : postsHook.error;
 
   const posts = useMemo(() => {
     return data?.posts ?? initialPosts ?? [];

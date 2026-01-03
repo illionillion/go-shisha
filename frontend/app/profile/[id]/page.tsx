@@ -16,13 +16,15 @@ export default async function Page({ params }: Props) {
     return <div className="p-6 text-center text-gray-600">無効なユーザーIDです</div>;
   }
 
-  // Fetch user and posts; let unexpected errors bubble to `app/error.tsx`.
-  const [user, postsResp] = await Promise.all([getUsersId(id), getUsersIdPosts(id)]);
+  // Fetch user first; only fetch posts if user exists to avoid unnecessary requests.
+  // Let unexpected errors bubble to `app/error.tsx`.
+  const user = await getUsersId(id);
 
   if (!user || !user.id) {
     notFound();
   }
 
+  const postsResp = await getUsersIdPosts(id);
   const initialPosts = postsResp?.posts ?? [];
 
   return (
