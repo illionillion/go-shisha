@@ -76,28 +76,21 @@ export const Avatar: FC<AvatarProps> = ({
     );
   }
 
-  const handleClick = (e: React.MouseEvent) => {
-    if (e.ctrlKey || e.metaKey) {
-      window.open(targetHref, "_blank");
-      e.stopPropagation();
-      e.preventDefault();
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // If not a left click or any modifier key is pressed, let the browser
+    // handle the click (open in new tab, context menu, etc.).
+    if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) {
       return;
     }
+
     e.preventDefault();
     e.stopPropagation();
     router.push(targetHref);
   };
 
-  const handleAuxClick = (e: React.MouseEvent) => {
-    if (e.button === 1) {
-      window.open(targetHref, "_blank");
-      e.stopPropagation();
-      e.preventDefault();
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLAnchorElement>) => {
+    // Space or Enter should perform SPA navigation
+    if (e.key === " " || e.key === "Enter") {
       e.preventDefault();
       e.stopPropagation();
       router.push(targetHref);
@@ -105,16 +98,15 @@ export const Avatar: FC<AvatarProps> = ({
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      onAuxClick={handleAuxClick}
-      onKeyDown={handleKeyDown}
+    <a
+      href={targetHref}
       aria-label={alt}
       className="inline-block"
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
     >
       {inner}
-    </button>
+    </a>
   );
 };
 
