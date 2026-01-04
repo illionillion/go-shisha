@@ -20,7 +20,7 @@ export const BackButton = () => {
         type="button"
         onClick={handleBack}
         aria-label="戻る"
-        className="inline-flex items-center gap-2 text-sm text-gray-700 focus:outline-none"
+        className="inline-flex items-center gap-2 text-sm text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500"
       >
         <PrevIcon className="w-4 h-4 text-black" />
         <span>戻る</span>

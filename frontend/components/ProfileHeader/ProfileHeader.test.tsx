@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
 import { describe, test, expect } from "vitest";
+import { render, screen } from "@/test/utils";
 import type { User } from "@/types/domain";
 import { ProfileHeader } from "./ProfileHeader";
 
@@ -16,9 +16,9 @@ describe("ProfileHeader", () => {
     render(<ProfileHeader user={mockUser} />);
     expect(screen.getByText("テストユーザー")).toBeInTheDocument();
     expect(screen.getByText("これは自己紹介です")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /https?:\/\// })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: mockUser.external_url })).toHaveAttribute(
       "href",
-      "https://example.com"
+      mockUser.external_url
     );
   });
 

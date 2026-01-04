@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, test, expect, vi, beforeEach } from "vitest";
+import { render, screen } from "@/test/utils";
 import type { Post, Flavor } from "@/types/domain";
 import { useGetPosts } from "../../../../api/posts";
 import { useGetUsersIdPosts } from "../../../../api/users";
