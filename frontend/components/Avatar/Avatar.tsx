@@ -77,9 +77,8 @@ export const Avatar: FC<AvatarProps> = ({
   }
 
   const openInNewTab = (url: string) => {
-    // const newWin = window.open(url, "_blank", "noopener,noreferrer");
-    // if (newWin) newWin.focus();
-    window.open(url, "_blank");
+    const newWin = window.open(url, "_blank", "noopener,noreferrer");
+    if (newWin) newWin.focus();
   };
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
