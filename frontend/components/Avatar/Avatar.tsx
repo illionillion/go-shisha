@@ -76,37 +76,52 @@ export const Avatar: FC<AvatarProps> = ({
     );
   }
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    // If not a left click or any modifier key is pressed, let the browser
-    // handle the click (open in new tab, context menu, etc.).
-    if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) {
+  const openInNewTab = (url: string) => {
+    // const newWin = window.open(url, "_blank", "noopener,noreferrer");
+    // if (newWin) newWin.focus();
+    window.open(url, "_blank");
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Middle click (button === 1) or modifier keys should open in new tab/window
+    if (e.button === 1 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) {
+      // Let the browser behavior be approximated by programmatically opening a new tab
+      // (button is used so native Ctrl+click won't automatically open a tab).
+      openInNewTab(targetHref);
       return;
     }
 
-    e.preventDefault();
-    e.stopPropagation();
-    router.push(targetHref);
+    // Left click without modifiers -> SPA navigation
+    if (e.button === 0) {
+      e.preventDefault();
+      router.push(targetHref);
+    }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLAnchorElement>) => {
-    // Space or Enter should perform SPA navigation
-    if (e.key === " " || e.key === "Enter") {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    // Enter or Space: perform SPA navigation, unless modifier keys are pressed
+    if (e.key === "Enter" || e.key === " ") {
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) {
+        openInNewTab(targetHref as string);
+        return;
+      }
+
       e.preventDefault();
-      e.stopPropagation();
       router.push(targetHref);
     }
   };
 
   return (
-    <a
-      href={targetHref}
+    <button
+      type="button"
+      role="link"
       aria-label={alt}
       className="inline-block"
       onClick={handleClick}
       onKeyDown={handleKeyDown}
     >
       {inner}
-    </a>
+    </button>
   );
 };
 
