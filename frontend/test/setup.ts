@@ -77,5 +77,6 @@ vi.mock("next/image", () => ({
 // Mock next/link to render an <a>
 vi.mock("next/link", () => ({
   __esModule: true,
-  default: (props: LinkProps) => React.createElement("a", props, props.children),
+  default: (props: LinkProps) =>
+    React.createElement("a", { ...props, href: props.href }, props.children),
 }));
