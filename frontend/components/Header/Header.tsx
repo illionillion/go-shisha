@@ -1,6 +1,6 @@
 import { clsx } from "clsx";
 import Link from "next/link";
-import Avatar from "../Avatar";
+import Avatar from "../Avatar/Avatar";
 
 /**
  * Headerコンポーネント

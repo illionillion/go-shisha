@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, test, expect, vi } from "vitest";
+import { render, screen } from "@/test/utils";
 import PostDetailCarousel from "./PostDetailCarousel";
 
 vi.mock("@/lib/getImageUrl", () => ({ getImageUrl: (u: string) => u }));

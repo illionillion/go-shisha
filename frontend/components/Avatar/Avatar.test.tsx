@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
 import React from "react";
+import { render, screen } from "@/test/utils";
 import { Avatar } from "./Avatar";
 
 describe("Avatar", () => {
@@ -39,5 +39,18 @@ describe("Avatar", () => {
     expect(img).toBeNull();
     const svg = wrapper?.querySelector("svg");
     expect(svg).toBeTruthy();
+  });
+
+  it.skip("middle-click (auxclick) opens profile in new tab - TODO: enable after implementing onAuxClick", () => {
+    // This test is intentionally skipped until `onAuxClick` support is implemented.
+    // Expected behavior once implemented:
+    // - middle-click on the Avatar should call window.open(targetHref, "_blank", "noopener,noreferrer")
+    // - the opened window should be focused if possible
+    // Example (to be enabled later):
+    // const openSpy = vi.spyOn(window, "open").mockImplementation(() => ({ focus: vi.fn() } as any));
+    // render(<Avatar userId={123} src={null} alt="u" size={32} linkMode="router" />);
+    // const btn = screen.getByRole("link", { name: "u" });
+    // fireEvent.auxClick(btn, { button: 1 });
+    // expect(openSpy).toHaveBeenCalledWith("/profile/123", "_blank", "noopener,noreferrer");
   });
 });

@@ -1,6 +1,6 @@
-import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
+import { render, screen, act } from "@/test/utils";
 import type { Post, PostPosts400 } from "@/types/domain";
 import { PostCard } from ".";
 

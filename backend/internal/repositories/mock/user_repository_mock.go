@@ -18,8 +18,8 @@ type UserRepositoryMock struct {
 func NewUserRepositoryMock() *UserRepositoryMock {
 	return &UserRepositoryMock{
 		users: []models.User{
-			{ID: 1, Email: "test@example.com", DisplayName: "テストユーザー", Description: "シーシャ大好き！", IconURL: "", ExternalURL: ""},
-			{ID: 2, Email: "shisha@example.com", DisplayName: "シーシャマスター", Description: "毎日シーシャ吸ってます", IconURL: "", ExternalURL: "https://twitter.com/shishamaster"},
+			{ID: 1, Email: "test@example.com", DisplayName: "テストユーザー", Description: "シーシャ大好き！", IconURL: "https://i.pravatar.cc/80?img=11", ExternalURL: ""},
+			{ID: 2, Email: "shisha@example.com", DisplayName: "シーシャマスター", Description: "毎日シーシャ吸ってます", IconURL: "https://i.pravatar.cc/80?img=12", ExternalURL: "https://twitter.com/shishamaster"},
 		},
 	}
 }

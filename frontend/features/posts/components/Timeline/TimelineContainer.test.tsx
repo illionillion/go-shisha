@@ -1,8 +1,9 @@
-import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, test, expect, vi, beforeEach } from "vitest";
+import { render, screen } from "@/test/utils";
 import type { Post, Flavor } from "@/types/domain";
 import { useGetPosts } from "../../../../api/posts";
+import { useGetUsersIdPosts } from "../../../../api/users";
 import type { TimelineProps } from "./Timeline";
 import { TimelineContainer } from "./TimelineContainer";
 
@@ -58,6 +59,11 @@ vi.mock("./Timeline", () => ({
 // --- useGetPostsモック ---
 vi.mock("../../../../api/posts", () => ({
   useGetPosts: vi.fn(),
+}));
+
+// --- useGetUsersIdPosts モック（userId パスの検証用） ---
+vi.mock("../../../../api/users", () => ({
+  useGetUsersIdPosts: vi.fn(),
 }));
 
 // --- useLike モック (QueryClientProvider がテストにないため) ---
@@ -222,5 +228,66 @@ describe("TimelineContainer", () => {
     });
     render(<TimelineContainer initialPosts={[]} />);
     expect(screen.getByText("投稿がありません")).toBeInTheDocument();
+  });
+
+  test("userId 指定時は useGetUsersIdPosts が使われ、useGetPosts は disabled になる", () => {
+    const usersMock = useGetUsersIdPosts as ReturnType<typeof vi.fn>;
+    (usersMock as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: { posts: [mockPosts[0]] },
+      isLoading: false,
+      error: null,
+    });
+
+    (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+    });
+
+    render(<TimelineContainer userId={1} />);
+
+    // users hook が userId で呼ばれている
+    expect((usersMock as ReturnType<typeof vi.fn>).mock.calls[0][0]).toBe(1);
+
+    // posts hook の enabled が false になっていることを確認
+    const postsCallArg = (useGetPosts as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(postsCallArg.query?.enabled).toBe(false);
+
+    // Timeline が usersHook の投稿を表示している
+    expect(screen.getByTestId("timeline-mock")).toHaveTextContent("posts:1");
+  });
+
+  test("userId 指定時に loading 状態は usersHook の isLoading を反映する", () => {
+    const usersMock = useGetUsersIdPosts as ReturnType<typeof vi.fn>;
+    (usersMock as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      error: null,
+    });
+    (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+    });
+
+    render(<TimelineContainer userId={2} />);
+    expect(screen.getByTestId("timeline-mock")).toHaveTextContent("isLoading:true");
+  });
+
+  test("userId 指定時に error 状態は usersHook の error を反映する", () => {
+    const usersMock = useGetUsersIdPosts as ReturnType<typeof vi.fn>;
+    (usersMock as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: { message: "err" },
+    });
+    (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+    });
+
+    render(<TimelineContainer userId={3} />);
+    expect(screen.getByTestId("timeline-mock")).toHaveTextContent("error:true");
   });
 });

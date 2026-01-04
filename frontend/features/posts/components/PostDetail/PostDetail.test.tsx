@@ -1,7 +1,7 @@
-import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { describe, test, expect, vi, beforeEach } from "vitest";
+import { render, screen, cleanup } from "@/test/utils";
 import type { Post } from "@/types/domain";
 import { useGetPostsId } from "../../../../api/posts";
 import { PostDetail } from "./PostDetail";
