@@ -30,11 +30,7 @@ export function TimelineContainer({ initialPosts, userId }: TimelineContainerPro
     refetchInterval: 60000,
   } as const;
 
-  // Call both hooks unconditionally to satisfy hooks rules; control fetching via `enabled`.
-  // Do NOT coerce `userId` to 0 when undefined — pass through `undefined` so query key
-  // does not change unexpectedly.
-  // useGetUsersIdPosts expects a number; pass 0 when undefined but disable fetching
-  // via `enabled` to avoid making requests when no userId is provided.
+  // ユーザーページであればそのユーザーの投稿を取得、そうでなければ全投稿を取得
   const usersHook = useGetUsersIdPosts(userId ?? 0, {
     query: {
       ...queryOptions,
