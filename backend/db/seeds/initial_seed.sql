@@ -41,6 +41,3 @@
 -- SELECT setval(pg_get_serial_sequence('users','id'), COALESCE((SELECT MAX(id) FROM users), 1), true);
 -- SELECT setval(pg_get_serial_sequence('flavors','id'), COALESCE((SELECT MAX(id) FROM flavors), 1), true);
 -- SELECT setval(pg_get_serial_sequence('posts','id'), COALESCE((SELECT MAX(id) FROM posts), 1), true);
-
--- COMMIT;
--- initial_seed.sql (cleaned)
