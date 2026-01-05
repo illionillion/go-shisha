@@ -1,6 +1,9 @@
 -- 0003_seed.up.sql
 -- 初期データ（シード）をマイグレーションとして適用
 
+-- NOTICE: 開発環境用の初期データです。**本番環境ではこのマイグレーションを適用しないでください。**
+-- パスワードはテスト用途の既知ハッシュを使用しています（bcrypt）。実運用では適切なユーザー作成フローを使用してください。
+
 -- flavors
 INSERT INTO flavors (id, name, created_at, color) VALUES
   (1, 'ミント', NOW(), 'bg-green-500'),
@@ -11,10 +14,11 @@ INSERT INTO flavors (id, name, created_at, color) VALUES
   (6, 'グレープ', NOW(), 'bg-indigo-500')
 ON CONFLICT (id) DO NOTHING;
 
--- users
+-- users (開発用テストユーザー。実運用での利用は厳禁)
+-- 例: パスワードは bcrypt('test1234') のハッシュを使用
 INSERT INTO users (id, email, password_hash, display_name, description, icon_url, external_url, created_at) VALUES
-  (1, 'test@example.com', '', 'テストユーザー', 'シーシャ大好き！', 'https://i.pravatar.cc/80?img=11', '', NOW()),
-  (2, 'shisha@example.com', '', 'シーシャマスター', '毎日シーシャ吸ってます', 'https://i.pravatar.cc/80?img=12', 'https://twitter.com/shishamaster', NOW())
+  (1, 'test@example.com', '$2b$12$RUMZQPIh7H5Avzkdxl3pPOxsDCYXgq6Gh7Wl5kHJ1i1P0RFzxHq8a', 'テストユーザー', 'シーシャ大好き！', 'https://i.pravatar.cc/80?img=11', '', NOW()),
+  (2, 'shisha@example.com', '$2b$12$RUMZQPIh7H5Avzkdxl3pPOxsDCYXgq6Gh7Wl5kHJ1i1P0RFzxHq8a', 'シーシャマスター', '毎日シーシャ吸ってます', 'https://i.pravatar.cc/80?img=12', 'https://twitter.com/shishamaster', NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- posts
