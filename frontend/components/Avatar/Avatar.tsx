@@ -117,6 +117,7 @@ export const Avatar: FC<AvatarProps> = ({
       aria-label={alt}
       className="inline-block"
       onClick={handleClick}
+      onAuxClick={handleClick}
       onKeyDown={handleKeyDown}
     >
       {inner}
