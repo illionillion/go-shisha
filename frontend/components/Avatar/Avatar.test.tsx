@@ -1,4 +1,5 @@
 import React from "react";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@/test/utils";
 import { Avatar } from "./Avatar";
 
@@ -16,11 +17,9 @@ describe("Avatar", () => {
     // wrapper has role img and accessible name
     const candidates = screen.getAllByRole("img", { name: "ユーザー名" });
     expect(candidates.length).toBeGreaterThan(0);
-    // pick the outer wrapper element (the div with aria-label)
     const wrapper = candidates.find((el) => el.tagName.toLowerCase() === "div");
     expect(wrapper).toBeTruthy();
 
-    // next/image should render an actual <img> inside the wrapper in tests
     const img = wrapper?.querySelector("img");
     expect(img).toBeTruthy();
     if (img) expect(img).toHaveAttribute("alt", "ユーザー名");
@@ -34,23 +33,34 @@ describe("Avatar", () => {
     const wrapper = candidates.find((el) => el.tagName.toLowerCase() === "div");
     expect(wrapper).toBeTruthy();
 
-    // ensure no <img> inside and an svg fallback exists
     const img = wrapper?.querySelector("img");
     expect(img).toBeNull();
     const svg = wrapper?.querySelector("svg");
     expect(svg).toBeTruthy();
   });
 
-  it.skip("middle-click (auxclick) opens profile in new tab - TODO: enable after implementing onAuxClick", () => {
-    // This test is intentionally skipped until `onAuxClick` support is implemented.
-    // Expected behavior once implemented:
-    // - middle-click on the Avatar should call window.open(targetHref, "_blank", "noopener,noreferrer")
-    // - the opened window should be focused if possible
-    // Example (to be enabled later):
-    // const openSpy = vi.spyOn(window, "open").mockImplementation(() => ({ focus: vi.fn() } as any));
-    // render(<Avatar userId={123} src={null} alt="u" size={32} linkMode="router" />);
-    // const btn = screen.getByRole("link", { name: "u" });
-    // fireEvent.auxClick(btn, { button: 1 });
-    // expect(openSpy).toHaveBeenCalledWith("/profile/123", "_blank", "noopener,noreferrer");
+  it("middle-click (auxclick) opens profile in new tab", async () => {
+    const openSpy = vi.spyOn(window, "open").mockImplementation(() => null as unknown as Window);
+
+    render(<Avatar userId={123} src={null} alt="u" size={32} linkMode="router" />);
+    const btn = screen.getByRole("link", { name: "u" });
+    // simulate auxclick (middle click)
+    btn.dispatchEvent(new MouseEvent("auxclick", { bubbles: true, button: 1 }));
+
+    expect(openSpy).toHaveBeenCalledWith("/profile/123", "_blank", "noopener,noreferrer");
+
+    openSpy.mockRestore();
+  });
+
+  it("Ctrl/Cmd+click opens in new tab", async () => {
+    const openSpy = vi.spyOn(window, "open").mockImplementation(() => null as unknown as Window);
+
+    render(<Avatar userId={456} src={null} alt="v" size={32} linkMode="router" />);
+    const btn = screen.getByRole("link", { name: "v" });
+    btn.dispatchEvent(new MouseEvent("click", { bubbles: true, ctrlKey: true, button: 0 }));
+
+    expect(openSpy).toHaveBeenCalledWith("/profile/456", "_blank", "noopener,noreferrer");
+
+    openSpy.mockRestore();
   });
 });
