@@ -1,9 +1,17 @@
+import * as NextNavigation from "next/navigation";
 import React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@/test/utils";
 import { Avatar } from "./Avatar";
 
 describe("Avatar", () => {
+  const mockRouter = (pushMock: unknown) =>
+    vi.spyOn(NextNavigation, "useRouter").mockReturnValue({
+      push: pushMock,
+      prefetch: vi.fn(),
+      back: vi.fn(),
+    } as unknown as ReturnType<typeof NextNavigation.useRouter>);
+
   it("src がある場合に next/image をレンダーする", () => {
     // use an absolute placeholder URL so tests don't depend on NEXT_PUBLIC_BACKEND_URL
     render(
@@ -39,7 +47,7 @@ describe("Avatar", () => {
     expect(svg).toBeTruthy();
   });
 
-  it("中クリック（auxclick）でプロフィールを新しいタブで開く", async () => {
+  it("中クリック（auxclick）でプロフィールを新しいタブで開く", () => {
     const openSpy = vi.spyOn(window, "open").mockImplementation(() => null as unknown as Window);
 
     render(<Avatar userId={123} src={null} alt="u" size={32} linkMode="router" />);
@@ -82,55 +90,60 @@ describe("Avatar", () => {
 
   it("window.open が null を返してもエラーにならず focus を呼ばない", () => {
     const openSpy = vi.spyOn(window, "open").mockImplementation(() => null as unknown as Window);
-    const focusSpy = vi.fn();
 
     render(<Avatar userId={201} src={null} alt="x" size={32} linkMode="router" />);
     const btn = screen.getByRole("link", { name: "x" });
     btn.dispatchEvent(new MouseEvent("auxclick", { bubbles: true, button: 1 }));
 
     expect(openSpy).toHaveBeenCalledWith("/profile/201", "_blank", "noopener,noreferrer");
-    expect(focusSpy).not.toHaveBeenCalled();
 
     openSpy.mockRestore();
   });
 
-  it("Enter/Space は SPA ナビゲーション、修飾キー付きは新しいタブで開く", async () => {
+  it("Enter は SPA ナビゲーションを行う", () => {
     const pushMock = vi.fn();
-    const nav = await import("next/navigation");
-    const spy = vi.spyOn(nav, "useRouter").mockReturnValue({
-      push: pushMock,
-      prefetch: vi.fn(),
-      back: vi.fn(),
-    } as unknown as ReturnType<typeof nav.useRouter>);
+    const spy = mockRouter(pushMock);
 
     render(<Avatar userId={300} src={null} alt="k" size={32} linkMode="router" />);
     const btn = screen.getByRole("link", { name: "k" });
 
-    // Enter（修飾キーなし）-> SPA ナビゲーション
     btn.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     expect(pushMock).toHaveBeenCalledWith("/profile/300");
 
-    // Space（修飾キーなし）-> SPA ナビゲーション
-    btn.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
-    expect(pushMock).toHaveBeenCalledWith("/profile/300");
+    spy.mockRestore();
+  });
 
-    // Ctrl+Enter -> 新しいタブで開く
+  it("Space は SPA ナビゲーションを行う", () => {
+    const pushMock = vi.fn();
+    const spy = mockRouter(pushMock);
+
+    render(<Avatar userId={301} src={null} alt="sp" size={32} linkMode="router" />);
+    const btn = screen.getByRole("link", { name: "sp" });
+
+    btn.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+    expect(pushMock).toHaveBeenCalledWith("/profile/301");
+
+    spy.mockRestore();
+  });
+
+  it("Ctrl+Enter は新しいタブで開く", () => {
+    const pushMock = vi.fn();
+    const spy = mockRouter(pushMock);
     const openSpy = vi.spyOn(window, "open").mockImplementation(() => null as unknown as Window);
+
+    render(<Avatar userId={302} src={null} alt="ctrl" size={32} linkMode="router" />);
+    const btn = screen.getByRole("link", { name: "ctrl" });
+
     btn.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true }));
-    expect(openSpy).toHaveBeenCalledWith("/profile/300", "_blank", "noopener,noreferrer");
+    expect(openSpy).toHaveBeenCalledWith("/profile/302", "_blank", "noopener,noreferrer");
 
     openSpy.mockRestore();
     spy.mockRestore();
   });
 
-  it("左クリック（修飾なし）は SPA ナビゲーションを行う", async () => {
+  it("左クリック（修飾なし）は SPA ナビゲーションを行う", () => {
     const pushMock = vi.fn();
-    const nav = await import("next/navigation");
-    const spy = vi.spyOn(nav, "useRouter").mockReturnValue({
-      push: pushMock,
-      prefetch: vi.fn(),
-      back: vi.fn(),
-    } as unknown as ReturnType<typeof nav.useRouter>);
+    const spy = mockRouter(pushMock);
 
     render(<Avatar userId={500} src={null} alt="left" size={32} linkMode="router" />);
     const btn = screen.getByRole("link", { name: "left" });
