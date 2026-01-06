@@ -1,0 +1,4 @@
+-- 0001_init.down.sql
+DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS flavors;
+DROP TABLE IF EXISTS users;

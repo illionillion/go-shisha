@@ -25,9 +25,31 @@ curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/insta
 ---
 
 ## Swagger のセットアップ
-
 Swagger ドキュメント生成ツール `swag` をインストールする必要があります。
 
+## マイグレーションとシード運用
+
+### マイグレーションの場所
+- マイグレーションファイルは `backend/db/migrations` に配置します。ファイル名は番号付きで管理し、ツールが番号順に適用します（例: `0001_init.up.sql`, `0002_add_columns.up.sql`, `0003_seed.up.sql`）。
+
+### 自動適用の仕組み
+- 開発環境では `compose.yml` に定義した `migrate` サービス（`migrate/migrate:latest`）が起動時に `migrate up` を実行します。`docker compose up -d` でマイグレーションが適用される運用を想定しています。
+
+### シード（初期データ）の扱い
+- 必須の初期データ（フレーバーなど）はマイグレーションとして `0003_seed.up.sql` のように配置してください。`migrate up` により自動投入されます。
+- 開発用の大量データや手動での再投入が必要な場合は `backend/db/seeds/` 配下にテンプレートを置き、必要時に手動で適用してください。手動適用の例:
+
+```sh
+docker compose exec -T -i postgres psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} < backend/db/seeds/initial_seed.sql
+```
+
+### 安全対策
+- マイグレーション内の挿入は idempotent（`INSERT ... ON CONFLICT DO NOTHING` 等）にしてください。シーケンスは `setval(...)` で同期してください。
+
+### CIでの運用メモ
+- CIではジョブ内で Postgres を立ち上げた後に `migrate up` を実行し、その後テストを実行するワークフローを推奨します。
+
+---
 ### 手順
 1. 依存関係を整理する:
    ```bash
