@@ -22,17 +22,32 @@ dev:
 	air 
 
 # Formatting and linting
-.PHONY: fmt imports lint lint-fix install-golangci
+.PHONY: fmt imports lint lint-fix install-golangci install-goimports install-tools
 
 fmt:
 	gofmt -w .
 
 imports:
-	@command -v goimports >/dev/null 2>&1 || { echo "goimports not found, skipping"; exit 0; }
-	goimports -w .
+	@if command -v goimports >/dev/null 2>&1; then \
+		goimports -w .; \
+	else \
+		echo "goimports not found, skipping"; \
+	fi
 
 install-golangci:
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin latest
+
+install-goimports:
+	@echo "Installing goimports..."
+	@GO_BIN=$$(go env GOBIN || echo $$(go env GOPATH)/bin) ; \
+	if command -v go >/dev/null 2>&1; then \
+		go install golang.org/x/tools/cmd/goimports@latest && echo "goimports installed to $$GOBIN" || echo "failed to install goimports" ; \
+	else \
+		echo "go not found" ; \
+	fi
+
+install-tools: install-goimports install-golangci
+	@echo "Tools installed"
 
 lint:
 	@if [ -x ./bin/golangci-lint ]; then \
