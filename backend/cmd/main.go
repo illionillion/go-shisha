@@ -7,8 +7,9 @@ import (
 
 	_ "go-shisha-backend/docs" // Swagger docs
 	"go-shisha-backend/internal/handlers"
-	"go-shisha-backend/internal/repositories/mock"
+	"go-shisha-backend/internal/repositories/postgres"
 	"go-shisha-backend/internal/services"
+	"go-shisha-backend/pkg/db"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -52,9 +53,14 @@ func main() {
 	fmt.Println("Static images: http://localhost:8080/images/")
 
 	// Dependency Injection
-	// Repository層（モック実装）
-	userRepo := mock.NewUserRepositoryMock()
-	postRepo := mock.NewPostRepositoryMock()
+	// DB接続と Repository（GORM）
+	gormDB, err := db.NewDBFromEnv()
+	if err != nil {
+		fmt.Printf("failed to connect to DB: %v\n", err)
+		return
+	}
+	postRepo := postgres.NewPostRepository(gormDB)
+	userRepo := postgres.NewUserRepository(gormDB)
 
 	// Service層
 	userService := services.NewUserService(userRepo, postRepo)
