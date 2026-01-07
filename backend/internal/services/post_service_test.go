@@ -1,10 +1,10 @@
 package services
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 	"time"
-	"errors"
 
 	"go-shisha-backend/internal/models"
 )
@@ -86,17 +86,25 @@ func TestGetAllPosts(t *testing.T) {
 // Error cases for PostService
 type mockPostRepoError struct{}
 
-func (m *mockPostRepoError) GetAll() ([]models.Post, error)                       { return nil, errors.New("db error") }
-func (m *mockPostRepoError) GetByID(id int) (*models.Post, error)                 { return nil, errors.New("db error") }
-func (m *mockPostRepoError) GetByUserID(userID int) ([]models.Post, error)        { return nil, errors.New("db error") }
-func (m *mockPostRepoError) Create(post *models.Post) error                      { return errors.New("db error") }
-func (m *mockPostRepoError) IncrementLikes(id int) (*models.Post, error)         { return nil, errors.New("db error") }
-func (m *mockPostRepoError) DecrementLikes(id int) (*models.Post, error)         { return nil, errors.New("db error") }
+func (m *mockPostRepoError) GetAll() ([]models.Post, error)       { return nil, errors.New("db error") }
+func (m *mockPostRepoError) GetByID(id int) (*models.Post, error) { return nil, errors.New("db error") }
+func (m *mockPostRepoError) GetByUserID(userID int) ([]models.Post, error) {
+	return nil, errors.New("db error")
+}
+func (m *mockPostRepoError) Create(post *models.Post) error { return errors.New("db error") }
+func (m *mockPostRepoError) IncrementLikes(id int) (*models.Post, error) {
+	return nil, errors.New("db error")
+}
+func (m *mockPostRepoError) DecrementLikes(id int) (*models.Post, error) {
+	return nil, errors.New("db error")
+}
 
 type mockUserRepoMissing struct{}
 
 func (m *mockUserRepoMissing) GetAll() ([]models.User, error) { return nil, nil }
-func (m *mockUserRepoMissing) GetByID(id int) (*models.User, error) { return nil, errors.New("user not found") }
+func (m *mockUserRepoMissing) GetByID(id int) (*models.User, error) {
+	return nil, errors.New("user not found")
+}
 
 func TestCreatePost_UserMissing(t *testing.T) {
 	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoMissing{})

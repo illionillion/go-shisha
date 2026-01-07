@@ -3,8 +3,8 @@ package services
 import (
 	"testing"
 
-	"go-shisha-backend/internal/models"
 	"errors"
+	"go-shisha-backend/internal/models"
 )
 
 type mockUserRepo struct{}
@@ -63,7 +63,7 @@ func TestGetUserByID(t *testing.T) {
 // Error cases
 type mockUserRepoError struct{}
 
-func (m *mockUserRepoError) GetAll() ([]models.User, error) { return nil, errors.New("db error") }
+func (m *mockUserRepoError) GetAll() ([]models.User, error)       { return nil, errors.New("db error") }
 func (m *mockUserRepoError) GetByID(id int) (*models.User, error) { return nil, errors.New("db error") }
 
 func TestGetAllUsers_Error(t *testing.T) {
