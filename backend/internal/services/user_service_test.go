@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"go-shisha-backend/internal/models"
+	"errors"
 )
 
 type mockUserRepo struct{}
@@ -56,5 +57,35 @@ func TestGetUserByID(t *testing.T) {
 	u2, _ := svc.GetUserByID(99)
 	if u2 != nil {
 		t.Fatalf("expected nil for missing user, got %+v", u2)
+	}
+}
+
+// Error cases
+type mockUserRepoError struct{}
+
+func (m *mockUserRepoError) GetAll() ([]models.User, error) { return nil, errors.New("db error") }
+func (m *mockUserRepoError) GetByID(id int) (*models.User, error) { return nil, errors.New("db error") }
+
+func TestGetAllUsers_Error(t *testing.T) {
+	svc := NewUserService(&mockUserRepoError{}, &noopPostRepo{})
+	_, err := svc.GetAllUsers()
+	if err == nil {
+		t.Fatalf("expected error from GetAllUsers, got nil")
+	}
+}
+
+func TestGetUserByID_Error(t *testing.T) {
+	svc := NewUserService(&mockUserRepoError{}, &noopPostRepo{})
+	_, err := svc.GetUserByID(1)
+	if err == nil {
+		t.Fatalf("expected error from GetUserByID, got nil")
+	}
+}
+
+func TestGetUserPosts_UserNotFound(t *testing.T) {
+	svc := NewUserService(&mockUserRepoError{}, &noopPostRepo{})
+	_, err := svc.GetUserPosts(1)
+	if err == nil {
+		t.Fatalf("expected error when user not found, got nil")
 	}
 }

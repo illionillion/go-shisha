@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 	"time"
+	"errors"
 
 	"go-shisha-backend/internal/models"
 )
@@ -79,5 +80,54 @@ func TestGetAllPosts(t *testing.T) {
 	}
 	if !reflect.DeepEqual(posts, []models.Post{{ID: 1}}) {
 		t.Fatalf("unexpected posts: %+v", posts)
+	}
+}
+
+// Error cases for PostService
+type mockPostRepoError struct{}
+
+func (m *mockPostRepoError) GetAll() ([]models.Post, error)                       { return nil, errors.New("db error") }
+func (m *mockPostRepoError) GetByID(id int) (*models.Post, error)                 { return nil, errors.New("db error") }
+func (m *mockPostRepoError) GetByUserID(userID int) ([]models.Post, error)        { return nil, errors.New("db error") }
+func (m *mockPostRepoError) Create(post *models.Post) error                      { return errors.New("db error") }
+func (m *mockPostRepoError) IncrementLikes(id int) (*models.Post, error)         { return nil, errors.New("db error") }
+func (m *mockPostRepoError) DecrementLikes(id int) (*models.Post, error)         { return nil, errors.New("db error") }
+
+type mockUserRepoMissing struct{}
+
+func (m *mockUserRepoMissing) GetAll() ([]models.User, error) { return nil, nil }
+func (m *mockUserRepoMissing) GetByID(id int) (*models.User, error) { return nil, errors.New("user not found") }
+
+func TestCreatePost_UserMissing(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoMissing{})
+	input := &models.CreatePostInput{UserID: 999, Slides: []models.Slide{{ImageURL: "i.jpg", Text: "hello"}}}
+	_, err := postSvc.CreatePost(input)
+	if err == nil {
+		t.Fatalf("expected error when user is missing, got nil")
+	}
+}
+
+func TestCreatePost_PostCreateError(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{})
+	input := &models.CreatePostInput{UserID: 1, Slides: []models.Slide{{ImageURL: "i.jpg", Text: "hello"}}}
+	_, err := postSvc.CreatePost(input)
+	if err == nil {
+		t.Fatalf("expected error when post create fails, got nil")
+	}
+}
+
+func TestLikePost_Error(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{})
+	_, err := postSvc.LikePost(1)
+	if err == nil {
+		t.Fatalf("expected error when IncrementLikes fails, got nil")
+	}
+}
+
+func TestUnlikePost_Error(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{})
+	_, err := postSvc.UnlikePost(1)
+	if err == nil {
+		t.Fatalf("expected error when DecrementLikes fails, got nil")
 	}
 }
