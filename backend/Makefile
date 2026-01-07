@@ -62,3 +62,8 @@ lint-fix:
 	else \
 		command -v golangci-lint >/dev/null 2>&1 && golangci-lint run --fix ./... || echo "golangci-lint not found, run make install-golangci"; \
 	fi
+
+# Run all backend formatting/lint fixes (installs tools if missing)
+.PHONY: fix-all
+fix-all: install-tools imports fmt lint-fix
+	@echo "Backend formatting and lint fixes complete"

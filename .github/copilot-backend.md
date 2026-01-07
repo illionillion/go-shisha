@@ -70,6 +70,59 @@
 // @Router /path [method]
 ```
 
+## 開発ツール運用（Backend）
+
+- **コンテナ内で実行**: Backend のフォーマット・リンティング・自動修正はコンテナ内のツールセットで実行します。ローカルに直接ツールをインストールせず、まず `make -C backend install-tools` を実行してください。
+-
+### コンテナ内でのツールセットアップとフォーマット方針
+
+開発は基本的にコンテナ内で行う前提です（ソースはボリュームで同期）。バックエンドのフォーマット・lint 用ツールはコンテナ内へインストールして実行する運用を推奨します。
+
+推奨ワークフロー（コンテナ内）:
+
+1. コンテナ起動・接続
+
+```bash
+docker compose up --build -d
+docker compose exec backend bash
+cd /app/backend
+```
+
+2. ツールの一括インストール（初回 or ツール更新時）
+
+```bash
+make install-tools    # goimports と golangci-lint を ./bin にインストール
+```
+
+3. フォーマット / インポート / lint の実行
+
+```bash
+make fmt              # gofmt
+make imports          # goimports があれば実行（無ければスキップ）
+make lint             # golangci-lint
+make lint-fix         # 自動修正（可能な範囲）
+```
+
+4. 変更をホストへ反映（ボリュームマウントにより同期）
+
+```bash
+git add -A
+git commit -m "style: apply formatting/lint fixes"
+git push
+```
+
+運用上の注意:
+
+- `lefthook` は主に Node/Frontend 側で使うため、backend 側の自動実行は無効にしています。backendの自動整形を pre-commit で有効にしたい場合は `lefthook.yml` に `backend-format` を追加してください（チーム合意が必要）。
+- CI では `make install-tools` をジョブ内で実行することで、ローカルとCIで共通のツールセットが使えます。
+
+---
+
+この運用ルールはリポジトリ内に集約されています。README に短い案内を追加する場合は本セクションを参照するリンクを貼ってください。
+- **ワンコマンド修正**: 一括適用用に `backend/Makefile` に `fix-all` ターゲットを用意しました。ツールが整っている状態で `make -C backend fix-all` を実行すると、`goimports`、`gofmt`、`golangci-lint --fix` 等の自動修正を順に実行します。
+- **実行前確認**: `make -C backend fix-all` はファイルを書き換えます。実行前に `git status` で変更点を確認し、必要ならブランチ作成を行ってください。
+- **CI整合性**: 開発者は `fix-all` 実行後に変更を push してください。CI は同一ツールセットで検証を行う想定です。
+
 #### 型定義の対応例
 
 **❌ NG: 実装とアノテーションが不一致**
