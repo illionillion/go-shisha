@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"go-shisha-backend/internal/models"
@@ -61,8 +62,12 @@ func NewPostRepository(db *gorm.DB) *PostRepository {
 }
 
 func (r *PostRepository) toDomain(pm *postModel) models.Post {
+	if pm == nil {
+		return models.Post{}
+	}
+
 	var slides []models.Slide
-	if pm != nil {
+	{
 		slide := models.Slide{
 			ImageURL: pm.ImageURL,
 			Text:     pm.Content,
@@ -78,7 +83,7 @@ func (r *PostRepository) toDomain(pm *postModel) models.Post {
 	}
 
 	var user models.User
-	if pm != nil && pm.User != nil {
+	if pm.User != nil {
 		user = models.User{
 			ID:          int(pm.User.ID),
 			Email:       pm.User.Email,
@@ -165,16 +170,16 @@ func (r *PostRepository) IncrementLikes(id int) (*models.Post, error) {
 	logging.L.Printf("[PostRepository] IncrementLikes: id=%d", id)
 	if err := r.db.Model(&postModel{}).Where("id = ?", id).UpdateColumn("likes", gorm.Expr("likes + ?", 1)).Error; err != nil {
 		logging.L.Printf("[PostRepository] IncrementLikes: db error id=%d err=%v", id, err)
-		return nil, err
+		return nil, fmt.Errorf("failed to increment likes for post id=%d: %w", id, err)
 	}
 	return r.GetByID(id)
 }
 
 func (r *PostRepository) DecrementLikes(id int) (*models.Post, error) {
 	logging.L.Printf("[PostRepository] DecrementLikes: id=%d", id)
-	if err := r.db.Exec("UPDATE posts SET likes = GREATEST(likes - 1, 0) WHERE id = ?", id).Error; err != nil {
+	if err := r.db.Model(&postModel{}).Where("id = ?", id).UpdateColumn("likes", gorm.Expr("GREATEST(likes - 1, 0)")).Error; err != nil {
 		logging.L.Printf("[PostRepository] DecrementLikes: db error id=%d err=%v", id, err)
-		return nil, err
+		return nil, fmt.Errorf("failed to decrement likes for post id=%d: %w", id, err)
 	}
 	return r.GetByID(id)
 }
