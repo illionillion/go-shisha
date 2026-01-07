@@ -41,24 +41,24 @@ func (s *PostService) GetPostByID(id int) (*models.Post, error) {
  * CreatePost creates a new post
  */
 func (s *PostService) CreatePost(input *models.CreatePostInput) (*models.Post, error) {
-       // Verify user exists and get user information
-       user, err := s.userRepo.GetByID(input.UserID)
-       if err != nil {
-	       return nil, err
-       }
+	// Verify user exists and get user information
+	user, err := s.userRepo.GetByID(input.UserID)
+	if err != nil {
+		return nil, err
+	}
 
-       post := &models.Post{
-	       UserID:  input.UserID,
-	       Slides:  input.Slides,
-	       User:    *user,
-       }
+	post := &models.Post{
+		UserID: input.UserID,
+		Slides: input.Slides,
+		User:   *user,
+	}
 
-       err = s.postRepo.Create(post)
-       if err != nil {
-	       return nil, err
-       }
+	err = s.postRepo.Create(post)
+	if err != nil {
+		return nil, err
+	}
 
-       return post, nil
+	return post, nil
 }
 
 /**

@@ -46,7 +46,7 @@ func (s *UserService) GetUserPosts(userID int) ([]models.Post, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Get posts by user ID
 	return s.postRepo.GetByUserID(userID)
 }

@@ -1,195 +1,195 @@
 package postgres
 
 import (
-    "errors"
-    "time"
+	"errors"
+	"time"
 
-    "go-shisha-backend/internal/models"
-    "log"
+	"go-shisha-backend/internal/models"
+	"log"
 
-    "gorm.io/gorm"
+	"gorm.io/gorm"
 )
 
 type postModel struct {
-    ID        int64      `gorm:"primaryKey;column:id"`
-    UserID    int64      `gorm:"column:user_id"`
-    FlavorID  *int64     `gorm:"column:flavor_id"`
-    Content   string     `gorm:"column:content"`
-    ImageURL  string     `gorm:"column:image_url"`
-    Likes     int        `gorm:"column:likes"`
-    CreatedAt time.Time  `gorm:"column:created_at"`
-    User      *userModel `gorm:"foreignKey:UserID"`
-    Flavor    *flavorModel `gorm:"foreignKey:FlavorID"`
+	ID        int64        `gorm:"primaryKey;column:id"`
+	UserID    int64        `gorm:"column:user_id"`
+	FlavorID  *int64       `gorm:"column:flavor_id"`
+	Content   string       `gorm:"column:content"`
+	ImageURL  string       `gorm:"column:image_url"`
+	Likes     int          `gorm:"column:likes"`
+	CreatedAt time.Time    `gorm:"column:created_at"`
+	User      *userModel   `gorm:"foreignKey:UserID"`
+	Flavor    *flavorModel `gorm:"foreignKey:FlavorID"`
 }
 
 // TableName ensures GORM uses the existing `posts` table
 func (postModel) TableName() string {
-    return "posts"
+	return "posts"
 }
 
 type userModel struct {
-    ID          int64  `gorm:"primaryKey;column:id"`
-    Email       string `gorm:"column:email"`
-    DisplayName string `gorm:"column:display_name"`
-    Description string `gorm:"column:description"`
-    IconURL     string `gorm:"column:icon_url"`
-    ExternalURL string `gorm:"column:external_url"`
+	ID          int64  `gorm:"primaryKey;column:id"`
+	Email       string `gorm:"column:email"`
+	DisplayName string `gorm:"column:display_name"`
+	Description string `gorm:"column:description"`
+	IconURL     string `gorm:"column:icon_url"`
+	ExternalURL string `gorm:"column:external_url"`
 }
 
 // TableName ensures GORM uses the existing `users` table
 func (userModel) TableName() string {
-    return "users"
+	return "users"
 }
 
 type flavorModel struct {
-    ID    int64  `gorm:"primaryKey;column:id"`
-    Name  string `gorm:"column:name"`
-    Color string `gorm:"column:color"`
+	ID    int64  `gorm:"primaryKey;column:id"`
+	Name  string `gorm:"column:name"`
+	Color string `gorm:"column:color"`
 }
 
 // TableName ensures GORM uses the existing `flavors` table
 func (flavorModel) TableName() string {
-    return "flavors"
+	return "flavors"
 }
 
 type PostRepository struct {
-    db *gorm.DB
+	db *gorm.DB
 }
 
 func NewPostRepository(db *gorm.DB) *PostRepository {
-    return &PostRepository{db: db}
+	return &PostRepository{db: db}
 }
 
 func (r *PostRepository) toDomain(pm *postModel) models.Post {
-    var slides []models.Slide
-    if pm != nil {
-        slide := models.Slide{
-            ImageURL: pm.ImageURL,
-            Text:     pm.Content,
-        }
-        if pm.Flavor != nil {
-            slide.Flavor = &models.Flavor{
-                ID:    int(pm.Flavor.ID),
-                Name:  pm.Flavor.Name,
-                Color: pm.Flavor.Color,
-            }
-        }
-        slides = append(slides, slide)
-    }
+	var slides []models.Slide
+	if pm != nil {
+		slide := models.Slide{
+			ImageURL: pm.ImageURL,
+			Text:     pm.Content,
+		}
+		if pm.Flavor != nil {
+			slide.Flavor = &models.Flavor{
+				ID:    int(pm.Flavor.ID),
+				Name:  pm.Flavor.Name,
+				Color: pm.Flavor.Color,
+			}
+		}
+		slides = append(slides, slide)
+	}
 
-    var user models.User
-    if pm != nil && pm.User != nil {
-        user = models.User{
-            ID:          int(pm.User.ID),
-            Email:       pm.User.Email,
-            DisplayName: pm.User.DisplayName,
-            Description: pm.User.Description,
-            IconURL:     pm.User.IconURL,
-            ExternalURL: pm.User.ExternalURL,
-        }
-    }
+	var user models.User
+	if pm != nil && pm.User != nil {
+		user = models.User{
+			ID:          int(pm.User.ID),
+			Email:       pm.User.Email,
+			DisplayName: pm.User.DisplayName,
+			Description: pm.User.Description,
+			IconURL:     pm.User.IconURL,
+			ExternalURL: pm.User.ExternalURL,
+		}
+	}
 
-    return models.Post{
-        ID:        int(pm.ID),
-        UserID:    int(pm.UserID),
-        Slides:    slides,
-        Likes:     pm.Likes,
-        User:      user,
-        CreatedAt: pm.CreatedAt,
-    }
+	return models.Post{
+		ID:        int(pm.ID),
+		UserID:    int(pm.UserID),
+		Slides:    slides,
+		Likes:     pm.Likes,
+		User:      user,
+		CreatedAt: pm.CreatedAt,
+	}
 }
 
 func (r *PostRepository) GetAll() ([]models.Post, error) {
-    log.Printf("[PostRepository] GetAll: querying posts from DB")
-    var pms []postModel
-    if err := r.db.Preload("User").Preload("Flavor").Order("created_at desc").Find(&pms).Error; err != nil {
-        log.Printf("[PostRepository] GetAll: db error: %v", err)
-        return nil, err
-    }
-    log.Printf("[PostRepository] GetAll: fetched %d rows", len(pms))
-    var posts []models.Post
-    for i := range pms {
-        posts = append(posts, r.toDomain(&pms[i]))
-    }
-    return posts, nil
+	log.Printf("[PostRepository] GetAll: querying posts from DB")
+	var pms []postModel
+	if err := r.db.Preload("User").Preload("Flavor").Order("created_at desc").Find(&pms).Error; err != nil {
+		log.Printf("[PostRepository] GetAll: db error: %v", err)
+		return nil, err
+	}
+	log.Printf("[PostRepository] GetAll: fetched %d rows", len(pms))
+	var posts []models.Post
+	for i := range pms {
+		posts = append(posts, r.toDomain(&pms[i]))
+	}
+	return posts, nil
 }
 
 func (r *PostRepository) GetByID(id int) (*models.Post, error) {
-    log.Printf("[PostRepository] GetByID: id=%d", id)
-    var pm postModel
-    if err := r.db.Preload("User").Preload("Flavor").First(&pm, "id = ?", id).Error; err != nil {
-        if errors.Is(err, gorm.ErrRecordNotFound) {
-            log.Printf("[PostRepository] GetByID: not found id=%d", id)
-            return nil, errors.New("post not found")
-        }
-        log.Printf("[PostRepository] GetByID: db error id=%d error=%v", id, err)
-        return nil, err
-    }
-    post := r.toDomain(&pm)
-    log.Printf("[PostRepository] GetByID: success id=%d", id)
-    return &post, nil
+	log.Printf("[PostRepository] GetByID: id=%d", id)
+	var pm postModel
+	if err := r.db.Preload("User").Preload("Flavor").First(&pm, "id = ?", id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Printf("[PostRepository] GetByID: not found id=%d", id)
+			return nil, errors.New("post not found")
+		}
+		log.Printf("[PostRepository] GetByID: db error id=%d error=%v", id, err)
+		return nil, err
+	}
+	post := r.toDomain(&pm)
+	log.Printf("[PostRepository] GetByID: success id=%d", id)
+	return &post, nil
 }
 
 func (r *PostRepository) Create(post *models.Post) error {
-    var content string
-    var image string
-    var flavorID *int64
-    if len(post.Slides) > 0 {
-        // join slide texts with newlines
-        content = post.Slides[0].Text
-        image = post.Slides[0].ImageURL
-        if post.Slides[0].Flavor != nil {
-            id := int64(post.Slides[0].Flavor.ID)
-            flavorID = &id
-        }
-    }
-    pm := postModel{
-        UserID:   int64(post.UserID),
-        FlavorID: flavorID,
-        Content:  content,
-        ImageURL: image,
-        Likes:    post.Likes,
-    }
-    log.Printf("[PostRepository] Create: creating post for user_id=%d", post.UserID)
-    if err := r.db.Create(&pm).Error; err != nil {
-        log.Printf("[PostRepository] Create: db error: %v", err)
-        return err
-    }
-    post.ID = int(pm.ID)
-    post.CreatedAt = pm.CreatedAt
-    log.Printf("[PostRepository] Create: created id=%d", post.ID)
-    return nil
+	var content string
+	var image string
+	var flavorID *int64
+	if len(post.Slides) > 0 {
+		// join slide texts with newlines
+		content = post.Slides[0].Text
+		image = post.Slides[0].ImageURL
+		if post.Slides[0].Flavor != nil {
+			id := int64(post.Slides[0].Flavor.ID)
+			flavorID = &id
+		}
+	}
+	pm := postModel{
+		UserID:   int64(post.UserID),
+		FlavorID: flavorID,
+		Content:  content,
+		ImageURL: image,
+		Likes:    post.Likes,
+	}
+	log.Printf("[PostRepository] Create: creating post for user_id=%d", post.UserID)
+	if err := r.db.Create(&pm).Error; err != nil {
+		log.Printf("[PostRepository] Create: db error: %v", err)
+		return err
+	}
+	post.ID = int(pm.ID)
+	post.CreatedAt = pm.CreatedAt
+	log.Printf("[PostRepository] Create: created id=%d", post.ID)
+	return nil
 }
 
 func (r *PostRepository) IncrementLikes(id int) (*models.Post, error) {
-    log.Printf("[PostRepository] IncrementLikes: id=%d", id)
-    if err := r.db.Model(&postModel{}).Where("id = ?", id).UpdateColumn("likes", gorm.Expr("likes + ?", 1)).Error; err != nil {
-        log.Printf("[PostRepository] IncrementLikes: db error id=%d err=%v", id, err)
-        return nil, err
-    }
-    return r.GetByID(id)
+	log.Printf("[PostRepository] IncrementLikes: id=%d", id)
+	if err := r.db.Model(&postModel{}).Where("id = ?", id).UpdateColumn("likes", gorm.Expr("likes + ?", 1)).Error; err != nil {
+		log.Printf("[PostRepository] IncrementLikes: db error id=%d err=%v", id, err)
+		return nil, err
+	}
+	return r.GetByID(id)
 }
 
 func (r *PostRepository) DecrementLikes(id int) (*models.Post, error) {
-    log.Printf("[PostRepository] DecrementLikes: id=%d", id)
-    if err := r.db.Exec("UPDATE posts SET likes = GREATEST(likes - 1, 0) WHERE id = ?", id).Error; err != nil {
-        log.Printf("[PostRepository] DecrementLikes: db error id=%d err=%v", id, err)
-        return nil, err
-    }
-    return r.GetByID(id)
+	log.Printf("[PostRepository] DecrementLikes: id=%d", id)
+	if err := r.db.Exec("UPDATE posts SET likes = GREATEST(likes - 1, 0) WHERE id = ?", id).Error; err != nil {
+		log.Printf("[PostRepository] DecrementLikes: db error id=%d err=%v", id, err)
+		return nil, err
+	}
+	return r.GetByID(id)
 }
 
 func (r *PostRepository) GetByUserID(userID int) ([]models.Post, error) {
-    log.Printf("[PostRepository] GetByUserID: user_id=%d", userID)
-    var pms []postModel
-    if err := r.db.Preload("User").Preload("Flavor").Where("user_id = ?", userID).Order("created_at desc").Find(&pms).Error; err != nil {
-        log.Printf("[PostRepository] GetByUserID: db error user_id=%d err=%v", userID, err)
-        return nil, err
-    }
-    log.Printf("[PostRepository] GetByUserID: fetched %d rows for user_id=%d", len(pms), userID)
-    var posts []models.Post
-    for i := range pms {
-        posts = append(posts, r.toDomain(&pms[i]))
-    }
-    return posts, nil
+	log.Printf("[PostRepository] GetByUserID: user_id=%d", userID)
+	var pms []postModel
+	if err := r.db.Preload("User").Preload("Flavor").Where("user_id = ?", userID).Order("created_at desc").Find(&pms).Error; err != nil {
+		log.Printf("[PostRepository] GetByUserID: db error user_id=%d err=%v", userID, err)
+		return nil, err
+	}
+	log.Printf("[PostRepository] GetByUserID: fetched %d rows for user_id=%d", len(pms), userID)
+	var posts []models.Post
+	for i := range pms {
+		posts = append(posts, r.toDomain(&pms[i]))
+	}
+	return posts, nil
 }
