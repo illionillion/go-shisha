@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	_ "go-shisha-backend/docs" // Swagger docs
 	"go-shisha-backend/internal/handlers"
@@ -99,8 +104,37 @@ func main() {
 		api.GET("/users/:id/posts", userHandler.GetUserPosts)
 	}
 
-	// サーバーを8080ポートで起動
-	if err := r.Run(":8080"); err != nil {
-		fmt.Printf("server error: %v\n", err)
+	// サーバーを8080ポートで起動（graceful shutdown 対応）
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: r,
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			fmt.Printf("server error: %v\n", err)
+		}
+	}()
+
+	// シグナル待ち（CTRL+C, SIGTERM）
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+
+	fmt.Println("Shutting down server...")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		fmt.Printf("server shutdown error: %v\n", err)
+	}
+
+	// gorm DB の underlying sql.DB を閉じる
+	if sqlDB, err := gormDB.DB(); err == nil {
+		if err := sqlDB.Close(); err != nil {
+			fmt.Printf("failed to close db: %v\n", err)
+		}
+	} else {
+		fmt.Printf("failed to get sql.DB for close: %v\n", err)
 	}
 }
