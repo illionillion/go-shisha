@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,6 +13,7 @@ import (
 	"go-shisha-backend/internal/repositories/postgres"
 	"go-shisha-backend/internal/services"
 	"go-shisha-backend/pkg/db"
+	"go-shisha-backend/pkg/logging"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -54,13 +54,13 @@ func main() {
 
 	// 静的ファイル配信（画像）
 	r.Static("/images", "./public/images")
-	fmt.Println("Static images: http://localhost:8080/images/")
+	logging.L.Println("Static images: http://localhost:8080/images/")
 
 	// Dependency Injection
 	// DB接続と Repository（GORM）
 	gormDB, err := db.NewDBFromEnv()
 	if err != nil {
-		fmt.Printf("failed to connect to DB: %v\n", err)
+		logging.L.Printf("failed to connect to DB: %v", err)
 		return
 	}
 	postRepo := postgres.NewPostRepository(gormDB)
@@ -78,7 +78,7 @@ func main() {
 	// Note: gin-swaggerは/swagger/index.htmlでのアクセスのみサポート
 	// /swagger/でのリダイレクトは未サポート (関連Issue: https://github.com/swaggo/gin-swagger/issues/323)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/swagger/doc.json")))
-	fmt.Println("Swagger UI: http://localhost:8080/swagger/index.html")
+	logging.L.Println("Swagger UI: http://localhost:8080/swagger/index.html")
 
 	// API routes
 	api := r.Group("/api/v1")
@@ -112,7 +112,7 @@ func main() {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			fmt.Printf("server error: %v\n", err)
+			logging.L.Printf("server error: %v", err)
 		}
 	}()
 
@@ -121,20 +121,20 @@ func main() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 
-	fmt.Println("Shutting down server...")
+	logging.L.Println("Shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		fmt.Printf("server shutdown error: %v\n", err)
+		logging.L.Printf("server shutdown error: %v", err)
 	}
 
 	// gorm DB の underlying sql.DB を閉じる
 	if sqlDB, err := gormDB.DB(); err == nil {
 		if err := sqlDB.Close(); err != nil {
-			fmt.Printf("failed to close db: %v\n", err)
+			logging.L.Printf("failed to close db: %v", err)
 		}
 	} else {
-		fmt.Printf("failed to get sql.DB for close: %v\n", err)
+		logging.L.Printf("failed to get sql.DB for close: %v", err)
 	}
 }
