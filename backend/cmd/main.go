@@ -63,7 +63,7 @@ func main() {
 		logging.L.Printf("failed to connect to DB: %v", err)
 		return
 	}
-	
+
 	// DB接続のクリーンアップ処理を登録
 	sqlDB, err := gormDB.DB()
 	if err == nil {
@@ -75,7 +75,7 @@ func main() {
 			}
 		}()
 	}
-	
+
 	postRepo := postgres.NewPostRepository(gormDB)
 	userRepo := postgres.NewUserRepository(gormDB)
 
