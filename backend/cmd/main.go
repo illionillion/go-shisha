@@ -141,13 +141,5 @@ func main() {
 	if err := srv.Shutdown(ctx); err != nil {
 		logging.L.Printf("server shutdown error: %v", err)
 	}
-
-	// gorm DB の underlying sql.DB を閉じる
-	if sqlDB, err := gormDB.DB(); err == nil {
-		if err := sqlDB.Close(); err != nil {
-			logging.L.Printf("failed to close db: %v", err)
-		}
-	} else {
-		logging.L.Printf("failed to get sql.DB for close: %v", err)
-	}
+	logging.L.Println("Server exited, cleanup via defer")
 }
