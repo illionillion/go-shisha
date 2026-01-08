@@ -23,13 +23,13 @@ describe("ProfileHeader", () => {
   });
 
   test("external_url がない場合はリンクを表示しない", () => {
-    const u = { ...mockUser, external_url: undefined } as User;
+    const u = { ...mockUser, external_url: undefined };
     render(<ProfileHeader user={u} />);
     expect(screen.queryByRole("link")).toBeNull();
   });
 
   test("display_name が undefined の場合は「名無しのユーザー」を表示する", () => {
-    const u = { ...mockUser, display_name: undefined } as User;
+    const u = { ...mockUser, display_name: undefined };
     render(<ProfileHeader user={u} />);
     expect(screen.getByText("名無しのユーザー")).toBeInTheDocument();
   });
@@ -41,7 +41,7 @@ describe("ProfileHeader", () => {
   });
 
   test("description が undefined の場合は説明を表示しない", () => {
-    const u = { ...mockUser, description: undefined } as User;
+    const u = { ...mockUser, description: undefined };
     render(<ProfileHeader user={u} />);
     expect(screen.queryByText("これは自己紹介です")).toBeNull();
   });
@@ -53,7 +53,7 @@ describe("ProfileHeader", () => {
   });
 
   test("icon_url が undefined の場合は null として Avatar に渡される", () => {
-    const u = { ...mockUser, icon_url: undefined } as User;
+    const u = { ...mockUser, icon_url: undefined };
     render(<ProfileHeader user={u} />);
     // SVGフォールバックが表示される（imgタグがないことを確認）
     const avatarWrapper = screen.getByRole("img", { name: "テストユーザー" });
