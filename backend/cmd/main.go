@@ -63,6 +63,19 @@ func main() {
 		logging.L.Printf("failed to connect to DB: %v", err)
 		return
 	}
+	
+	// DB接続のクリーンアップ処理を登録
+	sqlDB, err := gormDB.DB()
+	if err == nil {
+		defer func() {
+			if err := sqlDB.Close(); err != nil {
+				logging.L.Printf("error closing database connection: %v", err)
+			} else {
+				logging.L.Println("database connection closed")
+			}
+		}()
+	}
+	
 	postRepo := postgres.NewPostRepository(gormDB)
 	userRepo := postgres.NewUserRepository(gormDB)
 
