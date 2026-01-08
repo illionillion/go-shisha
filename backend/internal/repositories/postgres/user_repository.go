@@ -2,11 +2,12 @@ package postgres
 
 import (
 	"errors"
+	"fmt"
+
+	"gorm.io/gorm"
 
 	"go-shisha-backend/internal/models"
 	"go-shisha-backend/pkg/logging"
-
-	"gorm.io/gorm"
 )
 
 type UserRepository struct {
@@ -36,7 +37,7 @@ func (r *UserRepository) GetAll() ([]models.User, error) {
 	var ums []userModel
 	if err := r.db.Order("id").Find(&ums).Error; err != nil {
 		logging.L.Printf("[UserRepository] GetAll: db error: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to query all users: %w", err)
 	}
 	logging.L.Printf("[UserRepository] GetAll: fetched %d rows", len(ums))
 	var users []models.User
@@ -52,10 +53,10 @@ func (r *UserRepository) GetByID(id int) (*models.User, error) {
 	if err := r.db.First(&um, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			logging.L.Printf("[UserRepository] GetByID: not found id=%d", id)
-			return nil, errors.New("user not found")
+			return nil, fmt.Errorf("user not found: id=%d", id)
 		}
 		logging.L.Printf("[UserRepository] GetByID: db error id=%d error=%v", id, err)
-		return nil, err
+		return nil, fmt.Errorf("failed to query user by id=%d: %w", id, err)
 	}
 	user := r.toDomain(&um)
 	logging.L.Printf("[UserRepository] GetByID: success id=%d", id)

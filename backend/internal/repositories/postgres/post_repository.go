@@ -3,55 +3,12 @@ package postgres
 import (
 	"errors"
 	"fmt"
-	"time"
+
+	"gorm.io/gorm"
 
 	"go-shisha-backend/internal/models"
 	"go-shisha-backend/pkg/logging"
-
-	"gorm.io/gorm"
 )
-
-type postModel struct {
-	ID        int64        `gorm:"primaryKey;column:id"`
-	UserID    int64        `gorm:"column:user_id"`
-	FlavorID  *int64       `gorm:"column:flavor_id"`
-	Content   string       `gorm:"column:content"`
-	ImageURL  string       `gorm:"column:image_url"`
-	Likes     int          `gorm:"column:likes"`
-	CreatedAt time.Time    `gorm:"column:created_at"`
-	User      *userModel   `gorm:"foreignKey:UserID"`
-	Flavor    *flavorModel `gorm:"foreignKey:FlavorID"`
-}
-
-// TableName ensures GORM uses the existing `posts` table
-func (postModel) TableName() string {
-	return "posts"
-}
-
-type userModel struct {
-	ID          int64  `gorm:"primaryKey;column:id"`
-	Email       string `gorm:"column:email"`
-	DisplayName string `gorm:"column:display_name"`
-	Description string `gorm:"column:description"`
-	IconURL     string `gorm:"column:icon_url"`
-	ExternalURL string `gorm:"column:external_url"`
-}
-
-// TableName ensures GORM uses the existing `users` table
-func (userModel) TableName() string {
-	return "users"
-}
-
-type flavorModel struct {
-	ID    int64  `gorm:"primaryKey;column:id"`
-	Name  string `gorm:"column:name"`
-	Color string `gorm:"column:color"`
-}
-
-// TableName ensures GORM uses the existing `flavors` table
-func (flavorModel) TableName() string {
-	return "flavors"
-}
 
 type PostRepository struct {
 	db *gorm.DB
@@ -109,7 +66,7 @@ func (r *PostRepository) GetAll() ([]models.Post, error) {
 	var pms []postModel
 	if err := r.db.Preload("User").Preload("Flavor").Order("created_at desc").Find(&pms).Error; err != nil {
 		logging.L.Printf("[PostRepository] GetAll: db error: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to query all posts: %w", err)
 	}
 	logging.L.Printf("[PostRepository] GetAll: fetched %d rows", len(pms))
 	var posts []models.Post
@@ -125,10 +82,10 @@ func (r *PostRepository) GetByID(id int) (*models.Post, error) {
 	if err := r.db.Preload("User").Preload("Flavor").First(&pm, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			logging.L.Printf("[PostRepository] GetByID: not found id=%d", id)
-			return nil, errors.New("post not found")
+			return nil, fmt.Errorf("post not found: id=%d", id)
 		}
 		logging.L.Printf("[PostRepository] GetByID: db error id=%d error=%v", id, err)
-		return nil, err
+		return nil, fmt.Errorf("failed to query post by id=%d: %w", id, err)
 	}
 	post := r.toDomain(&pm)
 	logging.L.Printf("[PostRepository] GetByID: success id=%d", id)
@@ -158,7 +115,7 @@ func (r *PostRepository) Create(post *models.Post) error {
 	logging.L.Printf("[PostRepository] Create: creating post for user_id=%d", post.UserID)
 	if err := r.db.Create(&pm).Error; err != nil {
 		logging.L.Printf("[PostRepository] Create: db error: %v", err)
-		return err
+		return fmt.Errorf("failed to create post for user_id=%d: %w", post.UserID, err)
 	}
 	post.ID = int(pm.ID)
 	post.CreatedAt = pm.CreatedAt
@@ -189,7 +146,7 @@ func (r *PostRepository) GetByUserID(userID int) ([]models.Post, error) {
 	var pms []postModel
 	if err := r.db.Preload("User").Preload("Flavor").Where("user_id = ?", userID).Order("created_at desc").Find(&pms).Error; err != nil {
 		logging.L.Printf("[PostRepository] GetByUserID: db error user_id=%d err=%v", userID, err)
-		return nil, err
+		return nil, fmt.Errorf("failed to query posts by user_id=%d: %w", userID, err)
 	}
 	logging.L.Printf("[PostRepository] GetByUserID: fetched %d rows for user_id=%d", len(pms), userID)
 	var posts []models.Post
