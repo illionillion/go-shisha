@@ -34,8 +34,14 @@ imports:
 		echo "goimports not found, skipping"; \
 	fi
 
+# golangci-lint バージョン固定（セキュリティ対策：サプライチェーン攻撃防止）
+GOLANGCI_LINT_VERSION := v2.8.0
+
 install-golangci:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin latest
+	@echo "Installing golangci-lint $(GOLANGCI_LINT_VERSION)..."
+	@mkdir -p ./bin
+	@curl -sSfL https://github.com/golangci/golangci-lint/releases/download/$(GOLANGCI_LINT_VERSION)/golangci-lint-$$(echo $(GOLANGCI_LINT_VERSION) | sed 's/v//')-$$(go env GOOS)-$$(go env GOARCH).tar.gz | tar -xz -C ./bin --strip-components=1 golangci-lint-$$(echo $(GOLANGCI_LINT_VERSION) | sed 's/v//')-$$(go env GOOS)-$$(go env GOARCH)/golangci-lint
+	@echo "golangci-lint $(GOLANGCI_LINT_VERSION) installed to ./bin"
 
 install-goimports:
 	@echo "Installing goimports..."
