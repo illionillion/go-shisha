@@ -285,8 +285,9 @@ describe("PostDetailFooter", () => {
       expect(alertMock).toHaveBeenCalledWith("URLをコピーしました");
     });
 
-    it("クリップボードAPIが存在しない場合でもエラーが発生しない", async () => {
+    it("クリップボードAPIが存在しない場合、アラートは表示されない", async () => {
       const user = userEvent.setup();
+      const originalClipboard = navigator.clipboard;
 
       // クリップボードAPIを無効化
       Object.defineProperty(navigator, "clipboard", {
@@ -306,8 +307,54 @@ describe("PostDetailFooter", () => {
 
       const shareButton = screen.getByLabelText("シェア");
 
-      // エラーが発生しないことを確認
-      await expect(user.click(shareButton)).resolves.not.toThrow();
+      // シェアボタンをクリック
+      await user.click(shareButton);
+
+      // アラートが呼ばれないことを確認
+      expect(alertMock).not.toHaveBeenCalled();
+
+      // 元に戻す
+      Object.defineProperty(navigator, "clipboard", {
+        value: originalClipboard,
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    it("クリップボードAPIがエラーを投げた場合、アラートは表示されない", async () => {
+      const user = userEvent.setup();
+
+      // 新しいエラーを投げるモックを作成
+      const errorMock = vi.fn().mockRejectedValue(new Error("Clipboard API error"));
+
+      // クリップボードAPIを再設定
+      Object.defineProperty(navigator, "clipboard", {
+        value: {
+          writeText: errorMock,
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      render(
+        <PostDetailFooter
+          currentSlide={{ text: "test" }}
+          optimisticLikes={10}
+          isLiked={false}
+          onLike={vi.fn()}
+        />
+      );
+
+      const shareButton = screen.getByLabelText("シェア");
+
+      // シェアボタンをクリック
+      await user.click(shareButton);
+
+      // writeTextが呼ばれたことを確認
+      expect(errorMock).toHaveBeenCalled();
+
+      // アラートが呼ばれないことを確認
+      expect(alertMock).not.toHaveBeenCalled();
     });
   });
 
