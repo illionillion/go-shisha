@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook } from "@testing-library/react";
-import type { ReactNode } from "react";
+import type { ReactNode, JSX } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as postsApi from "@/api/posts";
 import type { Post } from "@/types/domain";

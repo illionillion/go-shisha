@@ -67,7 +67,7 @@ describe("PostDetailHeader", () => {
     });
 
     it("icon_urlがnullの場合でも表示される", () => {
-      const userWithoutIcon = { ...mockUser, icon_url: null };
+      const userWithoutIcon = { ...mockUser, icon_url: undefined };
       const { container } = render(
         <PostDetailHeader user={userWithoutIcon} createdAt="2024-01-01" onBack={vi.fn()} />
       );
@@ -79,7 +79,7 @@ describe("PostDetailHeader", () => {
     });
 
     it("display_nameがnullの場合は「匿名」と表示される", () => {
-      const userWithoutName = { ...mockUser, display_name: null };
+      const userWithoutName = { ...mockUser, display_name: undefined };
       render(<PostDetailHeader user={userWithoutName} createdAt="2024-01-01" onBack={vi.fn()} />);
 
       expect(screen.getByText("匿名")).toBeInTheDocument();
@@ -193,10 +193,10 @@ describe("PostDetailHeader", () => {
       const partialUser: User = {
         id: 1,
         email: "test@example.com",
-        display_name: null,
-        description: null,
-        icon_url: null,
-        external_url: null,
+        display_name: undefined,
+        description: undefined,
+        icon_url: undefined,
+        external_url: undefined,
       };
 
       render(<PostDetailHeader user={partialUser} createdAt="2024-01-01" onBack={vi.fn()} />);

@@ -23,7 +23,7 @@ describe("PostDetailFooter", () => {
     });
 
     // window.alertのモック
-    vi.spyOn(window, "alert").mockImplementation(alertMock);
+    vi.spyOn(window, "alert").mockImplementation(alertMock as (message?: string) => void);
   });
 
   afterEach(() => {
