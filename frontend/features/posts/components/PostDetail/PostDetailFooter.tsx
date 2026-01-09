@@ -65,8 +65,9 @@ export function PostDetailFooter({ currentSlide, optimisticLikes, isLiked, onLik
                 await navigator.clipboard.writeText(window.location.href);
                 alert("URLをコピーしました");
               }
-            } catch {
+            } catch (error) {
               // クリップボードAPIが使用できない場合は何もしない
+              console.debug("クリップボードへのコピーに失敗しました", error);
             }
           }}
           aria-label="シェア"
