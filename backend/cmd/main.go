@@ -1,14 +1,19 @@
 package main
 
-
 import (
-	"fmt"
+	"context"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	_ "go-shisha-backend/docs" // Swagger docs
 	"go-shisha-backend/internal/handlers"
-	"go-shisha-backend/internal/repositories/mock"
+	"go-shisha-backend/internal/repositories/postgres"
 	"go-shisha-backend/internal/services"
+	"go-shisha-backend/pkg/db"
+	"go-shisha-backend/pkg/logging"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -49,12 +54,30 @@ func main() {
 
 	// 静的ファイル配信（画像）
 	r.Static("/images", "./public/images")
-	fmt.Println("Static images: http://localhost:8080/images/")
+	logging.L.Println("Static images: http://localhost:8080/images/")
 
 	// Dependency Injection
-	// Repository層（モック実装）
-	userRepo := mock.NewUserRepositoryMock()
-	postRepo := mock.NewPostRepositoryMock()
+	// DB接続と Repository（GORM）
+	gormDB, err := db.NewDBFromEnv()
+	if err != nil {
+		logging.L.Printf("failed to connect to DB: %v", err)
+		return
+	}
+
+	// DB接続のクリーンアップ処理を登録
+	sqlDB, err := gormDB.DB()
+	if err == nil {
+		defer func() {
+			if err := sqlDB.Close(); err != nil {
+				logging.L.Printf("error closing database connection: %v", err)
+			} else {
+				logging.L.Println("database connection closed")
+			}
+		}()
+	}
+
+	postRepo := postgres.NewPostRepository(gormDB)
+	userRepo := postgres.NewUserRepository(gormDB)
 
 	// Service層
 	userService := services.NewUserService(userRepo, postRepo)
@@ -68,7 +91,7 @@ func main() {
 	// Note: gin-swaggerは/swagger/index.htmlでのアクセスのみサポート
 	// /swagger/でのリダイレクトは未サポート (関連Issue: https://github.com/swaggo/gin-swagger/issues/323)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/swagger/doc.json")))
-	fmt.Println("Swagger UI: http://localhost:8080/swagger/index.html")
+	logging.L.Println("Swagger UI: http://localhost:8080/swagger/index.html")
 
 	// API routes
 	api := r.Group("/api/v1")
@@ -94,8 +117,29 @@ func main() {
 		api.GET("/users/:id/posts", userHandler.GetUserPosts)
 	}
 
-	// サーバーを8080ポートで起動
-	if err := r.Run(":8080"); err != nil {
-		fmt.Printf("server error: %v\n", err)
+	// サーバーを8080ポートで起動（graceful shutdown 対応）
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: r,
 	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logging.L.Printf("server error: %v", err)
+		}
+	}()
+
+	// シグナル待ち（CTRL+C, SIGTERM）
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+
+	logging.L.Println("Shutting down server...")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		logging.L.Printf("server shutdown error: %v", err)
+	}
+	logging.L.Println("Server exited, cleanup via defer")
 }

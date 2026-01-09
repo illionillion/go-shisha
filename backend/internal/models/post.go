@@ -5,9 +5,9 @@ import "time"
 // Post represents a shisha post
 // Slide represents a single image + text + flavor in a post
 type Slide struct {
-	ImageURL string   `json:"image_url"`
-	Text     string   `json:"text"`
-	Flavor   *Flavor  `json:"flavor,omitempty"`
+	ImageURL string  `json:"image_url"`
+	Text     string  `json:"text"`
+	Flavor   *Flavor `json:"flavor,omitempty"`
 }
 
 // Post represents a shisha post
@@ -23,8 +23,8 @@ type Post struct {
 
 // CreatePostInput represents the input for creating a post
 type CreatePostInput struct {
-	UserID   int     `json:"user_id" binding:"required"`
-	Slides   []Slide `json:"slides"`
+	UserID int     `json:"user_id" binding:"required"`
+	Slides []Slide `json:"slides"`
 }
 
 // PostsResponse represents the response for post list

@@ -8,7 +8,7 @@ import "go-shisha-backend/internal/models"
 type UserRepository interface {
 	// GetAll returns all users
 	GetAll() ([]models.User, error)
-	
+
 	// GetByID returns a user by ID
 	GetByID(id int) (*models.User, error)
 }
