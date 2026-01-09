@@ -62,13 +62,13 @@ func (r *PostRepository) toDomain(pm *postModel) models.Post {
 }
 
 func (r *PostRepository) GetAll() ([]models.Post, error) {
-	logging.L.Printf("[PostRepository] GetAll: querying posts from DB")
+	logging.L.Debug("querying posts from DB", "repository", "PostRepository", "method", "GetAll")
 	var pms []postModel
 	if err := r.db.Preload("User").Preload("Flavor").Order("created_at desc").Find(&pms).Error; err != nil {
-		logging.L.Printf("[PostRepository] GetAll: db error: %v", err)
+		logging.L.Error("failed to query posts", "repository", "PostRepository", "method", "GetAll", "error", err)
 		return nil, fmt.Errorf("failed to query all posts: %w", err)
 	}
-	logging.L.Printf("[PostRepository] GetAll: fetched %d rows", len(pms))
+	logging.L.Debug("fetched posts", "repository", "PostRepository", "method", "GetAll", "count", len(pms))
 	var posts []models.Post
 	for i := range pms {
 		posts = append(posts, r.toDomain(&pms[i]))
@@ -77,18 +77,18 @@ func (r *PostRepository) GetAll() ([]models.Post, error) {
 }
 
 func (r *PostRepository) GetByID(id int) (*models.Post, error) {
-	logging.L.Printf("[PostRepository] GetByID: id=%d", id)
+	logging.L.Debug("querying post by ID", "repository", "PostRepository", "method", "GetByID", "id", id)
 	var pm postModel
 	if err := r.db.Preload("User").Preload("Flavor").First(&pm, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			logging.L.Printf("[PostRepository] GetByID: not found id=%d", id)
+			logging.L.Debug("post not found", "repository", "PostRepository", "method", "GetByID", "id", id)
 			return nil, fmt.Errorf("post not found: id=%d", id)
 		}
-		logging.L.Printf("[PostRepository] GetByID: db error id=%d error=%v", id, err)
+		logging.L.Error("failed to query post", "repository", "PostRepository", "method", "GetByID", "id", id, "error", err)
 		return nil, fmt.Errorf("failed to query post by id=%d: %w", id, err)
 	}
 	post := r.toDomain(&pm)
-	logging.L.Printf("[PostRepository] GetByID: success id=%d", id)
+	logging.L.Debug("post found", "repository", "PostRepository", "method", "GetByID", "id", id)
 	return &post, nil
 }
 
@@ -112,43 +112,43 @@ func (r *PostRepository) Create(post *models.Post) error {
 		ImageURL: image,
 		Likes:    post.Likes,
 	}
-	logging.L.Printf("[PostRepository] Create: creating post for user_id=%d", post.UserID)
+	logging.L.Debug("creating post", "repository", "PostRepository", "method", "Create", "user_id", post.UserID)
 	if err := r.db.Create(&pm).Error; err != nil {
-		logging.L.Printf("[PostRepository] Create: db error: %v", err)
+		logging.L.Error("failed to create post", "repository", "PostRepository", "method", "Create", "user_id", post.UserID, "error", err)
 		return fmt.Errorf("failed to create post for user_id=%d: %w", post.UserID, err)
 	}
 	post.ID = int(pm.ID)
 	post.CreatedAt = pm.CreatedAt
-	logging.L.Printf("[PostRepository] Create: created id=%d", post.ID)
+	logging.L.Info("post created", "repository", "PostRepository", "method", "Create", "post_id", post.ID, "user_id", post.UserID)
 	return nil
 }
 
 func (r *PostRepository) IncrementLikes(id int) (*models.Post, error) {
-	logging.L.Printf("[PostRepository] IncrementLikes: id=%d", id)
+	logging.L.Debug("incrementing post likes", "repository", "PostRepository", "method", "IncrementLikes", "post_id", id)
 	if err := r.db.Model(&postModel{}).Where("id = ?", id).UpdateColumn("likes", gorm.Expr("likes + ?", 1)).Error; err != nil {
-		logging.L.Printf("[PostRepository] IncrementLikes: db error id=%d err=%v", id, err)
+		logging.L.Error("failed to increment likes", "repository", "PostRepository", "method", "IncrementLikes", "post_id", id, "error", err)
 		return nil, fmt.Errorf("failed to increment likes for post id=%d: %w", id, err)
 	}
 	return r.GetByID(id)
 }
 
 func (r *PostRepository) DecrementLikes(id int) (*models.Post, error) {
-	logging.L.Printf("[PostRepository] DecrementLikes: id=%d", id)
+	logging.L.Debug("decrementing post likes", "repository", "PostRepository", "method", "DecrementLikes", "post_id", id)
 	if err := r.db.Model(&postModel{}).Where("id = ?", id).UpdateColumn("likes", gorm.Expr("GREATEST(likes - 1, 0)")).Error; err != nil {
-		logging.L.Printf("[PostRepository] DecrementLikes: db error id=%d err=%v", id, err)
+		logging.L.Error("failed to decrement likes", "repository", "PostRepository", "method", "DecrementLikes", "post_id", id, "error", err)
 		return nil, fmt.Errorf("failed to decrement likes for post id=%d: %w", id, err)
 	}
 	return r.GetByID(id)
 }
 
 func (r *PostRepository) GetByUserID(userID int) ([]models.Post, error) {
-	logging.L.Printf("[PostRepository] GetByUserID: user_id=%d", userID)
+	logging.L.Debug("querying posts by user ID", "repository", "PostRepository", "method", "GetByUserID", "user_id", userID)
 	var pms []postModel
 	if err := r.db.Preload("User").Preload("Flavor").Where("user_id = ?", userID).Order("created_at desc").Find(&pms).Error; err != nil {
-		logging.L.Printf("[PostRepository] GetByUserID: db error user_id=%d err=%v", userID, err)
+		logging.L.Error("failed to query posts by user", "repository", "PostRepository", "method", "GetByUserID", "user_id", userID, "error", err)
 		return nil, fmt.Errorf("failed to query posts by user_id=%d: %w", userID, err)
 	}
-	logging.L.Printf("[PostRepository] GetByUserID: fetched %d rows for user_id=%d", len(pms), userID)
+	logging.L.Debug("fetched posts for user", "repository", "PostRepository", "method", "GetByUserID", "user_id", userID, "count", len(pms))
 	var posts []models.Post
 	for i := range pms {
 		posts = append(posts, r.toDomain(&pms[i]))

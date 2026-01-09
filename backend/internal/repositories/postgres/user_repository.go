@@ -33,13 +33,13 @@ func (r *UserRepository) toDomain(um *userModel) models.User {
 }
 
 func (r *UserRepository) GetAll() ([]models.User, error) {
-	logging.L.Printf("[UserRepository] GetAll: querying users from DB")
+	logging.L.Debug("querying users from DB", "repository", "UserRepository", "method", "GetAll")
 	var ums []userModel
 	if err := r.db.Order("id").Find(&ums).Error; err != nil {
-		logging.L.Printf("[UserRepository] GetAll: db error: %v", err)
+		logging.L.Error("failed to query users", "repository", "UserRepository", "method", "GetAll", "error", err)
 		return nil, fmt.Errorf("failed to query all users: %w", err)
 	}
-	logging.L.Printf("[UserRepository] GetAll: fetched %d rows", len(ums))
+	logging.L.Debug("fetched users", "repository", "UserRepository", "method", "GetAll", "count", len(ums))
 	var users []models.User
 	for i := range ums {
 		users = append(users, r.toDomain(&ums[i]))
@@ -48,17 +48,17 @@ func (r *UserRepository) GetAll() ([]models.User, error) {
 }
 
 func (r *UserRepository) GetByID(id int) (*models.User, error) {
-	logging.L.Printf("[UserRepository] GetByID: id=%d", id)
+	logging.L.Debug("querying user by ID", "repository", "UserRepository", "method", "GetByID", "id", id)
 	var um userModel
 	if err := r.db.First(&um, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			logging.L.Printf("[UserRepository] GetByID: not found id=%d", id)
+			logging.L.Debug("user not found", "repository", "UserRepository", "method", "GetByID", "id", id)
 			return nil, fmt.Errorf("user not found: id=%d", id)
 		}
-		logging.L.Printf("[UserRepository] GetByID: db error id=%d error=%v", id, err)
+		logging.L.Error("failed to query user", "repository", "UserRepository", "method", "GetByID", "id", id, "error", err)
 		return nil, fmt.Errorf("failed to query user by id=%d: %w", id, err)
 	}
 	user := r.toDomain(&um)
-	logging.L.Printf("[UserRepository] GetByID: success id=%d", id)
+	logging.L.Debug("user found", "repository", "UserRepository", "method", "GetByID", "id", id)
 	return &user, nil
 }
