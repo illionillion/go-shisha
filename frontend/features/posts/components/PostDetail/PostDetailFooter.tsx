@@ -59,9 +59,16 @@ export function PostDetailFooter({ currentSlide, optimisticLikes, isLiked, onLik
           <span className="text-sm">{optimisticLikes}</span>
         </button>
         <button
-          onClick={() => {
-            void navigator.clipboard?.writeText(window.location.href);
-            alert("URLをコピーしました");
+          onClick={async () => {
+            try {
+              if (navigator.clipboard) {
+                await navigator.clipboard.writeText(window.location.href);
+                alert("URLをコピーしました");
+              }
+            } catch (error) {
+              // クリップボードAPIが使用できない場合は何もしない
+              console.debug("クリップボードへのコピーに失敗しました", error);
+            }
           }}
           aria-label="シェア"
           className="inline-flex items-center gap-2 px-3 py-2 border rounded transition-transform transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-1 text-gray-700 bg-white"
