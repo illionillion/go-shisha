@@ -20,13 +20,13 @@
 #### 構造化フィールドの使用
 ```go
 // ❌ NG: 文字列フォーマットのみ
-logging.L.Error(fmt.Sprintf("failed to query user id=%d", id))
+logging.L.Error("failed to query user id=123")
 
 // ✅ OK: 構造化フィールドを使用
 logging.L.Error("failed to query user", 
     "repository", "UserRepository",
     "method", "GetByID",
-    "id", id,
+    "user_id", id,
     "error", err)
 ```
 
@@ -57,15 +57,21 @@ logging.L.Error("failed to query posts",
 
 ### 初期化
 ```go
-// main.goまたはセットアップ時
+// loggingパッケージは自動的に環境変数から初期化されます
+// APP_ENV: "production" or "development" (デフォルト: "development")
+// LOG_LEVEL: "DEBUG", "INFO", "WARN", "ERROR" (デフォルト: "DEBUG")
+
+// compose.ymlでの設定例:
+// environment:
+//   - APP_ENV=${APP_ENV:-development}
+//   - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
+
+// main.goでは特別な初期化は不要、logging.Lをそのまま使用可能
 import "go-shisha-backend/pkg/logging"
 
 func main() {
-    env := os.Getenv("ENV") // "production" or "development"
-    logLevel := os.Getenv("LOG_LEVEL") // "DEBUG", "INFO", "WARN", "ERROR"
-    logging.Init(env, logLevel)
-    
-    // 以降はlogging.Lでグローバルに使用可能
+    // logging.Lはパッケージインポート時に自動初期化済み
+    logging.L.Info("server starting")
 }
 ```
 
