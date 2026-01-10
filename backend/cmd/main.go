@@ -63,6 +63,7 @@ func main() {
 		logging.L.Error("failed to connect to DB", "error", err)
 		return
 	}
+	logging.L.Info("database connected successfully")
 
 	// DB接続のクリーンアップ処理を登録
 	sqlDB, err := gormDB.DB()
@@ -123,6 +124,7 @@ func main() {
 		Handler: r,
 	}
 
+	logging.L.Info("server starting", "addr", srv.Addr)
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logging.L.Error("server error", "error", err)
