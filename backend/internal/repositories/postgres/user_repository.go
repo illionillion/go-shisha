@@ -48,17 +48,17 @@ func (r *UserRepository) GetAll() ([]models.User, error) {
 }
 
 func (r *UserRepository) GetByID(id int) (*models.User, error) {
-	logging.L.Debug("querying user by ID", "repository", "UserRepository", "method", "GetByID", "id", id)
+	logging.L.Debug("querying user by ID", "repository", "UserRepository", "method", "GetByID", "user_id", id)
 	var um userModel
 	if err := r.db.First(&um, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			logging.L.Debug("user not found", "repository", "UserRepository", "method", "GetByID", "id", id)
+			logging.L.Debug("user not found", "repository", "UserRepository", "method", "GetByID", "user_id", id)
 			return nil, fmt.Errorf("user not found: id=%d", id)
 		}
-		logging.L.Error("failed to query user", "repository", "UserRepository", "method", "GetByID", "id", id, "error", err)
+		logging.L.Error("failed to query user", "repository", "UserRepository", "method", "GetByID", "user_id", id, "error", err)
 		return nil, fmt.Errorf("failed to query user by id=%d: %w", id, err)
 	}
 	user := r.toDomain(&um)
-	logging.L.Debug("user found", "repository", "UserRepository", "method", "GetByID", "id", id)
+	logging.L.Debug("user found", "repository", "UserRepository", "method", "GetByID", "user_id", id)
 	return &user, nil
 }

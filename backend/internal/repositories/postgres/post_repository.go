@@ -77,18 +77,18 @@ func (r *PostRepository) GetAll() ([]models.Post, error) {
 }
 
 func (r *PostRepository) GetByID(id int) (*models.Post, error) {
-	logging.L.Debug("querying post by ID", "repository", "PostRepository", "method", "GetByID", "id", id)
+	logging.L.Debug("querying post by ID", "repository", "PostRepository", "method", "GetByID", "post_id", id)
 	var pm postModel
 	if err := r.db.Preload("User").Preload("Flavor").First(&pm, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			logging.L.Debug("post not found", "repository", "PostRepository", "method", "GetByID", "id", id)
+			logging.L.Debug("post not found", "repository", "PostRepository", "method", "GetByID", "post_id", id)
 			return nil, fmt.Errorf("post not found: id=%d", id)
 		}
-		logging.L.Error("failed to query post", "repository", "PostRepository", "method", "GetByID", "id", id, "error", err)
+		logging.L.Error("failed to query post", "repository", "PostRepository", "method", "GetByID", "post_id", id, "error", err)
 		return nil, fmt.Errorf("failed to query post by id=%d: %w", id, err)
 	}
 	post := r.toDomain(&pm)
-	logging.L.Debug("post found", "repository", "PostRepository", "method", "GetByID", "id", id)
+	logging.L.Debug("post found", "repository", "PostRepository", "method", "GetByID", "post_id", id)
 	return &post, nil
 }
 
