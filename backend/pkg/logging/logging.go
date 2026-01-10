@@ -46,6 +46,16 @@ func Init(env, logLevel string) {
 }
 
 func init() {
-	// Default initialization (development mode with DEBUG level)
-	Init("development", "DEBUG")
+	// Initialize logger based on environment variables with sensible defaults.
+	env := os.Getenv("APP_ENV")
+	if env == "" {
+		env = "development"
+	}
+
+	level := os.Getenv("LOG_LEVEL")
+	if level == "" {
+		level = "DEBUG"
+	}
+
+	Init(env, level)
 }
