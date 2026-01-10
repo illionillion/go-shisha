@@ -54,24 +54,25 @@ func main() {
 
 	// 静的ファイル配信（画像）
 	r.Static("/images", "./public/images")
-	logging.L.Println("Static images: http://localhost:8080/images/")
+	logging.L.Info("static images served", "path", "/images", "url", "http://localhost:8080/images/")
 
 	// Dependency Injection
 	// DB接続と Repository（GORM）
 	gormDB, err := db.NewDBFromEnv()
 	if err != nil {
-		logging.L.Printf("failed to connect to DB: %v", err)
+		logging.L.Error("failed to connect to DB", "error", err)
 		return
 	}
+	logging.L.Info("database connected successfully")
 
 	// DB接続のクリーンアップ処理を登録
 	sqlDB, err := gormDB.DB()
 	if err == nil {
 		defer func() {
 			if err := sqlDB.Close(); err != nil {
-				logging.L.Printf("error closing database connection: %v", err)
+				logging.L.Error("failed to close database connection", "error", err)
 			} else {
-				logging.L.Println("database connection closed")
+				logging.L.Info("database connection closed")
 			}
 		}()
 	}
@@ -91,7 +92,7 @@ func main() {
 	// Note: gin-swaggerは/swagger/index.htmlでのアクセスのみサポート
 	// /swagger/でのリダイレクトは未サポート (関連Issue: https://github.com/swaggo/gin-swagger/issues/323)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/swagger/doc.json")))
-	logging.L.Println("Swagger UI: http://localhost:8080/swagger/index.html")
+	logging.L.Info("swagger UI available", "url", "http://localhost:8080/swagger/index.html")
 
 	// API routes
 	api := r.Group("/api/v1")
@@ -123,9 +124,10 @@ func main() {
 		Handler: r,
 	}
 
+	logging.L.Info("server starting", "addr", srv.Addr)
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logging.L.Printf("server error: %v", err)
+			logging.L.Error("server error", "error", err)
 		}
 	}()
 
@@ -134,12 +136,12 @@ func main() {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 
-	logging.L.Println("Shutting down server...")
+	logging.L.Info("shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		logging.L.Printf("server shutdown error: %v", err)
+		logging.L.Error("server shutdown error", "error", err)
 	}
-	logging.L.Println("Server exited, cleanup via defer")
+	logging.L.Info("server exited, cleanup via defer")
 }

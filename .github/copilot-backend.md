@@ -5,6 +5,84 @@
 ## コメント記述規則
 - **Backend（Go）**: godoc標準の`//`形式を使用する。Swaggoアノテーションも`//`形式で記述する。JSDoc形式は使用しない
 
+## 構造化ログ（slog）運用ルール
+
+### 基本方針
+- **標準ライブラリslogを使用**: `log/slog`を使った構造化ログを採用（外部依存なし）
+- **ログレベルの使い分け**:
+  - `Debug`: 開発時のデバッグ情報（成功系のクエリ、詳細なトレース）
+  - `Info`: 重要な操作（データ作成、更新、削除等）
+  - `Warn`: 警告レベルの問題（非推奨機能の使用、リトライ等）
+  - `Error`: エラー発生時（DB接続失敗、クエリエラー等）
+
+### ログの書き方
+
+#### 構造化フィールドの使用
+```go
+// ❌ NG: 文字列フォーマットのみ
+logging.L.Error("failed to query user id=123")
+
+// ✅ OK: 構造化フィールドを使用
+logging.L.Error("failed to query user", 
+    "repository", "UserRepository",
+    "method", "GetByID",
+    "user_id", id,
+    "error", err)
+```
+
+#### レベルの使い分け例
+```go
+// Debug: 開発時のみ必要な情報
+logging.L.Debug("querying users from DB",
+    "repository", "UserRepository",
+    "method", "GetAll")
+
+// Info: 重要な操作（本番でも記録したい）
+logging.L.Info("post created",
+    "repository", "PostRepository",
+    "method", "Create",
+    "post_id", post.ID,
+    "user_id", post.UserID)
+
+// Error: エラー発生時
+logging.L.Error("failed to query posts",
+    "repository", "PostRepository",
+    "method", "GetAll",
+    "error", err)
+```
+
+### 環境別のログ設定
+- **開発環境**: TextHandler + DEBUGレベル（人間が読みやすい形式）
+- **本番環境**: JSONHandler + INFOレベル（機械で解析しやすい形式）
+
+### 初期化
+```go
+// loggingパッケージは自動的に環境変数から初期化されます
+// APP_ENV: "production" or "development" (デフォルト: "development")
+// LOG_LEVEL: "DEBUG", "INFO", "WARN", "ERROR" (デフォルト: "DEBUG")
+
+// compose.ymlでの設定例:
+// environment:
+//   - APP_ENV=${APP_ENV:-development}
+//   - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
+
+// main.goでは特別な初期化は不要、logging.Lをそのまま使用可能
+import "go-shisha-backend/pkg/logging"
+
+func main() {
+    // logging.Lはパッケージインポート時に自動初期化済み
+    logging.L.Info("server starting")
+}
+```
+
+### 推奨フィールド名
+- `repository`: Repository名（例: "UserRepository", "PostRepository"）
+- `method`: メソッド名（例: "GetAll", "GetByID", "Create"）
+- `id`, `user_id`, `post_id`: エンティティのID
+- `error`: エラーオブジェクト
+- `count`: 取得件数
+- `duration`: 処理時間（将来的に追加予定）
+
 ## Backend変更時のビルド・Lint・テスト確認
 - Backend（Go）のコードを変更した場合、プッシュ前に必ず以下を確認する:
   - `go build`または`make build`でビルドが通ること
