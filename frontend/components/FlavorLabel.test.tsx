@@ -17,69 +17,24 @@ describe("FlavorLabel", () => {
     expect(label).toBeTruthy();
   });
 
-  it("bg-green-500 の色クラスを適用する", () => {
+  it.each([
+    { id: 1, color: "bg-green-500", name: "ミント" },
+    { id: 2, color: "bg-red-500", name: "ストロベリー" },
+    { id: 3, color: "bg-purple-500", name: "グレープ" },
+    { id: 4, color: "bg-yellow-500", name: "レモン" },
+    { id: 5, color: "bg-orange-500", name: "オレンジ" },
+    { id: 6, color: "bg-indigo-500", name: "ブルーベリー" },
+  ])("$color の色クラスを適用する", ({ id, color, name }) => {
     const flavor: Flavor = {
-      id: 2,
-      name: "ストロベリー",
-      color: "bg-red-500",
+      id,
+      name,
+      color,
     };
 
     render(<FlavorLabel flavor={flavor} />);
 
-    const label = screen.getByText("ストロベリー");
-    expect(label.className).toContain("bg-red-500");
-  });
-
-  it("bg-purple-500 の色クラスを適用する", () => {
-    const flavor: Flavor = {
-      id: 3,
-      name: "グレープ",
-      color: "bg-purple-500",
-    };
-
-    render(<FlavorLabel flavor={flavor} />);
-
-    const label = screen.getByText("グレープ");
-    expect(label.className).toContain("bg-purple-500");
-  });
-
-  it("bg-yellow-500 の色クラスを適用する", () => {
-    const flavor: Flavor = {
-      id: 4,
-      name: "レモン",
-      color: "bg-yellow-500",
-    };
-
-    render(<FlavorLabel flavor={flavor} />);
-
-    const label = screen.getByText("レモン");
-    expect(label.className).toContain("bg-yellow-500");
-  });
-
-  it("bg-orange-500 の色クラスを適用する", () => {
-    const flavor: Flavor = {
-      id: 5,
-      name: "オレンジ",
-      color: "bg-orange-500",
-    };
-
-    render(<FlavorLabel flavor={flavor} />);
-
-    const label = screen.getByText("オレンジ");
-    expect(label.className).toContain("bg-orange-500");
-  });
-
-  it("bg-indigo-500 の色クラスを適用する", () => {
-    const flavor: Flavor = {
-      id: 6,
-      name: "ブルーベリー",
-      color: "bg-indigo-500",
-    };
-
-    render(<FlavorLabel flavor={flavor} />);
-
-    const label = screen.getByText("ブルーベリー");
-    expect(label.className).toContain("bg-indigo-500");
+    const label = screen.getByText(name);
+    expect(label.className).toContain(color);
   });
 
   it("未定義の色の場合は bg-gray-500 をフォールバックとして適用する", () => {

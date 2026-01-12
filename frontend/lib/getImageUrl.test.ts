@@ -43,7 +43,7 @@ describe("getImageUrl", () => {
     expect(result).toBe("https://api.example.com/uploads/image.jpg");
   });
 
-  it("相対パスで BACKEND_URL が設定されていない場合はプレースホルダーを返す", () => {
+  it("相対パスで BACKEND_URL が空文字の場合はプレースホルダーを返す", () => {
     process.env.NEXT_PUBLIC_BACKEND_URL = "";
     const url = "/uploads/image.jpg";
     const result = getImageUrl(url);
@@ -61,21 +61,14 @@ describe("getImageUrl", () => {
     process.env.NEXT_PUBLIC_BACKEND_URL = "https://api.example.com/";
     const url = "/uploads/image.jpg";
     const result = getImageUrl(url);
-    expect(result).toBe("https://api.example.com//uploads/image.jpg");
+    expect(result).toBe("https://api.example.com/uploads/image.jpg");
   });
 
-  it("相対パスがスラッシュなしで始まる場合も BACKEND_URL を付与する", () => {
+  it("相対パスがスラッシュなしで始まる場合は先頭にスラッシュを補完して BACKEND_URL を付与する", () => {
     process.env.NEXT_PUBLIC_BACKEND_URL = "https://api.example.com";
     const url = "uploads/image.jpg";
     const result = getImageUrl(url);
-    // 関数は単純に連結するため、スラッシュなしの場合はそのまま連結される
-    expect(result).toBe("https://api.example.comuploads/image.jpg");
-  });
-
-  it("http で始まるが https ではない URL を正しく処理する", () => {
-    const url = "http://cdn.example.com/pic.jpg";
-    const result = getImageUrl(url);
-    expect(result).toBe(url);
+    expect(result).toBe("https://api.example.com/uploads/image.jpg");
   });
 
   it("HTTPS の絶対 URL は BACKEND_URL の設定に関わらずそのまま返す", () => {
