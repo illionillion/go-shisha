@@ -126,9 +126,9 @@ func main() {
 		// Posts endpoints
 		api.GET("/posts", postHandler.GetAllPosts)
 		api.GET("/posts/:id", postHandler.GetPost)
-		api.POST("/posts", postHandler.CreatePost)
-		api.POST("/posts/:id/like", postHandler.LikePost)
-		api.POST("/posts/:id/unlike", postHandler.UnlikePost)
+		api.POST("/posts", postHandler.CreatePost) // TODO: 認証必須化 + 画像アップロード実装
+		api.POST("/posts/:id/like", middleware.AuthMiddleware(), postHandler.LikePost)
+		api.POST("/posts/:id/unlike", middleware.AuthMiddleware(), postHandler.UnlikePost)
 
 		// Users endpoints
 		api.GET("/users", userHandler.GetAllUsers)
