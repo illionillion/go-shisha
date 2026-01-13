@@ -1,13 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { getImageUrl } from "./getImageUrl";
 
 describe("getImageUrl", () => {
   const originalEnv = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-  beforeEach(() => {
-    // 各テスト前にモックをクリア
-    vi.clearAllMocks();
-  });
 
   afterEach(() => {
     // テスト後に環境変数を元に戻す
@@ -71,10 +66,17 @@ describe("getImageUrl", () => {
     expect(result).toBe("https://api.example.com/uploads/image.jpg");
   });
 
-  it("HTTPS の絶対 URL は BACKEND_URL の設定に関わらずそのまま返す", () => {
-    process.env.NEXT_PUBLIC_BACKEND_URL = "https://api.example.com";
-    const url = "https://external.com/image.jpg";
+  it("BACKEND_URL の末尾に複数のスラッシュがある場合でも正しく結合する", () => {
+    process.env.NEXT_PUBLIC_BACKEND_URL = "https://api.example.com///";
+    const url = "/uploads/image.jpg";
     const result = getImageUrl(url);
-    expect(result).toBe(url);
+    expect(result).toBe("https://api.example.com/uploads/image.jpg");
+  });
+
+  it("相対パスの先頭に複数のスラッシュがある場合でも正しく結合する", () => {
+    process.env.NEXT_PUBLIC_BACKEND_URL = "https://api.example.com";
+    const url = "///uploads/image.jpg";
+    const result = getImageUrl(url);
+    expect(result).toBe("https://api.example.com/uploads/image.jpg");
   });
 });

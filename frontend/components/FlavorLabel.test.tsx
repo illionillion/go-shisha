@@ -24,7 +24,7 @@ describe("FlavorLabel", () => {
     { id: 4, color: "bg-yellow-500", name: "レモン" },
     { id: 5, color: "bg-orange-500", name: "オレンジ" },
     { id: 6, color: "bg-indigo-500", name: "ブルーベリー" },
-  ])("$color の色クラスを適用する", ({ id, color, name }) => {
+  ])("$name ($color) の色クラスを適用する", ({ id, color, name }) => {
     const flavor: Flavor = {
       id,
       name,

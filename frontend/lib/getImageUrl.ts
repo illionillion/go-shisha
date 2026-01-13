@@ -7,9 +7,9 @@ export function getImageUrl(url?: string): string {
   if (!backendUrl) {
     return "https://placehold.co/400x600/CCCCCC/666666?text=No+Image";
   }
-  // Ensure URL has leading slash
-  const normalizedUrl = url.startsWith("/") ? url : `/${url}`;
-  // Remove trailing slash from backend URL if present
-  const normalizedBackendUrl = backendUrl.endsWith("/") ? backendUrl.slice(0, -1) : backendUrl;
+  // Normalize URL to have exactly one leading slash
+  const normalizedUrl = `/${url.replace(/^\/+/, "")}`;
+  // Normalize backend URL to have no trailing slashes
+  const normalizedBackendUrl = backendUrl.replace(/\/+$/, "");
   return `${normalizedBackendUrl}${normalizedUrl}`;
 }

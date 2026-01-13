@@ -67,5 +67,17 @@ describe("Icons", () => {
       const path = container.querySelector("path");
       expect(path?.getAttribute("stroke-width")).toBe("2");
     });
+
+    it('path の strokeLinecap が "round" である', () => {
+      const { container } = render(<Icon />);
+      const path = container.querySelector("path");
+      expect(path?.getAttribute("stroke-linecap")).toBe("round");
+    });
+
+    it('path の strokeLinejoin が "round" である', () => {
+      const { container } = render(<Icon />);
+      const path = container.querySelector("path");
+      expect(path?.getAttribute("stroke-linejoin")).toBe("round");
+    });
   });
 });
