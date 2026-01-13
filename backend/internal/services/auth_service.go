@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories"
 	"go-shisha-backend/internal/repositories/postgres"
 	"go-shisha-backend/pkg/auth"
 	"go-shisha-backend/pkg/logging"
@@ -15,12 +16,12 @@ import (
 
 // AuthService は認証サービスのインターフェース
 type AuthService struct {
-	userRepo         *postgres.UserRepository
+	userRepo         repositories.AuthUserRepository
 	refreshTokenRepo postgres.RefreshTokenRepository
 }
 
 // NewAuthService はAuthServiceの新しいインスタンスを作成
-func NewAuthService(userRepo *postgres.UserRepository, refreshTokenRepo postgres.RefreshTokenRepository) *AuthService {
+func NewAuthService(userRepo repositories.AuthUserRepository, refreshTokenRepo postgres.RefreshTokenRepository) *AuthService {
 	return &AuthService{
 		userRepo:         userRepo,
 		refreshTokenRepo: refreshTokenRepo,
