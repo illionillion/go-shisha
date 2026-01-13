@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"os"
 	"testing"
 	"time"
 
@@ -10,6 +11,11 @@ import (
 
 	"gorm.io/gorm"
 )
+
+func init() {
+	// テスト用のJWT_SECRETを設定
+	os.Setenv("JWT_SECRET", "test-secret-key-for-testing-purpose-at-least-64-characters-long")
+}
 
 // mockAuthUserRepo はUserRepositoryのモック
 type mockAuthUserRepo struct {
@@ -110,7 +116,7 @@ func TestRegister(t *testing.T) {
 	t.Run("正常系: ユーザー登録成功", func(t *testing.T) {
 		input := &models.CreateUserInput{
 			Email:       "test@example.com",
-			Password:    "password123",
+			Password:    "password12345",
 			DisplayName: "Test User",
 		}
 
@@ -132,7 +138,7 @@ func TestRegister(t *testing.T) {
 	t.Run("異常系: メールアドレス重複", func(t *testing.T) {
 		input := &models.CreateUserInput{
 			Email:       "test@example.com",
-			Password:    "password123",
+			Password:    "password12345",
 			DisplayName: "Duplicate User",
 		}
 
@@ -154,7 +160,7 @@ func TestLogin(t *testing.T) {
 	// テスト用ユーザーを事前登録
 	registerInput := &models.CreateUserInput{
 		Email:       "login@example.com",
-		Password:    "password123",
+		Password:    "password12345",
 		DisplayName: "Login User",
 	}
 	_, err := svc.Register(registerInput)
@@ -165,7 +171,7 @@ func TestLogin(t *testing.T) {
 	t.Run("正常系: ログイン成功", func(t *testing.T) {
 		loginInput := &models.LoginInput{
 			Email:    "login@example.com",
-			Password: "password123",
+			Password: "password12345",
 		}
 
 		user, accessToken, refreshToken, err := svc.Login(loginInput)
@@ -195,7 +201,7 @@ func TestLogin(t *testing.T) {
 	t.Run("異常系: パスワード不一致", func(t *testing.T) {
 		loginInput := &models.LoginInput{
 			Email:    "login@example.com",
-			Password: "wrongpassword",
+			Password: "wrongpassword123",
 		}
 
 		_, _, _, err := svc.Login(loginInput)
@@ -210,7 +216,7 @@ func TestLogin(t *testing.T) {
 	t.Run("異常系: ユーザーが存在しない", func(t *testing.T) {
 		loginInput := &models.LoginInput{
 			Email:    "notfound@example.com",
-			Password: "password123",
+			Password: "password12345",
 		}
 
 		_, _, _, err := svc.Login(loginInput)
@@ -231,7 +237,7 @@ func TestRefresh(t *testing.T) {
 	// テスト用ユーザーを事前登録してログイン
 	registerInput := &models.CreateUserInput{
 		Email:       "refresh@example.com",
-		Password:    "password123",
+		Password:    "password12345",
 		DisplayName: "Refresh User",
 	}
 	_, err := svc.Register(registerInput)
@@ -241,7 +247,7 @@ func TestRefresh(t *testing.T) {
 
 	loginInput := &models.LoginInput{
 		Email:    "refresh@example.com",
-		Password: "password123",
+		Password: "password12345",
 	}
 	_, _, refreshToken, err := svc.Login(loginInput)
 	if err != nil {
@@ -280,7 +286,7 @@ func TestLogout(t *testing.T) {
 	// テスト用ユーザーを事前登録してログイン
 	registerInput := &models.CreateUserInput{
 		Email:       "logout@example.com",
-		Password:    "password123",
+		Password:    "password12345",
 		DisplayName: "Logout User",
 	}
 	user, err := svc.Register(registerInput)
@@ -290,7 +296,7 @@ func TestLogout(t *testing.T) {
 
 	loginInput := &models.LoginInput{
 		Email:    "logout@example.com",
-		Password: "password123",
+		Password: "password12345",
 	}
 	_, _, _, err = svc.Login(loginInput)
 	if err != nil {
@@ -318,7 +324,7 @@ func TestGetCurrentUser(t *testing.T) {
 	// テスト用ユーザーを事前登録
 	registerInput := &models.CreateUserInput{
 		Email:       "current@example.com",
-		Password:    "password123",
+		Password:    "password12345",
 		DisplayName: "Current User",
 	}
 	registeredUser, err := svc.Register(registerInput)

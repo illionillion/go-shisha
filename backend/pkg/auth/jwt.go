@@ -23,10 +23,12 @@ type Claims struct {
 
 // GenerateAccessToken はAccess Tokenを生成する（15分有効）
 func GenerateAccessToken(userID int64) (string, error) {
+	now := time.Now()
 	claims := Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(now.Add(15 * time.Minute)),
+			IssuedAt:  jwt.NewNumericDate(now),
 		},
 	}
 
@@ -37,10 +39,12 @@ func GenerateAccessToken(userID int64) (string, error) {
 
 // GenerateRefreshToken はRefresh Tokenを生成する（7日有効）
 func GenerateRefreshToken(userID int64) (string, error) {
+	now := time.Now()
 	claims := Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(now.Add(7 * 24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(now),
 		},
 	}
 
@@ -80,8 +84,7 @@ func ValidateToken(tokenString string) (*Claims, error) {
 func getJWTSecret() string {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
-		// デフォルト値（開発環境用、本番では必ず設定すること）
-		return "default-secret-key-please-change-in-production"
+		panic("JWT_SECRET environment variable is required but not set")
 	}
 	return secret
 }

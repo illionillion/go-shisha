@@ -93,26 +93,26 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	// Access Token を Cookie に設定（15分有効）
-	c.SetCookie(
-		"access_token",
-		accessToken,
-		15*60, // 15分（秒単位）
-		"/",
-		"",
-		false, // 開発環境ではfalse、本番ではtrue（HTTPS）
-		true,  // HttpOnly
-	)
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "access_token",
+		Value:    accessToken,
+		Path:     "/",
+		MaxAge:   15 * 60,
+		Secure:   false, // 開発環境ではfalse、本番ではtrue（HTTPS）
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode, // CSRF対策
+	})
 
 	// Refresh Token を Cookie に設定（7日有効）
-	c.SetCookie(
-		"refresh_token",
-		refreshToken,
-		7*24*60*60, // 7日（秒単位）
-		"/",
-		"",
-		false, // 開発環境ではfalse、本番ではtrue（HTTPS）
-		true,  // HttpOnly
-	)
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Path:     "/",
+		MaxAge:   7 * 24 * 60 * 60,
+		Secure:   false, // 開発環境ではfalse、本番ではtrue（HTTPS）
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode, // CSRF対策
+	})
 
 	logging.L.Info("user logged in",
 		"handler", "AuthHandler",
@@ -153,15 +153,15 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 	}
 
 	// 新しい Access Token を Cookie に設定
-	c.SetCookie(
-		"access_token",
-		newAccessToken,
-		15*60, // 15分（秒単位）
-		"/",
-		"",
-		false, // 開発環境ではfalse、本番ではtrue（HTTPS）
-		true,  // HttpOnly
-	)
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "access_token",
+		Value:    newAccessToken,
+		Path:     "/",
+		MaxAge:   15 * 60,
+		Secure:   false, // 開発環境ではfalse、本番ではtrue（HTTPS）
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode, // CSRF対策
+	})
 
 	logging.L.Info("access token refreshed",
 		"handler", "AuthHandler",
@@ -202,8 +202,24 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	}
 
 	// Cookieを削除（MaxAge=-1で即座に削除）
-	c.SetCookie("access_token", "", -1, "/", "", false, true)
-	c.SetCookie("refresh_token", "", -1, "/", "", false, true)
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		Secure:   false,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		Secure:   false,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
 
 	logging.L.Info("user logged out",
 		"handler", "AuthHandler",

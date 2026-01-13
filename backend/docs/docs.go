@@ -599,7 +599,7 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string",
-                    "minLength": 8
+                    "minLength": 12
                 }
             }
         },

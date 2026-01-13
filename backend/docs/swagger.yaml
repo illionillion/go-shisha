@@ -23,7 +23,7 @@ definitions:
       email:
         type: string
       password:
-        minLength: 8
+        minLength: 12
         type: string
     required:
     - email

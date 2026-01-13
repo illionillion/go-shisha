@@ -37,9 +37,10 @@ type UsersResponse struct {
 }
 
 // CreateUserInput represents the input for user registration
+// パスワードは現行のセキュリティポリシーとして12文字以上を必須とする
 type CreateUserInput struct {
 	Email       string `json:"email" binding:"required,email"`
-	Password    string `json:"password" binding:"required,min=8"`
+	Password    string `json:"password" binding:"required,min=12"`
 	DisplayName string `json:"display_name"`
 }
 
