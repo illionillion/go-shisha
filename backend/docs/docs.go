@@ -18,6 +18,216 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "メールアドレスとパスワードでログインし、JWT（Cookie）を発行する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "ログイン",
+                "parameters": [
+                    {
+                        "description": "ログイン情報",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.LoginInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ログイン成功",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "バリデーションエラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "認証失敗",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Cookieを削除し、Refresh Tokenを無効化する",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "ログアウト",
+                "responses": {
+                    "200": {
+                        "description": "ログアウト成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "認証失敗",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "認証されたユーザーの情報を取得する",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "現在のユーザー情報取得",
+                "responses": {
+                    "200": {
+                        "description": "ユーザー情報",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.AuthResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "認証失敗",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/refresh": {
+            "post": {
+                "description": "Refresh Tokenを使って新しいAccess Tokenを発行する",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "アクセストークンのリフレッシュ",
+                "responses": {
+                    "200": {
+                        "description": "リフレッシュ成功",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "認証失敗",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "新しいユーザーを登録する",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "ユーザー登録",
+                "parameters": [
+                    {
+                        "description": "ユーザー登録情報",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.CreateUserInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "登録成功",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.AuthResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "バリデーションエラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/posts": {
             "get": {
                 "description": "全ての投稿の一覧を取得します（総数付き）",
@@ -349,6 +559,14 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "go-shisha-backend_internal_models.AuthResponse": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "$ref": "#/definitions/go-shisha-backend_internal_models.User"
+                }
+            }
+        },
         "go-shisha-backend_internal_models.CreatePostInput": {
             "type": "object",
             "required": [
@@ -366,6 +584,33 @@ const docTemplate = `{
                 }
             }
         },
+        "go-shisha-backend_internal_models.CreateUserInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "display_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
         "go-shisha-backend_internal_models.Flavor": {
             "type": "object",
             "properties": {
@@ -376,6 +621,21 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.LoginInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 }
             }
@@ -473,6 +733,13 @@ const docTemplate = `{
                     }
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

@@ -10,6 +10,7 @@ import (
 
 	_ "go-shisha-backend/docs" // Swagger docs
 	"go-shisha-backend/internal/handlers"
+	"go-shisha-backend/internal/middleware"
 	"go-shisha-backend/internal/repositories/postgres"
 	"go-shisha-backend/internal/services"
 	"go-shisha-backend/pkg/db"
@@ -31,6 +32,10 @@ import (
 // @host localhost:8080
 // @BasePath /api/v1
 // @schemes http
+//
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 
 func main() {
 	// Ginのデバッグモードを設定（本番環境ではgin.ReleaseMode）
@@ -79,14 +84,17 @@ func main() {
 
 	postRepo := postgres.NewPostRepository(gormDB)
 	userRepo := postgres.NewUserRepository(gormDB)
+	refreshTokenRepo := postgres.NewRefreshTokenRepository(gormDB)
 
 	// Service層
 	userService := services.NewUserService(userRepo, postRepo)
 	postService := services.NewPostService(postRepo, userRepo)
+	authService := services.NewAuthService(userRepo, refreshTokenRepo)
 
 	// Handler層
 	userHandler := handlers.NewUserHandler(userService)
 	postHandler := handlers.NewPostHandler(postService)
+	authHandler := handlers.NewAuthHandler(authService)
 
 	// Swagger UI
 	// Note: gin-swaggerは/swagger/index.htmlでのアクセスのみサポート
@@ -104,6 +112,16 @@ func main() {
 				"message": "Go-Shisha API is running",
 			})
 		})
+
+		// Auth endpoints (認証不要)
+		auth := api.Group("/auth")
+		{
+			auth.POST("/register", authHandler.Register)
+			auth.POST("/login", authHandler.Login)
+			auth.POST("/refresh", authHandler.Refresh)
+			auth.POST("/logout", middleware.AuthMiddleware(), authHandler.Logout)
+			auth.GET("/me", middleware.AuthMiddleware(), authHandler.Me)
+		}
 
 		// Posts endpoints
 		api.GET("/posts", postHandler.GetAllPosts)

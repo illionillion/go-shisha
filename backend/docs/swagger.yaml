@@ -1,5 +1,10 @@
 basePath: /api/v1
 definitions:
+  go-shisha-backend_internal_models.AuthResponse:
+    properties:
+      user:
+        $ref: '#/definitions/go-shisha-backend_internal_models.User'
+    type: object
   go-shisha-backend_internal_models.CreatePostInput:
     properties:
       slides:
@@ -11,6 +16,24 @@ definitions:
     required:
     - user_id
     type: object
+  go-shisha-backend_internal_models.CreateUserInput:
+    properties:
+      display_name:
+        type: string
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  go-shisha-backend_internal_models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
   go-shisha-backend_internal_models.Flavor:
     properties:
       color:
@@ -19,6 +42,16 @@ definitions:
         type: integer
       name:
         type: string
+    type: object
+  go-shisha-backend_internal_models.LoginInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
     type: object
   go-shisha-backend_internal_models.Post:
     properties:
@@ -92,6 +125,141 @@ info:
   title: Go-Shisha API
   version: "1.0"
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: メールアドレスとパスワードでログインし、JWT（Cookie）を発行する
+      parameters:
+      - description: ログイン情報
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/go-shisha-backend_internal_models.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ログイン成功
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.AuthResponse'
+        "400":
+          description: バリデーションエラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+        "401":
+          description: 認証失敗
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+        "500":
+          description: サーバーエラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+      summary: ログイン
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      description: Cookieを削除し、Refresh Tokenを無効化する
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ログアウト成功
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: 認証失敗
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+        "500":
+          description: サーバーエラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: ログアウト
+      tags:
+      - auth
+  /auth/me:
+    get:
+      description: 認証されたユーザーの情報を取得する
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ユーザー情報
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.AuthResponse'
+        "401":
+          description: 認証失敗
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+        "500":
+          description: サーバーエラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: 現在のユーザー情報取得
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      description: Refresh Tokenを使って新しいAccess Tokenを発行する
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: リフレッシュ成功
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: 認証失敗
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+        "500":
+          description: サーバーエラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+      summary: アクセストークンのリフレッシュ
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: 新しいユーザーを登録する
+      parameters:
+      - description: ユーザー登録情報
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/go-shisha-backend_internal_models.CreateUserInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 登録成功
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.AuthResponse'
+        "400":
+          description: バリデーションエラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+        "500":
+          description: サーバーエラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+      summary: ユーザー登録
+      tags:
+      - auth
   /posts:
     get:
       consumes:
@@ -315,4 +483,9 @@ paths:
       - users
 schemes:
 - http
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
