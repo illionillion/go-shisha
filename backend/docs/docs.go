@@ -258,7 +258,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "新しい投稿を作成します",
+                "description": "新しい投稿を作成します（未実装）",
                 "consumes": [
                     "application/json"
                 ],
@@ -287,8 +287,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/go-shisha-backend_internal_models.Post"
                         }
                     },
-                    "400": {
-                        "description": "バリデーションエラー",
+                    "501": {
+                        "description": "未実装",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
