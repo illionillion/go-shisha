@@ -219,6 +219,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
                         }
                     },
+                    "409": {
+                        "description": "メールアドレス重複",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                        }
+                    },
                     "500": {
                         "description": "サーバーエラー",
                         "schema": {
