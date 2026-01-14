@@ -59,7 +59,7 @@ func (i *IPRateLimiter) GetLimiter(ip string) *rate.Limiter {
 func RateLimitMiddleware(limiter *IPRateLimiter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ip := c.ClientIP()
-		
+
 		lim := limiter.GetLimiter(ip)
 		if !lim.Allow() {
 			logging.L.Warn("rate limit exceeded",
