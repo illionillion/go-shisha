@@ -3,7 +3,6 @@ package postgres
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"gorm.io/gorm"
 
@@ -104,8 +103,8 @@ func (r *UserRepository) Create(user *models.User) error {
 	}
 
 	if err := r.db.Create(um).Error; err != nil {
-		// PostgreSQL の UNIQUE 制約違反エラー (23505) またはメールアドレス重複を検出
-		if strings.Contains(err.Error(), "duplicate key") || strings.Contains(err.Error(), "UNIQUE constraint") {
+		// GORM の UNIQUE 制約違反エラーを検出
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			logging.L.Warn("duplicate email detected",
 				"repository", "UserRepository",
 				"method", "Create",

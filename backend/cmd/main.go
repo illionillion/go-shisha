@@ -103,10 +103,12 @@ func main() {
 	authHandler := handlers.NewAuthHandler(authService)
 
 	// レート制限ミドルウェア（認証エンドポイント用）
-	// 1分間に5リクエストまで、バースト10リクエスト
+	// 1分間に5リクエストまで、バースト5リクエスト
 	authRateLimiter := middleware.NewIPRateLimiter(rate.Every(12*time.Second), 5)
 	// 1時間ごとに古いIPエントリをクリーンアップ
-	authRateLimiter.CleanupOldIPs(1 * time.Hour)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	authRateLimiter.CleanupOldIPs(ctx, 1*time.Hour)
 	logging.L.Info("rate limiter initialized", "rate", "5 req/min", "burst", 5)
 
 	// Swagger UI
@@ -169,10 +171,10 @@ func main() {
 	<-quit
 
 	logging.L.Info("shutting down server...")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdownCancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := srv.Shutdown(shutdownCtx); err != nil {
 		logging.L.Error("server shutdown error", "error", err)
 	}
 	logging.L.Info("server exited, cleanup via defer")

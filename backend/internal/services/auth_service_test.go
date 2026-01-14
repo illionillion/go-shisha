@@ -334,7 +334,7 @@ func TestGetCurrentUser(t *testing.T) {
 	}
 
 	t.Run("正常系: 現在のユーザー情報取得成功", func(t *testing.T) {
-		user, err := svc.GetCurrentUser(registeredUser.ID)
+		user, err := svc.GetCurrentUser(int64(registeredUser.ID))
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}

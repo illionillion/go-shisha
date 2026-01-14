@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"os"
 
 	"go-shisha-backend/internal/models"
 	"go-shisha-backend/internal/services"
@@ -14,12 +15,16 @@ import (
 // AuthHandler は認証関連のハンドラー
 type AuthHandler struct {
 	authService *services.AuthService
+	isSecure    bool // Cookie Secureフラグ（本番環境でtrue）
 }
 
 // NewAuthHandler はAuthHandlerの新しいインスタンスを作成
 func NewAuthHandler(authService *services.AuthService) *AuthHandler {
+	// APP_ENVがproductionの場合はSecure=true
+	isSecure := os.Getenv("APP_ENV") == "production"
 	return &AuthHandler{
 		authService: authService,
+		isSecure:    isSecure,
 	}
 }
 
@@ -109,7 +114,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Value:    accessToken,
 		Path:     "/",
 		MaxAge:   15 * 60,
-		Secure:   false, // 開発環境ではfalse、本番ではtrue（HTTPS）
+		Secure:   h.isSecure, // 本番環境（APP_ENV=production）でtrue
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode, // CSRF対策
 	})
@@ -120,7 +125,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Value:    refreshToken,
 		Path:     "/",
 		MaxAge:   7 * 24 * 60 * 60,
-		Secure:   false, // 開発環境ではfalse、本番ではtrue（HTTPS）
+		Secure:   h.isSecure, // 本番環境（APP_ENV=production）でtrue
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode, // CSRF対策
 	})
@@ -169,7 +174,7 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 		Value:    newAccessToken,
 		Path:     "/",
 		MaxAge:   15 * 60,
-		Secure:   false, // 開発環境ではfalse、本番ではtrue（HTTPS）
+		Secure:   h.isSecure, // 本番環境（APP_ENV=production）でtrue
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode, // CSRF対策
 	})
@@ -218,7 +223,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		Value:    "",
 		Path:     "/",
 		MaxAge:   -1,
-		Secure:   false,
+		Secure:   h.isSecure,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	})
@@ -227,7 +232,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		Value:    "",
 		Path:     "/",
 		MaxAge:   -1,
-		Secure:   false,
+		Secure:   h.isSecure,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	})
@@ -261,7 +266,7 @@ func (h *AuthHandler) Me(c *gin.Context) {
 		return
 	}
 
-	user, err := h.authService.GetCurrentUser(userID.(int))
+	user, err := h.authService.GetCurrentUser(int64(userID.(int)))
 	if err != nil {
 		logging.L.Error("failed to get current user",
 			"handler", "AuthHandler",

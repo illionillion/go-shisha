@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"sync"
 	"time"
@@ -14,10 +15,12 @@ import (
 
 // IPRateLimiter はIPアドレスごとのレート制限を管理
 type IPRateLimiter struct {
-	ips map[string]*rate.Limiter
-	mu  *sync.RWMutex
-	r   rate.Limit
-	b   int
+	ips    map[string]*rate.Limiter
+	mu     *sync.RWMutex
+	r      rate.Limit
+	b      int
+	ticker *time.Ticker
+	cancel context.CancelFunc
 }
 
 // NewIPRateLimiter は新しいIPRateLimiterを作成
@@ -79,16 +82,34 @@ func RateLimitMiddleware(limiter *IPRateLimiter) gin.HandlerFunc {
 
 // CleanupOldIPs は古いIPアドレスのエントリを定期的にクリーンアップ
 // メモリリーク防止のため、バックグラウンドで実行することを推奨
-func (i *IPRateLimiter) CleanupOldIPs(interval time.Duration) {
-	ticker := time.NewTicker(interval)
+// アプリケーション終了時は Stop() を呼び出してgoroutineを停止すること
+func (i *IPRateLimiter) CleanupOldIPs(ctx context.Context, interval time.Duration) {
+	i.ticker = time.NewTicker(interval)
 	go func() {
-		for range ticker.C {
-			i.mu.Lock()
-			// 実装の簡略化のため、全エントリをクリア
-			// 本番環境ではRedisなどの外部ストレージを使用することを推奨
-			i.ips = make(map[string]*rate.Limiter)
-			i.mu.Unlock()
-			logging.L.Debug("rate limiter cleanup executed")
+		for {
+			select {
+			case <-ctx.Done():
+				i.ticker.Stop()
+				logging.L.Debug("rate limiter cleanup stopped")
+				return
+			case <-i.ticker.C:
+				i.mu.Lock()
+				// 実装の簡略化のため、全エントリをクリア
+				// 本番環境ではRedisなどの外部ストレージを使用することを推奨
+				i.ips = make(map[string]*rate.Limiter)
+				i.mu.Unlock()
+				logging.L.Debug("rate limiter cleanup executed")
+			}
 		}
 	}()
+}
+
+// Stop はクリーンアップgoroutineを停止する
+func (i *IPRateLimiter) Stop() {
+	if i.cancel != nil {
+		i.cancel()
+	}
+	if i.ticker != nil {
+		i.ticker.Stop()
+	}
 }

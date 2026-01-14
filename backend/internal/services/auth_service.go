@@ -247,13 +247,13 @@ func (s *AuthService) Logout(userID int64) error {
 }
 
 // GetCurrentUser は現在のユーザー情報を取得
-func (s *AuthService) GetCurrentUser(userID int) (*models.User, error) {
+func (s *AuthService) GetCurrentUser(userID int64) (*models.User, error) {
 	logging.L.Debug("getting current user",
 		"service", "AuthService",
 		"method", "GetCurrentUser",
 		"user_id", userID)
 
-	user, err := s.userRepo.GetByID(userID)
+	user, err := s.userRepo.GetByID(int(userID))
 	if err != nil {
 		logging.L.Error("failed to get user",
 			"service", "AuthService",
