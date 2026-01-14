@@ -19,6 +19,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"golang.org/x/time/rate"
 )
 
 // @title Go-Shisha API
@@ -101,6 +102,13 @@ func main() {
 	postHandler := handlers.NewPostHandler(postService)
 	authHandler := handlers.NewAuthHandler(authService)
 
+	// レート制限ミドルウェア（認証エンドポイント用）
+	// 1分間に5リクエストまで、バースト10リクエスト
+	authRateLimiter := middleware.NewIPRateLimiter(rate.Every(12*time.Second), 5)
+	// 1時間ごとに古いIPエントリをクリーンアップ
+	authRateLimiter.CleanupOldIPs(1 * time.Hour)
+	logging.L.Info("rate limiter initialized", "rate", "5 req/min", "burst", 5)
+
 	// Swagger UI
 	// Note: gin-swaggerは/swagger/index.htmlでのアクセスのみサポート
 	// /swagger/でのリダイレクトは未サポート (関連Issue: https://github.com/swaggo/gin-swagger/issues/323)
@@ -121,9 +129,10 @@ func main() {
 		// Auth endpoints (認証不要)
 		auth := api.Group("/auth")
 		{
-			auth.POST("/register", authHandler.Register)
-			auth.POST("/login", authHandler.Login)
-			auth.POST("/refresh", authHandler.Refresh)
+			// レート制限を適用（ブルートフォース攻撃対策）
+			auth.POST("/register", middleware.RateLimitMiddleware(authRateLimiter), authHandler.Register)
+			auth.POST("/login", middleware.RateLimitMiddleware(authRateLimiter), authHandler.Login)
+			auth.POST("/refresh", middleware.RateLimitMiddleware(authRateLimiter), authHandler.Refresh)
 			auth.POST("/logout", middleware.AuthMiddleware(), authHandler.Logout)
 			auth.GET("/me", middleware.AuthMiddleware(), authHandler.Me)
 		}
