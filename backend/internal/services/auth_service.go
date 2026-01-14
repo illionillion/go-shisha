@@ -14,6 +14,11 @@ import (
 	"gorm.io/gorm"
 )
 
+var (
+	// ErrEmailAlreadyExists はメールアドレスが既に登録されている場合のエラー
+	ErrEmailAlreadyExists = errors.New("email already exists")
+)
+
 // AuthService は認証サービスのインターフェース
 type AuthService struct {
 	userRepo         repositories.AuthUserRepository
@@ -35,16 +40,6 @@ func (s *AuthService) Register(input *models.CreateUserInput) (*models.User, err
 		"method", "Register",
 		"email", input.Email)
 
-	// メールアドレスの重複チェック
-	existingUser, _ := s.userRepo.GetByEmail(input.Email)
-	if existingUser != nil {
-		logging.L.Warn("email already exists",
-			"service", "AuthService",
-			"method", "Register",
-			"email", input.Email)
-		return nil, errors.New("email already exists")
-	}
-
 	// ユーザーの作成
 	user := &models.User{
 		Email:       input.Email,
@@ -60,8 +55,16 @@ func (s *AuthService) Register(input *models.CreateUserInput) (*models.User, err
 		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	// DBに保存
+	// DBに保存（UNIQUE制約違反は repository 層で検出される）
 	if err := s.userRepo.Create(user); err != nil {
+		// メールアドレス重複エラーの場合は特定のエラーを返す
+		if errors.Is(err, repositories.ErrEmailAlreadyExists) {
+			logging.L.Warn("email already exists",
+				"service", "AuthService",
+				"method", "Register",
+				"email", input.Email)
+			return nil, ErrEmailAlreadyExists
+		}
 		logging.L.Error("failed to create user",
 			"service", "AuthService",
 			"method", "Register",
