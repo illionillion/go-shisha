@@ -3,10 +3,12 @@ package postgres
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"gorm.io/gorm"
 
 	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories"
 	"go-shisha-backend/pkg/logging"
 )
 
@@ -102,6 +104,14 @@ func (r *UserRepository) Create(user *models.User) error {
 	}
 
 	if err := r.db.Create(um).Error; err != nil {
+		// PostgreSQL の UNIQUE 制約違反エラー (23505) またはメールアドレス重複を検出
+		if strings.Contains(err.Error(), "duplicate key") || strings.Contains(err.Error(), "UNIQUE constraint") {
+			logging.L.Warn("duplicate email detected",
+				"repository", "UserRepository",
+				"method", "Create",
+				"email", user.Email)
+			return repositories.ErrEmailAlreadyExists
+		}
 		logging.L.Error("failed to create user",
 			"repository", "UserRepository",
 			"method", "Create",
