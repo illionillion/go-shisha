@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories"
 	"go-shisha-backend/pkg/auth"
 
 	"gorm.io/gorm"
@@ -37,7 +38,7 @@ func (m *mockAuthUserRepo) GetByEmail(email string) (*models.User, error) {
 
 func (m *mockAuthUserRepo) Create(user *models.User) error {
 	if _, exists := m.users[user.Email]; exists {
-		return errors.New("email already exists")
+		return repositories.ErrEmailAlreadyExists
 	}
 	user.ID = len(m.users) + 1
 	m.users[user.Email] = user
@@ -146,8 +147,8 @@ func TestRegister(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error for duplicate email, got nil")
 		}
-		if err.Error() != "email already exists" {
-			t.Fatalf("expected 'email already exists' error, got %v", err)
+		if !errors.Is(err, ErrEmailAlreadyExists) {
+			t.Fatalf("expected ErrEmailAlreadyExists error, got %v", err)
 		}
 	})
 }
