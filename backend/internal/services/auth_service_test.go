@@ -15,7 +15,7 @@ import (
 
 func init() {
 	// テスト用のJWT_SECRETを設定
-	os.Setenv("JWT_SECRET", "test-secret-key-for-testing-purpose-at-least-64-characters-long")
+	_ = os.Setenv("JWT_SECRET", "test-secret-key-for-testing-purpose-at-least-64-characters-long")
 }
 
 // mockAuthUserRepo はUserRepositoryのモック
