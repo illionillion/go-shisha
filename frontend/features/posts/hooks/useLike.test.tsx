@@ -206,6 +206,36 @@ describe("useLike", () => {
       // mutateは呼ばれる
       expect(mockMutate).toHaveBeenCalled();
     });
+
+    it("キャッシュにデータがない状態でエラーが発生してもロールバックしない", () => {
+      const postId = 999;
+
+      // キャッシュにデータがない状態でエラーを発生させる
+      const mockMutate = vi.fn((params, options) => {
+        if (options?.onError) {
+          options.onError(new Error("Network error"), params, undefined);
+        }
+      });
+
+      vi.mocked(postsApi.usePostPostsIdLike).mockReturnValue({
+        mutate: mockMutate,
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdLike>);
+
+      vi.mocked(postsApi.usePostPostsIdUnlike).mockReturnValue({
+        mutate: vi.fn(),
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdUnlike>);
+
+      const { result } = renderHook(() => useLike(), { wrapper });
+
+      result.current.onLike(postId);
+
+      // キャッシュにデータがないのでロールバックも発生しない
+      const cacheData = queryClient.getQueryData<Post>(["posts", postId]);
+      expect(cacheData).toBeUndefined();
+
+      // mutateは呼ばれる
+      expect(mockMutate).toHaveBeenCalled();
+    });
   });
 
   describe("onUnlike", () => {
@@ -396,6 +426,36 @@ describe("useLike", () => {
       const { result } = renderHook(() => useLike(), { wrapper });
 
       expect(() => result.current.onUnlike(999)).not.toThrow();
+      expect(mockMutate).toHaveBeenCalled();
+    });
+
+    it("キャッシュにデータがない状態でエラーが発生してもロールバックしない", () => {
+      const postId = 999;
+
+      // キャッシュにデータがない状態でエラーを発生させる
+      const mockMutate = vi.fn((params, options) => {
+        if (options?.onError) {
+          options.onError(new Error("Network error"), params, undefined);
+        }
+      });
+
+      vi.mocked(postsApi.usePostPostsIdUnlike).mockReturnValue({
+        mutate: mockMutate,
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdUnlike>);
+
+      vi.mocked(postsApi.usePostPostsIdLike).mockReturnValue({
+        mutate: vi.fn(),
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdLike>);
+
+      const { result } = renderHook(() => useLike(), { wrapper });
+
+      result.current.onUnlike(postId);
+
+      // キャッシュにデータがないのでロールバックも発生しない
+      const cacheData = queryClient.getQueryData<Post>(["posts", postId]);
+      expect(cacheData).toBeUndefined();
+
+      // mutateは呼ばれる
       expect(mockMutate).toHaveBeenCalled();
     });
   });
