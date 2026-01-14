@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"go-shisha-backend/internal/models"
@@ -31,6 +32,7 @@ func NewAuthHandler(authService *services.AuthService) *AuthHandler {
 // @Param input body models.CreateUserInput true "ユーザー登録情報"
 // @Success 201 {object} models.AuthResponse "登録成功"
 // @Failure 400 {object} models.ErrorResponse "バリデーションエラー"
+// @Failure 409 {object} models.ErrorResponse "メールアドレス重複"
 // @Failure 500 {object} models.ErrorResponse "サーバーエラー"
 // @Router /auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
@@ -46,6 +48,15 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	user, err := h.authService.Register(&input)
 	if err != nil {
+		// メールアドレス重複エラーの場合は 409 Conflict を返す
+		if errors.Is(err, services.ErrEmailAlreadyExists) {
+			logging.L.Warn("registration failed: email already exists",
+				"handler", "AuthHandler",
+				"method", "Register",
+				"email", input.Email)
+			c.JSON(http.StatusConflict, models.ErrorResponse{Error: "email already exists"})
+			return
+		}
 		logging.L.Error("failed to register user",
 			"handler", "AuthHandler",
 			"method", "Register",
