@@ -37,12 +37,16 @@
     "test:vrt:sp:update": "VRT_DEVICE=sp test-storybook --url http://localhost:6006 -u"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@tanstack/react-query": "^5.90.12",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.26.2",
     "next": "16.0.3",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "react-hook-form": "^7.71.1",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
