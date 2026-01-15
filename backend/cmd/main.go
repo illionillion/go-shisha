@@ -103,7 +103,7 @@ func main() {
 	authHandler := handlers.NewAuthHandler(authService)
 
 	// レート制限ミドルウェア（認証エンドポイント用）
-	// 1分間に5リクエストまで、バースト5リクエスト
+	// 1分間に5リクエストまで（12秒 × 5 = 60秒）、バースト5リクエスト
 	authRateLimiter := middleware.NewIPRateLimiter(rate.Every(12*time.Second), 5)
 	// 1時間ごとに古いIPエントリをクリーンアップ
 	ctx, cancel := context.WithCancel(context.Background())

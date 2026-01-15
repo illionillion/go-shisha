@@ -84,6 +84,7 @@ func RateLimitMiddleware(limiter *IPRateLimiter) gin.HandlerFunc {
 // メモリリーク防止のため、バックグラウンドで実行することを推奨
 // アプリケーション終了時は Stop() を呼び出してgoroutineを停止すること
 func (i *IPRateLimiter) CleanupOldIPs(ctx context.Context, interval time.Duration) {
+	ctx, i.cancel = context.WithCancel(ctx)
 	i.ticker = time.NewTicker(interval)
 	go func() {
 		for {
@@ -95,7 +96,8 @@ func (i *IPRateLimiter) CleanupOldIPs(ctx context.Context, interval time.Duratio
 			case <-i.ticker.C:
 				i.mu.Lock()
 				// 実装の簡略化のため、全エントリをクリア
-				// 本番環境ではRedisなどの外部ストレージを使用することを推奨
+				// 注意: 全削除により一時的にレート制限がリセットされる
+				// 本番環境ではRedisなどの外部ストレージ、またはTTLベースのクリーンアップを推奨
 				i.ips = make(map[string]*rate.Limiter)
 				i.mu.Unlock()
 				logging.L.Debug("rate limiter cleanup executed")
