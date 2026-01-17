@@ -23,17 +23,18 @@ func (r *PostRepository) toDomain(pm *postModel) models.Post {
 		return models.Post{}
 	}
 
+	// Convert slides
 	var slides []models.Slide
-	{
+	for _, sm := range pm.Slides {
 		slide := models.Slide{
-			ImageURL: pm.ImageURL,
-			Text:     pm.Content,
+			ImageURL: sm.ImageURL,
+			Text:     sm.Text,
 		}
-		if pm.Flavor != nil {
+		if sm.Flavor != nil {
 			slide.Flavor = &models.Flavor{
-				ID:    int(pm.Flavor.ID),
-				Name:  pm.Flavor.Name,
-				Color: pm.Flavor.Color,
+				ID:    int(sm.Flavor.ID),
+				Name:  sm.Flavor.Name,
+				Color: sm.Flavor.Color,
 			}
 		}
 		slides = append(slides, slide)
@@ -64,7 +65,9 @@ func (r *PostRepository) toDomain(pm *postModel) models.Post {
 func (r *PostRepository) GetAll() ([]models.Post, error) {
 	logging.L.Debug("querying posts from DB", "repository", "PostRepository", "method", "GetAll")
 	var pms []postModel
-	if err := r.db.Preload("User").Preload("Flavor").Order("created_at desc").Find(&pms).Error; err != nil {
+	if err := r.db.Preload("User").Preload("Slides", func(db *gorm.DB) *gorm.DB {
+		return db.Order("slides.slide_order ASC")
+	}).Preload("Slides.Flavor").Order("created_at desc").Find(&pms).Error; err != nil {
 		logging.L.Error("failed to query posts", "repository", "PostRepository", "method", "GetAll", "error", err)
 		return nil, fmt.Errorf("failed to query all posts: %w", err)
 	}
@@ -79,7 +82,9 @@ func (r *PostRepository) GetAll() ([]models.Post, error) {
 func (r *PostRepository) GetByID(id int) (*models.Post, error) {
 	logging.L.Debug("querying post by ID", "repository", "PostRepository", "method", "GetByID", "post_id", id)
 	var pm postModel
-	if err := r.db.Preload("User").Preload("Flavor").First(&pm, "id = ?", id).Error; err != nil {
+	if err := r.db.Preload("User").Preload("Slides", func(db *gorm.DB) *gorm.DB {
+		return db.Order("slides.slide_order ASC")
+	}).Preload("Slides.Flavor").First(&pm, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			logging.L.Debug("post not found", "repository", "PostRepository", "method", "GetByID", "post_id", id)
 			return nil, fmt.Errorf("post not found: id=%d", id)
@@ -93,33 +98,47 @@ func (r *PostRepository) GetByID(id int) (*models.Post, error) {
 }
 
 func (r *PostRepository) Create(post *models.Post) error {
-	var content string
-	var image string
-	var flavorID *int64
-	if len(post.Slides) > 0 {
-		// join slide texts with newlines
-		content = post.Slides[0].Text
-		image = post.Slides[0].ImageURL
-		if post.Slides[0].Flavor != nil {
-			id := int64(post.Slides[0].Flavor.ID)
-			flavorID = &id
-		}
-	}
-	pm := postModel{
-		UserID:   int64(post.UserID),
-		FlavorID: flavorID,
-		Content:  content,
-		ImageURL: image,
-		Likes:    post.Likes,
-	}
 	logging.L.Debug("creating post", "repository", "PostRepository", "method", "Create", "user_id", post.UserID)
-	if err := r.db.Create(&pm).Error; err != nil {
+
+	// トランザクション内でpostとslidesを作成
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		// Postを作成
+		pm := postModel{
+			UserID: int64(post.UserID),
+			Likes:  post.Likes,
+		}
+		if err := tx.Create(&pm).Error; err != nil {
+			return fmt.Errorf("failed to create post: %w", err)
+		}
+
+		// Slidesを作成
+		for i, slide := range post.Slides {
+			sm := slideModel{
+				PostID:     pm.ID,
+				ImageURL:   slide.ImageURL,
+				Text:       slide.Text,
+				SlideOrder: i,
+			}
+			if slide.Flavor != nil {
+				flavorID := int64(slide.Flavor.ID)
+				sm.FlavorID = &flavorID
+			}
+			if err := tx.Create(&sm).Error; err != nil {
+				return fmt.Errorf("failed to create slide %d: %w", i, err)
+			}
+		}
+
+		post.ID = int(pm.ID)
+		post.CreatedAt = pm.CreatedAt
+		return nil
+	})
+
+	if err != nil {
 		logging.L.Error("failed to create post", "repository", "PostRepository", "method", "Create", "user_id", post.UserID, "error", err)
-		return fmt.Errorf("failed to create post for user_id=%d: %w", post.UserID, err)
+		return err
 	}
-	post.ID = int(pm.ID)
-	post.CreatedAt = pm.CreatedAt
-	logging.L.Info("post created", "repository", "PostRepository", "method", "Create", "post_id", post.ID, "user_id", post.UserID)
+
+	logging.L.Info("post created", "repository", "PostRepository", "method", "Create", "post_id", post.ID, "user_id", post.UserID, "slides_count", len(post.Slides))
 	return nil
 }
 
@@ -144,7 +163,9 @@ func (r *PostRepository) DecrementLikes(id int) (*models.Post, error) {
 func (r *PostRepository) GetByUserID(userID int) ([]models.Post, error) {
 	logging.L.Debug("querying posts by user ID", "repository", "PostRepository", "method", "GetByUserID", "user_id", userID)
 	var pms []postModel
-	if err := r.db.Preload("User").Preload("Flavor").Where("user_id = ?", userID).Order("created_at desc").Find(&pms).Error; err != nil {
+	if err := r.db.Preload("User").Preload("Slides", func(db *gorm.DB) *gorm.DB {
+		return db.Order("slides.slide_order ASC")
+	}).Preload("Slides.Flavor").Where("user_id = ?", userID).Order("created_at desc").Find(&pms).Error; err != nil {
 		logging.L.Error("failed to query posts by user", "repository", "PostRepository", "method", "GetByUserID", "user_id", userID, "error", err)
 		return nil, fmt.Errorf("failed to query posts by user_id=%d: %w", userID, err)
 	}

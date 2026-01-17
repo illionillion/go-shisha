@@ -7,6 +7,37 @@ import {
 } from "@/api/posts";
 import type { Post } from "@/types/domain";
 
+/**
+ * リスト内の該当投稿のいいね数を楽観的に更新
+ */
+function updatePostInList(
+  queryClient: ReturnType<typeof useQueryClient>,
+  postId: number,
+  updater: (post: Post) => Post
+) {
+  // 全投稿リストを更新
+  const postsKey = getGetPostsQueryKey();
+  queryClient.setQueryData<{ posts: Post[] }>(postsKey, (old) => {
+    if (!old?.posts) return old;
+    return {
+      ...old,
+      posts: old.posts.map((post) => (post.id === postId ? updater(post) : post)),
+    };
+  });
+
+  // ユーザー別投稿リストも更新（存在する場合）
+  queryClient
+    .getQueriesData<{ posts: Post[] }>({ queryKey: ["v1", "users"] })
+    .forEach(([key, data]) => {
+      if (data?.posts) {
+        queryClient.setQueryData(key, {
+          ...data,
+          posts: data.posts.map((post) => (post.id === postId ? updater(post) : post)),
+        });
+      }
+    });
+}
+
 export function useLike() {
   const queryClient = useQueryClient();
   const likeMut = usePostPostsIdLike();
@@ -16,10 +47,17 @@ export function useLike() {
     const detailKey = getGetPostsIdQueryKey(postId);
     const prev = queryClient.getQueryData<Post | undefined>(detailKey);
 
-    // optimistic update: increment
+    // optimistic update: 詳細画面用
     queryClient.setQueryData<Post | undefined>(detailKey, (old) =>
       old ? { ...old, likes: (old.likes ?? 0) + 1, is_liked: true } : old
     );
+
+    // optimistic update: リスト内
+    updatePostInList(queryClient, postId, (post) => ({
+      ...post,
+      likes: (post.likes ?? 0) + 1,
+      is_liked: true,
+    }));
 
     likeMut.mutate(
       { id: postId },
@@ -27,10 +65,7 @@ export function useLike() {
         onError: () => {
           if (prev) queryClient.setQueryData(detailKey, prev);
         },
-        onSettled: () => {
-          queryClient.invalidateQueries({ queryKey: getGetPostsQueryKey() });
-          queryClient.invalidateQueries({ queryKey: detailKey });
-        },
+        // onSettledでinvalidateしない（楽観的更新のみで対応）
       }
     );
   };
@@ -39,10 +74,17 @@ export function useLike() {
     const detailKey = getGetPostsIdQueryKey(postId);
     const prev = queryClient.getQueryData<Post | undefined>(detailKey);
 
-    // optimistic update: decrement
+    // optimistic update: 詳細画面用
     queryClient.setQueryData<Post | undefined>(detailKey, (old) =>
       old ? { ...old, likes: Math.max(0, (old.likes ?? 0) - 1), is_liked: false } : old
     );
+
+    // optimistic update: リスト内
+    updatePostInList(queryClient, postId, (post) => ({
+      ...post,
+      likes: Math.max(0, (post.likes ?? 0) - 1),
+      is_liked: false,
+    }));
 
     unlikeMut.mutate(
       { id: postId },
@@ -50,10 +92,7 @@ export function useLike() {
         onError: () => {
           if (prev) queryClient.setQueryData(detailKey, prev);
         },
-        onSettled: () => {
-          queryClient.invalidateQueries({ queryKey: getGetPostsQueryKey() });
-          queryClient.invalidateQueries({ queryKey: detailKey });
-        },
+        // onSettledでinvalidateしない（楽観的更新のみで対応）
       }
     );
   };

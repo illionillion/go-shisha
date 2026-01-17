@@ -22,18 +22,32 @@ func (userModel) TableName() string {
 type postModel struct {
 	ID        int64        `gorm:"primaryKey;column:id"`
 	UserID    int64        `gorm:"column:user_id"`
-	FlavorID  *int64       `gorm:"column:flavor_id"`
-	Content   string       `gorm:"column:content"`
-	ImageURL  string       `gorm:"column:image_url"`
 	Likes     int          `gorm:"column:likes"`
 	CreatedAt time.Time    `gorm:"column:created_at"`
 	User      *userModel   `gorm:"foreignKey:UserID"`
-	Flavor    *flavorModel `gorm:"foreignKey:FlavorID"`
+	Slides    []slideModel `gorm:"foreignKey:PostID"`
 }
 
 // TableName ensures GORM uses the existing `posts` table
 func (postModel) TableName() string {
 	return "posts"
+}
+
+// slideModel represents the slides table
+type slideModel struct {
+	ID         int64        `gorm:"primaryKey;column:id"`
+	PostID     int64        `gorm:"column:post_id"`
+	ImageURL   string       `gorm:"column:image_url"`
+	Text       string       `gorm:"column:text"`
+	FlavorID   *int64       `gorm:"column:flavor_id"`
+	SlideOrder int          `gorm:"column:slide_order"`
+	CreatedAt  time.Time    `gorm:"column:created_at"`
+	Flavor     *flavorModel `gorm:"foreignKey:FlavorID"`
+}
+
+// TableName ensures GORM uses the existing `slides` table
+func (slideModel) TableName() string {
+	return "slides"
 }
 
 // flavorModel represents the flavors table
