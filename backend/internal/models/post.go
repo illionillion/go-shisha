@@ -2,10 +2,25 @@ package models
 
 import "time"
 
-// Post represents a shisha post
-// Slide represents a single image + text + flavor in a post
+// SlideDB represents a slide record in the database
+type SlideDB struct {
+	ID         int       `gorm:"primaryKey;autoIncrement"`
+	PostID     int       `gorm:"not null;index"`
+	ImageURL   string    `gorm:"not null"`
+	Text       string    `gorm:"type:text"`
+	FlavorID   *int      `gorm:"index"`
+	SlideOrder int       `gorm:"not null;default:0"`
+	CreatedAt  time.Time `gorm:"not null;default:now()"`
+}
+
+// TableName specifies the table name for SlideDB
+func (SlideDB) TableName() string {
+	return "slides"
+}
+
+// Slide represents a single image + text + flavor in a post (API response)
 type Slide struct {
-	ImageURL string  `json:"image_url"`
+	ImageURL string  `json:"image_url" binding:"required"`
 	Text     string  `json:"text"`
 	Flavor   *Flavor `json:"flavor,omitempty"`
 }
@@ -21,10 +36,23 @@ type Post struct {
 	IsLiked   bool      `json:"is_liked,omitempty"`
 }
 
+// PostDB represents a post record in the database
+type PostDB struct {
+	ID        int       `gorm:"primaryKey;autoIncrement"`
+	UserID    int       `gorm:"not null;index"`
+	Likes     int       `gorm:"not null;default:0"`
+	CreatedAt time.Time `gorm:"not null;default:now()"`
+}
+
+// TableName specifies the table name for PostDB
+func (PostDB) TableName() string {
+	return "posts"
+}
+
 // CreatePostInput represents the input for creating a post
 type CreatePostInput struct {
 	UserID int     `json:"user_id" binding:"required"`
-	Slides []Slide `json:"slides"`
+	Slides []Slide `json:"slides" binding:"required,min=1,dive"`
 }
 
 // PostsResponse represents the response for post list
