@@ -28,7 +28,8 @@ function updatePostInList(
   // ユーザー別投稿リストも更新（存在する場合）
   // Orval が生成するキー等、実装差に依存せず、
   // クエリキーに `users` と `posts` を含むキャッシュを探して更新します。
-  queryClient.getQueriesData<{ posts: Post[] }>({}).forEach(([key, data]) => {
+  // パフォーマンスを考慮し、usersプレフィックスを持つクエリのみ対象に絞る
+  queryClient.getQueriesData<{ posts: Post[] }>({ queryKey: ["users"] }).forEach(([key, data]) => {
     if (!data?.posts) return;
     const keyParts = Array.isArray(key) ? key.map((p) => String(p)) : [String(key)];
     const keyString = keyParts.join("/");
@@ -71,10 +72,10 @@ export function useLike() {
       { id: postId },
       {
         onError: () => {
-          // 詳細画面のキャッシュをロールバック
-          if (prev) queryClient.setQueryData(detailKey, prev);
-          // リスト内のキャッシュもロールバック
           if (prev) {
+            // 詳細画面のキャッシュをロールバック
+            queryClient.setQueryData(detailKey, prev);
+            // リスト内のキャッシュもロールバック
             updatePostInList(queryClient, postId, () => prev);
           }
         },
@@ -103,10 +104,10 @@ export function useLike() {
       { id: postId },
       {
         onError: () => {
-          // 詳細画面のキャッシュをロールバック
-          if (prev) queryClient.setQueryData(detailKey, prev);
-          // リスト内のキャッシュもロールバック
           if (prev) {
+            // 詳細画面のキャッシュをロールバック
+            queryClient.setQueryData(detailKey, prev);
+            // リスト内のキャッシュもロールバック
             updatePostInList(queryClient, postId, () => prev);
           }
         },
