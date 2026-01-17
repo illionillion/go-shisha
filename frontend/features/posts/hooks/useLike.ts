@@ -33,10 +33,15 @@ function updatePostInList(
     if (!data?.posts) return;
     if (!Array.isArray(key) || typeof key[0] !== "string") return;
 
+    const first = String(key[0]);
+    // 絞り込み: 先頭が /users/ でなければ無視
+    if (!first.startsWith("/users/")) return;
+
     // key[0] 形式は `/users/{id}/posts` のはずなのでパースして id を取り出す
-    const maybe = /^\/users\/(\d+)\/posts$/.exec(String(key[0]));
+    const maybe = /^\/users\/(\d+)\/posts$/.exec(first);
     if (!maybe) return;
     const id = Number(maybe[1]);
+    if (isNaN(id)) return;
 
     const expected = getGetUsersIdPostsQueryKey(id);
     // queryKey の厳密一致を確認してから更新

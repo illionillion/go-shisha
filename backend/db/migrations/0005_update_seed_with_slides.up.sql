@@ -15,6 +15,7 @@ INSERT INTO posts (id, user_id, likes, created_at) VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- slidesデータを挿入（元のモックデータを復元）
+-- flavor mapping: 1=ミント, 2=アップル, 3=ベリー, 4=マンゴー, 5=オレンジ, 6=グレープ
 -- Post 1: 3つのスライド (flavor_id: 1=ミント, 2=アップル, 3=ベリー)
 INSERT INTO slides (post_id, image_url, text, flavor_id, slide_order) VALUES
   (1, '/images/264971_0.jpg', '最初はミント。爽やかでスッキリ！', 1, 0),
