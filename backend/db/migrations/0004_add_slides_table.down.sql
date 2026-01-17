@@ -1,5 +1,7 @@
 -- 0004_add_slides_table.down.sql
 -- スライドテーブルを削除し、postsテーブルを元の構造に戻す
+-- 警告: 複数スライドを持つPostは2枚目以降のデータが失われます。
+-- 本番環境でロールバックする場合は事前にバックアップを取ってください。
 
 -- postsテーブルに削除したカラムを復元
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS content TEXT;

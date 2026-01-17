@@ -92,6 +92,11 @@ describe("useLike", () => {
         { id: 5 },
         expect.objectContaining({
           onError: expect.any(Function),
+        })
+      );
+      expect(mockMutate).toHaveBeenCalledWith(
+        { id: 5 },
+        expect.not.objectContaining({
           onSettled: expect.any(Function),
         })
       );
@@ -162,16 +167,8 @@ describe("useLike", () => {
       expect(rolledBackPost).toEqual(initialPost);
     });
 
-    it("onSettledでキャッシュが無効化される", async () => {
-      const postId = 1;
-      const invalidateQueriesSpy = vi.spyOn(queryClient, "invalidateQueries");
-
-      const mockMutate = vi.fn((params, options) => {
-        if (options?.onSettled) {
-          options.onSettled(undefined, null, params, undefined);
-        }
-      });
-
+    it("リスト内の投稿も楽観的に更新される", () => {
+      const mockMutate = vi.fn();
       vi.mocked(postsApi.usePostPostsIdLike).mockReturnValue({
         mutate: mockMutate,
       } as unknown as ReturnType<typeof postsApi.usePostPostsIdLike>);
@@ -180,12 +177,27 @@ describe("useLike", () => {
         mutate: vi.fn(),
       } as unknown as ReturnType<typeof postsApi.usePostPostsIdUnlike>);
 
+      const postId = 1;
+      const initialPosts = [
+        { id: postId, user_id: 1, likes: 10, is_liked: false, slides: [] },
+        { id: 2, user_id: 2, likes: 20, is_liked: false, slides: [] },
+      ];
+
+      // リストデータをキャッシュに設定
+      queryClient.setQueryData(["posts"], { posts: initialPosts });
+
       const { result } = renderHook(() => useLike(), { wrapper });
 
       result.current.onLike(postId);
 
-      expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ["posts"] });
-      expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ["posts", postId] });
+      // リスト内の該当投稿が更新されているか確認
+      const updatedList = queryClient.getQueryData<{ posts: Post[] }>(["posts"]);
+      expect(updatedList?.posts[0]).toEqual({
+        ...initialPosts[0],
+        likes: 11,
+        is_liked: true,
+      });
+      expect(updatedList?.posts[1]).toEqual(initialPosts[1]); // 他の投稿は変わらない
     });
 
     it("キャッシュにデータがない場合でもエラーにならない", () => {
@@ -348,6 +360,11 @@ describe("useLike", () => {
         { id: 7 },
         expect.objectContaining({
           onError: expect.any(Function),
+        })
+      );
+      expect(mockMutate).toHaveBeenCalledWith(
+        { id: 7 },
+        expect.not.objectContaining({
           onSettled: expect.any(Function),
         })
       );
@@ -387,16 +404,8 @@ describe("useLike", () => {
       expect(rolledBackPost).toEqual(initialPost);
     });
 
-    it("onSettledでキャッシュが無効化される", () => {
-      const postId = 1;
-      const invalidateQueriesSpy = vi.spyOn(queryClient, "invalidateQueries");
-
-      const mockMutate = vi.fn((params, options) => {
-        if (options?.onSettled) {
-          options.onSettled(undefined, null, params, undefined);
-        }
-      });
-
+    it("リスト内の投稿も楽観的に更新される", () => {
+      const mockMutate = vi.fn();
       vi.mocked(postsApi.usePostPostsIdUnlike).mockReturnValue({
         mutate: mockMutate,
       } as unknown as ReturnType<typeof postsApi.usePostPostsIdUnlike>);
@@ -405,12 +414,27 @@ describe("useLike", () => {
         mutate: vi.fn(),
       } as unknown as ReturnType<typeof postsApi.usePostPostsIdLike>);
 
+      const postId = 1;
+      const initialPosts = [
+        { id: postId, user_id: 1, likes: 10, is_liked: true, slides: [] },
+        { id: 2, user_id: 2, likes: 20, is_liked: false, slides: [] },
+      ];
+
+      // リストデータをキャッシュに設定
+      queryClient.setQueryData(["posts"], { posts: initialPosts });
+
       const { result } = renderHook(() => useLike(), { wrapper });
 
       result.current.onUnlike(postId);
 
-      expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ["posts"] });
-      expect(invalidateQueriesSpy).toHaveBeenCalledWith({ queryKey: ["posts", postId] });
+      // リスト内の該当投稿が更新されているか確認
+      const updatedList = queryClient.getQueryData<{ posts: Post[] }>(["posts"]);
+      expect(updatedList?.posts[0]).toEqual({
+        ...initialPosts[0],
+        likes: 9,
+        is_liked: false,
+      });
+      expect(updatedList?.posts[1]).toEqual(initialPosts[1]); // 他の投稿は変わらない
     });
 
     it("キャッシュにデータがない場合でもエラーにならない", () => {

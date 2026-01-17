@@ -63,7 +63,12 @@ export function useLike() {
       { id: postId },
       {
         onError: () => {
+          // 詳細画面のキャッシュをロールバック
           if (prev) queryClient.setQueryData(detailKey, prev);
+          // リスト内のキャッシュもロールバック
+          if (prev) {
+            updatePostInList(queryClient, postId, () => prev);
+          }
         },
         // onSettledでinvalidateしない（楽観的更新のみで対応）
       }
@@ -90,7 +95,12 @@ export function useLike() {
       { id: postId },
       {
         onError: () => {
+          // 詳細画面のキャッシュをロールバック
           if (prev) queryClient.setQueryData(detailKey, prev);
+          // リスト内のキャッシュもロールバック
+          if (prev) {
+            updatePostInList(queryClient, postId, () => prev);
+          }
         },
         // onSettledでinvalidateしない（楽観的更新のみで対応）
       }

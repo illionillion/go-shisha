@@ -1,5 +1,7 @@
 -- 0005_update_seed_with_slides.down.sql
 -- シードデータを元に戻す
+-- 依存: このdownを実行する前に0004のdownが実行されている必要があります
+-- （flavor_id, content, image_urlカラムが復元済みである必要があります）
 
 -- slidesとpostsを削除
 DELETE FROM slides;
