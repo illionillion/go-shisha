@@ -10,6 +10,6 @@ import type { GoShishaBackendInternalModelsFlavor } from "./goShishaBackendInter
 
 export interface GoShishaBackendInternalModelsSlide {
   flavor?: GoShishaBackendInternalModelsFlavor;
-  image_url?: string;
+  image_url: string;
   text?: string;
 }
