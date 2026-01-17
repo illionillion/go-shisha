@@ -5,6 +5,7 @@ import {
   getGetPostsIdQueryKey,
   getGetPostsQueryKey,
 } from "@/api/posts";
+import { getGetUsersIdPostsQueryKey } from "@/api/users";
 import type { Post } from "@/types/domain";
 
 /**
@@ -26,19 +27,20 @@ function updatePostInList(
   });
 
   // ユーザー別投稿リストも更新（存在する場合）
-  // Orval が生成するキー等、実装差に依存せず、
-  // クエリキーに `users` と `posts` を含むキャッシュを探して更新します。
-  // パフォーマンスを考慮し、usersプレフィックスを持つクエリのみ対象に絞る
-  queryClient.getQueriesData<{ posts: Post[] }>({ queryKey: ["users"] }).forEach(([key, data]) => {
+  // Orval が生成するキー関数 `getGetUsersIdPostsQueryKey` を用いて
+  // 実際のクエリキーと比較することで、実装依存のヒューリスティックを避ける
+  queryClient.getQueriesData<{ posts: Post[] }>({}).forEach(([key, data]) => {
     if (!data?.posts) return;
-    const keyParts = Array.isArray(key) ? key.map((p) => String(p)) : [String(key)];
-    const keyString = keyParts.join("/");
+    if (!Array.isArray(key) || typeof key[0] !== "string") return;
 
-    const looksLikeUserPosts =
-      /\/users\/\d+\/posts$/.test(keyString) ||
-      (keyString.includes("users") && keyString.includes("posts"));
+    // key[0] 形式は `/users/{id}/posts` のはずなのでパースして id を取り出す
+    const maybe = /^\/users\/(\d+)\/posts$/.exec(String(key[0]));
+    if (!maybe) return;
+    const id = Number(maybe[1]);
 
-    if (!looksLikeUserPosts) return;
+    const expected = getGetUsersIdPostsQueryKey(id);
+    // queryKey の厳密一致を確認してから更新
+    if (JSON.stringify(key) !== JSON.stringify(expected)) return;
 
     queryClient.setQueryData(key, {
       ...data,
