@@ -1,10 +1,12 @@
 import { useQueryClient } from "@tanstack/react-query";
+import type { QueryKey } from "@tanstack/react-query";
 import {
   usePostPostsIdLike,
   usePostPostsIdUnlike,
   getGetPostsIdQueryKey,
   getGetPostsQueryKey,
 } from "@/api/posts";
+import { getGetUsersIdPostsQueryKey } from "@/api/users";
 import type { Post } from "@/types/domain";
 
 /**
@@ -14,9 +16,13 @@ function updatePostInList(
   queryClient: ReturnType<typeof useQueryClient>,
   postId: number,
   updater: (post: Post) => Post
-) {
-  // 全投稿リストを更新
+): Array<[QueryKey, { posts: Post[] } | undefined]> {
+  const prevs: Array<[QueryKey, { posts: Post[] } | undefined]> = [];
+
+  // 全投稿リストを更新（prev を保存）
   const postsKey = getGetPostsQueryKey();
+  const postsPrev = queryClient.getQueryData<{ posts: Post[] }>(postsKey);
+  prevs.push([postsKey, postsPrev]);
   queryClient.setQueryData<{ posts: Post[] }>(postsKey, (old) => {
     if (!old?.posts) return old;
     return {
@@ -26,24 +32,51 @@ function updatePostInList(
   });
 
   // ユーザー別投稿リストも更新（存在する場合）
-  // Orval が生成するキー等、実装差に依存せず、
-  // クエリキーに `users` と `posts` を含むキャッシュを探して更新します。
-  queryClient.getQueriesData<{ posts: Post[] }>({}).forEach(([key, data]) => {
-    if (!data?.posts) return;
-    const keyParts = Array.isArray(key) ? key.map((p) => String(p)) : [String(key)];
-    const keyString = keyParts.join("/");
+  // getQueriesData の返り値のタプル型を明示して安全に扱う
+  queryClient
+    .getQueriesData<{ posts: Post[] }>({})
+    .forEach(([key, data]: [QueryKey, { posts: Post[] } | undefined]) => {
+      if (!data?.posts) return;
+      if (!Array.isArray(key) || typeof key[0] !== "string") return;
 
-    const looksLikeUserPosts =
-      /\/users\/\d+\/posts$/.test(keyString) ||
-      (keyString.includes("users") && keyString.includes("posts"));
+      const first = String(key[0]);
+      if (!first.startsWith("/users/")) return;
 
-    if (!looksLikeUserPosts) return;
+      const maybe = /^\/users\/(\d+)\/posts$/.exec(first);
+      if (!maybe) return;
+      const id = Number(maybe[1]);
+      if (isNaN(id) || !Number.isInteger(id) || id <= 0) return;
 
-    queryClient.setQueryData(key, {
-      ...data,
-      posts: data.posts.map((post) => (post.id === postId ? updater(post) : post)),
+      const expected = getGetUsersIdPostsQueryKey(id);
+      if (JSON.stringify(key) !== JSON.stringify(expected)) return;
+
+      // 保存してから更新
+      prevs.push([key, data]);
+      queryClient.setQueryData<{ posts: Post[] }>(key, {
+        ...data,
+        posts: data.posts.map((post) => (post.id === postId ? updater(post) : post)),
+      });
     });
-  });
+
+  return prevs;
+}
+
+// 指定投稿について、リスト内の各クエリキーごとの元データをキャプチャして返す
+function captureListPrev(
+  queryClient: ReturnType<typeof useQueryClient>,
+  postId: number
+): Array<{ key: QueryKey; prev?: Post }> {
+  const listPrev: Array<{ key: QueryKey; prev?: Post }> = [];
+  queryClient
+    .getQueriesData<{ posts: Post[] }>({})
+    .forEach(([key, data]: [QueryKey, { posts: Post[] } | undefined]) => {
+      if (!data?.posts) return;
+      const found = data.posts.find((p) => p.id === postId);
+      if (found) {
+        listPrev.push({ key, prev: found });
+      }
+    });
+  return listPrev;
 }
 
 export function useLike() {
@@ -54,6 +87,7 @@ export function useLike() {
   const onLike = (postId: number) => {
     const detailKey = getGetPostsIdQueryKey(postId);
     const prev = queryClient.getQueryData<Post | undefined>(detailKey);
+    const listPrev = captureListPrev(queryClient, postId);
 
     // optimistic update: 詳細画面用
     queryClient.setQueryData<Post | undefined>(detailKey, (old) =>
@@ -71,11 +105,20 @@ export function useLike() {
       { id: postId },
       {
         onError: () => {
-          // 詳細画面のキャッシュをロールバック
-          if (prev) queryClient.setQueryData(detailKey, prev);
-          // リスト内のキャッシュもロールバック
           if (prev) {
-            updatePostInList(queryClient, postId, () => prev);
+            // 詳細画面のキャッシュをロールバック
+            queryClient.setQueryData(detailKey, prev);
+            // リスト内のキャッシュも個別にロールバック
+            listPrev.forEach(({ key, prev: p }) => {
+              if (!p) return;
+              queryClient.setQueryData(key, (data: { posts: Post[] } | undefined) => {
+                if (!data?.posts) return data;
+                return {
+                  ...data,
+                  posts: data.posts.map((post: Post) => (post.id === postId ? p : post)),
+                };
+              });
+            });
           }
         },
         // onSettledでinvalidateしない（楽観的更新のみで対応）
@@ -86,6 +129,7 @@ export function useLike() {
   const onUnlike = (postId: number) => {
     const detailKey = getGetPostsIdQueryKey(postId);
     const prev = queryClient.getQueryData<Post | undefined>(detailKey);
+    const listPrev = captureListPrev(queryClient, postId);
 
     // optimistic update: 詳細画面用
     queryClient.setQueryData<Post | undefined>(detailKey, (old) =>
@@ -103,11 +147,20 @@ export function useLike() {
       { id: postId },
       {
         onError: () => {
-          // 詳細画面のキャッシュをロールバック
-          if (prev) queryClient.setQueryData(detailKey, prev);
-          // リスト内のキャッシュもロールバック
           if (prev) {
-            updatePostInList(queryClient, postId, () => prev);
+            // 詳細画面のキャッシュをロールバック
+            queryClient.setQueryData(detailKey, prev);
+            // リスト内のキャッシュも個別にロールバック
+            listPrev.forEach(({ key, prev: p }) => {
+              if (!p) return;
+              queryClient.setQueryData(key, (data: { posts: Post[] } | undefined) => {
+                if (!data?.posts) return data;
+                return {
+                  ...data,
+                  posts: data.posts.map((post: Post) => (post.id === postId ? p : post)),
+                };
+              });
+            });
           }
         },
         // onSettledでinvalidateしない（楽観的更新のみで対応）

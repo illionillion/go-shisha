@@ -110,3 +110,63 @@ func TestGetAllAndGetByUserIDOrdering(t *testing.T) {
 		t.Fatalf("expected at least 2 user posts, got %d", len(userPosts))
 	}
 }
+
+func TestCreatePostWithNoSlides(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewPostRepository(db)
+
+	// create user
+	if err := db.Create(&userModel{ID: 1, Email: "u1@example.com", DisplayName: "u1"}).Error; err != nil {
+		t.Fatalf("failed to create user: %v", err)
+	}
+
+	// create post with empty slides
+	p := &models.Post{UserID: 1, Slides: []models.Slide{}}
+	if err := repo.Create(p); err != nil {
+		t.Fatalf("Create with no slides failed: %v", err)
+	}
+
+	got, err := repo.GetByID(p.ID)
+	if err != nil {
+		t.Fatalf("GetByID failed: %v", err)
+	}
+
+	if len(got.Slides) != 0 {
+		t.Fatalf("expected 0 slides, got %d", len(got.Slides))
+	}
+}
+
+func TestSlideFlavorAssociation(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewPostRepository(db)
+
+	// create user and flavor
+	if err := db.Create(&userModel{ID: 1, Email: "u1@example.com", DisplayName: "u1"}).Error; err != nil {
+		t.Fatalf("failed to create user: %v", err)
+	}
+	if err := db.Create(&flavorModel{ID: 2, Name: "Berry", Color: "#FF00"}).Error; err != nil {
+		t.Fatalf("failed to create flavor: %v", err)
+	}
+
+	// create post with a slide that references the flavor
+	p := &models.Post{
+		UserID: 1,
+		Slides: []models.Slide{{ImageURL: "/f1.jpg", Text: "flavored", Flavor: &models.Flavor{ID: 2}}},
+	}
+
+	if err := repo.Create(p); err != nil {
+		t.Fatalf("Create with flavor slide failed: %v", err)
+	}
+
+	got, err := repo.GetByID(p.ID)
+	if err != nil {
+		t.Fatalf("GetByID failed: %v", err)
+	}
+
+	if len(got.Slides) != 1 {
+		t.Fatalf("expected 1 slide, got %d", len(got.Slides))
+	}
+	if got.Slides[0].Flavor == nil || got.Slides[0].Flavor.ID != 2 {
+		t.Fatalf("expected slide flavor ID 2, got %+v", got.Slides[0].Flavor)
+	}
+}

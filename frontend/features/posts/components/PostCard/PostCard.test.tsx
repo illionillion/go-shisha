@@ -211,8 +211,8 @@ describe("PostCard", () => {
       ...mockPost,
       slides: [
         {
-          image_url: mockPost.slides?.[0]?.image_url || "/images/test.jpg",
-          text: mockPost.slides?.[0]?.text || "",
+          image_url: mockPost.slides![0].image_url,
+          text: mockPost.slides![0].text,
           flavor: { id: 1, name: "ミント", color: undefined },
         },
       ],
@@ -230,8 +230,8 @@ describe("PostCard", () => {
       ...mockPost,
       slides: [
         {
-          image_url: mockPost.slides?.[0]?.image_url || "/images/test.jpg",
-          text: mockPost.slides?.[0]?.text || "",
+          image_url: mockPost.slides![0].image_url,
+          text: mockPost.slides![0].text,
           flavor: { id: 1, name: "ミント", color: "bg-unknown-500" },
         },
       ],
