@@ -20,7 +20,7 @@ func (SlideDB) TableName() string {
 
 // Slide represents a single image + text + flavor in a post (API response)
 type Slide struct {
-	ImageURL string  `json:"image_url"`
+	ImageURL string  `json:"image_url" binding:"required"`
 	Text     string  `json:"text"`
 	Flavor   *Flavor `json:"flavor,omitempty"`
 }
@@ -52,7 +52,7 @@ func (PostDB) TableName() string {
 // CreatePostInput represents the input for creating a post
 type CreatePostInput struct {
 	UserID int     `json:"user_id" binding:"required"`
-	Slides []Slide `json:"slides"`
+	Slides []Slide `json:"slides" binding:"required,min=1,dive"`
 }
 
 // PostsResponse represents the response for post list

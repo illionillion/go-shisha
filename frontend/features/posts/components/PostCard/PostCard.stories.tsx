@@ -157,7 +157,7 @@ export const WithoutImage: Story = {
       id: 4,
       slides: [
         {
-          image_url: undefined,
+          image_url: "",
           text: "画像なしの投稿です。フォールバック画像が表示されます。",
         },
       ],

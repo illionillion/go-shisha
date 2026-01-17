@@ -10,10 +10,12 @@ definitions:
       slides:
         items:
           $ref: '#/definitions/go-shisha-backend_internal_models.Slide'
+        minItems: 1
         type: array
       user_id:
         type: integer
     required:
+    - slides
     - user_id
     type: object
   go-shisha-backend_internal_models.CreateUserInput:
@@ -89,6 +91,8 @@ definitions:
         type: string
       text:
         type: string
+    required:
+    - image_url
     type: object
   go-shisha-backend_internal_models.User:
     properties:

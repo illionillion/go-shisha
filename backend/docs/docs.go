@@ -576,11 +576,13 @@ const docTemplate = `{
         "go-shisha-backend_internal_models.CreatePostInput": {
             "type": "object",
             "required": [
+                "slides",
                 "user_id"
             ],
             "properties": {
                 "slides": {
                     "type": "array",
+                    "minItems": 1,
                     "items": {
                         "$ref": "#/definitions/go-shisha-backend_internal_models.Slide"
                     }
@@ -691,6 +693,9 @@ const docTemplate = `{
         },
         "go-shisha-backend_internal_models.Slide": {
             "type": "object",
+            "required": [
+                "image_url"
+            ],
             "properties": {
                 "flavor": {
                     "$ref": "#/definitions/go-shisha-backend_internal_models.Flavor"

@@ -138,7 +138,7 @@ describe("PostCard", () => {
       ...mockPost,
       slides: [
         {
-          image_url: undefined,
+          image_url: "",
           text: "今日のシーシャは最高でした！",
         },
       ],
@@ -211,7 +211,8 @@ describe("PostCard", () => {
       ...mockPost,
       slides: [
         {
-          ...mockPost.slides?.[0],
+          image_url: mockPost.slides?.[0]?.image_url || "/images/test.jpg",
+          text: mockPost.slides?.[0]?.text || "",
           flavor: { id: 1, name: "ミント", color: undefined },
         },
       ],
@@ -229,7 +230,8 @@ describe("PostCard", () => {
       ...mockPost,
       slides: [
         {
-          ...mockPost.slides?.[0],
+          image_url: mockPost.slides?.[0]?.image_url || "/images/test.jpg",
+          text: mockPost.slides?.[0]?.text || "",
           flavor: { id: 1, name: "ミント", color: "bg-unknown-500" },
         },
       ],
