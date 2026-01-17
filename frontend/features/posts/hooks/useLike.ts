@@ -26,16 +26,24 @@ function updatePostInList(
   });
 
   // ユーザー別投稿リストも更新（存在する場合）
-  queryClient
-    .getQueriesData<{ posts: Post[] }>({ queryKey: ["v1", "users"] })
-    .forEach(([key, data]) => {
-      if (data?.posts) {
-        queryClient.setQueryData(key, {
-          ...data,
-          posts: data.posts.map((post) => (post.id === postId ? updater(post) : post)),
-        });
-      }
+  // Orval が生成するキー等、実装差に依存せず、
+  // クエリキーに `users` と `posts` を含むキャッシュを探して更新します。
+  queryClient.getQueriesData<{ posts: Post[] }>({}).forEach(([key, data]) => {
+    if (!data?.posts) return;
+    const keyParts = Array.isArray(key) ? key.map((p) => String(p)) : [String(key)];
+    const keyString = keyParts.join("/");
+
+    const looksLikeUserPosts =
+      /\/users\/\d+\/posts$/.test(keyString) ||
+      (keyString.includes("users") && keyString.includes("posts"));
+
+    if (!looksLikeUserPosts) return;
+
+    queryClient.setQueryData(key, {
+      ...data,
+      posts: data.posts.map((post) => (post.id === postId ? updater(post) : post)),
     });
+  });
 }
 
 export function useLike() {

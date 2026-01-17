@@ -18,12 +18,14 @@ CREATE INDEX IF NOT EXISTS idx_slides_flavor_id ON slides(flavor_id);
 
 -- postsテーブルからimage_url, flavor_id, contentカラムを削除
 -- （既存データがある場合は先にslidesテーブルへ移行が必要）
--- 既存のpostsデータをslidesへ移行（image_url IS NOT NULLのレコードのみ）
--- 注意: contentやflavor_idがNULLの既存レコードもslidesに移行されます
+-- 既存のpostsデータをslidesへ移行
+-- - image_url が NULL の投稿でも、content または flavor_id が存在する場合は
+--   スライドを作成します（image_url は空文字に変換して挿入）。
+-- - 完全に空の投稿（image_url, content, flavor_id 全て NULL）の場合はスキップします。
 INSERT INTO slides (post_id, image_url, text, flavor_id, slide_order)
-SELECT id, image_url, content, flavor_id, 0
+SELECT id, COALESCE(image_url, ''), content, flavor_id, 0
 FROM posts
-WHERE image_url IS NOT NULL;
+WHERE image_url IS NOT NULL OR content IS NOT NULL OR flavor_id IS NOT NULL;
 
 -- 移行後にpostsテーブルから不要なカラムを削除
 ALTER TABLE posts DROP COLUMN IF EXISTS image_url;
