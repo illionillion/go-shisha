@@ -57,7 +57,21 @@ export async function apiFetch<T>(
   });
 
   if (!res.ok) {
-    throw new Error(`API Error: ${res.status} ${res.statusText}`);
+    const errorText = await res.text();
+    let parsedBody: unknown;
+    try {
+      parsedBody = errorText ? JSON.parse(errorText) : undefined;
+    } catch {
+      parsedBody = undefined;
+    }
+
+    const error: ApiError = Object.assign(new Error(`API Error: ${res.status} ${res.statusText}`), {
+      status: res.status,
+      statusText: res.statusText,
+      bodyText: errorText,
+      bodyJson: parsedBody,
+    });
+    throw error;
   }
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
@@ -65,3 +79,10 @@ export async function apiFetch<T>(
 
   return data as T;
 }
+
+export type ApiError = Error & {
+  status?: number;
+  statusText?: string;
+  bodyText?: string;
+  bodyJson?: unknown;
+};
