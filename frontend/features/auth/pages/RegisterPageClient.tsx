@@ -24,8 +24,9 @@ export const RegisterPageClient = () => {
     try {
       const payload = toCreateUserInput(data);
       const res = await register(payload);
+      // 登録APIはトークンを発行しないため、ログインページへ誘導する
       setUser(res.user ?? null);
-      router.push("/");
+      router.push("/login");
     } catch (error) {
       console.error("RegisterPageClient onSubmit error:", error);
       setErrorMessage(getRegisterErrorMessage(error));
