@@ -47,6 +47,7 @@ export async function apiFetch<T>(
   const res = await fetch(url, {
     ...options,
     method: config.method,
+    credentials: options?.credentials ?? "include",
     headers: {
       ...(config.data && !hasContentType ? { "Content-Type": "application/json" } : {}),
       ...config.headers,
