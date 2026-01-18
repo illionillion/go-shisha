@@ -1,5 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
+import { useAuthStore } from "@/features/auth/stores/authStore";
+import type { User } from "@/types/domain";
 import { Header } from "./Header";
+
+const mockUser: User = {
+  id: 1,
+  display_name: "テストユーザー",
+  email: "test@example.com",
+  icon_url: "https://via.placeholder.com/150",
+  description: "これはテストユーザーです",
+};
 
 const meta = {
   title: "Components/Header",
@@ -14,6 +24,25 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * デフォルトのヘッダー表示
+ * ログイン済み状態のヘッダー
  */
-export const Default: Story = {};
+export const LoggedIn: Story = {
+  decorators: [
+    (Story) => {
+      useAuthStore.setState({ user: mockUser });
+      return <Story />;
+    },
+  ],
+};
+
+/**
+ * 未ログイン状態のヘッダー
+ */
+export const LoggedOut: Story = {
+  decorators: [
+    (Story) => {
+      useAuthStore.setState({ user: null });
+      return <Story />;
+    },
+  ],
+};
