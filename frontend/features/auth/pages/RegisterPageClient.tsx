@@ -17,7 +17,8 @@ export const RegisterPageClient = () => {
       // mock
       await new Promise((r) => setTimeout(r, 200));
       router.push("/");
-    } catch {
+    } catch (error) {
+      console.error("RegisterPageClient onSubmit error:", error);
       setErrorMessage("通信エラーが発生しました");
     } finally {
       setIsLoading(false);
