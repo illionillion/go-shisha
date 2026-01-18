@@ -36,17 +36,16 @@ import type {
   PostPostsIdUnlike404,
 } from "./model";
 
-type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-
 /**
  * 全ての投稿の一覧を取得します（総数付き）
  * @summary 投稿一覧取得
  */
-export const getPosts = (options?: SecondParameter<typeof apiFetch>, signal?: AbortSignal) => {
-  return apiFetch<GoShishaBackendInternalModelsPostsResponse>(
-    { url: `/posts`, method: "GET", signal },
-    options
-  );
+export const getPosts = (signal?: AbortSignal) => {
+  return apiFetch<GoShishaBackendInternalModelsPostsResponse>({
+    url: `/posts`,
+    method: "GET",
+    signal,
+  });
 };
 
 export const getGetPostsQueryKey = () => {
@@ -58,14 +57,13 @@ export const getGetPostsQueryOptions = <
   TError = GetPosts500,
 >(options?: {
   query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>>;
-  request?: SecondParameter<typeof apiFetch>;
 }) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const { query: queryOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetPostsQueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getPosts>>> = ({ signal }) =>
-    getPosts(requestOptions, signal);
+    getPosts(signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getPosts>>,
@@ -88,7 +86,6 @@ export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -103,14 +100,12 @@ export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError = GetPosts500>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>>;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -121,7 +116,6 @@ export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError
 export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError = GetPosts500>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>>;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -142,19 +136,15 @@ export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError
  */
 export const postPosts = (
   goShishaBackendInternalModelsCreatePostInput: GoShishaBackendInternalModelsCreatePostInput,
-  options?: SecondParameter<typeof apiFetch>,
   signal?: AbortSignal
 ) => {
-  return apiFetch<GoShishaBackendInternalModelsPost>(
-    {
-      url: `/posts`,
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      data: goShishaBackendInternalModelsCreatePostInput,
-      signal,
-    },
-    options
-  );
+  return apiFetch<GoShishaBackendInternalModelsPost>({
+    url: `/posts`,
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    data: goShishaBackendInternalModelsCreatePostInput,
+    signal,
+  });
 };
 
 export const getPostPostsMutationOptions = <TError = PostPosts501, TContext = unknown>(options?: {
@@ -164,7 +154,6 @@ export const getPostPostsMutationOptions = <TError = PostPosts501, TContext = un
     { data: GoShishaBackendInternalModelsCreatePostInput },
     TContext
   >;
-  request?: SecondParameter<typeof apiFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postPosts>>,
   TError,
@@ -172,11 +161,11 @@ export const getPostPostsMutationOptions = <TError = PostPosts501, TContext = un
   TContext
 > => {
   const mutationKey = ["postPosts"];
-  const { mutation: mutationOptions, request: requestOptions } = options
+  const { mutation: mutationOptions } = options
     ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
+    : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postPosts>>,
@@ -184,7 +173,7 @@ export const getPostPostsMutationOptions = <TError = PostPosts501, TContext = un
   > = (props) => {
     const { data } = props ?? {};
 
-    return postPosts(data, requestOptions);
+    return postPosts(data);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -205,7 +194,6 @@ export const usePostPosts = <TError = PostPosts501, TContext = unknown>(
       { data: GoShishaBackendInternalModelsCreatePostInput },
       TContext
     >;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
@@ -222,15 +210,12 @@ export const usePostPosts = <TError = PostPosts501, TContext = unknown>(
  * 指定されたIDの投稿情報を取得します
  * @summary 投稿詳細取得
  */
-export const getPostsId = (
-  id: number,
-  options?: SecondParameter<typeof apiFetch>,
-  signal?: AbortSignal
-) => {
-  return apiFetch<GoShishaBackendInternalModelsPost>(
-    { url: `/posts/${id}`, method: "GET", signal },
-    options
-  );
+export const getPostsId = (id: number, signal?: AbortSignal) => {
+  return apiFetch<GoShishaBackendInternalModelsPost>({
+    url: `/posts/${id}`,
+    method: "GET",
+    signal,
+  });
 };
 
 export const getGetPostsIdQueryKey = (id?: number) => {
@@ -244,15 +229,14 @@ export const getGetPostsIdQueryOptions = <
   id: number,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData>>;
-    request?: SecondParameter<typeof apiFetch>;
   }
 ) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const { query: queryOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetPostsIdQueryKey(id);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getPostsId>>> = ({ signal }) =>
-    getPostsId(id, requestOptions, signal);
+    getPostsId(id, signal);
 
   return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getPostsId>>,
@@ -279,7 +263,6 @@ export function useGetPostsId<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -298,7 +281,6 @@ export function useGetPostsId<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -309,7 +291,6 @@ export function useGetPostsId<
   id: number,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData>>;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -324,7 +305,6 @@ export function useGetPostsId<
   id: number,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostsId>>, TError, TData>>;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -343,15 +323,12 @@ export function useGetPostsId<
  * 指定された投稿にいいねを追加します
  * @summary 投稿にいいね
  */
-export const postPostsIdLike = (
-  id: number,
-  options?: SecondParameter<typeof apiFetch>,
-  signal?: AbortSignal
-) => {
-  return apiFetch<GoShishaBackendInternalModelsPost>(
-    { url: `/posts/${id}/like`, method: "POST", signal },
-    options
-  );
+export const postPostsIdLike = (id: number, signal?: AbortSignal) => {
+  return apiFetch<GoShishaBackendInternalModelsPost>({
+    url: `/posts/${id}/like`,
+    method: "POST",
+    signal,
+  });
 };
 
 export const getPostPostsIdLikeMutationOptions = <
@@ -364,7 +341,6 @@ export const getPostPostsIdLikeMutationOptions = <
     { id: number },
     TContext
   >;
-  request?: SecondParameter<typeof apiFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postPostsIdLike>>,
   TError,
@@ -372,11 +348,11 @@ export const getPostPostsIdLikeMutationOptions = <
   TContext
 > => {
   const mutationKey = ["postPostsIdLike"];
-  const { mutation: mutationOptions, request: requestOptions } = options
+  const { mutation: mutationOptions } = options
     ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
+    : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postPostsIdLike>>,
@@ -384,7 +360,7 @@ export const getPostPostsIdLikeMutationOptions = <
   > = (props) => {
     const { id } = props ?? {};
 
-    return postPostsIdLike(id, requestOptions);
+    return postPostsIdLike(id);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -410,7 +386,6 @@ export const usePostPostsIdLike = <
       { id: number },
       TContext
     >;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
@@ -427,15 +402,12 @@ export const usePostPostsIdLike = <
  * 指定された投稿のいいねを取り消します
  * @summary 投稿のいいねを取り消す
  */
-export const postPostsIdUnlike = (
-  id: number,
-  options?: SecondParameter<typeof apiFetch>,
-  signal?: AbortSignal
-) => {
-  return apiFetch<GoShishaBackendInternalModelsPost>(
-    { url: `/posts/${id}/unlike`, method: "POST", signal },
-    options
-  );
+export const postPostsIdUnlike = (id: number, signal?: AbortSignal) => {
+  return apiFetch<GoShishaBackendInternalModelsPost>({
+    url: `/posts/${id}/unlike`,
+    method: "POST",
+    signal,
+  });
 };
 
 export const getPostPostsIdUnlikeMutationOptions = <
@@ -448,7 +420,6 @@ export const getPostPostsIdUnlikeMutationOptions = <
     { id: number },
     TContext
   >;
-  request?: SecondParameter<typeof apiFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postPostsIdUnlike>>,
   TError,
@@ -456,11 +427,11 @@ export const getPostPostsIdUnlikeMutationOptions = <
   TContext
 > => {
   const mutationKey = ["postPostsIdUnlike"];
-  const { mutation: mutationOptions, request: requestOptions } = options
+  const { mutation: mutationOptions } = options
     ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
+    : { mutation: { mutationKey } };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postPostsIdUnlike>>,
@@ -468,7 +439,7 @@ export const getPostPostsIdUnlikeMutationOptions = <
   > = (props) => {
     const { id } = props ?? {};
 
-    return postPostsIdUnlike(id, requestOptions);
+    return postPostsIdUnlike(id);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -494,7 +465,6 @@ export const usePostPostsIdUnlike = <
       { id: number },
       TContext
     >;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<

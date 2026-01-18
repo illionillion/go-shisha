@@ -30,17 +30,16 @@ import type {
   GoShishaBackendInternalModelsUsersResponse,
 } from "./model";
 
-type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-
 /**
  * 全てのユーザーの一覧を取得します（総数付き）
  * @summary ユーザー一覧取得
  */
-export const getUsers = (options?: SecondParameter<typeof apiFetch>, signal?: AbortSignal) => {
-  return apiFetch<GoShishaBackendInternalModelsUsersResponse>(
-    { url: `/users`, method: "GET", signal },
-    options
-  );
+export const getUsers = (signal?: AbortSignal) => {
+  return apiFetch<GoShishaBackendInternalModelsUsersResponse>({
+    url: `/users`,
+    method: "GET",
+    signal,
+  });
 };
 
 export const getGetUsersQueryKey = () => {
@@ -52,14 +51,13 @@ export const getGetUsersQueryOptions = <
   TError = GetUsers500,
 >(options?: {
   query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>>;
-  request?: SecondParameter<typeof apiFetch>;
 }) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const { query: queryOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetUsersQueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsers>>> = ({ signal }) =>
-    getUsers(requestOptions, signal);
+    getUsers(signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getUsers>>,
@@ -82,7 +80,6 @@ export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -97,14 +94,12 @@ export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError = GetUsers500>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>>;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -115,7 +110,6 @@ export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError
 export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError = GetUsers500>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>>;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -134,15 +128,12 @@ export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError
  * 指定されたIDのユーザー情報を取得します
  * @summary ユーザー詳細取得
  */
-export const getUsersId = (
-  id: number,
-  options?: SecondParameter<typeof apiFetch>,
-  signal?: AbortSignal
-) => {
-  return apiFetch<GoShishaBackendInternalModelsUser>(
-    { url: `/users/${id}`, method: "GET", signal },
-    options
-  );
+export const getUsersId = (id: number, signal?: AbortSignal) => {
+  return apiFetch<GoShishaBackendInternalModelsUser>({
+    url: `/users/${id}`,
+    method: "GET",
+    signal,
+  });
 };
 
 export const getGetUsersIdQueryKey = (id?: number) => {
@@ -156,15 +147,14 @@ export const getGetUsersIdQueryOptions = <
   id: number,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>>;
-    request?: SecondParameter<typeof apiFetch>;
   }
 ) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const { query: queryOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetUsersIdQueryKey(id);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersId>>> = ({ signal }) =>
-    getUsersId(id, requestOptions, signal);
+    getUsersId(id, signal);
 
   return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getUsersId>>,
@@ -191,7 +181,6 @@ export function useGetUsersId<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -210,7 +199,6 @@ export function useGetUsersId<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -221,7 +209,6 @@ export function useGetUsersId<
   id: number,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>>;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -236,7 +223,6 @@ export function useGetUsersId<
   id: number,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>>;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -255,15 +241,12 @@ export function useGetUsersId<
  * 指定されたユーザーの全ての投稿を取得します（総数付き）
  * @summary ユーザーの投稿一覧取得
  */
-export const getUsersIdPosts = (
-  id: number,
-  options?: SecondParameter<typeof apiFetch>,
-  signal?: AbortSignal
-) => {
-  return apiFetch<GoShishaBackendInternalModelsPostsResponse>(
-    { url: `/users/${id}/posts`, method: "GET", signal },
-    options
-  );
+export const getUsersIdPosts = (id: number, signal?: AbortSignal) => {
+  return apiFetch<GoShishaBackendInternalModelsPostsResponse>({
+    url: `/users/${id}/posts`,
+    method: "GET",
+    signal,
+  });
 };
 
 export const getGetUsersIdPostsQueryKey = (id?: number) => {
@@ -277,15 +260,14 @@ export const getGetUsersIdPostsQueryOptions = <
   id: number,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersIdPosts>>, TError, TData>>;
-    request?: SecondParameter<typeof apiFetch>;
   }
 ) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const { query: queryOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetUsersIdPostsQueryKey(id);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersIdPosts>>> = ({ signal }) =>
-    getUsersIdPosts(id, requestOptions, signal);
+    getUsersIdPosts(id, signal);
 
   return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getUsersIdPosts>>,
@@ -312,7 +294,6 @@ export function useGetUsersIdPosts<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -331,7 +312,6 @@ export function useGetUsersIdPosts<
         >,
         "initialData"
       >;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -342,7 +322,6 @@ export function useGetUsersIdPosts<
   id: number,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersIdPosts>>, TError, TData>>;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -357,7 +336,6 @@ export function useGetUsersIdPosts<
   id: number,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsersIdPosts>>, TError, TData>>;
-    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
