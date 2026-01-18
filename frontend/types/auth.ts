@@ -12,7 +12,11 @@ export const loginInputSchema = z.object({
   password: z
     .string()
     .min(1, "パスワードを入力してください")
-    .min(12, "パスワードは12文字以上である必要があります"),
+    .min(12, "パスワードは12文字以上である必要があります")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "パスワードは大文字、小文字、数字を含む必要があります"
+    ),
 });
 
 export type LoginInput = z.infer<typeof loginInputSchema>;
