@@ -44,11 +44,19 @@ export async function apiFetch<T>(
     (config.headers && typeof config.headers === "object" && "Content-Type" in config.headers) ||
     (options?.headers && typeof options.headers === "object" && "Content-Type" in options.headers);
 
+  const hasCookieHeader =
+    (config.headers && typeof config.headers === "object" && "cookie" in config.headers) ||
+    (options?.headers && typeof options.headers === "object" && "cookie" in options.headers);
+
+  const serverCookies = !hasCookieHeader ? await getServerCookiesHeader() : undefined;
+
   const res = await fetch(url, {
     ...options,
     method: config.method,
+    credentials: options?.credentials ?? "include",
     headers: {
       ...(config.data && !hasContentType ? { "Content-Type": "application/json" } : {}),
+      ...(serverCookies ?? {}),
       ...config.headers,
       ...options?.headers,
     },
@@ -64,4 +72,16 @@ export async function apiFetch<T>(
   const data = body ? JSON.parse(body) : null;
 
   return data as T;
+}
+
+async function getServerCookiesHeader(): Promise<HeadersInit | undefined> {
+  if (typeof window !== "undefined") return undefined;
+
+  try {
+    const { cookies } = await import("next/headers");
+    const cookieHeader = cookies().toString();
+    return cookieHeader ? { cookie: cookieHeader } : undefined;
+  } catch {
+    return undefined;
+  }
 }

@@ -29,7 +29,7 @@ import type {
   GoShishaBackendInternalModelsCreatePostInput,
   GoShishaBackendInternalModelsPost,
   GoShishaBackendInternalModelsPostsResponse,
-  PostPosts400,
+  PostPosts501,
   PostPostsIdLike400,
   PostPostsIdLike404,
   PostPostsIdUnlike400,
@@ -137,7 +137,7 @@ export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError
 }
 
 /**
- * 新しい投稿を作成します
+ * 新しい投稿を作成します（未実装）
  * @summary 投稿作成
  */
 export const postPosts = (
@@ -157,7 +157,7 @@ export const postPosts = (
   );
 };
 
-export const getPostPostsMutationOptions = <TError = PostPosts400, TContext = unknown>(options?: {
+export const getPostPostsMutationOptions = <TError = PostPosts501, TContext = unknown>(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPosts>>,
     TError,
@@ -192,12 +192,12 @@ export const getPostPostsMutationOptions = <TError = PostPosts400, TContext = un
 
 export type PostPostsMutationResult = NonNullable<Awaited<ReturnType<typeof postPosts>>>;
 export type PostPostsMutationBody = GoShishaBackendInternalModelsCreatePostInput;
-export type PostPostsMutationError = PostPosts400;
+export type PostPostsMutationError = PostPosts501;
 
 /**
  * @summary 投稿作成
  */
-export const usePostPosts = <TError = PostPosts400, TContext = unknown>(
+export const usePostPosts = <TError = PostPosts501, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postPosts>>,
