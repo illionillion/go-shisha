@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthStore } from "@/features/auth/stores/authStore";
 import type { User } from "@/types/domain";
 import { Header } from "./Header";
@@ -18,6 +19,21 @@ const meta = {
     layout: "fullscreen",
   },
   tags: ["autodocs", "vrt", "vrt-sp"],
+  decorators: [
+    (Story) => {
+      const queryClient = new QueryClient({
+        defaultOptions: {
+          queries: { retry: false },
+          mutations: { retry: false },
+        },
+      });
+      return (
+        <QueryClientProvider client={queryClient}>
+          <Story />
+        </QueryClientProvider>
+      );
+    },
+  ],
 } satisfies Meta<typeof Header>;
 
 export default meta;
