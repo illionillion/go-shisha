@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authApi } from "@/features/auth/api/authApi";
 import { RegisterForm } from "@/features/auth/components/RegisterForm";
-import { useAuthStore } from "@/features/auth/stores/authStore";
 import type { ApiError } from "@/lib/api-client";
 import type { RegisterInput } from "@/types/auth";
 import type { CreateUserInput } from "@/types/domain";
@@ -13,7 +12,6 @@ import type { CreateUserInput } from "@/types/domain";
 export const RegisterPageClient = () => {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-  const { setUser } = useAuthStore();
 
   const { mutateAsync: register, isPending } = useMutation({
     mutationFn: (data: CreateUserInput) => authApi.register(data),
@@ -23,9 +21,7 @@ export const RegisterPageClient = () => {
     setErrorMessage(undefined);
     try {
       const payload = toCreateUserInput(data);
-      const res = await register(payload);
-      // 登録APIはトークンを発行しないため、ログインページへ誘導する
-      setUser(res.user ?? null);
+      await register(payload);
       router.push("/login");
     } catch (error) {
       console.error("RegisterPageClient onSubmit error:", error);
