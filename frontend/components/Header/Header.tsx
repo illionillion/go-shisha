@@ -1,5 +1,8 @@
+"use client";
+
 import { clsx } from "clsx";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Avatar from "../Avatar/Avatar";
 
 /**
@@ -9,6 +12,12 @@ import Avatar from "../Avatar/Avatar";
  * - 右側: ユーザーアイコン
  */
 export function Header() {
+  const pathname = usePathname();
+
+  // 非表示にするパスを列挙
+  const hidePaths = ["/login", "/register"];
+  if (pathname && hidePaths.some((p) => pathname.startsWith(p))) return null;
+
   return (
     <header
       className={clsx([
