@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories"
 	"go-shisha-backend/pkg/logging"
 )
 
@@ -61,4 +62,68 @@ func (r *UserRepository) GetByID(id int) (*models.User, error) {
 	user := r.toDomain(&um)
 	logging.L.Debug("user found", "repository", "UserRepository", "method", "GetByID", "user_id", id)
 	return &user, nil
+}
+
+// GetByEmail はメールアドレスでユーザーを検索
+func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
+	logging.L.Debug("querying user by email", "repository", "UserRepository", "method", "GetByEmail", "email", email)
+	var um userModel
+	if err := r.db.First(&um, "email = ?", email).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			logging.L.Debug("user not found", "repository", "UserRepository", "method", "GetByEmail", "email", email)
+			return nil, fmt.Errorf("user not found: email=%s", email)
+		}
+		logging.L.Error("failed to query user", "repository", "UserRepository", "method", "GetByEmail", "email", email, "error", err)
+		return nil, fmt.Errorf("failed to query user by email=%s: %w", email, err)
+	}
+
+	// パスワードハッシュも含めて返す（認証用）
+	user := models.User{
+		ID:           int(um.ID),
+		Email:        um.Email,
+		PasswordHash: um.PasswordHash,
+		DisplayName:  um.DisplayName,
+		Description:  um.Description,
+		IconURL:      um.IconURL,
+		ExternalURL:  um.ExternalURL,
+	}
+	logging.L.Debug("user found", "repository", "UserRepository", "method", "GetByEmail", "user_id", um.ID)
+	return &user, nil
+}
+
+// Create は新しいユーザーを作成
+func (r *UserRepository) Create(user *models.User) error {
+	um := &userModel{
+		Email:        user.Email,
+		PasswordHash: user.PasswordHash,
+		DisplayName:  user.DisplayName,
+		Description:  user.Description,
+		IconURL:      user.IconURL,
+		ExternalURL:  user.ExternalURL,
+	}
+
+	if err := r.db.Create(um).Error; err != nil {
+		// GORM の UNIQUE 制約違反エラーを検出
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			logging.L.Warn("duplicate email detected",
+				"repository", "UserRepository",
+				"method", "Create",
+				"email", user.Email)
+			return repositories.ErrEmailAlreadyExists
+		}
+		logging.L.Error("failed to create user",
+			"repository", "UserRepository",
+			"method", "Create",
+			"email", user.Email,
+			"error", err)
+		return fmt.Errorf("failed to create user: %w", err)
+	}
+
+	user.ID = int(um.ID)
+	logging.L.Info("user created",
+		"repository", "UserRepository",
+		"method", "Create",
+		"user_id", um.ID,
+		"email", user.Email)
+	return nil
 }
