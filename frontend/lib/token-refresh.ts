@@ -1,8 +1,4 @@
-/**
- * トークンリフレッシュ処理
- * 401エラー時に自動的にリフレッシュトークンを使って新しいアクセストークンを取得
- */
-
+import { useAuthStore } from "@/features/auth/stores/authStore";
 import { getApiBaseUrl } from "./api-client";
 
 let isRefreshing = false;
@@ -45,10 +41,13 @@ async function performRefresh(): Promise<boolean> {
     }
 
     // リフレッシュトークンも無効（ログアウト状態）
+    // authStoreをクリアして、ユーザーをログアウト状態にする
+    useAuthStore.getState().clearUser();
     return false;
   } catch (error) {
-    // ネットワークエラー等
+    // ネットワークエラー等でもログアウト状態にする
     console.error("Token refresh failed:", error);
+    useAuthStore.getState().clearUser();
     return false;
   }
 }
