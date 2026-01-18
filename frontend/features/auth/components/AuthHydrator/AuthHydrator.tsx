@@ -27,9 +27,19 @@ export const AuthHydrator = () => {
     }
 
     const apiError = error as ApiError | undefined;
-    if (apiError?.status === 401) {
-      clearUser();
+    if (!apiError) {
+      return;
     }
+
+    // 401の場合は明示的にサインアウト扱いにする
+    if (apiError.status === 401) {
+      clearUser();
+      return;
+    }
+
+    // それ以外のエラー（500、ネットワークエラーなど）でも
+    // ストアの不整合を避けるために一旦ユーザー情報をクリアする
+    clearUser();
   }, [data?.user, error, setUser, clearUser]);
 
   return null;
