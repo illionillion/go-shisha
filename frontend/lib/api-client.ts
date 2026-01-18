@@ -44,19 +44,11 @@ export async function apiFetch<T>(
     (config.headers && typeof config.headers === "object" && "Content-Type" in config.headers) ||
     (options?.headers && typeof options.headers === "object" && "Content-Type" in options.headers);
 
-  const hasCookieHeader =
-    (config.headers && typeof config.headers === "object" && "cookie" in config.headers) ||
-    (options?.headers && typeof options.headers === "object" && "cookie" in options.headers);
-
-  const serverCookies = !hasCookieHeader ? await getServerCookiesHeader() : undefined;
-
   const res = await fetch(url, {
     ...options,
     method: config.method,
-    credentials: options?.credentials ?? "include",
     headers: {
       ...(config.data && !hasContentType ? { "Content-Type": "application/json" } : {}),
-      ...(serverCookies ?? {}),
       ...config.headers,
       ...options?.headers,
     },
@@ -65,44 +57,11 @@ export async function apiFetch<T>(
   });
 
   if (!res.ok) {
-    const errorText = await res.text();
-    let parsedBody: unknown;
-    try {
-      parsedBody = errorText ? JSON.parse(errorText) : undefined;
-    } catch {
-      parsedBody = undefined;
-    }
-
-    const error: ApiError = Object.assign(new Error(`API Error: ${res.status} ${res.statusText}`), {
-      status: res.status,
-      statusText: res.statusText,
-      bodyText: errorText,
-      bodyJson: parsedBody,
-    });
-    throw error;
+    throw new Error(`API Error: ${res.status} ${res.statusText}`);
   }
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
   const data = body ? JSON.parse(body) : null;
 
   return data as T;
-}
-
-export type ApiError = Error & {
-  status?: number;
-  statusText?: string;
-  bodyText?: string;
-  bodyJson?: unknown;
-};
-
-async function getServerCookiesHeader(): Promise<HeadersInit | undefined> {
-  if (typeof window !== "undefined") return undefined;
-
-  try {
-    const { cookies } = await import("next/headers");
-    const cookieHeader = cookies().toString();
-    return cookieHeader ? { cookie: cookieHeader } : undefined;
-  } catch {
-    return undefined;
-  }
 }

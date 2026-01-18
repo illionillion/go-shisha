@@ -31,21 +31,27 @@ import type {
   PostAuthRefresh200,
 } from "./model";
 
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
 /**
  * メールアドレスとパスワードでログインし、JWT（Cookie）を発行する
  * @summary ログイン
  */
 export const postAuthLogin = (
   goShishaBackendInternalModelsLoginInput: GoShishaBackendInternalModelsLoginInput,
+  options?: SecondParameter<typeof apiFetch>,
   signal?: AbortSignal
 ) => {
-  return apiFetch<GoShishaBackendInternalModelsAuthResponse>({
-    url: `/auth/login`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: goShishaBackendInternalModelsLoginInput,
-    signal,
-  });
+  return apiFetch<GoShishaBackendInternalModelsAuthResponse>(
+    {
+      url: `/auth/login`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: goShishaBackendInternalModelsLoginInput,
+      signal,
+    },
+    options
+  );
 };
 
 export const getPostAuthLoginMutationOptions = <
@@ -58,6 +64,7 @@ export const getPostAuthLoginMutationOptions = <
     { data: GoShishaBackendInternalModelsLoginInput },
     TContext
   >;
+  request?: SecondParameter<typeof apiFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postAuthLogin>>,
   TError,
@@ -65,11 +72,11 @@ export const getPostAuthLoginMutationOptions = <
   TContext
 > => {
   const mutationKey = ["postAuthLogin"];
-  const { mutation: mutationOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postAuthLogin>>,
@@ -77,7 +84,7 @@ export const getPostAuthLoginMutationOptions = <
   > = (props) => {
     const { data } = props ?? {};
 
-    return postAuthLogin(data);
+    return postAuthLogin(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -101,6 +108,7 @@ export const usePostAuthLogin = <
       { data: GoShishaBackendInternalModelsLoginInput },
       TContext
     >;
+    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
@@ -117,8 +125,11 @@ export const usePostAuthLogin = <
  * Cookieを削除し、Refresh Tokenを無効化する
  * @summary ログアウト
  */
-export const postAuthLogout = (signal?: AbortSignal) => {
-  return apiFetch<PostAuthLogout200>({ url: `/auth/logout`, method: "POST", signal });
+export const postAuthLogout = (
+  options?: SecondParameter<typeof apiFetch>,
+  signal?: AbortSignal
+) => {
+  return apiFetch<PostAuthLogout200>({ url: `/auth/logout`, method: "POST", signal }, options);
 };
 
 export const getPostAuthLogoutMutationOptions = <
@@ -126,16 +137,17 @@ export const getPostAuthLogoutMutationOptions = <
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<Awaited<ReturnType<typeof postAuthLogout>>, TError, void, TContext>;
+  request?: SecondParameter<typeof apiFetch>;
 }): UseMutationOptions<Awaited<ReturnType<typeof postAuthLogout>>, TError, void, TContext> => {
   const mutationKey = ["postAuthLogout"];
-  const { mutation: mutationOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthLogout>>, void> = () => {
-    return postAuthLogout();
+    return postAuthLogout(requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -159,6 +171,7 @@ export const usePostAuthLogout = <
       void,
       TContext
     >;
+    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<Awaited<ReturnType<typeof postAuthLogout>>, TError, void, TContext> => {
@@ -170,12 +183,11 @@ export const usePostAuthLogout = <
  * 認証されたユーザーの情報を取得する
  * @summary 現在のユーザー情報取得
  */
-export const getAuthMe = (signal?: AbortSignal) => {
-  return apiFetch<GoShishaBackendInternalModelsAuthResponse>({
-    url: `/auth/me`,
-    method: "GET",
-    signal,
-  });
+export const getAuthMe = (options?: SecondParameter<typeof apiFetch>, signal?: AbortSignal) => {
+  return apiFetch<GoShishaBackendInternalModelsAuthResponse>(
+    { url: `/auth/me`, method: "GET", signal },
+    options
+  );
 };
 
 export const getGetAuthMeQueryKey = () => {
@@ -187,13 +199,14 @@ export const getGetAuthMeQueryOptions = <
   TError = GoShishaBackendInternalModelsErrorResponse,
 >(options?: {
   query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>;
+  request?: SecondParameter<typeof apiFetch>;
 }) => {
-  const { query: queryOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetAuthMeQueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuthMe>>> = ({ signal }) =>
-    getAuthMe(signal);
+    getAuthMe(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getAuthMe>>,
@@ -219,6 +232,7 @@ export function useGetAuthMe<
         >,
         "initialData"
       >;
+    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -236,6 +250,7 @@ export function useGetAuthMe<
         >,
         "initialData"
       >;
+    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -245,6 +260,7 @@ export function useGetAuthMe<
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -258,6 +274,7 @@ export function useGetAuthMe<
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -276,8 +293,11 @@ export function useGetAuthMe<
  * Refresh Tokenを使って新しいAccess Tokenを発行する
  * @summary アクセストークンのリフレッシュ
  */
-export const postAuthRefresh = (signal?: AbortSignal) => {
-  return apiFetch<PostAuthRefresh200>({ url: `/auth/refresh`, method: "POST", signal });
+export const postAuthRefresh = (
+  options?: SecondParameter<typeof apiFetch>,
+  signal?: AbortSignal
+) => {
+  return apiFetch<PostAuthRefresh200>({ url: `/auth/refresh`, method: "POST", signal }, options);
 };
 
 export const getPostAuthRefreshMutationOptions = <
@@ -290,16 +310,17 @@ export const getPostAuthRefreshMutationOptions = <
     void,
     TContext
   >;
+  request?: SecondParameter<typeof apiFetch>;
 }): UseMutationOptions<Awaited<ReturnType<typeof postAuthRefresh>>, TError, void, TContext> => {
   const mutationKey = ["postAuthRefresh"];
-  const { mutation: mutationOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAuthRefresh>>, void> = () => {
-    return postAuthRefresh();
+    return postAuthRefresh(requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -325,6 +346,7 @@ export const usePostAuthRefresh = <
       void,
       TContext
     >;
+    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<Awaited<ReturnType<typeof postAuthRefresh>>, TError, void, TContext> => {
@@ -338,15 +360,19 @@ export const usePostAuthRefresh = <
  */
 export const postAuthRegister = (
   goShishaBackendInternalModelsCreateUserInput: GoShishaBackendInternalModelsCreateUserInput,
+  options?: SecondParameter<typeof apiFetch>,
   signal?: AbortSignal
 ) => {
-  return apiFetch<GoShishaBackendInternalModelsAuthResponse>({
-    url: `/auth/register`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: goShishaBackendInternalModelsCreateUserInput,
-    signal,
-  });
+  return apiFetch<GoShishaBackendInternalModelsAuthResponse>(
+    {
+      url: `/auth/register`,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      data: goShishaBackendInternalModelsCreateUserInput,
+      signal,
+    },
+    options
+  );
 };
 
 export const getPostAuthRegisterMutationOptions = <
@@ -359,6 +385,7 @@ export const getPostAuthRegisterMutationOptions = <
     { data: GoShishaBackendInternalModelsCreateUserInput },
     TContext
   >;
+  request?: SecondParameter<typeof apiFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postAuthRegister>>,
   TError,
@@ -366,11 +393,11 @@ export const getPostAuthRegisterMutationOptions = <
   TContext
 > => {
   const mutationKey = ["postAuthRegister"];
-  const { mutation: mutationOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey } };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postAuthRegister>>,
@@ -378,7 +405,7 @@ export const getPostAuthRegisterMutationOptions = <
   > = (props) => {
     const { data } = props ?? {};
 
-    return postAuthRegister(data);
+    return postAuthRegister(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -404,6 +431,7 @@ export const usePostAuthRegister = <
       { data: GoShishaBackendInternalModelsCreateUserInput },
       TContext
     >;
+    request?: SecondParameter<typeof apiFetch>;
   },
   queryClient?: QueryClient
 ): UseMutationResult<
