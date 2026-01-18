@@ -8,7 +8,7 @@ const mockUser: User = {
   id: 1,
   display_name: "テストユーザー",
   email: "test@example.com",
-  icon_url: "https://via.placeholder.com/150",
+  icon_url: "",
   description: "これはテストユーザーです",
 };
 
