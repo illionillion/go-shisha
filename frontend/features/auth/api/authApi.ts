@@ -1,4 +1,4 @@
-import { postAuthLogin, postAuthRegister } from "@/api/auth";
+import { postAuthLogin, postAuthLogout, postAuthRegister } from "@/api/auth";
 import type { AuthResponse, CreateUserInput, LoginInput } from "@/types/domain";
 
 /**
@@ -9,4 +9,5 @@ import type { AuthResponse, CreateUserInput, LoginInput } from "@/types/domain";
 export const authApi = {
   login: (data: LoginInput): Promise<AuthResponse> => postAuthLogin(data),
   register: (data: CreateUserInput): Promise<AuthResponse> => postAuthRegister(data),
+  logout: (): Promise<{ message?: string }> => postAuthLogout(),
 };
