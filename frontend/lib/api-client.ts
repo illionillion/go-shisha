@@ -3,6 +3,8 @@
  * クライアント側とサーバー側で自動的に適切なURLを使用する
  */
 
+import { tryRefreshToken } from "./token-refresh";
+
 /**
  * 実行環境に応じた適切なAPIベースURLを返す
  * @returns APIのベースURL
@@ -47,6 +49,7 @@ export async function apiFetch<T>(
   const res = await fetch(url, {
     ...options,
     method: config.method,
+    credentials: options?.credentials ?? "include",
     headers: {
       ...(config.data && !hasContentType ? { "Content-Type": "application/json" } : {}),
       ...config.headers,
@@ -57,7 +60,32 @@ export async function apiFetch<T>(
   });
 
   if (!res.ok) {
-    throw new Error(`API Error: ${res.status} ${res.statusText}`);
+    const errorText = await res.text();
+    let parsedBody: unknown;
+    try {
+      parsedBody = errorText ? JSON.parse(errorText) : undefined;
+    } catch {
+      parsedBody = undefined;
+    }
+
+    // 401エラー時、リフレッシュトークンで自動再試行
+    // ただし、リフレッシュAPI自体は再試行しない（無限ループ防止）
+    if (res.status === 401 && config.url !== "/auth/refresh" && typeof window !== "undefined") {
+      const refreshed = await tryRefreshToken();
+      if (refreshed) {
+        // リフレッシュ成功、元のリクエストをリトライ
+        return apiFetch<T>(config, options);
+      }
+      // リフレッシュ失敗（ログアウト状態）→エラーをそのまま投げる
+    }
+
+    const error: ApiError = Object.assign(new Error(`API Error: ${res.status} ${res.statusText}`), {
+      status: res.status,
+      statusText: res.statusText,
+      bodyText: errorText,
+      bodyJson: parsedBody,
+    });
+    throw error;
   }
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
@@ -65,3 +93,10 @@ export async function apiFetch<T>(
 
   return data as T;
 }
+
+export type ApiError = Error & {
+  status?: number;
+  statusText?: string;
+  bodyText?: string;
+  bodyJson?: unknown;
+};

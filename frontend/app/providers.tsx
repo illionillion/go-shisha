@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { AuthHydrator } from "@/features/auth/components/AuthHydrator";
 
 /**
  * アプリケーション全体のProviderをまとめるコンポーネント
@@ -25,5 +26,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 
   // 将来的に他のProvider（認証、テーマなど）もここに追加
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthHydrator />
+      {children}
+    </QueryClientProvider>
+  );
 }
