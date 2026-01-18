@@ -36,7 +36,14 @@ function isPublicPath(pathname: string) {
   // Next.js内部・静的ファイル系はスキップ
   if (pathname.startsWith("/_next")) return true;
   if (pathname.startsWith("/api")) return true;
-  if (/\.[^/]+$/.test(pathname)) return true; // 静的アセット
+  // 静的アセット（画像、フォント、CSS/JS等）
+  if (
+    /\.(jpg|jpeg|png|gif|svg|webp|ico|bmp|woff|woff2|ttf|otf|eot|css|js|xml|txt|pdf|zip)$/i.test(
+      pathname
+    )
+  ) {
+    return true;
+  }
   return false;
 }
 
