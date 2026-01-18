@@ -27,9 +27,10 @@ export const UserMenu = () => {
     },
     onError: (error) => {
       console.error("UserMenu: logout failed", error);
-      // エラーでも強制的にクライアント側をクリア
-      clearUser();
-      router.push("/login");
+      // サーバー側のログアウトに失敗した場合はクライアント状態を維持し、ユーザーにエラーを通知する
+      if (typeof window !== "undefined") {
+        window.alert("ログアウトに失敗しました。時間をおいて再度お試しください。");
+      }
     },
   });
 
