@@ -7,7 +7,7 @@ import { useAuthStore } from "@/features/auth/stores/authStore";
 import type { ApiError } from "@/lib/api-client";
 
 /**
- * Cookieベース認証の状態を初期化するための水和コンポーネント。
+ * Cookieベース認証の状態を初期化するためのハイドレーション（hydration）コンポーネント。
  * - /auth/me を1回叩いてユーザーをstoreに反映
  * - 401なら明示的にサインアウト扱いにする
  */
@@ -16,8 +16,8 @@ export const AuthHydrator = () => {
 
   const { data, error } = useQuery({
     ...getGetAuthMeQueryOptions(),
-    retry: 0,
-    staleTime: 0,
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5分
   });
 
   useEffect(() => {

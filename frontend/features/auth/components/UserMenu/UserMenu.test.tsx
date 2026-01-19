@@ -73,6 +73,14 @@ describe("UserMenu", () => {
       expect(avatar).toBeInTheDocument();
     });
 
+    it("アバターボタンに適切なaria属性が設定されている", () => {
+      render(<UserMenu />, { wrapper: createWrapper() });
+
+      const avatar = screen.getByRole("button", { name: /メニュー/i });
+      expect(avatar).toHaveAttribute("aria-haspopup", "true");
+      expect(avatar).toHaveAttribute("aria-expanded", "false");
+    });
+
     it("ログインボタンは表示されない", () => {
       render(<UserMenu />, { wrapper: createWrapper() });
 
@@ -89,6 +97,7 @@ describe("UserMenu", () => {
       await waitFor(() => {
         expect(screen.getByText(/プロフィール/i)).toBeInTheDocument();
         expect(screen.getByText(/ログアウト/i)).toBeInTheDocument();
+        expect(avatar).toHaveAttribute("aria-expanded", "true");
       });
     });
 
@@ -118,7 +127,7 @@ describe("UserMenu", () => {
       const avatar = screen.getByRole("button", { name: /メニュー/i });
       await user.click(avatar);
 
-      const profileLink = await screen.findByRole("link", { name: /プロフィール/i });
+      const profileLink = await screen.findByText(/プロフィール/i);
       expect(profileLink).toHaveAttribute("href", `/profile/${mockUser.id}`);
     });
 
@@ -164,6 +173,49 @@ describe("UserMenu", () => {
 
       await waitFor(() => {
         expect(screen.queryByText(/ログアウト/i)).not.toBeInTheDocument();
+      });
+    });
+
+    it("ドロップダウンメニューに適切なrole属性が設定されている", async () => {
+      const user = userEvent.setup();
+      render(<UserMenu />, { wrapper: createWrapper() });
+
+      const avatar = screen.getByRole("button", { name: /メニュー/i });
+      await user.click(avatar);
+
+      const menu = await screen.findByRole("menu");
+      expect(menu).toBeInTheDocument();
+      expect(menu).toHaveAttribute("aria-orientation", "vertical");
+    });
+
+    it("メニュー項目にrole='menuitem'が設定されている", async () => {
+      const user = userEvent.setup();
+      render(<UserMenu />, { wrapper: createWrapper() });
+
+      const avatar = screen.getByRole("button", { name: /メニュー/i });
+      await user.click(avatar);
+
+      const menuItems = await screen.findAllByRole("menuitem");
+      expect(menuItems).toHaveLength(2); // プロフィールとログアウト
+    });
+
+    it("Escキーを押すとメニューが閉じる", async () => {
+      const user = userEvent.setup();
+      render(<UserMenu />, { wrapper: createWrapper() });
+
+      const avatar = screen.getByRole("button", { name: /メニュー/i });
+      await user.click(avatar);
+
+      await waitFor(() => {
+        expect(screen.getByText(/ログアウト/i)).toBeInTheDocument();
+      });
+
+      // Escキーを押す
+      await user.keyboard("{Escape}");
+
+      await waitFor(() => {
+        expect(screen.queryByText(/ログアウト/i)).not.toBeInTheDocument();
+        expect(avatar).toHaveAttribute("aria-expanded", "false");
       });
     });
   });

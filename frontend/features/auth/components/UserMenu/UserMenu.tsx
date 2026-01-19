@@ -42,12 +42,20 @@ export const UserMenu = () => {
       }
     };
 
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleEscapeKey);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscapeKey);
     };
   }, [isOpen]);
 
@@ -70,16 +78,23 @@ export const UserMenu = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-2 focus:outline-none"
         aria-label="ユーザーメニュー"
+        aria-haspopup="true"
+        aria-expanded={isOpen}
       >
         <Avatar src={user.icon_url} alt={user.display_name || "ユーザー"} size={40} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+        <div
+          className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
+          role="menu"
+          aria-orientation="vertical"
+        >
           <Link
             href={`/profile/${user.id}`}
             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
             onClick={() => setIsOpen(false)}
+            role="menuitem"
           >
             プロフィール
           </Link>
@@ -90,6 +105,7 @@ export const UserMenu = () => {
             }}
             disabled={isPending}
             className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 disabled:opacity-50"
+            role="menuitem"
           >
             {isPending ? "ログアウト中..." : "ログアウト"}
           </button>
