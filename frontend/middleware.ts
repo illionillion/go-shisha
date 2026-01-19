@@ -8,6 +8,14 @@ const AUTH_PAGES = ["/login", "/register"];
  * - access_token クッキーが無ければ /login へリダイレクト
  * - ログイン済みユーザーが認証ページにアクセスした場合は / へリダイレクト
  * - login/register/test などのパブリックページは除外
+ *
+ * 【認証検証について】
+ * このミドルウェアはCookieの存在のみをチェックし、トークンの有効性（期限切れ・改ざん）は検証しません。
+ * これは意図的な設計で、以下の理由によります：
+ * - ミドルウェアは軽量なルーティングガードとして機能（UX向上のための事前チェック）
+ * - 実際の認証検証はバックエンドAPIエンドポイントで行われる（セキュリティの責務分離）
+ * - クライアント側ではAuthHydratorが/auth/meを呼び出し、トークンの有効性を確認してストアを同期
+ * - 期限切れトークンの場合、APIが401を返し、AuthHydratorがログアウト処理を実行
  */
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -37,6 +45,8 @@ function isPublicPath(pathname: string) {
   if (pathname.startsWith("/_next")) return true;
   if (pathname.startsWith("/api")) return true;
   // 静的アセット（画像、フォント、CSS/JS等）
+  // 注: req.nextUrl.pathnameにはクエリパラメータは含まれず、Next.jsがパスを正規化するため
+  // パストラバーサル（/api/../login.png）やクエリ攻撃（/file.jpg?token=secret）の心配はない
   if (
     /\.(jpg|jpeg|png|gif|svg|webp|ico|bmp|woff|woff2|ttf|otf|eot|css|js|xml|txt|pdf|zip)$/i.test(
       pathname
