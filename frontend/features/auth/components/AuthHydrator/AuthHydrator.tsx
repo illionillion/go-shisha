@@ -14,9 +14,9 @@ import type { ApiError } from "@/lib/api-client";
 export const AuthHydrator = () => {
   const { setUser, clearUser } = useAuthStore();
 
-  const { data, error } = useQuery({
+  const { data, error, isError } = useQuery({
     ...getGetAuthMeQueryOptions(),
-    retry: 1,
+    retry: 3,
     staleTime: 5 * 60 * 1000, // 5分
   });
 
@@ -26,21 +26,21 @@ export const AuthHydrator = () => {
       return;
     }
 
+    if (!isError) {
+      return;
+    }
+
     const apiError = error as ApiError | undefined;
     if (!apiError) {
       return;
     }
 
-    // 401の場合は明示的にサインアウト扱いにする
+    // 401の場合のみ明示的にサインアウト扱いにする
+    // 500系エラーは一時的な障害の可能性があるためストアは維持
     if (apiError.status === 401) {
       clearUser();
-      return;
     }
-
-    // それ以外のエラー（500、ネットワークエラーなど）でも
-    // ストアの不整合を避けるために一旦ユーザー情報をクリアする
-    clearUser();
-  }, [data?.user, error, setUser, clearUser]);
+  }, [data?.user, error, isError, setUser, clearUser]);
 
   return null;
 };

@@ -39,7 +39,7 @@ describe("AuthHydrator", () => {
     queryClient = new QueryClient({
       defaultOptions: {
         queries: {
-          retry: 1,
+          retry: 3,
           staleTime: 5 * 60 * 1000,
         },
       },
@@ -62,7 +62,7 @@ describe("AuthHydrator", () => {
     queryClient = new QueryClient({
       defaultOptions: {
         queries: {
-          retry: 1,
+          retry: 3,
           staleTime: 5 * 60 * 1000,
         },
       },
@@ -75,5 +75,37 @@ describe("AuthHydrator", () => {
 
     const { container } = renderWithClient(queryClient);
     expect(container.firstChild).toBeNull();
+  });
+
+  it("500エラー時はユーザー情報を保持する", async () => {
+    // 初期状態でユーザーをセット
+    useAuthStore.setState({ user: mockUser });
+
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: 0, // リトライなし
+          staleTime: 5 * 60 * 1000,
+        },
+      },
+    });
+
+    vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
+      queryKey: ["auth", "me"],
+      queryFn: async () => {
+        const error = Object.assign(new Error("Internal Server Error"), {
+          status: 500,
+          statusText: "Internal Server Error",
+        });
+        throw error;
+      },
+    } as unknown as ReturnType<typeof getGetAuthMeQueryOptions>);
+
+    renderWithClient(queryClient);
+
+    // 少し待ってもユーザー情報は保持される
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    const state = useAuthStore.getState();
+    expect(state.user).toEqual(mockUser);
   });
 });
