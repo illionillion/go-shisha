@@ -34,13 +34,9 @@ function base64urlDecode(s: string) {
 async function getCrypto(): Promise<Crypto> {
   const maybe = (globalThis as unknown as { crypto?: Crypto }).crypto;
   if (maybe && (maybe as unknown as { subtle?: unknown }).subtle) return maybe;
-  if (typeof process !== "undefined") {
-    const nodeCrypto = await import("crypto");
-    if (nodeCrypto?.webcrypto && (nodeCrypto.webcrypto as unknown as { subtle?: unknown }).subtle) {
-      return nodeCrypto.webcrypto as unknown as Crypto;
-    }
-  }
-  throw new Error("Web Crypto API not available");
+  // Server Actions / Next.js server runtime should provide globalThis.crypto (Node 18+).
+  // Avoid dynamic import('crypto') to prevent bundlers from including Node builtins in client bundles.
+  throw new Error("Web Crypto API not available in this runtime");
 }
 
 async function deriveKey(secret: string) {
