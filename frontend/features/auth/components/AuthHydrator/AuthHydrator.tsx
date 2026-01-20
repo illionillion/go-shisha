@@ -1,26 +1,38 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { getGetAuthMeQueryOptions } from "@/api/auth";
 import { useAuthStore } from "@/features/auth/stores/authStore";
 import type { ApiError } from "@/lib/api-client";
 
+// ログインページなど、認証チェックをスキップするパス
+const SKIP_AUTH_CHECK_PATHS = ["/login", "/register"];
+
 /**
  * Cookieベース認証の状態を初期化するためのハイドレーション（hydration）コンポーネント。
  * - /auth/me を1回叩いてユーザーをstoreに反映
  * - 401なら明示的にサインアウト扱いにする
+ * - ログインページ等では実行をスキップしてrate limit回避
  */
 export const AuthHydrator = () => {
+  const pathname = usePathname();
   const { setUser, clearUser } = useAuthStore();
+
+  // ログインページなどでは認証チェックをスキップ
+  const shouldSkip = SKIP_AUTH_CHECK_PATHS.includes(pathname || "");
 
   const { data, error, isError } = useQuery({
     ...getGetAuthMeQueryOptions(),
     retry: 3,
     staleTime: 5 * 60 * 1000, // 5分
+    enabled: !shouldSkip, // スキップ対象のページでは実行しない
   });
 
   useEffect(() => {
+    if (shouldSkip) return;
+
     if (data?.user) {
       setUser(data.user);
       return;
@@ -40,7 +52,7 @@ export const AuthHydrator = () => {
     if (apiError.status === 401) {
       clearUser();
     }
-  }, [data?.user, error, isError, setUser, clearUser]);
+  }, [shouldSkip, data?.user, error, isError, setUser, clearUser]);
 
   return null;
 };
