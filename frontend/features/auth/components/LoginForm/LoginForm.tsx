@@ -16,6 +16,8 @@ export interface LoginFormProps {
   isLoading?: boolean;
   /** サーバーエラーメッセージ */
   errorMessage?: string;
+  /** register へのリンクを上書きする（例: `/register?redirectUrl=...`） */
+  registerHref?: string;
 }
 
 /**
@@ -33,7 +35,12 @@ export interface LoginFormProps {
  * />
  * ```
  */
-export const LoginForm = ({ onSubmit, isLoading = false, errorMessage }: LoginFormProps) => {
+export const LoginForm = ({
+  onSubmit,
+  isLoading = false,
+  errorMessage,
+  registerHref,
+}: LoginFormProps) => {
   const {
     register,
     handleSubmit,
@@ -97,7 +104,7 @@ export const LoginForm = ({ onSubmit, isLoading = false, errorMessage }: LoginFo
         {/* 登録リンク */}
         <div className="text-center text-sm text-gray-600">
           アカウントをお持ちでない方は
-          <Link href="/register" className="ml-1 text-purple-600 hover:underline">
+          <Link href={registerHref ?? "/register"} className="ml-1 text-purple-600 hover:underline">
             こちら
           </Link>
         </div>

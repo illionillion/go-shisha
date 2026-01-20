@@ -1,8 +1,9 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { resolveRedirect } from "@/app/actions/resolveRedirect.server";
 import { authApi } from "@/features/auth/api/authApi";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 import { useAuthStore } from "@/features/auth/stores/authStore";
@@ -13,6 +14,11 @@ export const LoginPageClient = () => {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const { setUser } = useAuthStore();
+  const searchParams = useSearchParams();
+  const redirectToken = searchParams?.get("redirectUrl");
+  const registerHref = redirectToken
+    ? `/register?redirectUrl=${encodeURIComponent(redirectToken)}`
+    : "/register";
 
   const { mutateAsync: login, isPending } = useMutation({
     mutationFn: (data: LoginInput) => authApi.login(data),
@@ -23,6 +29,19 @@ export const LoginPageClient = () => {
     try {
       const res = await login(data);
       setUser(res.user ?? null);
+      // ミドルウェアで渡された redirectUrl トークンがあればサーバーアクションで解決してリダイレクト
+      const token = redirectToken;
+      if (token) {
+        try {
+          const path = await resolveRedirect(token);
+          if (path) {
+            router.push(path);
+            return;
+          }
+        } catch {
+          // ignore and fallback to home
+        }
+      }
       router.push("/");
     } catch (error) {
       console.error("LoginPageClient: login request failed", error);
@@ -30,7 +49,14 @@ export const LoginPageClient = () => {
     }
   };
 
-  return <LoginForm onSubmit={onSubmit} isLoading={isPending} errorMessage={errorMessage} />;
+  return (
+    <LoginForm
+      onSubmit={onSubmit}
+      isLoading={isPending}
+      errorMessage={errorMessage}
+      registerHref={registerHref}
+    />
+  );
 };
 
 const getLoginErrorMessage = (error: unknown) => {
