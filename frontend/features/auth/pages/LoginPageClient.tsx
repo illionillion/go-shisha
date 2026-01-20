@@ -30,7 +30,6 @@ export const LoginPageClient = () => {
       setUser(res.user ?? null);
       // ミドルウェアで渡された redirectUrl トークンがあればAPI経由で解決してリダイレクト
       const token = redirectToken;
-      console.log("LoginPageClient: redirectToken", token);
       if (token) {
         try {
           const response = await fetch("/api/resolve-redirect", {
@@ -41,7 +40,6 @@ export const LoginPageClient = () => {
           if (response.ok) {
             const result = await response.json();
             if (result.path && result.path.startsWith("/")) {
-              console.log("LoginPageClient: redirecting to", result.path);
               router.push(result.path);
               return;
             }
