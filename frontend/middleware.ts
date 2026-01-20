@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { encryptRedirect } from "./lib/redirectCrypto";
 
 const PUBLIC_PATHS = ["/login", "/register", "/test"];
 const AUTH_PAGES = ["/login", "/register"];
@@ -17,14 +18,13 @@ const AUTH_PAGES = ["/login", "/register"];
  * - クライアント側ではAuthHydratorが/auth/meを呼び出し、トークンの有効性を確認してストアを同期
  * - 期限切れトークンの場合、APIが401を返し、AuthHydratorがログアウト処理を実行
  */
-export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+export async function middleware(req: NextRequest) {
+  const { pathname, search } = req.nextUrl;
   const hasAccessToken = req.cookies.get("access_token")?.value;
 
   // ログイン済みユーザーが認証ページ（/login, /register）にアクセスした場合
   if (hasAccessToken && AUTH_PAGES.includes(pathname)) {
-    const homeUrl = new URL("/", req.url);
-    return NextResponse.redirect(homeUrl);
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   if (isPublicPath(pathname)) {
@@ -32,7 +32,16 @@ export function middleware(req: NextRequest) {
   }
 
   if (!hasAccessToken) {
+    const original = `${pathname}${search || ""}`;
     const loginUrl = new URL("/login", req.url);
+    if (isSafeRedirect(original)) {
+      try {
+        const token = await encryptRedirect(original);
+        loginUrl.searchParams.set("redirectUrl", token);
+      } catch {
+        // ignore and fallback to plain /login
+      }
+    }
     return NextResponse.redirect(loginUrl);
   }
 
@@ -61,3 +70,13 @@ function isPublicPath(pathname: string) {
 export const config = {
   matcher: "/:path*",
 };
+
+function isSafeRedirect(path: string) {
+  if (!path.startsWith("/")) return false;
+  if (path.startsWith("/_next")) return false;
+  if (path.startsWith("/api")) return false;
+  if (path === "/login" || path === "/register") return false;
+  // limit length to avoid abuse
+  if (path.length > 2048) return false;
+  return true;
+}
