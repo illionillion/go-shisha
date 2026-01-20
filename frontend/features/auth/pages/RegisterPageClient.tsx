@@ -27,7 +27,7 @@ export const RegisterPageClient = () => {
     try {
       const payload = toCreateUserInput(data);
       await register(payload);
-      router.push("/login");
+      router.push(loginHref);
     } catch (error) {
       console.error("RegisterPageClient onSubmit error:", error);
       setErrorMessage(getRegisterErrorMessage(error));
