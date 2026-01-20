@@ -18,7 +18,7 @@ const AUTH_PAGES = ["/login", "/register"];
  * - クライアント側ではAuthHydratorが/auth/meを呼び出し、トークンの有効性を確認してストアを同期
  * - 期限切れトークンの場合、APIが401を返し、AuthHydratorがログアウト処理を実行
  */
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
   const hasAccessToken = req.cookies.get("access_token")?.value;
 
@@ -36,7 +36,7 @@ export function middleware(req: NextRequest) {
     const loginUrl = new URL("/login", req.url);
     if (isSafeRedirect(original)) {
       try {
-        const token = encryptRedirect(original);
+        const token = await encryptRedirect(original);
         loginUrl.searchParams.set("redirectUrl", token);
       } catch {
         // ignore and fallback to plain /login

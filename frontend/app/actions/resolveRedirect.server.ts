@@ -4,7 +4,7 @@ import { decryptRedirect } from "@/lib/redirectCrypto";
 export async function resolveRedirect(token: string): Promise<string | null> {
   if (!token) return null;
   try {
-    const path = decryptRedirect(token);
+    const path = await decryptRedirect(token);
     if (!path || typeof path !== "string") return null;
     if (!path.startsWith("/")) return null;
     if (path.length > 2048) return null;

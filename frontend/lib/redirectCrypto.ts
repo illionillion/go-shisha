@@ -1,44 +1,63 @@
-import { createHash, randomBytes, createCipheriv, createDecipheriv } from "crypto";
+// Edge Runtime互換のWeb Crypto API実装
+// middleware.tsとServer Actionsの両方で動作
 
 const SECRET = process.env.REDIRECT_SECRET || "";
 
-function base64urlEncode(buffer: Buffer) {
-  return buffer.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+function base64urlEncode(bytes: Uint8Array): string {
+  let binary = "";
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
-function base64urlDecode(s: string) {
+function base64urlDecode(s: string): Uint8Array {
   const b64 = s.replace(/-/g, "+").replace(/_/g, "/") + "==".slice((2 - s.length * 3) & 3);
-  return Buffer.from(b64, "base64");
+  const binary = atob(b64);
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
 }
 
-function deriveKey(secret: string): Buffer {
-  return createHash("sha256").update(secret).digest();
+async function deriveKey(secret: string): Promise<CryptoKey> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", keyData);
+  return crypto.subtle.importKey("raw", hashBuffer, { name: "AES-GCM" }, false, [
+    "encrypt",
+    "decrypt",
+  ]);
 }
 
-export function encryptRedirect(path: string): string {
+export async function encryptRedirect(path: string): Promise<string> {
   if (!SECRET) throw new Error("REDIRECT_SECRET not set");
-  const key = deriveKey(SECRET);
-  const iv = randomBytes(12);
-  const cipher = createCipheriv("aes-256-gcm", key, iv);
-  const encrypted = Buffer.concat([cipher.update(path, "utf8"), cipher.final()]);
-  const authTag = cipher.getAuthTag();
-  const result = Buffer.concat([iv, encrypted, authTag]);
+  const key = await deriveKey(SECRET);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encoder = new TextEncoder();
+  const data = encoder.encode(path);
+  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, data);
+  const encryptedArray = new Uint8Array(encrypted);
+  const result = new Uint8Array(iv.length + encryptedArray.length);
+  result.set(iv, 0);
+  result.set(encryptedArray, iv.length);
   return base64urlEncode(result);
 }
 
-export function decryptRedirect(token: string): string | null {
+export async function decryptRedirect(token: string): Promise<string | null> {
   if (!SECRET) return null;
   try {
     const data = base64urlDecode(token);
-    if (data.length < 29) return null; // 12(iv) + 1(min content) + 16(tag)
-    const iv = data.subarray(0, 12);
-    const authTag = data.subarray(data.length - 16);
-    const encrypted = data.subarray(12, data.length - 16);
-    const key = deriveKey(SECRET);
-    const decipher = createDecipheriv("aes-256-gcm", key, iv);
-    decipher.setAuthTag(authTag);
-    const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
-    return decrypted.toString("utf8");
+    if (data.length < 29) return null; // 12(iv) + 1(min) + 16(tag)
+    const iv = data.slice(0, 12);
+    const encrypted = data.slice(12);
+    const key = await deriveKey(SECRET);
+    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, encrypted);
+    const decoder = new TextDecoder();
+    return decoder.decode(decrypted);
   } catch {
     return null;
   }
