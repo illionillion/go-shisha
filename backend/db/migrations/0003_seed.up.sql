@@ -15,10 +15,10 @@ INSERT INTO flavors (id, name, created_at, color) VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- users (開発用テストユーザー。実運用での利用は厳禁)
--- 例: パスワードは bcrypt('test1234') のハッシュを使用
+-- パスワード: TestPassword12 (14文字、大文字小文字数字含む、bcryptハッシュ化済み)
 INSERT INTO users (id, email, password_hash, display_name, description, icon_url, external_url, created_at) VALUES
-  (1, 'test@example.com', '$2b$12$RUMZQPIh7H5Avzkdxl3pPOxsDCYXgq6Gh7Wl5kHJ1i1P0RFzxHq8a', 'テストユーザー', 'シーシャ大好き！', 'https://i.pravatar.cc/80?img=11', '', NOW()),
-  (2, 'shisha@example.com', '$2b$12$RUMZQPIh7H5Avzkdxl3pPOxsDCYXgq6Gh7Wl5kHJ1i1P0RFzxHq8a', 'シーシャマスター', '毎日シーシャ吸ってます', 'https://i.pravatar.cc/80?img=12', 'https://twitter.com/shishamaster', NOW())
+  (1, 'test@example.com', '$2a$10$64wDz30D0qHnLuvpsgebgenOFozJlV5meVY6H6uvDZKzXyvnVHOsa', 'テストユーザー', 'シーシャ大好き！', 'https://i.pravatar.cc/80?img=11', '', NOW()),
+  (2, 'shisha@example.com', '$2a$10$64wDz30D0qHnLuvpsgebgenOFozJlV5meVY6H6uvDZKzXyvnVHOsa', 'シーシャマスター', '毎日シーシャ吸ってます', 'https://i.pravatar.cc/80?img=12', 'https://twitter.com/shishamaster', NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- posts

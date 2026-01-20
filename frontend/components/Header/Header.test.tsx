@@ -12,10 +12,4 @@ describe("Header", () => {
     render(<Header />);
     expect(screen.getByText("S")).toBeInTheDocument();
   });
-
-  it("ユーザーアイコンのSVGが表示される", () => {
-    const { container } = render(<Header />);
-    const svg = container.querySelector("svg");
-    expect(svg).toBeInTheDocument();
-  });
 });

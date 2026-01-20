@@ -10,6 +10,7 @@ import (
 
 	_ "go-shisha-backend/docs" // Swagger docs
 	"go-shisha-backend/internal/handlers"
+	"go-shisha-backend/internal/middleware"
 	"go-shisha-backend/internal/repositories/postgres"
 	"go-shisha-backend/internal/services"
 	"go-shisha-backend/pkg/db"
@@ -18,6 +19,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"golang.org/x/time/rate"
 )
 
 // @title Go-Shisha API
@@ -31,6 +33,10 @@ import (
 // @host localhost:8080
 // @BasePath /api/v1
 // @schemes http
+//
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 
 func main() {
 	// Ginのデバッグモードを設定（本番環境ではgin.ReleaseMode）
@@ -38,11 +44,16 @@ func main() {
 
 	r := gin.Default()
 
-	// CORS設定（開発環境用）
+	// CORS設定
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:3000" // デフォルト値
+	}
 	r.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Origin", frontendURL)
 		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		c.Header("Access-Control-Allow-Credentials", "true")
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
@@ -79,14 +90,26 @@ func main() {
 
 	postRepo := postgres.NewPostRepository(gormDB)
 	userRepo := postgres.NewUserRepository(gormDB)
+	refreshTokenRepo := postgres.NewRefreshTokenRepository(gormDB)
 
 	// Service層
 	userService := services.NewUserService(userRepo, postRepo)
 	postService := services.NewPostService(postRepo, userRepo)
+	authService := services.NewAuthService(userRepo, refreshTokenRepo)
 
 	// Handler層
 	userHandler := handlers.NewUserHandler(userService)
 	postHandler := handlers.NewPostHandler(postService)
+	authHandler := handlers.NewAuthHandler(authService)
+
+	// レート制限ミドルウェア（認証エンドポイント用）
+	// 1分間に5リクエストまで（12秒 × 5 = 60秒）、バースト5リクエスト
+	authRateLimiter := middleware.NewIPRateLimiter(rate.Every(12*time.Second), 5)
+	// 1時間ごとに古いIPエントリをクリーンアップ
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	authRateLimiter.CleanupOldIPs(ctx, 1*time.Hour)
+	logging.L.Info("rate limiter initialized", "rate", "5 req/min", "burst", 5)
 
 	// Swagger UI
 	// Note: gin-swaggerは/swagger/index.htmlでのアクセスのみサポート
@@ -105,12 +128,23 @@ func main() {
 			})
 		})
 
+		// Auth endpoints (認証不要)
+		auth := api.Group("/auth")
+		{
+			// レート制限を適用（ブルートフォース攻撃対策）
+			auth.POST("/register", middleware.RateLimitMiddleware(authRateLimiter), authHandler.Register)
+			auth.POST("/login", middleware.RateLimitMiddleware(authRateLimiter), authHandler.Login)
+			auth.POST("/refresh", middleware.RateLimitMiddleware(authRateLimiter), authHandler.Refresh)
+			auth.POST("/logout", middleware.AuthMiddleware(), authHandler.Logout)
+			auth.GET("/me", middleware.AuthMiddleware(), authHandler.Me)
+		}
+
 		// Posts endpoints
 		api.GET("/posts", postHandler.GetAllPosts)
 		api.GET("/posts/:id", postHandler.GetPost)
-		api.POST("/posts", postHandler.CreatePost)
-		api.POST("/posts/:id/like", postHandler.LikePost)
-		api.POST("/posts/:id/unlike", postHandler.UnlikePost)
+		api.POST("/posts", postHandler.CreatePost) // TODO: 認証必須化 + 画像アップロード実装
+		api.POST("/posts/:id/like", middleware.AuthMiddleware(), postHandler.LikePost)
+		api.POST("/posts/:id/unlike", middleware.AuthMiddleware(), postHandler.UnlikePost)
 
 		// Users endpoints
 		api.GET("/users", userHandler.GetAllUsers)
@@ -137,10 +171,10 @@ func main() {
 	<-quit
 
 	logging.L.Info("shutting down server...")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdownCancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := srv.Shutdown(shutdownCtx); err != nil {
 		logging.L.Error("server shutdown error", "error", err)
 	}
 	logging.L.Info("server exited, cleanup via defer")

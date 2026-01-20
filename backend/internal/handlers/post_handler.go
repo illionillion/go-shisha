@@ -84,29 +84,16 @@ func (h *PostHandler) GetPost(c *gin.Context) {
  * CreatePost handles POST /api/v1/posts
  */
 // @Summary 投稿作成
-// @Description 新しい投稿を作成します
+// @Description 新しい投稿を作成します（未実装）
 // @Tags posts
 // @Accept json
 // @Produce json
 // @Param post body models.CreatePostInput true "投稿情報"
 // @Success 201 {object} models.Post "作成された投稿"
-// @Failure 400 {object} map[string]interface{} "バリデーションエラー"
+// @Failure 501 {object} map[string]interface{} "未実装"
 // @Router /posts [post]
 func (h *PostHandler) CreatePost(c *gin.Context) {
-	var input models.CreatePostInput
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	post, err := h.postService.CreatePost(&input)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusCreated, post)
+	c.JSON(http.StatusNotImplemented, gin.H{"error": "Not implemented yet"})
 }
 
 /**

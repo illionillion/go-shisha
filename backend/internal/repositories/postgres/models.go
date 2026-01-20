@@ -4,12 +4,13 @@ import "time"
 
 // userModel represents the users table
 type userModel struct {
-	ID          int64  `gorm:"primaryKey;column:id"`
-	Email       string `gorm:"column:email"`
-	DisplayName string `gorm:"column:display_name"`
-	Description string `gorm:"column:description"`
-	IconURL     string `gorm:"column:icon_url"`
-	ExternalURL string `gorm:"column:external_url"`
+	ID           int64  `gorm:"primaryKey;column:id"`
+	Email        string `gorm:"column:email"`
+	PasswordHash string `gorm:"column:password_hash"`
+	DisplayName  string `gorm:"column:display_name"`
+	Description  string `gorm:"column:description"`
+	IconURL      string `gorm:"column:icon_url"`
+	ExternalURL  string `gorm:"column:external_url"`
 }
 
 // TableName ensures GORM uses the existing `users` table
