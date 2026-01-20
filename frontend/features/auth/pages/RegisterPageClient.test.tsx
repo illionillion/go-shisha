@@ -8,10 +8,14 @@ import { RegisterPageClient } from "./RegisterPageClient";
 
 // モックの設定
 const mockPush = vi.fn();
+const mockSearchParams = {
+  get: vi.fn(() => null),
+};
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockPush,
   }),
+  useSearchParams: () => mockSearchParams,
 }));
 
 vi.mock("../api/authApi", () => ({
