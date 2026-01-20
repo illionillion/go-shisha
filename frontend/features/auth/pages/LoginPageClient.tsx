@@ -3,7 +3,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { resolveRedirect } from "@/app/actions/resolveRedirect.server";
 import { authApi } from "@/features/auth/api/authApi";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 import { useAuthStore } from "@/features/auth/stores/authStore";
@@ -31,15 +30,24 @@ export const LoginPageClient = () => {
       setUser(res.user ?? null);
       // ミドルウェアで渡された redirectUrl トークンがあればサーバーアクションで解決してリダイレクト
       const token = redirectToken;
+      console.log("LoginPageClient: redirectToken", token);
       if (token) {
         try {
-          const path = await resolveRedirect(token);
-          if (path) {
-            router.push(path);
-            return;
+          const r = await fetch("/api/resolve-redirect", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token }),
+          });
+          if (r.ok) {
+            const j = await r.json();
+            const path = j?.path;
+            if (path && path.startsWith("/")) {
+              router.push(path);
+              return;
+            }
           }
-        } catch {
-          // ignore and fallback to home
+        } catch (e) {
+          console.error("LoginPageClient: resolve-redirect fetch failed", e);
         }
       }
       router.push("/");
