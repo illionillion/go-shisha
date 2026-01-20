@@ -75,7 +75,7 @@ function isSafeRedirect(path: string) {
   if (!path.startsWith("/")) return false;
   if (path.startsWith("/_next")) return false;
   if (path.startsWith("/api")) return false;
-  if (path === "/login" || path === "/register") return false;
+  if (path === "/" || path === "/login" || path === "/register") return false;
   // limit length to avoid abuse
   if (path.length > 2048) return false;
   return true;
