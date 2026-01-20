@@ -28,26 +28,26 @@ export const LoginPageClient = () => {
     try {
       const res = await login(data);
       setUser(res.user ?? null);
-      // ミドルウェアで渡された redirectUrl トークンがあればサーバーアクションで解決してリダイレクト
+      // ミドルウェアで渡された redirectUrl トークンがあればAPI経由で解決してリダイレクト
       const token = redirectToken;
       console.log("LoginPageClient: redirectToken", token);
       if (token) {
         try {
-          const r = await fetch("/api/resolve-redirect", {
+          const response = await fetch("/api/resolve-redirect", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token }),
           });
-          if (r.ok) {
-            const j = await r.json();
-            const path = j?.path;
-            if (path && path.startsWith("/")) {
-              router.push(path);
+          if (response.ok) {
+            const result = await response.json();
+            if (result.path && result.path.startsWith("/")) {
+              console.log("LoginPageClient: redirecting to", result.path);
+              router.push(result.path);
               return;
             }
           }
         } catch (e) {
-          console.error("LoginPageClient: resolve-redirect fetch failed", e);
+          console.error("LoginPageClient: resolve-redirect failed", e);
         }
       }
       router.push("/");
