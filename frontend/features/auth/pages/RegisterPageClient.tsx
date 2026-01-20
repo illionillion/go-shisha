@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { authApi } from "@/features/auth/api/authApi";
 import { RegisterForm } from "@/features/auth/components/RegisterForm";
@@ -12,6 +12,11 @@ import type { CreateUserInput } from "@/types/domain";
 export const RegisterPageClient = () => {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
+  const searchParams = useSearchParams();
+  const redirectToken = searchParams?.get("redirectUrl");
+  const loginHref = redirectToken
+    ? `/login?redirectUrl=${encodeURIComponent(redirectToken)}`
+    : "/login";
 
   const { mutateAsync: register, isPending } = useMutation({
     mutationFn: (data: CreateUserInput) => authApi.register(data),
@@ -29,7 +34,14 @@ export const RegisterPageClient = () => {
     }
   };
 
-  return <RegisterForm onSubmit={onSubmit} isLoading={isPending} errorMessage={errorMessage} />;
+  return (
+    <RegisterForm
+      onSubmit={onSubmit}
+      isLoading={isPending}
+      errorMessage={errorMessage}
+      loginHref={loginHref}
+    />
+  );
 };
 
 const toCreateUserInput = (data: RegisterInput): CreateUserInput => ({
