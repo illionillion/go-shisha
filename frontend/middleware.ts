@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { encryptRedirect } from "./lib/redirectCrypto";
+import { isSafeRedirectPath } from "./lib/validateRedirect";
 
 const PUBLIC_PATHS = ["/login", "/register", "/test"];
 const AUTH_PAGES = ["/login", "/register"];
@@ -34,11 +35,14 @@ export async function middleware(req: NextRequest) {
   if (!hasAccessToken) {
     const original = `${pathname}${search || ""}`;
     const loginUrl = new URL("/login", req.url);
-    if (isSafeRedirect(original)) {
+    if (isSafeRedirectPath(original)) {
       try {
         const token = await encryptRedirect(original);
         loginUrl.searchParams.set("redirectUrl", token);
-      } catch {
+      } catch (error) {
+        if (process.env.NODE_ENV === "development") {
+          console.error("Failed to encrypt redirect URL:", error);
+        }
         // ignore and fallback to plain /login
       }
     }
@@ -70,13 +74,3 @@ function isPublicPath(pathname: string) {
 export const config = {
   matcher: "/:path*",
 };
-
-function isSafeRedirect(path: string) {
-  if (!path.startsWith("/")) return false;
-  if (path.startsWith("/_next")) return false;
-  if (path.startsWith("/api")) return false;
-  if (path === "/" || path === "/login" || path === "/register") return false;
-  // limit length to avoid abuse
-  if (path.length > 2048) return false;
-  return true;
-}

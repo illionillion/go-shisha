@@ -1,7 +1,12 @@
 // Edge Runtime互換のWeb Crypto API実装
 // middleware.tsとServer Actionsの両方で動作
 
-const SECRET = process.env.REDIRECT_SECRET || "";
+const SECRET = process.env.REDIRECT_SECRET;
+
+if (!SECRET) {
+  console.error("REDIRECT_SECRET is not set");
+  throw new Error("REDIRECT_SECRET not set");
+}
 
 function base64urlEncode(bytes: Uint8Array): string {
   let binary = "";
@@ -13,6 +18,7 @@ function base64urlEncode(bytes: Uint8Array): string {
 }
 
 function base64urlDecode(s: string): Uint8Array {
+  // パディング文字数を計算して追加（base64urlはパディングを省略するため）
   const b64 = s.replace(/-/g, "+").replace(/_/g, "/") + "==".slice((2 - s.length * 3) & 3);
   const binary = atob(b64);
   const len = binary.length;
@@ -51,7 +57,11 @@ export async function decryptRedirect(token: string): Promise<string | null> {
   if (!SECRET) return null;
   try {
     const data = base64urlDecode(token);
-    if (data.length < 29) return null; // 12(iv) + 1(min) + 16(tag)
+    const IV_LENGTH = 12;
+    const MIN_PAYLOAD_LENGTH = 1;
+    const AUTH_TAG_LENGTH = 16;
+    const MIN_DATA_LENGTH = IV_LENGTH + MIN_PAYLOAD_LENGTH + AUTH_TAG_LENGTH;
+    if (data.length < MIN_DATA_LENGTH) return null;
     const iv = data.slice(0, 12);
     const encrypted = data.slice(12);
     const key = await deriveKey(SECRET);

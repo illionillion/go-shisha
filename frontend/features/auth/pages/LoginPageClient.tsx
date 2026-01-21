@@ -29,13 +29,12 @@ export const LoginPageClient = () => {
       const res = await login(data);
       setUser(res.user ?? null);
       // ミドルウェアで渡された redirectUrl トークンがあればAPI経由で解決してリダイレクト
-      const token = redirectToken;
-      if (token) {
+      if (redirectToken) {
         try {
           const response = await fetch("/api/resolve-redirect", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token }),
+            body: JSON.stringify({ token: redirectToken }),
           });
           if (response.ok) {
             const result = await response.json();
