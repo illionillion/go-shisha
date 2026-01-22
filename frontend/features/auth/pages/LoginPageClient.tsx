@@ -40,7 +40,8 @@ export const LoginPageClient = () => {
             const result = await response.json();
             // 防御的プログラミング：クライアント側でも再検証
             if (result.path && result.path.startsWith("/") && !result.path.startsWith("//")) {
-              router.push(result.path);
+              // 履歴を置き換えてログインページを残さない
+              router.replace(result.path);
               return;
             }
           }
@@ -48,7 +49,8 @@ export const LoginPageClient = () => {
           console.error("LoginPageClient: resolve-redirect failed", e);
         }
       }
-      router.push("/");
+      // 履歴を置き換えてログインページを残さない
+      router.replace("/");
     } catch (error) {
       console.error("LoginPageClient: login request failed", error);
       setErrorMessage(getLoginErrorMessage(error));
