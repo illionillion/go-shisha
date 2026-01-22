@@ -19,7 +19,7 @@ export function isSafeRedirectPath(path: string): boolean {
   if (path.startsWith("/_next")) return false;
   if (path.startsWith("/api")) return false;
   if (path === "/" || path === "/login" || path === "/register") return false;
-  // limit length to avoid abuse
+  // 長さ制限で悪用を防止
   if (path.length > 2048) return false;
   return true;
 }
