@@ -45,13 +45,14 @@ export const LoginPageClient = () => {
               return;
             }
           }
-        } catch {
-          // 復号化失敗時は黙ってデフォルトにフォールバック
+        } catch (e) {
+          console.error("LoginPageClient: resolve-redirect failed", e);
         }
       }
       // 履歴を置き換えてログインページを残さない
       router.replace("/");
     } catch (error) {
+      console.error("LoginPageClient: login request failed", error);
       setErrorMessage(getLoginErrorMessage(error));
     }
   };
