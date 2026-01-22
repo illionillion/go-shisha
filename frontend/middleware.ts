@@ -43,7 +43,7 @@ export async function middleware(req: NextRequest) {
         if (process.env.NODE_ENV === "development") {
           console.error("Failed to encrypt redirect URL:", error);
         }
-        // ignore and fallback to plain /login
+        // エラーは無視して通常の /login にフォールバック
       }
     }
     return NextResponse.redirect(loginUrl);
