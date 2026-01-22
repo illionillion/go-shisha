@@ -33,7 +33,7 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!hasAccessToken) {
-    const original = `${pathname}${search || ""}`;
+    const original = `${pathname}${search}`;
     const loginUrl = new URL("/login", req.url);
     if (isSafeRedirectPath(original)) {
       try {

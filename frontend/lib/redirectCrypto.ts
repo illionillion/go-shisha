@@ -1,6 +1,9 @@
 // Edge Runtime互換のWeb Crypto API実装
 // middleware.tsとServer Actionsの両方で動作
 
+// AES-GCM暗号化で使用するIV（Initialization Vector）の長さ
+const IV_LENGTH = 12;
+
 const SECRET = process.env.REDIRECT_SECRET;
 
 if (!SECRET) {
@@ -42,7 +45,7 @@ async function deriveKey(secret: string): Promise<CryptoKey> {
 export async function encryptRedirect(path: string): Promise<string> {
   if (!SECRET) throw new Error("REDIRECT_SECRET not set");
   const key = await deriveKey(SECRET);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
   const encoder = new TextEncoder();
   const data = encoder.encode(path);
   const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, data);
@@ -57,13 +60,12 @@ export async function decryptRedirect(token: string): Promise<string | null> {
   if (!SECRET) return null;
   try {
     const data = base64urlDecode(token);
-    const IV_LENGTH = 12;
     const MIN_PAYLOAD_LENGTH = 1;
     const AUTH_TAG_LENGTH = 16;
     const MIN_DATA_LENGTH = IV_LENGTH + MIN_PAYLOAD_LENGTH + AUTH_TAG_LENGTH;
     if (data.length < MIN_DATA_LENGTH) return null;
-    const iv = data.slice(0, 12);
-    const encrypted = data.slice(12);
+    const iv = data.slice(0, IV_LENGTH);
+    const encrypted = data.slice(IV_LENGTH);
     const key = await deriveKey(SECRET);
     const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, encrypted);
     const decoder = new TextDecoder();

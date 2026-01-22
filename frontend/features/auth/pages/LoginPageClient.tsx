@@ -38,7 +38,8 @@ export const LoginPageClient = () => {
           });
           if (response.ok) {
             const result = await response.json();
-            if (result.path && result.path.startsWith("/")) {
+            // 防御的プログラミング：クライアント側でも再検証
+            if (result.path && result.path.startsWith("/") && !result.path.startsWith("//")) {
               router.push(result.path);
               return;
             }

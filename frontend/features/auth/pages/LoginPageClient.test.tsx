@@ -9,7 +9,7 @@ import { LoginPageClient } from "./LoginPageClient";
 // モックの設定
 const mockPush = vi.fn();
 const mockSearchParams = {
-  get: vi.fn(() => null),
+  get: vi.fn((_key: string): string | null => null),
 };
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -196,6 +196,83 @@ describe("LoginPageClient", () => {
 
       await waitFor(() => {
         expect(screen.getByText(/パスワードを入力してください/i)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("redirectUrl機能", () => {
+    it("redirectUrlパラメータがある場合、ログイン成功後にAPIを呼び出して復号化されたパスへリダイレクトする", async () => {
+      const { authApi } = await import("../api/authApi");
+      const user = userEvent.setup();
+
+      // redirectUrlパラメータをモック
+      mockSearchParams.get.mockImplementation((key: string) =>
+        key === "redirectUrl" ? "encrypted-token-123" : null
+      );
+
+      // APIレスポンスをモック
+      vi.mocked(authApi.login).mockResolvedValue({ user: mockUser });
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ path: "/posts/123" }),
+      });
+
+      render(<LoginPageClient />, { wrapper: createWrapper() });
+
+      const emailInput = screen.getByLabelText(/メールアドレス/i);
+      const passwordInput = screen.getByLabelText(/パスワード/i);
+      const submitButton = screen.getByRole("button", { name: /ログイン/i });
+
+      await user.type(emailInput, "test@example.com");
+      await user.type(passwordInput, "Password123!");
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(fetch).toHaveBeenCalledWith("/api/resolve-redirect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: "encrypted-token-123" }),
+        });
+        expect(mockPush).toHaveBeenCalledWith("/posts/123");
+      });
+    });
+
+    it("redirectUrlパラメータがある場合、登録リンクにredirectUrlが引き継がれる", () => {
+      mockSearchParams.get.mockImplementation((key: string) =>
+        key === "redirectUrl" ? "encrypted-token-456" : null
+      );
+
+      render(<LoginPageClient />, { wrapper: createWrapper() });
+
+      const registerLink = screen.getByRole("link", { name: /こちら/i });
+      expect(registerLink).toHaveAttribute("href", "/register?redirectUrl=encrypted-token-456");
+    });
+
+    it("API呼び出しが失敗した場合、デフォルトの/へリダイレクトする", async () => {
+      const { authApi } = await import("../api/authApi");
+      const user = userEvent.setup();
+
+      mockSearchParams.get.mockImplementation((key: string) =>
+        key === "redirectUrl" ? "invalid-token" : null
+      );
+
+      vi.mocked(authApi.login).mockResolvedValue({ user: mockUser });
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+      });
+
+      render(<LoginPageClient />, { wrapper: createWrapper() });
+
+      const emailInput = screen.getByLabelText(/メールアドレス/i);
+      const passwordInput = screen.getByLabelText(/パスワード/i);
+      const submitButton = screen.getByRole("button", { name: /ログイン/i });
+
+      await user.type(emailInput, "test@example.com");
+      await user.type(passwordInput, "Password123!");
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith("/");
       });
     });
   });

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { decryptRedirect } from "@/lib/redirectCrypto";
 import { isSafeRedirectPath } from "@/lib/validateRedirect";
 
+// このAPIは未認証ユーザーも使用する（ログインページでredirectUrl復号のため）
+// 認証チェックは不要
 export async function POST(req: Request) {
   try {
     const body = await req.json();

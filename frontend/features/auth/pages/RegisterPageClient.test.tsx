@@ -9,7 +9,7 @@ import { RegisterPageClient } from "./RegisterPageClient";
 // モックの設定
 const mockPush = vi.fn();
 const mockSearchParams = {
-  get: vi.fn(() => null),
+  get: vi.fn((_key: string): string | null => null),
 };
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -273,6 +273,49 @@ describe("RegisterPageClient", () => {
       await waitFor(() => {
         expect(screen.getByText(/パスワードは12文字以上である必要があります/i)).toBeInTheDocument();
       });
+    });
+  });
+
+  describe("redirectUrl機能", () => {
+    it("redirectUrlパラメータがある場合、登録成功後のログインページリダイレクト時にredirectUrlが引き継がれる", async () => {
+      const { authApi } = await import("../api/authApi");
+      const user = userEvent.setup();
+
+      // redirectUrlパラメータをモック
+      mockSearchParams.get.mockImplementation((key: string) =>
+        key === "redirectUrl" ? "encrypted-token-789" : null
+      );
+
+      vi.mocked(authApi.register).mockResolvedValue({ user: mockUser });
+
+      render(<RegisterPageClient />, { wrapper: createWrapper() });
+
+      const displayNameInput = screen.getByLabelText(/表示名/i);
+      const emailInput = screen.getByLabelText(/メールアドレス/i);
+      const passwordInput = screen.getByLabelText(/^パスワード$/i);
+      const confirmPasswordInput = screen.getByLabelText(/パスワード（確認）/i);
+      const submitButton = screen.getByRole("button", { name: /登録/i });
+
+      await user.type(displayNameInput, "新規ユーザー");
+      await user.type(emailInput, "newuser@example.com");
+      await user.type(passwordInput, "ValidPassword123!");
+      await user.type(confirmPasswordInput, "ValidPassword123!");
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockPush).toHaveBeenCalledWith("/login?redirectUrl=encrypted-token-789");
+      });
+    });
+
+    it("redirectUrlパラメータがある場合、ログインリンクにredirectUrlが引き継がれる", () => {
+      mockSearchParams.get.mockImplementation((key: string) =>
+        key === "redirectUrl" ? "encrypted-token-abc" : null
+      );
+
+      render(<RegisterPageClient />, { wrapper: createWrapper() });
+
+      const loginLink = screen.getByRole("link", { name: /こちら/i });
+      expect(loginLink).toHaveAttribute("href", "/login?redirectUrl=encrypted-token-abc");
     });
   });
 });
