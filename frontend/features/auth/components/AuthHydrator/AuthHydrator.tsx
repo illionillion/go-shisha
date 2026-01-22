@@ -7,7 +7,10 @@ import { getGetAuthMeQueryOptions } from "@/api/auth";
 import { useAuthStore } from "@/features/auth/stores/authStore";
 import type { ApiError } from "@/lib/api-client";
 
-// ログインページなど、認証チェックをスキップするパス
+// ログイン・新規登録ページなど、/auth/me の認証チェックをスキップするパス
+// NOTE:
+// - 主目的は、これらのページでの /auth/me アクセスを抑制し、rate limit を回避すること
+// - middleware.ts の PUBLIC_PATHS（認証不要のパブリックパス一覧）とは用途が異なるため、あえて同期させていない
 const SKIP_AUTH_CHECK_PATHS = ["/login", "/register"];
 
 /**
