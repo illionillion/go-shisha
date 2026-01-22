@@ -20,6 +20,12 @@ function base64urlEncode(bytes: Uint8Array): string {
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
+/**
+ * base64url形式の文字列をデコードしてUint8Arrayに変換
+ * @param s - base64url形式の文字列
+ * @returns デコードされたバイト配列
+ * @throws 不正なbase64文字列の場合、atob()が例外をスローする可能性があります
+ */
 function base64urlDecode(s: string): Uint8Array {
   // パディング文字数を計算して追加（base64urlはパディングを省略するため）
   const b64 = s.replace(/-/g, "+").replace(/_/g, "/") + "==".slice((2 - s.length * 3) & 3);

@@ -7,6 +7,7 @@ import { authApi } from "@/features/auth/api/authApi";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 import { useAuthStore } from "@/features/auth/stores/authStore";
 import type { ApiError } from "@/lib/api-client";
+import { isSafeRedirectPath } from "@/lib/validateRedirect";
 import type { LoginInput } from "@/types/auth";
 
 export const LoginPageClient = () => {
@@ -38,8 +39,8 @@ export const LoginPageClient = () => {
           });
           if (response.ok) {
             const result = await response.json();
-            // 防御的プログラミング：クライアント側でも再検証
-            if (result.path && result.path.startsWith("/") && !result.path.startsWith("//")) {
+            // 防御的プログラミング：クライアント側でも再検証（サーバー側と同じロジック）
+            if (result.path && isSafeRedirectPath(result.path)) {
               // 履歴を置き換えてログインページを残さない
               router.replace(result.path);
               return;

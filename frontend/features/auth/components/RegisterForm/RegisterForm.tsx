@@ -89,7 +89,7 @@ export const RegisterForm = ({
   onSubmit,
   isLoading = false,
   errorMessage,
-  loginHref = "/login",
+  loginHref,
 }: RegisterFormProps) => {
   const {
     register,
@@ -194,7 +194,7 @@ export const RegisterForm = ({
         {/* ログインリンク */}
         <div className="text-center text-sm text-gray-600">
           既にアカウントをお持ちの方は
-          <Link href={loginHref} className="ml-1 text-purple-600 hover:underline">
+          <Link href={loginHref ?? "/login"} className="ml-1 text-purple-600 hover:underline">
             こちら
           </Link>
         </div>
