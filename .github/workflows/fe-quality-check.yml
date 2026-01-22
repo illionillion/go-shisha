@@ -97,6 +97,8 @@ jobs:
     defaults:
       run:
         working-directory: ./frontend
+    env:
+      REDIRECT_SECRET: dummy-secret-for-build-only-not-used-in-runtime
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

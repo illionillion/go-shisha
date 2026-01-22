@@ -180,4 +180,25 @@ describe("LoginForm", () => {
       ).not.toBeInTheDocument();
     });
   });
+
+  /**
+   * 正常系: registerHref prop
+   */
+  describe("registerHref prop", () => {
+    it("registerHrefが指定された場合、登録リンクに正しいhrefが設定される", () => {
+      render(
+        <LoginForm onSubmit={vi.fn()} registerHref="/register?redirectUrl=encrypted-token-123" />
+      );
+
+      const link = screen.getByRole("link", { name: "こちら" });
+      expect(link).toHaveAttribute("href", "/register?redirectUrl=encrypted-token-123");
+    });
+
+    it("registerHrefが未指定の場合、デフォルトの/registerが使用される", () => {
+      render(<LoginForm onSubmit={vi.fn()} />);
+
+      const link = screen.getByRole("link", { name: "こちら" });
+      expect(link).toHaveAttribute("href", "/register");
+    });
+  });
 });

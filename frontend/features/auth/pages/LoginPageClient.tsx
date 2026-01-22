@@ -1,18 +1,24 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { authApi } from "@/features/auth/api/authApi";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 import { useAuthStore } from "@/features/auth/stores/authStore";
 import type { ApiError } from "@/lib/api-client";
+import { isSafeRedirectPath } from "@/lib/validateRedirect";
 import type { LoginInput } from "@/types/auth";
 
 export const LoginPageClient = () => {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const { setUser } = useAuthStore();
+  const searchParams = useSearchParams();
+  const redirectToken = searchParams?.get("redirectUrl");
+  const registerHref = redirectToken
+    ? `/register?redirectUrl=${encodeURIComponent(redirectToken)}`
+    : "/register";
 
   const { mutateAsync: login, isPending } = useMutation({
     mutationFn: (data: LoginInput) => authApi.login(data),
@@ -23,14 +29,43 @@ export const LoginPageClient = () => {
     try {
       const res = await login(data);
       setUser(res.user ?? null);
-      router.push("/");
+      // ミドルウェアで渡された redirectUrl トークンがあればAPI経由で解決してリダイレクト
+      if (redirectToken) {
+        try {
+          const response = await fetch("/api/resolve-redirect", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token: redirectToken }),
+          });
+          if (response.ok) {
+            const result = await response.json();
+            // 防御的プログラミング：クライアント側でも再検証（サーバー側と同じロジック）
+            if (result.path && isSafeRedirectPath(result.path)) {
+              // 履歴を置き換えてログインページを残さない
+              router.replace(result.path);
+              return;
+            }
+          }
+        } catch (e) {
+          console.error("LoginPageClient: resolve-redirect failed", e);
+        }
+      }
+      // 履歴を置き換えてログインページを残さない
+      router.replace("/");
     } catch (error) {
       console.error("LoginPageClient: login request failed", error);
       setErrorMessage(getLoginErrorMessage(error));
     }
   };
 
-  return <LoginForm onSubmit={onSubmit} isLoading={isPending} errorMessage={errorMessage} />;
+  return (
+    <LoginForm
+      onSubmit={onSubmit}
+      isLoading={isPending}
+      errorMessage={errorMessage}
+      registerHref={registerHref}
+    />
+  );
 };
 
 const getLoginErrorMessage = (error: unknown) => {
