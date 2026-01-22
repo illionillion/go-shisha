@@ -7,13 +7,13 @@ import { useAuthStore } from "../stores/authStore";
 import { LoginPageClient } from "./LoginPageClient";
 
 // モックの設定
-const mockPush = vi.fn();
+const mockReplace = vi.fn();
 const mockSearchParams = {
   get: vi.fn((_key: string): string | null => null),
 };
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
-    push: mockPush,
+    replace: mockReplace,
   }),
   useSearchParams: () => mockSearchParams,
 }));
@@ -47,6 +47,7 @@ const createWrapper = () => {
 describe("LoginPageClient", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockReplace.mockClear();
     useAuthStore.setState({ user: null });
   });
 
@@ -96,7 +97,7 @@ describe("LoginPageClient", () => {
       expect(useAuthStore.getState().user).toEqual(mockUser);
 
       // ホームページにリダイレクト
-      expect(mockPush).toHaveBeenCalledWith("/");
+      expect(mockReplace).toHaveBeenCalledWith("/");
     });
 
     it("エラー時にエラーメッセージが表示される", async () => {
@@ -128,7 +129,7 @@ describe("LoginPageClient", () => {
       expect(useAuthStore.getState().user).toBeNull();
 
       // リダイレクトされない
-      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockReplace).not.toHaveBeenCalled();
     });
 
     it("送信中はボタンが無効化される", async () => {
@@ -233,7 +234,7 @@ describe("LoginPageClient", () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token: "encrypted-token-123" }),
         });
-        expect(mockPush).toHaveBeenCalledWith("/posts/123");
+        expect(mockReplace).toHaveBeenCalledWith("/posts/123");
       });
     });
 
@@ -272,7 +273,7 @@ describe("LoginPageClient", () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith("/");
+        expect(mockReplace).toHaveBeenCalledWith("/");
       });
     });
   });
