@@ -61,5 +61,12 @@
     "frontend/**/*.{json,md,yml,yaml}": [
       "pnpm -w -F frontend format --"
     ]
+  },
+  "pnpm": {
+    "overrides": {
+      "qs": ">=6.14.1",
+      "lodash": ">=4.17.23",
+      "node-polyfill-webpack-plugin": ">=4.1.0"
+    }
   }
 }
