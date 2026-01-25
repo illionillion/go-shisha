@@ -3,6 +3,7 @@ import { getUsersId, getUsersIdPosts } from "@/api/users";
 import { BackButton } from "@/components/BackButton";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { TimelineContainer } from "@/features/posts/components/Timeline";
+import { isSuccessResponse } from "@/lib/api-helpers";
 
 interface Props {
   params: { id: string } | Promise<{ id: string }>;
@@ -18,18 +19,18 @@ export default async function Page({ params }: Props) {
 
   // Fetch user first; only fetch posts if user exists to avoid unnecessary requests.
   // Let unexpected errors bubble to `app/error.tsx`.
-  const user = await getUsersId(id);
+  const userResponse = await getUsersId(id);
 
-  if (!user || !user.id) {
+  if (!isSuccessResponse(userResponse) || !userResponse.data.id) {
     notFound();
   }
 
-  const postsResp = await getUsersIdPosts(id);
-  const initialPosts = postsResp?.posts ?? [];
+  const postsResponse = await getUsersIdPosts(id);
+  const initialPosts = isSuccessResponse(postsResponse) ? (postsResponse.data.posts ?? []) : [];
 
   return (
     <div>
-      <ProfileHeader user={user} />
+      <ProfileHeader user={userResponse.data} />
       <main className="max-w-3xl mx-auto py-6">
         <BackButton />
         <TimelineContainer initialPosts={initialPosts} userId={id} />

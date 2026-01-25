@@ -1,3 +1,4 @@
+import { isSuccessResponse } from "@/lib/api-helpers";
 import type { Post } from "@/types/domain";
 import { getPosts } from "../api/posts";
 import { TimelineContainer } from "../features/posts/components/Timeline/TimelineContainer";
@@ -11,8 +12,10 @@ export default async function Home() {
   // RSCでサーバーサイド取得（SSR）
   let initialPosts: Post[] | undefined;
   try {
-    const data = await getPosts();
-    initialPosts = data.posts;
+    const response = await getPosts();
+    if (isSuccessResponse(response)) {
+      initialPosts = response.data.posts;
+    }
   } catch (error) {
     console.error("Failed to fetch posts in RSC:", error);
     // エラー時はクライアント側でフォールバック

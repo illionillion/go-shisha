@@ -22,41 +22,20 @@ export function getApiBaseUrl(): string {
 
 /**
  * orvalで生成されたAPI関数をラップし、適切なベースURLでfetchを実行する
- * react-queryモード対応: 第1引数にリクエスト設定オブジェクトを受け取る
- * @param config リクエスト設定（url, method, data, headers等）
- * @param options 追加のfetchオプション
- * @returns fetch Promise
+ * Orval 8.x対応: 第1引数にURL、第2引数にRequestInitを受け取る
+ * レスポンスは { data: T, status: number, headers: Headers } 形式で返す
+ * @param url APIエンドポイントのパス
+ * @param options fetchオプション（method, headers, body等）
+ * @returns fetch Promise（Orval 8.x形式: { data, status, headers }）
  * @throws {Error} HTTPエラー（4xx, 5xx）が発生した場合
  */
-export async function apiFetch<T>(
-  config: {
-    url: string;
-    method: string;
-    headers?: HeadersInit;
-    data?: unknown;
-    signal?: AbortSignal;
-  },
-  options?: RequestInit
-): Promise<T> {
+export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const baseUrl = getApiBaseUrl();
-  const url = `${baseUrl}${config.url}`;
+  const fullUrl = `${baseUrl}${url}`;
 
-  // ヘッダーマージ: 明示的指定を優先（config.headers > 自動Content-Type > options.headers）
-  const hasContentType =
-    (config.headers && typeof config.headers === "object" && "Content-Type" in config.headers) ||
-    (options?.headers && typeof options.headers === "object" && "Content-Type" in options.headers);
-
-  const res = await fetch(url, {
+  const res = await fetch(fullUrl, {
     ...options,
-    method: config.method,
     credentials: options?.credentials ?? "include",
-    headers: {
-      ...(config.data && !hasContentType ? { "Content-Type": "application/json" } : {}),
-      ...config.headers,
-      ...options?.headers,
-    },
-    body: config.data ? JSON.stringify(config.data) : undefined,
-    signal: config.signal,
   });
 
   if (!res.ok) {
@@ -70,11 +49,11 @@ export async function apiFetch<T>(
 
     // 401エラー時、リフレッシュトークンで自動再試行
     // ただし、リフレッシュAPI自体は再試行しない（無限ループ防止）
-    if (res.status === 401 && config.url !== "/auth/refresh" && typeof window !== "undefined") {
+    if (res.status === 401 && url !== "/auth/refresh" && typeof window !== "undefined") {
       const refreshed = await tryRefreshToken();
       if (refreshed) {
         // リフレッシュ成功、元のリクエストをリトライ
-        return apiFetch<T>(config, options);
+        return apiFetch<T>(url, options);
       }
       // リフレッシュ失敗（ログアウト状態）→エラーをそのまま投げる
     }
@@ -88,10 +67,17 @@ export async function apiFetch<T>(
     throw error;
   }
 
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-  const data = body ? JSON.parse(body) : null;
+  // Orval 8.x 形式でレスポンスを返す: { data, status, headers }
+  const bodyText = [204, 205, 304].includes(res.status) ? null : await res.text();
+  const bodyData = bodyText ? JSON.parse(bodyText) : null;
 
-  return data as T;
+  const response = {
+    data: bodyData,
+    status: res.status,
+    headers: res.headers,
+  };
+
+  return response as T;
 }
 
 export type ApiError = Error & {
