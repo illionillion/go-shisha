@@ -94,19 +94,35 @@ jobs:
     name: Build Next.js
     runs-on: ubuntu-latest
     needs: [eslint, prettier, type_check]
-    defaults:
-      run:
-        working-directory: ./frontend
     env:
       REDIRECT_SECRET: dummy-secret-for-build-only-not-used-in-runtime
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Generate Swagger from Backend
+        working-directory: ./backend
+        run: |
+          go install github.com/swaggo/swag/cmd/swag@latest
+          make swagger
+
       - name: Setup Frontend Environment
         uses: ./.github/actions/setup-frontend
 
+      - name: Copy OpenAPI spec and generate API client
+        working-directory: ./frontend
+        run: |
+          mkdir -p openapi
+          cp ../backend/docs/swagger.yaml openapi/openapi.yml
+          pnpm orval
+
       - name: Build application
+        working-directory: ./frontend
         run: pnpm build
 
   build_storybook:
