@@ -19,13 +19,15 @@ export default async function Page({ params }: Props) {
 
   // Fetch user first; only fetch posts if user exists to avoid unnecessary requests.
   // Let unexpected errors bubble to `app/error.tsx`.
+  // apiFetchがエラー時にthrowするためresponseは常に成功レスポンスだが、
+  // TypeScriptの型推論のためにisSuccessResponseで明示的に絞り込む
   const userResponse = await getUsersId(id);
+  const postsResponse = await getUsersIdPosts(id);
 
   if (!isSuccessResponse(userResponse) || !userResponse.data.id) {
     notFound();
   }
 
-  const postsResponse = await getUsersIdPosts(id);
   const initialPosts = isSuccessResponse(postsResponse) ? (postsResponse.data.posts ?? []) : [];
 
   return (

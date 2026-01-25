@@ -69,7 +69,7 @@ describe("PostDetail", () => {
     // Orval 8.x形式: { data: Post, status: 200, headers }
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       data: {
-        data: { data: mockPost, status: 200, headers: new Headers() },
+        data: mockPost,
         status: 200,
         headers: new Headers(),
       },

@@ -10,6 +10,6 @@
  */
 export function isSuccessResponse<T extends { status: number; data: unknown }>(
   response: T
-): response is Extract<T, { status: 200 | 201 | 204 }> {
+): response is Extract<T, { status: 200 | 201 | 202 | 203 | 204 | 205 | 206 | 207 | 208 | 226 }> {
   return response.status >= 200 && response.status < 300;
 }

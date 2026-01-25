@@ -20,6 +20,8 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
   const router = useRouter();
 
   // Orval 8.x: レスポンスから成功時のデータを取り出す
+  // apiFetchがエラー時にthrowするためresponseは常に成功レスポンスだが、
+  // TypeScriptの型推論のためにisSuccessResponseで明示的に絞り込む必要がある
   const post = response && isSuccessResponse(response) ? response.data : initialPost;
 
   const slides = post?.slides || [];

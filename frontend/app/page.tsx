@@ -13,6 +13,8 @@ export default async function Home() {
   let initialPosts: Post[] | undefined;
   try {
     const response = await getPosts();
+    // apiFetchがエラー時にthrowするためresponseは常に成功レスポンスだが、
+    // TypeScriptの型推論のためにisSuccessResponseで明示的に絞り込む
     if (isSuccessResponse(response)) {
       initialPosts = response.data.posts;
     }
