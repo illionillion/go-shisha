@@ -16,7 +16,18 @@ interface PostDetailProps {
 }
 
 export function PostDetail({ postId, initialPost }: PostDetailProps) {
-  const { data: response, isLoading, isError, refetch } = useGetPostsId(postId);
+  const {
+    data: response,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetPostsId(postId, {
+    query: {
+      initialData: initialPost
+        ? { data: initialPost, status: 200, headers: new Headers() }
+        : undefined,
+    },
+  });
   const router = useRouter();
 
   // Orval 8.x: レスポンスから成功時のデータを取り出す
