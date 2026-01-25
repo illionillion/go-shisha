@@ -133,7 +133,7 @@ describe("TimelineContainer", () => {
 
   test("CSR: データ取得後はposts/availableFlavorsが正しく渡る", () => {
     (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: { posts: mockPosts },
+      data: { data: { posts: mockPosts }, status: 200, headers: new Headers() },
       isLoading: false,
       error: null,
     });
@@ -199,7 +199,7 @@ describe("TimelineContainer", () => {
 
   test("filteredPosts/handleFlavorToggle: flavor選択で絞り込み・トグル動作が正しい", async () => {
     (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: { posts: mockPosts },
+      data: { data: { posts: mockPosts }, status: 200, headers: new Headers() },
       isLoading: false,
       error: null,
     });
@@ -233,7 +233,7 @@ describe("TimelineContainer", () => {
   test("userId 指定時は useGetUsersIdPosts が使われ、useGetPosts は disabled になる", () => {
     const usersMock = useGetUsersIdPosts as ReturnType<typeof vi.fn>;
     (usersMock as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: { posts: [mockPosts[0]] },
+      data: { data: { posts: [mockPosts[0]] }, status: 200, headers: new Headers() },
       isLoading: false,
       error: null,
     });

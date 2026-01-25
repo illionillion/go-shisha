@@ -45,9 +45,14 @@ describe("AuthHydrator", () => {
       },
     });
 
+    // Orval 8.x形式: { data: { user }, status: 200, headers }
     vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
       queryKey: ["auth", "me"],
-      queryFn: async () => ({ user: mockUser }),
+      queryFn: async () => ({
+        data: { user: mockUser },
+        status: 200,
+        headers: new Headers(),
+      }),
     } as unknown as ReturnType<typeof getGetAuthMeQueryOptions>);
 
     renderWithClient(queryClient);
