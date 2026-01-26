@@ -3,16 +3,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { Post } from "@/types/domain";
 import PostDetail from "./PostDetail";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      // Prevent automatic refetches in Storybook / CI; stories provide `initialData`
-      staleTime: Infinity,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-    },
-  },
+// Orval 8.x形式のレスポンスを返すモックデータ用のヘルパー
+const createSuccessResponse = <T,>(data: T) => ({
+  data,
+  status: 200 as const,
+  headers: new Headers(),
 });
 
 const mockPost: Post = {
@@ -46,13 +41,6 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  decorators: [
-    (Story) => (
-      <QueryClientProvider client={queryClient}>
-        <Story />
-      </QueryClientProvider>
-    ),
-  ],
 } satisfies Meta<typeof PostDetail>;
 
 export default meta;
@@ -66,6 +54,27 @@ export const Default: Story = {
   parameters: {
     viewport: { defaultViewport: "responsive" },
   },
+  decorators: [
+    (Story) => {
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+            staleTime: Infinity,
+            refetchOnMount: false,
+            refetchOnWindowFocus: false,
+          },
+        },
+      });
+      // Orval 8.x形式でキャッシュに設定
+      client.setQueryData(["/posts/1"], createSuccessResponse(mockPost));
+      return (
+        <QueryClientProvider client={client}>
+          <Story />
+        </QueryClientProvider>
+      );
+    },
+  ],
 };
 
 export const SingleSlide: Story = {
@@ -83,4 +92,25 @@ export const SingleSlide: Story = {
       ],
     } as Post,
   },
+  decorators: [
+    (Story, { args }) => {
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+            staleTime: Infinity,
+            refetchOnMount: false,
+            refetchOnWindowFocus: false,
+          },
+        },
+      });
+      // Orval 8.x形式でキャッシュに設定
+      client.setQueryData([`/posts/${args.postId}`], createSuccessResponse(args.initialPost));
+      return (
+        <QueryClientProvider client={client}>
+          <Story />
+        </QueryClientProvider>
+      );
+    },
+  ],
 };

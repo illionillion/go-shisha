@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useGetPostsId } from "@/api/posts";
 import { useLike } from "@/features/posts/hooks/useLike";
+import { isSuccessResponse } from "@/lib/api-helpers";
 import type { Post } from "@/types/domain";
 import PostDetailCarousel from "./PostDetailCarousel";
 import PostDetailFooter from "./PostDetailFooter";
@@ -16,14 +17,23 @@ interface PostDetailProps {
 
 export function PostDetail({ postId, initialPost }: PostDetailProps) {
   const {
-    data: post,
+    data: response,
     isLoading,
     isError,
     refetch,
   } = useGetPostsId(postId, {
-    query: { initialData: initialPost },
+    query: {
+      initialData: initialPost
+        ? { data: initialPost, status: 200, headers: new Headers() }
+        : undefined,
+    },
   });
   const router = useRouter();
+
+  // Orval 8.x: レスポンスから成功時のデータを取り出す
+  // apiFetchがエラー時にthrowするためresponseは常に成功レスポンスだが、
+  // TypeScriptの型推論のためにisSuccessResponseで明示的に絞り込む必要がある
+  const post = response && isSuccessResponse(response) ? response.data : initialPost;
 
   const slides = post?.slides || [];
   const [current, setCurrent] = useState(0);

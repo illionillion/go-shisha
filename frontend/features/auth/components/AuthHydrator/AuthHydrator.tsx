@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { getGetAuthMeQueryOptions } from "@/api/auth";
 import { useAuthStore } from "@/features/auth/stores/authStore";
 import type { ApiError } from "@/lib/api-client";
+import { isSuccessResponse } from "@/lib/api-helpers";
 
 // ログイン・新規登録ページなど、/auth/me の認証チェックをスキップするパス
 // NOTE:
@@ -36,8 +37,8 @@ export const AuthHydrator = () => {
   useEffect(() => {
     if (shouldSkip) return;
 
-    if (data?.user) {
-      setUser(data.user);
+    if (data && isSuccessResponse(data) && data.data.user) {
+      setUser(data.data.user);
       return;
     }
 
@@ -55,7 +56,7 @@ export const AuthHydrator = () => {
     if (apiError.status === 401) {
       clearUser();
     }
-  }, [shouldSkip, data?.user, error, isError, setUser, clearUser]);
+  }, [shouldSkip, data, error, isError, setUser, clearUser]);
 
   return null;
 };

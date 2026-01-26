@@ -66,8 +66,13 @@ describe("PostDetail", () => {
 
   test("PostDetail の内部 handleBack が動作する (history.back / location.href)", async () => {
     // history length > 1 -> history.back
+    // Orval 8.x形式: { data: Post, status: 200, headers }
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: mockPost,
+      data: {
+        data: mockPost,
+        status: 200,
+        headers: new Headers(),
+      },
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
@@ -155,7 +160,11 @@ describe("PostDetail", () => {
 
     const refetch = vi.fn();
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: { id: 2, slides: [], user_id: 1, likes: 0 },
+      data: {
+        data: { id: 2, slides: [], user_id: 1, likes: 0 },
+        status: 200,
+        headers: new Headers(),
+      },
       isLoading: false,
       isError: false,
       refetch,
@@ -184,7 +193,7 @@ describe("PostDetail", () => {
     } as unknown as Post;
 
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: multi,
+      data: { data: multi, status: 200, headers: new Headers() },
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
@@ -205,7 +214,7 @@ describe("PostDetail", () => {
 
   test("投稿表示といいね動作（onLike/onUnlikeが呼ばれる）", async () => {
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: mockPost,
+      data: { data: mockPost, status: 200, headers: new Headers() },
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
@@ -249,7 +258,7 @@ describe("PostDetail", () => {
     } as unknown as Post;
 
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: multi,
+      data: { data: multi, status: 200, headers: new Headers() },
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
@@ -276,7 +285,7 @@ describe("PostDetail", () => {
     } as unknown as Post;
 
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: multi,
+      data: { data: multi, status: 200, headers: new Headers() },
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
@@ -322,7 +331,11 @@ describe("PostDetail", () => {
   test("post.id が undefined のときいいね操作は何もしない", async () => {
     const user = userEvent.setup();
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: { id: undefined, likes: 0 } as unknown as Post,
+      data: {
+        data: { id: undefined, likes: 0 } as unknown as Post,
+        status: 200,
+        headers: new Headers(),
+      },
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
@@ -340,10 +353,14 @@ describe("PostDetail", () => {
   test("ユーザー名がない場合、匿名が表示される", () => {
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       data: {
-        id: 2,
-        likes: 0,
-        user: undefined,
-      } as unknown as Post,
+        data: {
+          id: 2,
+          likes: 0,
+          user: undefined,
+        } as unknown as Post,
+        status: 200,
+        headers: new Headers(),
+      },
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
@@ -358,7 +375,7 @@ describe("PostDetail", () => {
     // case: history length > 1 -> history.back
     const refetch = vi.fn();
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      data: mockPost,
+      data: { data: mockPost, status: 200, headers: new Headers() },
       isLoading: false,
       isError: false,
       refetch,

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useGetPosts } from "@/api/posts";
 import { useGetUsersIdPosts } from "@/api/users";
 import { useLike } from "@/features/posts/hooks/useLike";
+import { isSuccessResponse } from "@/lib/api-helpers";
 import type { Flavor, Post } from "@/types/domain";
 import { Timeline } from "./Timeline";
 
@@ -23,35 +24,32 @@ interface TimelineContainerProps {
 export function TimelineContainer({ initialPosts, userId }: TimelineContainerProps) {
   const [selectedFlavorIds, setSelectedFlavorIds] = useState<number[]>([]);
 
-  // Prepare shared query options
-  const queryOptions = {
-    enabled: true,
-    initialData: initialPosts ? { posts: initialPosts } : undefined,
-    refetchInterval: 60000,
-  } as const;
-
   // ユーザーページであればそのユーザーの投稿を取得、そうでなければ全投稿を取得
   const usersHook = useGetUsersIdPosts(userId ?? 0, {
     query: {
-      ...queryOptions,
       enabled: !!userId,
+      refetchInterval: 60000,
     },
   });
 
   const postsHook = useGetPosts({
     query: {
-      ...queryOptions,
       enabled: userId == null,
+      refetchInterval: 60000,
     },
   });
 
-  const data = userId != null ? usersHook.data : postsHook.data;
+  const response = userId != null ? usersHook.data : postsHook.data;
   const isLoading = userId != null ? usersHook.isLoading : postsHook.isLoading;
   const error = userId != null ? usersHook.error : postsHook.error;
 
   const posts = useMemo(() => {
-    return data?.posts ?? initialPosts ?? [];
-  }, [data?.posts, initialPosts]);
+    // Orval 8.x: レスポンスから成功時のデータを取り出す
+    if (response && isSuccessResponse(response)) {
+      return response.data.posts ?? [];
+    }
+    return initialPosts ?? [];
+  }, [response, initialPosts]);
 
   // 投稿から一意のフレーバー一覧を抽出
   const availableFlavors = useMemo(() => {
