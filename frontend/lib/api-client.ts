@@ -7,17 +7,20 @@ import { tryRefreshToken } from "./token-refresh";
 
 /**
  * 実行環境に応じた適切なAPIベースURLを返す
+ * - クライアントサイド: /api/v1（Next.jsのrewritesでプロキシ）
+ * - サーバーサイド: http://localhost:8080/api/v1（直接バックエンドに接続）
  * @returns APIのベースURL
- * @throws {Error} 必要な環境変数が設定されていない場合
  */
 export function getApiBaseUrl(): string {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!apiUrl) {
-    throw new Error(
-      "NEXT_PUBLIC_API_URL environment variable is not set. Please set it in your .env file."
-    );
+  // サーバーサイド（Server Component等）では絶対URLが必要
+  if (typeof window === "undefined") {
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
+    return `${backendUrl}/api/v1`;
   }
-  return apiUrl;
+
+  // クライアントサイド: Next.jsのrewritesで /api/v1/* → バックエンドにプロキシ
+  // Orvalが生成するURLは /auth/login などbasePathを含まないため、ここで /api/v1 を付ける
+  return "/api/v1";
 }
 
 /**
