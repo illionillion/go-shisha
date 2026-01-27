@@ -7,13 +7,20 @@ import { tryRefreshToken } from "./token-refresh";
 
 /**
  * 実行環境に応じた適切なAPIベースURLを返す
- * Next.jsのrewritesで /api/v1 → バックエンドにプロキシするため空文字列を返す
- * これにより同一オリジンとなり、Cookie（SameSite=Lax）が正常に動作する
- * @returns APIのベースURL（空文字列 = 相対パス）
+ * - クライアントサイド: /api/v1（Next.jsのrewritesでプロキシ）
+ * - サーバーサイド: http://localhost:8080/api/v1（直接バックエンドに接続）
+ * @returns APIのベースURL
  */
 export function getApiBaseUrl(): string {
-  // Next.jsのrewritesで /api/v1/* → バックエンドにプロキシ
-  return "";
+  // サーバーサイド（Server Component等）では絶対URLが必要
+  if (typeof window === "undefined") {
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
+    return `${backendUrl}/api/v1`;
+  }
+
+  // クライアントサイド: Next.jsのrewritesで /api/v1/* → バックエンドにプロキシ
+  // Orvalが生成するURLは /auth/login などbasePathを含まないため、ここで /api/v1 を付ける
+  return "/api/v1";
 }
 
 /**
