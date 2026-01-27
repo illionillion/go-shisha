@@ -7,17 +7,13 @@ import { tryRefreshToken } from "./token-refresh";
 
 /**
  * 実行環境に応じた適切なAPIベースURLを返す
- * @returns APIのベースURL
- * @throws {Error} 必要な環境変数が設定されていない場合
+ * Next.jsのrewritesで /api/v1 → バックエンドにプロキシするため空文字列を返す
+ * これにより同一オリジンとなり、Cookie（SameSite=Lax）が正常に動作する
+ * @returns APIのベースURL（空文字列 = 相対パス）
  */
 export function getApiBaseUrl(): string {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!apiUrl) {
-    throw new Error(
-      "NEXT_PUBLIC_API_URL environment variable is not set. Please set it in your .env file."
-    );
-  }
-  return apiUrl;
+  // Next.jsのrewritesで /api/v1/* → バックエンドにプロキシ
+  return "";
 }
 
 /**
