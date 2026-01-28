@@ -18,11 +18,11 @@ echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> .env
 
 **環境変数の説明:**
 
-| 変数名 | 説明 | デフォルト値 | 必須 |
-|--------|------|--------------|------|
-| `NEXT_PUBLIC_BACKEND_URL` | バックエンドURL（画像などの公開URL） | `http://localhost:8080` | ✅ |
-| `BACKEND_URL` | Next.js rewrites用バックエンドURL（内部プロキシ先） | `http://localhost:8080` | ✅ |
-| `REDIRECT_SECRET` | ログイン後リダイレクト先暗号化キー | - | ✅ |
+| 変数名                    | 説明                                                | デフォルト値            | 必須 |
+| ------------------------- | --------------------------------------------------- | ----------------------- | ---- |
+| `NEXT_PUBLIC_BACKEND_URL` | バックエンドURL（画像などの公開URL）                | `http://localhost:8080` | ✅   |
+| `BACKEND_URL`             | Next.js rewrites用バックエンドURL（内部プロキシ先） | `http://localhost:8080` | ✅   |
+| `REDIRECT_SECRET`         | ログイン後リダイレクト先暗号化キー                  | -                       | ✅   |
 
 > **Codespacesで開発する場合**: `BACKEND_URL`を`https://<workspace>-8080.app.github.dev`に変更してください。
 
