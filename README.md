@@ -64,9 +64,11 @@ echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env
 # 3. 依存関係をインストール
 pnpm install
 
-# 4. すべて起動（Backend + Frontend）
-docker compose up -d  # Backendを起動
-pnpm dev             # Frontendを起動（別ターミナルで実行）
+# 4a. Backendを起動（Docker）
+docker compose up -d
+
+# 4b. Frontendを起動（別ターミナルで実行）
+pnpm dev
 ```
 
 起動後、以下のURLにアクセス:
@@ -122,7 +124,7 @@ echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env
 | 変数名 | 説明 | デフォルト値 | 必須 |
 |--------|------|--------------|------|
 | `NEXT_PUBLIC_BACKEND_URL` | バックエンドURL（画像などの公開URL） | `http://localhost:8080` | ✅ |
-| `BACKEND_URL` | Next.js rewrites用バックエンドURL | `http://localhost:8080` | ✅ |
+| `BACKEND_URL` | Next.js rewrites用バックエンドURL（内部プロキシ先） | `http://localhost:8080` | ✅ |
 | `REDIRECT_SECRET` | ログイン後リダイレクト先暗号化キー | - | ✅ |
 
 > **注意**: `JWT_SECRET`と`REDIRECT_SECRET`は**本番環境では必ずランダムな値に変更**してください。
