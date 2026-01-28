@@ -261,7 +261,12 @@
                 }
             },
             "post": {
-                "description": "新しい投稿を作成します（未実装）",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新しい投稿を作成します（認証必須）",
                 "consumes": [
                     "application/json"
                 ],
@@ -290,8 +295,22 @@
                             "$ref": "#/definitions/go-shisha-backend_internal_models.Post"
                         }
                     },
-                    "501": {
-                        "description": "未実装",
+                    "400": {
+                        "description": "バリデーションエラー",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "認証エラー",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -573,19 +592,15 @@
         "go-shisha-backend_internal_models.CreatePostInput": {
             "type": "object",
             "required": [
-                "slides",
-                "user_id"
+                "slides"
             ],
             "properties": {
                 "slides": {
                     "type": "array",
                     "minItems": 1,
                     "items": {
-                        "$ref": "#/definitions/go-shisha-backend_internal_models.Slide"
+                        "$ref": "#/definitions/go-shisha-backend_internal_models.SlideInput"
                     }
-                },
-                "user_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -696,6 +711,23 @@
             "properties": {
                 "flavor": {
                     "$ref": "#/definitions/go-shisha-backend_internal_models.Flavor"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.SlideInput": {
+            "type": "object",
+            "required": [
+                "image_url"
+            ],
+            "properties": {
+                "flavor_id": {
+                    "type": "integer"
                 },
                 "image_url": {
                     "type": "string"

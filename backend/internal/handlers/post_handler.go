@@ -84,16 +84,39 @@ func (h *PostHandler) GetPost(c *gin.Context) {
  * CreatePost handles POST /api/v1/posts
  */
 // @Summary 投稿作成
-// @Description 新しい投稿を作成します（未実装）
+// @Description 新しい投稿を作成します（認証必須）
 // @Tags posts
 // @Accept json
 // @Produce json
 // @Param post body models.CreatePostInput true "投稿情報"
 // @Success 201 {object} models.Post "作成された投稿"
-// @Failure 501 {object} map[string]interface{} "未実装"
+// @Failure 400 {object} map[string]interface{} "バリデーションエラー"
+// @Failure 401 {object} map[string]interface{} "認証エラー"
+// @Failure 500 {object} map[string]interface{} "サーバーエラー"
+// @Security BearerAuth
 // @Router /posts [post]
 func (h *PostHandler) CreatePost(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "Not implemented yet"})
+	// Get user_id from authentication middleware
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	var input models.CreatePostInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Create post with authenticated user's ID
+	post, err := h.postService.CreatePost(userID.(int), &input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, post)
 }
 
 /**

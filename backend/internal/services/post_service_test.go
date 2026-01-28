@@ -40,8 +40,8 @@ func (m *mockUserRepoForPost) GetByID(id int) (*models.User, error) {
 
 func TestCreatePost(t *testing.T) {
 	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{})
-	input := &models.CreatePostInput{UserID: 1, Slides: []models.Slide{{ImageURL: "i.jpg", Text: "hello"}}}
-	p, err := postSvc.CreatePost(input)
+	input := &models.CreatePostInput{Slides: []models.SlideInput{{ImageURL: "i.jpg", Text: "hello"}}}
+	p, err := postSvc.CreatePost(1, input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -108,8 +108,8 @@ func (m *mockUserRepoMissing) GetByID(id int) (*models.User, error) {
 
 func TestCreatePost_UserMissing(t *testing.T) {
 	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoMissing{})
-	input := &models.CreatePostInput{UserID: 999, Slides: []models.Slide{{ImageURL: "i.jpg", Text: "hello"}}}
-	_, err := postSvc.CreatePost(input)
+	input := &models.CreatePostInput{Slides: []models.SlideInput{{ImageURL: "i.jpg", Text: "hello"}}}
+	_, err := postSvc.CreatePost(999, input)
 	if err == nil {
 		t.Fatalf("expected error when user is missing, got nil")
 	}
@@ -117,8 +117,8 @@ func TestCreatePost_UserMissing(t *testing.T) {
 
 func TestCreatePost_PostCreateError(t *testing.T) {
 	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{})
-	input := &models.CreatePostInput{UserID: 1, Slides: []models.Slide{{ImageURL: "i.jpg", Text: "hello"}}}
-	_, err := postSvc.CreatePost(input)
+	input := &models.CreatePostInput{Slides: []models.SlideInput{{ImageURL: "i.jpg", Text: "hello"}}}
+	_, err := postSvc.CreatePost(1, input)
 	if err == nil {
 		t.Fatalf("expected error when post create fails, got nil")
 	}
