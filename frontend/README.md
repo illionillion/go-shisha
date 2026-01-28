@@ -24,7 +24,10 @@ echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> .env
 | `BACKEND_URL`             | Next.js rewrites用バックエンドURL（内部プロキシ先） | `http://localhost:8080` | ✅   |
 | `REDIRECT_SECRET`         | ログイン後リダイレクト先暗号化キー                  | -                       | ✅   |
 
-> **Codespacesで開発する場合**: `BACKEND_URL`を`https://<workspace>-8080.app.github.dev`に変更してください。
+> **Codespacesで開発する場合**:
+>
+> - `BACKEND_URL`を`https://<workspace>-8080.app.github.dev`に変更してください
+> - `NEXT_PUBLIC_BACKEND_URL`も同様に`https://<workspace>-8080.app.github.dev`に変更してください（画像などの公開URLとして使用）
 
 > **注意**: プロジェクトルートの`.env`（Backend用）も別途必要です。詳細はルートの[README.md](../README.md)を参照してください。
 
