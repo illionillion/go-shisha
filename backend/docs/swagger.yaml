@@ -9,14 +9,11 @@ definitions:
     properties:
       slides:
         items:
-          $ref: '#/definitions/go-shisha-backend_internal_models.Slide'
+          $ref: '#/definitions/go-shisha-backend_internal_models.SlideInput'
         minItems: 1
         type: array
-      user_id:
-        type: integer
     required:
     - slides
-    - user_id
     type: object
   go-shisha-backend_internal_models.CreateUserInput:
     properties:
@@ -87,6 +84,17 @@ definitions:
     properties:
       flavor:
         $ref: '#/definitions/go-shisha-backend_internal_models.Flavor'
+      image_url:
+        type: string
+      text:
+        type: string
+    required:
+    - image_url
+    type: object
+  go-shisha-backend_internal_models.SlideInput:
+    properties:
+      flavor_id:
+        type: integer
       image_url:
         type: string
       text:
@@ -291,7 +299,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 新しい投稿を作成します（未実装）
+      description: 新しい投稿を作成します（認証必須）
       parameters:
       - description: 投稿情報
         in: body
@@ -306,11 +314,23 @@ paths:
           description: 作成された投稿
           schema:
             $ref: '#/definitions/go-shisha-backend_internal_models.Post'
-        "501":
-          description: 未実装
+        "400":
+          description: バリデーションエラー
           schema:
             additionalProperties: true
             type: object
+        "401":
+          description: 認証エラー
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: サーバーエラー
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
       summary: 投稿作成
       tags:
       - posts

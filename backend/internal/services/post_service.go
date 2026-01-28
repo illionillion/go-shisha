@@ -40,16 +40,34 @@ func (s *PostService) GetPostByID(id int) (*models.Post, error) {
 /**
  * CreatePost creates a new post
  */
-func (s *PostService) CreatePost(input *models.CreatePostInput) (*models.Post, error) {
+func (s *PostService) CreatePost(userID int, input *models.CreatePostInput) (*models.Post, error) {
 	// Verify user exists and get user information
-	user, err := s.userRepo.GetByID(input.UserID)
+	user, err := s.userRepo.GetByID(userID)
 	if err != nil {
 		return nil, err
 	}
 
+	// Convert SlideInput to Slide
+	slides := make([]models.Slide, len(input.Slides))
+	for i, slideInput := range input.Slides {
+		slide := models.Slide{
+			ImageURL: slideInput.ImageURL,
+			Text:     slideInput.Text,
+		}
+		// Get flavor information if flavor_id is provided
+		if slideInput.FlavorID != nil {
+			// TODO: Get flavor from repository when flavor service is implemented
+			slide.Flavor = &models.Flavor{
+				ID:   *slideInput.FlavorID,
+				Name: "", // Will be populated from DB
+			}
+		}
+		slides[i] = slide
+	}
+
 	post := &models.Post{
-		UserID: input.UserID,
-		Slides: input.Slides,
+		UserID: userID,
+		Slides: slides,
 		User:   *user,
 	}
 
