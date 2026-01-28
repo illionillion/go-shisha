@@ -43,52 +43,123 @@ go-shisha/
 - Node.js 20+
 - pnpm 9+
 - Go 1.21+
-- PostgreSQL 14+
+- PostgreSQL 14+（Dockerで自動セットアップ）
 - Docker & Docker Compose
+
+### クイックスタート（初めての方向け）
+
+Dockerを使って最速でセットアップする方法です。
+
+```bash
+# 1. リポジトリをクローン
+git clone https://github.com/illionillion/go-shisha.git
+cd go-shisha
+
+# 2. 環境変数を一括セットアップ（ルート + Frontend）
+cp .env.example .env
+cp frontend/.env.example frontend/.env
+echo "JWT_SECRET=$(openssl rand -base64 64 | tr -d '\n')" >> .env
+echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env
+
+# 3. 依存関係をインストール
+pnpm install
+
+# 4a. Backendを起動（Docker）
+docker compose up -d
+
+# 4b. Frontendを起動（別ターミナルで実行）
+pnpm dev
+```
+
+起動後、以下のURLにアクセス:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080
+- **Swagger UI**: http://localhost:8080/swagger/index.html
 
 ### セットアップ
 
-1. リポジトリをクローン
+#### 1. リポジトリをクローン
 ```bash
 git clone https://github.com/illionillion/go-shisha.git
 cd go-shisha
 ```
 
-2. 環境変数を設定
+#### 2. 環境変数を設定
+
+##### ルート環境変数（Backend用）
 ```bash
+# .env.exampleをコピー
 cp .env.example .env
-# .envファイルを編集
+
+# JWT_SECRETにランダムな値を設定（64文字以上推奨）
+echo "JWT_SECRET=$(openssl rand -base64 64 | tr -d '\n')" >> .env
 ```
 
-3. 依存関係をインストール
+##### Frontend環境変数
+```bash
+# frontend/.env.exampleをコピー
+cp frontend/.env.example frontend/.env
+
+# REDIRECT_SECRETにランダムな値を設定（32バイトの16進数）
+echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env
+```
+
+**環境変数の説明:**
+
+**ルート `.env` (Backend・Docker用)**
+| 変数名 | 説明 | デフォルト値 | 必須 |
+|--------|------|--------------|------|
+| `TZ` | Dockerコンテナのタイムゾーン設定 | `Asia/Tokyo` | ✅ |
+| `BACKEND_PORT` | バックエンドAPIの公開ポート | `8080` | ✅ |
+| `POSTGRES_USER` | PostgreSQLのユーザー名 | `go_shisha` | ✅ |
+| `POSTGRES_PASSWORD` | PostgreSQLのパスワード | `password` | ✅ |
+| `POSTGRES_DB` | PostgreSQLのデータベース名 | `go_shisha_dev` | ✅ |
+| `POSTGRES_PORT` | PostgreSQLのポート | `5432` | ✅ |
+| `APP_ENV` | アプリケーション環境 | `development` | ❌ |
+| `LOG_LEVEL` | ログレベル | `DEBUG` | ❌ |
+| `FRONTEND_URL` | フロントエンドURL（CORS設定用） | `http://localhost:3000` | ✅ |
+| `JWT_SECRET` | JWT認証用シークレットキー（64文字以上） | - | ✅ |
+
+**frontend/.env (Frontend用)**
+| 変数名 | 説明 | デフォルト値 | 必須 |
+|--------|------|--------------|------|
+| `NEXT_PUBLIC_BACKEND_URL` | バックエンドURL（画像などの公開URL） | `http://localhost:8080` | ✅ |
+| `BACKEND_URL` | Next.js rewrites用バックエンドURL（内部プロキシ先） | `http://localhost:8080` | ✅ |
+| `REDIRECT_SECRET` | ログイン後リダイレクト先暗号化キー | - | ✅ |
+
+> **注意**: `JWT_SECRET`と`REDIRECT_SECRET`は**本番環境では必ずランダムな値に変更**してください。
+
+#### 3. 依存関係をインストール
 ```bash
 pnpm install
 ```
 
-4. Backendを起動（Docker）
+#### 4. Backendを起動（Docker）
 ```bash
 docker compose up -d
 ```
 
-5. Frontendを起動
+初回起動時にデータベースのマイグレーション・シードが自動で実行されます。
+
+#### 5. Frontendを起動
 ```bash
 pnpm dev
 ```
 
-### 環境変数
+ブラウザで以下のURLにアクセス:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080
+- **Swagger UI**: http://localhost:8080/swagger/index.html
 
-`.env`ファイルを作成し、以下の内容を記載してください。
+#### トラブルシューティング
 
-```env
-TZ=Asia/Tokyo                                      # タイムゾーン
-BACKEND_PORT=8080                                  # バックエンドの公開ポート
-```
+**環境変数が反映されない場合**
+- `.env`ファイルと`frontend/.env`ファイルが存在することを確認
+- Docker環境の場合は`docker compose down`後に再度`docker compose up -d`
 
-### 各変数の説明
-- `TZ`: Dockerコンテナのタイムゾーン設定
-- `BACKEND_PORT`: バックエンドAPIの公開ポート
-
-> 詳細は `.env.example` を参照してください。
+**ポート競合が発生した場合**
+- `.env`の`BACKEND_PORT`を変更（例: `8081`）
+- `frontend/.env`の`NEXT_PUBLIC_BACKEND_URL`と`BACKEND_URL`も合わせて変更
 
 ### 開発コマンド
 
