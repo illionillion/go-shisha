@@ -54,7 +54,7 @@ func (r *UserRepository) GetByID(id int) (*models.User, error) {
 	if err := r.db.First(&um, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			logging.L.Debug("user not found", "repository", "UserRepository", "method", "GetByID", "user_id", id)
-			return nil, fmt.Errorf("user not found: id=%d", id)
+			return nil, repositories.ErrUserNotFound
 		}
 		logging.L.Error("failed to query user", "repository", "UserRepository", "method", "GetByID", "user_id", id, "error", err)
 		return nil, fmt.Errorf("failed to query user by id=%d: %w", id, err)

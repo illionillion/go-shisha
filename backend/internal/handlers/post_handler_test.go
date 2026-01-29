@@ -3,13 +3,13 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories"
 	"go-shisha-backend/pkg/validation"
 
 	"github.com/gin-gonic/gin"
@@ -175,7 +175,7 @@ func TestCreatePost_UserNotFound(t *testing.T) {
 
 	mockService := &mockPostService{
 		createPostFunc: func(userID int, input *models.CreatePostInput) (*models.Post, error) {
-			return nil, errors.New("user not found: id=999")
+			return nil, repositories.ErrUserNotFound
 		},
 	}
 	handler := NewPostHandler(mockService)
