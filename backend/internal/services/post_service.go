@@ -9,17 +9,19 @@ import (
  * PostService handles post-related business logic
  */
 type PostService struct {
-	postRepo repositories.PostRepository
-	userRepo repositories.UserRepository
+	postRepo   repositories.PostRepository
+	userRepo   repositories.UserRepository
+	flavorRepo repositories.FlavorRepository
 }
 
 /**
  * NewPostService creates a new post service
  */
-func NewPostService(postRepo repositories.PostRepository, userRepo repositories.UserRepository) *PostService {
+func NewPostService(postRepo repositories.PostRepository, userRepo repositories.UserRepository, flavorRepo repositories.FlavorRepository) *PostService {
 	return &PostService{
-		postRepo: postRepo,
-		userRepo: userRepo,
+		postRepo:   postRepo,
+		userRepo:   userRepo,
+		flavorRepo: flavorRepo,
 	}
 }
 
@@ -56,11 +58,13 @@ func (s *PostService) CreatePost(userID int, input *models.CreatePostInput) (*mo
 		}
 		// Get flavor information if flavor_id is provided
 		if slideInput.FlavorID != nil {
-			// TODO: Get flavor from repository when flavor service is implemented
-			slide.Flavor = &models.Flavor{
-				ID:   *slideInput.FlavorID,
-				Name: "", // Will be populated from DB
+			flavor, err := s.flavorRepo.GetByID(*slideInput.FlavorID)
+			if err != nil {
+				// Flavor not found, but we don't want to fail the entire post creation
+				// Just log the error and continue without flavor data
+				continue
 			}
+			slide.Flavor = flavor
 		}
 		slides[i] = slide
 	}

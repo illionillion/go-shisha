@@ -91,10 +91,11 @@ func main() {
 	postRepo := postgres.NewPostRepository(gormDB)
 	userRepo := postgres.NewUserRepository(gormDB)
 	refreshTokenRepo := postgres.NewRefreshTokenRepository(gormDB)
+	flavorRepo := postgres.NewFlavorRepository(gormDB)
 
 	// Service層
 	userService := services.NewUserService(userRepo, postRepo)
-	postService := services.NewPostService(postRepo, userRepo)
+	postService := services.NewPostService(postRepo, userRepo, flavorRepo)
 	authService := services.NewAuthService(userRepo, refreshTokenRepo)
 
 	// Handler層
