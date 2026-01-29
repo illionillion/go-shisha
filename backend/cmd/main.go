@@ -56,6 +56,10 @@ func main() {
 
 	r := gin.Default()
 
+	// multipart/form-dataのメモリ制限（10MB/ファイル）
+	r.MaxMultipartMemory = 10 << 20 // 10MB
+	logging.L.Info("max multipart memory set", "size", "10MB")
+
 	// CORS設定
 	frontendURL := os.Getenv("FRONTEND_URL")
 	if frontendURL == "" {
@@ -109,11 +113,13 @@ func main() {
 	userService := services.NewUserService(userRepo, postRepo)
 	postService := services.NewPostService(postRepo, userRepo, flavorRepo)
 	authService := services.NewAuthService(userRepo, refreshTokenRepo)
+	uploadService := services.NewUploadService(logging.L)
 
 	// Handler層
 	userHandler := handlers.NewUserHandler(userService)
 	postHandler := handlers.NewPostHandler(postService)
 	authHandler := handlers.NewAuthHandler(authService)
+	uploadHandler := handlers.NewUploadHandler(uploadService, logging.L)
 
 	// レート制限ミドルウェア（認証エンドポイント用）
 	// 1分間に5リクエストまで（12秒 × 5 = 60秒）、バースト5リクエスト
@@ -163,6 +169,12 @@ func main() {
 		api.GET("/users", userHandler.GetAllUsers)
 		api.GET("/users/:id", userHandler.GetUser)
 		api.GET("/users/:id/posts", userHandler.GetUserPosts)
+
+		// Uploads endpoints (認証必須)
+		uploads := api.Group("/uploads")
+		{
+			uploads.POST("/images", middleware.AuthMiddleware(), uploadHandler.UploadImages)
+		}
 	}
 
 	// サーバーを8080ポートで起動（graceful shutdown 対応）
