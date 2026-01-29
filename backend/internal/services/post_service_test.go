@@ -105,6 +105,31 @@ func TestCreatePost_WithFlavor(t *testing.T) {
 	}
 }
 
+func TestCreatePost_WithInvalidFlavorID(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
+	invalidFlavorID := 999
+	input := &models.CreatePostInput{
+		Slides: []models.SlideInput{
+			{
+				ImageURL: "i.jpg",
+				Text:     "無効なFlavor ID",
+				FlavorID: &invalidFlavorID,
+			},
+		},
+	}
+	p, err := postSvc.CreatePost(1, input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(p.Slides) != 1 {
+		t.Fatalf("expected 1 slide, got %d", len(p.Slides))
+	}
+	// 無効なFlavorIDの場合、Flavorはnilになる（投稿作成は失敗しない）
+	if p.Slides[0].Flavor != nil {
+		t.Fatalf("expected flavor to be nil for invalid flavor_id, got %+v", p.Slides[0].Flavor)
+	}
+}
+
 func TestLikeUnlikePost(t *testing.T) {
 	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
 	liked, err := postSvc.LikePost(2)

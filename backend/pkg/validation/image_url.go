@@ -13,7 +13,7 @@ import (
 // 禁止:
 //   - javascript:, data:, file:, vbscript:, about: などの危険なスキーム（SSRF/XSS対策）
 func ValidateImageURL(fl validator.FieldLevel) bool {
-	imageURL := fl.Field().String()
+	imageURL := strings.TrimSpace(fl.Field().String())
 
 	// 危険なスキームをブロック（SSRF/XSS対策）
 	dangerousSchemes := []string{

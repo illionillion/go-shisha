@@ -89,6 +89,27 @@ func TestValidateImageURL(t *testing.T) {
 			imageURL:  "",
 			wantValid: false,
 		},
+		// 空白文字のトリミングテスト
+		{
+			name:      "先頭に空白がある有効なパス",
+			imageURL:  " /images/test.jpg",
+			wantValid: true,
+		},
+		{
+			name:      "末尾に空白がある有効なパス",
+			imageURL:  "/images/test.jpg ",
+			wantValid: true,
+		},
+		{
+			name:      "前後に空白がある有効なURL",
+			imageURL:  "  https://example.com/image.jpg  ",
+			wantValid: true,
+		},
+		{
+			name:      "空白のみ",
+			imageURL:  "   ",
+			wantValid: false,
+		},
 	}
 
 	for _, tt := range tests {

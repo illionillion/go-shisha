@@ -3,6 +3,7 @@ package services
 import (
 	"go-shisha-backend/internal/models"
 	"go-shisha-backend/internal/repositories"
+	"go-shisha-backend/pkg/logging"
 )
 
 /**
@@ -61,7 +62,8 @@ func (s *PostService) CreatePost(userID int, input *models.CreatePostInput) (*mo
 			flavor, err := s.flavorRepo.GetByID(*slideInput.FlavorID)
 			if err != nil {
 				// Flavor not found, but we don't want to fail the entire post creation
-				// Just log the error and continue without flavor data
+				// Log the error and continue without flavor data
+				logging.L.Warn("flavor not found for slide", "flavor_id", *slideInput.FlavorID, "error", err)
 				continue
 			}
 			slide.Flavor = flavor

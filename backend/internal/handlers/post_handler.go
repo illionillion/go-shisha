@@ -3,24 +3,33 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"go-shisha-backend/internal/models"
-	"go-shisha-backend/internal/services"
 
 	"github.com/gin-gonic/gin"
 )
+
+// PostServiceInterface はPostServiceのインターフェース（テスト用）
+type PostServiceInterface interface {
+	GetAllPosts() ([]models.Post, error)
+	GetPostByID(id int) (*models.Post, error)
+	CreatePost(userID int, input *models.CreatePostInput) (*models.Post, error)
+	LikePost(id int) (*models.Post, error)
+	UnlikePost(id int) (*models.Post, error)
+}
 
 /**
  * PostHandler handles post-related HTTP requests
  */
 type PostHandler struct {
-	postService *services.PostService
+	postService PostServiceInterface
 }
 
 /**
  * NewPostHandler creates a new post handler
  */
-func NewPostHandler(postService *services.PostService) *PostHandler {
+func NewPostHandler(postService PostServiceInterface) *PostHandler {
 	return &PostHandler{
 		postService: postService,
 	}
@@ -97,9 +106,15 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 // @Router /posts [post]
 func (h *PostHandler) CreatePost(c *gin.Context) {
 	// Get user_id from authentication middleware
-	userID, exists := c.Get("user_id")
+	userIDValue, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	userID, ok := userIDValue.(int)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id type"})
 		return
 	}
 
@@ -110,8 +125,13 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	}
 
 	// Create post with authenticated user's ID
-	post, err := h.postService.CreatePost(userID.(int), &input)
+	post, err := h.postService.CreatePost(userID, &input)
 	if err != nil {
+		// ユーザーが見つからない場合は認証エラーとして扱う
+		if strings.Contains(err.Error(), "user not found") {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
