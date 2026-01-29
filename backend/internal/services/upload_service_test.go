@@ -19,7 +19,7 @@ func TestUploadService_UploadImages(t *testing.T) {
 
 	// テスト後のクリーンアップ
 	defer func() {
-		os.RemoveAll("public/images")
+		_ = os.RemoveAll("public/images")
 	}()
 
 	t.Run("正常系_複数画像アップロード", func(t *testing.T) {
@@ -114,7 +114,7 @@ func createTestImageFiles(t *testing.T, testFiles []testFile) []*multipart.FileH
 		_, err = part.Write(dummyData)
 		assert.NoError(t, err)
 
-		writer.Close()
+		_ = writer.Close()
 
 		// multipart.FileHeaderを作成
 		reader := multipart.NewReader(body, writer.Boundary())

@@ -78,7 +78,11 @@ func (s *UploadService) UploadImages(files []*multipart.FileHeader) ([]string, e
 			s.logger.Error("ファイルオープン失敗", "error", err, "filename", fileHeader.Filename)
 			return nil, fmt.Errorf("ファイルの読み込みに失敗しました")
 		}
-		defer file.Close()
+		defer func() {
+			if err := file.Close(); err != nil {
+				s.logger.Warn("ファイルクローズ失敗", "error", err)
+			}
+		}()
 
 		// ファイル名生成（タイムスタンプ + UUID + 拡張子）
 		ext := filepath.Ext(fileHeader.Filename)
@@ -99,12 +103,18 @@ func (s *UploadService) UploadImages(files []*multipart.FileHeader) ([]string, e
 			s.logger.Error("ファイル作成失敗", "error", err, "path", savePath)
 			return nil, fmt.Errorf("ファイルの保存に失敗しました")
 		}
-		defer dst.Close()
+		defer func() {
+			if err := dst.Close(); err != nil {
+				s.logger.Warn("ファイルクローズ失敗", "error", err)
+			}
+		}()
 
 		if _, err := io.Copy(dst, file); err != nil {
 			s.logger.Error("ファイル書き込み失敗", "error", err, "path", savePath)
 			// 失敗したファイルを削除
-			os.Remove(savePath)
+			if removeErr := os.Remove(savePath); removeErr != nil {
+				s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
+			}
 			return nil, fmt.Errorf("ファイルの保存に失敗しました")
 		}
 

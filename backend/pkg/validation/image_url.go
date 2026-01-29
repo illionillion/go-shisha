@@ -10,6 +10,7 @@ import (
 // 許可:
 //   - /images/ で始まる相対パス（現状のpublic/images）
 //   - http:// または https:// で始まるURL（将来のS3など外部URL）
+//
 // 禁止:
 //   - javascript:, data:, file:, vbscript:, about: などの危険なスキーム（SSRF/XSS対策）
 func ValidateImageURL(fl validator.FieldLevel) bool {

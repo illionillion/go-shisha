@@ -26,7 +26,7 @@ func TestUploadHandler_UploadImages(t *testing.T) {
 
 	// テスト後のクリーンアップ
 	defer func() {
-		os.RemoveAll("public/images")
+		_ = os.RemoveAll("public/images")
 	}()
 
 	t.Run("正常系_画像アップロード成功", func(t *testing.T) {
@@ -39,15 +39,15 @@ func TestUploadHandler_UploadImages(t *testing.T) {
 		h.Set("Content-Disposition", `form-data; name="images"; filename="test1.jpg"`)
 		h.Set("Content-Type", "image/jpeg")
 		part1, _ := writer.CreatePart(h)
-		part1.Write([]byte("fake jpeg data"))
+		_, _ = part1.Write([]byte("fake jpeg data"))
 
 		h2 := make(textproto.MIMEHeader)
 		h2.Set("Content-Disposition", `form-data; name="images"; filename="test2.png"`)
 		h2.Set("Content-Type", "image/png")
 		part2, _ := writer.CreatePart(h2)
-		part2.Write([]byte("fake png data"))
+		_, _ = part2.Write([]byte("fake png data"))
 
-		writer.Close()
+		_ = writer.Close()
 
 		// リクエスト作成
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/images", body)
@@ -101,7 +101,7 @@ func TestUploadHandler_UploadImages(t *testing.T) {
 		// 空のmultipart/form-data
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
-		writer.Close()
+		_ = writer.Close()
 
 		// リクエスト作成
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/images", body)
