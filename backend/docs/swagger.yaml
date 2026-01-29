@@ -102,6 +102,16 @@ definitions:
     required:
     - image_url
     type: object
+  go-shisha-backend_internal_models.UploadImagesResponse:
+    properties:
+      urls:
+        example:
+        - /images/20260129_abc123.jpg
+        - /images/20260129_def456.png
+        items:
+          type: string
+        type: array
+    type: object
   go-shisha-backend_internal_models.User:
     properties:
       description:
@@ -427,6 +437,49 @@ paths:
       summary: 投稿のいいねを取り消す
       tags:
       - posts
+  /uploads/images:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 複数の画像を一括アップロードし、保存されたURLの配列を返却します
+      parameters:
+      - description: アップロードする画像（複数可）
+        in: formData
+        name: images
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.UploadImagesResponse'
+        "400":
+          description: バリデーションエラー
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 認証エラー
+          schema:
+            additionalProperties: true
+            type: object
+        "413":
+          description: ファイルサイズ超過
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: サーバーエラー
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: 画像アップロード
+      tags:
+      - uploads
   /users:
     get:
       consumes:

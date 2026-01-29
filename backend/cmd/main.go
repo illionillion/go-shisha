@@ -11,6 +11,7 @@ import (
 	_ "go-shisha-backend/docs" // Swagger docs
 	"go-shisha-backend/internal/handlers"
 	"go-shisha-backend/internal/middleware"
+	_ "go-shisha-backend/internal/models" // Swagger型定義用
 	"go-shisha-backend/internal/repositories/postgres"
 	"go-shisha-backend/internal/services"
 	"go-shisha-backend/pkg/db"

@@ -30,7 +30,7 @@ func NewUploadHandler(uploadService *services.UploadService, logger *slog.Logger
 // @Accept multipart/form-data
 // @Produce json
 // @Param images formData file true "アップロードする画像（複数可）"
-// @Success 200 {object} models.UploadImagesResponse
+// @Success 200 {object} go-shisha-backend_internal_models.UploadImagesResponse
 // @Failure 400 {object} map[string]interface{} "バリデーションエラー"
 // @Failure 401 {object} map[string]interface{} "認証エラー"
 // @Failure 413 {object} map[string]interface{} "ファイルサイズ超過"
