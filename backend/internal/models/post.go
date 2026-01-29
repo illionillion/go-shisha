@@ -51,7 +51,7 @@ func (PostDB) TableName() string {
 
 // SlideInput represents the input for a single slide when creating a post
 type SlideInput struct {
-	ImageURL string `json:"image_url" binding:"required"`
+	ImageURL string `json:"image_url" binding:"required,imageurl"`
 	Text     string `json:"text"`
 	FlavorID *int   `json:"flavor_id"`
 }

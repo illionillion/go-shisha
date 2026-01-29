@@ -15,8 +15,11 @@ import (
 	"go-shisha-backend/internal/services"
 	"go-shisha-backend/pkg/db"
 	"go-shisha-backend/pkg/logging"
+	"go-shisha-backend/pkg/validation"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"golang.org/x/time/rate"
@@ -41,6 +44,15 @@ import (
 func main() {
 	// Ginのデバッグモードを設定（本番環境ではgin.ReleaseMode）
 	gin.SetMode(gin.DebugMode)
+
+	// カスタムバリデータの登録
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		if err := v.RegisterValidation("imageurl", validation.ValidateImageURL); err != nil {
+			logging.L.Error("failed to register imageurl validation", "error", err)
+		} else {
+			logging.L.Info("custom validation registered", "name", "imageurl")
+		}
+	}
 
 	r := gin.Default()
 
