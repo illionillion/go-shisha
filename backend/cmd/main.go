@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -48,10 +49,16 @@ func main() {
 	// カスタムバリデータの登録
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		if err := v.RegisterValidation("imageurl", validation.ValidateImageURL); err != nil {
+			// バリデーション登録の失敗はアプリケーション起動時の致命的エラーとして扱う
+			// セキュリティ上重要なバリデーションが動作しない状態での起動を防ぐ
 			logging.L.Error("failed to register imageurl validation", "error", err)
-		} else {
-			logging.L.Info("custom validation registered", "name", "imageurl")
+			panic(fmt.Sprintf("failed to register imageurl validation: %v", err))
 		}
+		logging.L.Info("custom validation registered", "name", "imageurl")
+	} else {
+		// validator.Validateの型アサーション失敗もアプリケーション起動時の致命的エラーとして扱う
+		logging.L.Error("failed to get validator engine")
+		panic("failed to get validator engine")
 	}
 
 	r := gin.Default()

@@ -1,6 +1,8 @@
 package services
 
 import (
+	"errors"
+
 	"go-shisha-backend/internal/models"
 	"go-shisha-backend/internal/repositories"
 	"go-shisha-backend/pkg/logging"
@@ -47,6 +49,10 @@ func (s *PostService) CreatePost(userID int, input *models.CreatePostInput) (*mo
 	// Verify user exists and get user information
 	user, err := s.userRepo.GetByID(userID)
 	if err != nil {
+		// ユーザーが見つからない場合はsentinel errorをそのまま返す
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			return nil, repositories.ErrUserNotFound
+		}
 		return nil, err
 	}
 
@@ -64,9 +70,9 @@ func (s *PostService) CreatePost(userID int, input *models.CreatePostInput) (*mo
 				// Flavor not found, but we don't want to fail the entire post creation
 				// Log the error and continue without flavor data
 				logging.L.Warn("flavor not found for slide", "flavor_id", *slideInput.FlavorID, "error", err)
-				continue
+			} else {
+				slide.Flavor = flavor
 			}
-			slide.Flavor = flavor
 		}
 		slides[i] = slide
 	}

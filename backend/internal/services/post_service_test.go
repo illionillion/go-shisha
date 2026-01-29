@@ -124,6 +124,13 @@ func TestCreatePost_WithInvalidFlavorID(t *testing.T) {
 	if len(p.Slides) != 1 {
 		t.Fatalf("expected 1 slide, got %d", len(p.Slides))
 	}
+	// ImageURLとTextが正しく設定されていることを確認
+	if p.Slides[0].ImageURL != "i.jpg" {
+		t.Fatalf("expected ImageURL 'i.jpg', got '%s'", p.Slides[0].ImageURL)
+	}
+	if p.Slides[0].Text != "無効なFlavor ID" {
+		t.Fatalf("expected Text '無効なFlavor ID', got '%s'", p.Slides[0].Text)
+	}
 	// 無効なFlavorIDの場合、Flavorはnilになる（投稿作成は失敗しない）
 	if p.Slides[0].Flavor != nil {
 		t.Fatalf("expected flavor to be nil for invalid flavor_id, got %+v", p.Slides[0].Flavor)

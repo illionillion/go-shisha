@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories"
+	"go-shisha-backend/pkg/logging"
 
 	"github.com/gin-gonic/gin"
 )
@@ -108,18 +110,21 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	// Get user_id from authentication middleware
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
+		logging.L.Warn("user_id not found in context", "handler", "PostHandler", "method", "CreatePost")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
 
 	userID, ok := userIDValue.(int)
 	if !ok {
+		logging.L.Error("invalid user_id type", "handler", "PostHandler", "method", "CreatePost", "type", "%T", userIDValue)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id type"})
 		return
 	}
 
 	var input models.CreatePostInput
 	if err := c.ShouldBindJSON(&input); err != nil {
+		logging.L.Warn("invalid request body", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -128,14 +133,17 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	post, err := h.postService.CreatePost(userID, &input)
 	if err != nil {
 		// ユーザーが見つからない場合は認証エラーとして扱う
-		if strings.Contains(err.Error(), "user not found") {
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			logging.L.Warn("user not found for post creation", "handler", "PostHandler", "method", "CreatePost", "user_id", userID)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
 			return
 		}
+		logging.L.Error("failed to create post", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
+	logging.L.Info("post created", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "post_id", post.ID)
 	c.JSON(http.StatusCreated, post)
 }
 
