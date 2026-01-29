@@ -7,12 +7,14 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/textproto"
 	"os"
 	"testing"
 
+	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/services"
+
 	"github.com/gin-gonic/gin"
-	"github.com/illionillion/go-shisha/internal/models"
-	"github.com/illionillion/go-shisha/internal/services"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,11 +34,17 @@ func TestUploadHandler_UploadImages(t *testing.T) {
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
 
-		// テスト画像を追加
-		part1, _ := writer.CreateFormFile("images", "test1.jpg")
+		// テスト画像を追加（正しいContent-Typeヘッダーを設定）
+		h := make(textproto.MIMEHeader)
+		h.Set("Content-Disposition", `form-data; name="images"; filename="test1.jpg"`)
+		h.Set("Content-Type", "image/jpeg")
+		part1, _ := writer.CreatePart(h)
 		part1.Write([]byte("fake jpeg data"))
 
-		part2, _ := writer.CreateFormFile("images", "test2.png")
+		h2 := make(textproto.MIMEHeader)
+		h2.Set("Content-Disposition", `form-data; name="images"; filename="test2.png"`)
+		h2.Set("Content-Type", "image/png")
+		part2, _ := writer.CreatePart(h2)
 		part2.Write([]byte("fake png data"))
 
 		writer.Close()

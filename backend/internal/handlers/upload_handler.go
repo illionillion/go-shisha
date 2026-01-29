@@ -4,9 +4,10 @@ import (
 	"log/slog"
 	"net/http"
 
+	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/services"
+
 	"github.com/gin-gonic/gin"
-	"github.com/illionillion/go-shisha/internal/models"
-	"github.com/illionillion/go-shisha/internal/services"
 )
 
 // UploadHandler 画像アップロードハンドラー

@@ -2,7 +2,6 @@ package services
 
 import (
 	"bytes"
-	"io"
 	"log/slog"
 	"mime/multipart"
 	"os"
