@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories"
 	"go-shisha-backend/internal/services"
 	"go-shisha-backend/pkg/logging"
 
@@ -54,7 +55,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	user, err := h.authService.Register(&input)
 	if err != nil {
 		// メールアドレス重複エラーの場合は 409 Conflict を返す
-		if errors.Is(err, services.ErrEmailAlreadyExists) {
+		if errors.Is(err, repositories.ErrEmailAlreadyExists) {
 			logging.L.Warn("registration failed: email already exists",
 				"handler", "AuthHandler",
 				"method", "Register",

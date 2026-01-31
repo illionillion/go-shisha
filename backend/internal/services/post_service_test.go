@@ -38,10 +38,32 @@ func (m *mockUserRepoForPost) GetByID(id int) (*models.User, error) {
 	return &models.User{ID: id, Email: "u@example.com", DisplayName: "U"}, nil
 }
 
+type mockFlavorRepo struct{}
+
+func (m *mockFlavorRepo) GetByID(id int) (*models.Flavor, error) {
+	flavors := map[int]models.Flavor{
+		1: {ID: 1, Name: "ミント", Color: "bg-green-500"},
+		2: {ID: 2, Name: "アップル", Color: "bg-red-500"},
+		3: {ID: 3, Name: "ベリー", Color: "bg-purple-500"},
+	}
+	if flavor, ok := flavors[id]; ok {
+		return &flavor, nil
+	}
+	return nil, errors.New("flavor not found")
+}
+
+func (m *mockFlavorRepo) GetAll() ([]models.Flavor, error) {
+	return []models.Flavor{
+		{ID: 1, Name: "ミント", Color: "bg-green-500"},
+		{ID: 2, Name: "アップル", Color: "bg-red-500"},
+		{ID: 3, Name: "ベリー", Color: "bg-purple-500"},
+	}, nil
+}
+
 func TestCreatePost(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{})
-	input := &models.CreatePostInput{UserID: 1, Slides: []models.Slide{{ImageURL: "i.jpg", Text: "hello"}}}
-	p, err := postSvc.CreatePost(input)
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
+	input := &models.CreatePostInput{Slides: []models.SlideInput{{ImageURL: "i.jpg", Text: "hello"}}}
+	p, err := postSvc.CreatePost(1, input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -53,8 +75,70 @@ func TestCreatePost(t *testing.T) {
 	}
 }
 
+func TestCreatePost_WithFlavor(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
+	flavorID := 1
+	input := &models.CreatePostInput{
+		Slides: []models.SlideInput{
+			{
+				ImageURL: "i.jpg",
+				Text:     "ミント味最高！",
+				FlavorID: &flavorID,
+			},
+		},
+	}
+	p, err := postSvc.CreatePost(1, input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(p.Slides) != 1 {
+		t.Fatalf("expected 1 slide, got %d", len(p.Slides))
+	}
+	if p.Slides[0].Flavor == nil {
+		t.Fatalf("expected flavor to be populated, got nil")
+	}
+	if p.Slides[0].Flavor.Name != "ミント" {
+		t.Fatalf("expected flavor name 'ミント', got '%s'", p.Slides[0].Flavor.Name)
+	}
+	if p.Slides[0].Flavor.Color != "bg-green-500" {
+		t.Fatalf("expected flavor color 'bg-green-500', got '%s'", p.Slides[0].Flavor.Color)
+	}
+}
+
+func TestCreatePost_WithInvalidFlavorID(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
+	invalidFlavorID := 999
+	input := &models.CreatePostInput{
+		Slides: []models.SlideInput{
+			{
+				ImageURL: "i.jpg",
+				Text:     "無効なFlavor ID",
+				FlavorID: &invalidFlavorID,
+			},
+		},
+	}
+	p, err := postSvc.CreatePost(1, input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(p.Slides) != 1 {
+		t.Fatalf("expected 1 slide, got %d", len(p.Slides))
+	}
+	// ImageURLとTextが正しく設定されていることを確認
+	if p.Slides[0].ImageURL != "i.jpg" {
+		t.Fatalf("expected ImageURL 'i.jpg', got '%s'", p.Slides[0].ImageURL)
+	}
+	if p.Slides[0].Text != "無効なFlavor ID" {
+		t.Fatalf("expected Text '無効なFlavor ID', got '%s'", p.Slides[0].Text)
+	}
+	// 無効なFlavorIDの場合、Flavorはnilになる（投稿作成は失敗しない）
+	if p.Slides[0].Flavor != nil {
+		t.Fatalf("expected flavor to be nil for invalid flavor_id, got %+v", p.Slides[0].Flavor)
+	}
+}
+
 func TestLikeUnlikePost(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{})
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
 	liked, err := postSvc.LikePost(2)
 	if err != nil {
 		t.Fatalf("unexpected error like: %v", err)
@@ -73,7 +157,7 @@ func TestLikeUnlikePost(t *testing.T) {
 }
 
 func TestGetAllPosts(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{})
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
 	posts, err := postSvc.GetAllPosts()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -107,25 +191,25 @@ func (m *mockUserRepoMissing) GetByID(id int) (*models.User, error) {
 }
 
 func TestCreatePost_UserMissing(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoMissing{})
-	input := &models.CreatePostInput{UserID: 999, Slides: []models.Slide{{ImageURL: "i.jpg", Text: "hello"}}}
-	_, err := postSvc.CreatePost(input)
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoMissing{}, &mockFlavorRepo{})
+	input := &models.CreatePostInput{Slides: []models.SlideInput{{ImageURL: "i.jpg", Text: "hello"}}}
+	_, err := postSvc.CreatePost(999, input)
 	if err == nil {
 		t.Fatalf("expected error when user is missing, got nil")
 	}
 }
 
 func TestCreatePost_PostCreateError(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{})
-	input := &models.CreatePostInput{UserID: 1, Slides: []models.Slide{{ImageURL: "i.jpg", Text: "hello"}}}
-	_, err := postSvc.CreatePost(input)
+	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
+	input := &models.CreatePostInput{Slides: []models.SlideInput{{ImageURL: "i.jpg", Text: "hello"}}}
+	_, err := postSvc.CreatePost(1, input)
 	if err == nil {
 		t.Fatalf("expected error when post create fails, got nil")
 	}
 }
 
 func TestLikePost_Error(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{})
+	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
 	_, err := postSvc.LikePost(1)
 	if err == nil {
 		t.Fatalf("expected error when IncrementLikes fails, got nil")
@@ -133,7 +217,7 @@ func TestLikePost_Error(t *testing.T) {
 }
 
 func TestUnlikePost_Error(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{})
+	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
 	_, err := postSvc.UnlikePost(1)
 	if err == nil {
 		t.Fatalf("expected error when DecrementLikes fails, got nil")

@@ -264,7 +264,12 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "新しい投稿を作成します（未実装）",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "新しい投稿を作成します（認証必須）。注意: slides内のflavor_idが無効な場合、そのスライドはFlavorなしで作成されます（エラーにはなりません）",
                 "consumes": [
                     "application/json"
                 ],
@@ -293,8 +298,22 @@ const docTemplate = `{
                             "$ref": "#/definitions/go-shisha-backend_internal_models.Post"
                         }
                     },
-                    "501": {
-                        "description": "未実装",
+                    "400": {
+                        "description": "バリデーションエラー",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "認証エラー",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -576,19 +595,15 @@ const docTemplate = `{
         "go-shisha-backend_internal_models.CreatePostInput": {
             "type": "object",
             "required": [
-                "slides",
-                "user_id"
+                "slides"
             ],
             "properties": {
                 "slides": {
                     "type": "array",
                     "minItems": 1,
                     "items": {
-                        "$ref": "#/definitions/go-shisha-backend_internal_models.Slide"
+                        "$ref": "#/definitions/go-shisha-backend_internal_models.SlideInput"
                     }
-                },
-                "user_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -699,6 +714,23 @@ const docTemplate = `{
             "properties": {
                 "flavor": {
                     "$ref": "#/definitions/go-shisha-backend_internal_models.Flavor"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.SlideInput": {
+            "type": "object",
+            "required": [
+                "image_url"
+            ],
+            "properties": {
+                "flavor_id": {
+                    "type": "integer"
                 },
                 "image_url": {
                     "type": "string"

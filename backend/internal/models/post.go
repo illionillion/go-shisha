@@ -49,10 +49,16 @@ func (PostDB) TableName() string {
 	return "posts"
 }
 
+// SlideInput represents the input for a single slide when creating a post
+type SlideInput struct {
+	ImageURL string `json:"image_url" binding:"required,imageurl"`
+	Text     string `json:"text"`
+	FlavorID *int   `json:"flavor_id"`
+}
+
 // CreatePostInput represents the input for creating a post
 type CreatePostInput struct {
-	UserID int     `json:"user_id" binding:"required"`
-	Slides []Slide `json:"slides" binding:"required,min=1,dive"`
+	Slides []SlideInput `json:"slides" binding:"required,min=1,dive"`
 }
 
 // PostsResponse represents the response for post list

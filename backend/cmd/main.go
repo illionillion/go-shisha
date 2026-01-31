@@ -15,8 +15,11 @@ import (
 	"go-shisha-backend/internal/services"
 	"go-shisha-backend/pkg/db"
 	"go-shisha-backend/pkg/logging"
+	"go-shisha-backend/pkg/validation"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"golang.org/x/time/rate"
@@ -41,6 +44,25 @@ import (
 func main() {
 	// Ginのデバッグモードを設定（本番環境ではgin.ReleaseMode）
 	gin.SetMode(gin.DebugMode)
+
+	// カスタムバリデータの登録
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		if err := v.RegisterValidation("imageurl", validation.ValidateImageURL); err != nil {
+			// バリデーション登録の失敗はアプリケーション起動時の致命的エラーとして扱う
+			// セキュリティ上重要なバリデーションが動作しない状態での起動を防ぐ
+			logging.L.Error("critical: custom validation registration failed",
+				"validation", "imageurl",
+				"error", err,
+				"action", "aborting startup")
+			panic("imageurl validation registration failed")
+		}
+		logging.L.Info("custom validation registered", "name", "imageurl")
+	} else {
+		// validator.Validateの型アサーション失敗もアプリケーション起動時の致命的エラーとして扱う
+		logging.L.Error("critical: validator engine type assertion failed",
+			"action", "aborting startup")
+		panic("validator engine unavailable")
+	}
 
 	r := gin.Default()
 
@@ -91,10 +113,11 @@ func main() {
 	postRepo := postgres.NewPostRepository(gormDB)
 	userRepo := postgres.NewUserRepository(gormDB)
 	refreshTokenRepo := postgres.NewRefreshTokenRepository(gormDB)
+	flavorRepo := postgres.NewFlavorRepository(gormDB)
 
 	// Service層
 	userService := services.NewUserService(userRepo, postRepo)
-	postService := services.NewPostService(postRepo, userRepo)
+	postService := services.NewPostService(postRepo, userRepo, flavorRepo)
 	authService := services.NewAuthService(userRepo, refreshTokenRepo)
 
 	// Handler層
@@ -142,7 +165,7 @@ func main() {
 		// Posts endpoints
 		api.GET("/posts", postHandler.GetAllPosts)
 		api.GET("/posts/:id", postHandler.GetPost)
-		api.POST("/posts", postHandler.CreatePost) // TODO: 認証必須化 + 画像アップロード実装
+		api.POST("/posts", middleware.AuthMiddleware(), postHandler.CreatePost)
 		api.POST("/posts/:id/like", middleware.AuthMiddleware(), postHandler.LikePost)
 		api.POST("/posts/:id/unlike", middleware.AuthMiddleware(), postHandler.UnlikePost)
 

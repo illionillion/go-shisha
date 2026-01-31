@@ -1,26 +1,37 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"go-shisha-backend/internal/models"
-	"go-shisha-backend/internal/services"
+	"go-shisha-backend/internal/repositories"
+	"go-shisha-backend/pkg/logging"
 
 	"github.com/gin-gonic/gin"
 )
+
+// PostServiceInterface はPostServiceのインターフェース（テスト用）
+type PostServiceInterface interface {
+	GetAllPosts() ([]models.Post, error)
+	GetPostByID(id int) (*models.Post, error)
+	CreatePost(userID int, input *models.CreatePostInput) (*models.Post, error)
+	LikePost(id int) (*models.Post, error)
+	UnlikePost(id int) (*models.Post, error)
+}
 
 /**
  * PostHandler handles post-related HTTP requests
  */
 type PostHandler struct {
-	postService *services.PostService
+	postService PostServiceInterface
 }
 
 /**
  * NewPostHandler creates a new post handler
  */
-func NewPostHandler(postService *services.PostService) *PostHandler {
+func NewPostHandler(postService PostServiceInterface) *PostHandler {
 	return &PostHandler{
 		postService: postService,
 	}
@@ -84,16 +95,56 @@ func (h *PostHandler) GetPost(c *gin.Context) {
  * CreatePost handles POST /api/v1/posts
  */
 // @Summary 投稿作成
-// @Description 新しい投稿を作成します（未実装）
+// @Description 新しい投稿を作成します（認証必須）。注意: slides内のflavor_idが無効な場合、そのスライドはFlavorなしで作成されます（エラーにはなりません）
 // @Tags posts
 // @Accept json
 // @Produce json
 // @Param post body models.CreatePostInput true "投稿情報"
 // @Success 201 {object} models.Post "作成された投稿"
-// @Failure 501 {object} map[string]interface{} "未実装"
+// @Failure 400 {object} map[string]interface{} "バリデーションエラー"
+// @Failure 401 {object} map[string]interface{} "認証エラー"
+// @Failure 500 {object} map[string]interface{} "サーバーエラー"
+// @Security BearerAuth
 // @Router /posts [post]
 func (h *PostHandler) CreatePost(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, gin.H{"error": "Not implemented yet"})
+	// Get user_id from authentication middleware
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		logging.L.Warn("user_id not found in context", "handler", "PostHandler", "method", "CreatePost")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	userID, ok := userIDValue.(int)
+	if !ok {
+		logging.L.Error("invalid user_id type", "handler", "PostHandler", "method", "CreatePost", "type", "%T", userIDValue)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id type"})
+		return
+	}
+
+	var input models.CreatePostInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		logging.L.Warn("invalid request body", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Create post with authenticated user's ID
+	post, err := h.postService.CreatePost(userID, &input)
+	if err != nil {
+		// ユーザーが見つからない場合は認証エラーとして扱う
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			logging.L.Warn("user not found for post creation", "handler", "PostHandler", "method", "CreatePost", "user_id", userID)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+			return
+		}
+		logging.L.Error("failed to create post", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	logging.L.Info("post created", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "post_id", post.ID)
+	c.JSON(http.StatusCreated, post)
 }
 
 /**
