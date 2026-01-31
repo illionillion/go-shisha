@@ -14,11 +14,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var (
-	// ErrEmailAlreadyExists はメールアドレスが既に登録されている場合のエラー
-	ErrEmailAlreadyExists = errors.New("email already exists")
-)
-
 // AuthService は認証サービスのインターフェース
 type AuthService struct {
 	userRepo         repositories.AuthUserRepository
@@ -63,7 +58,7 @@ func (s *AuthService) Register(input *models.CreateUserInput) (*models.User, err
 				"service", "AuthService",
 				"method", "Register",
 				"email", input.Email)
-			return nil, ErrEmailAlreadyExists
+			return nil, repositories.ErrEmailAlreadyExists
 		}
 		logging.L.Error("failed to create user",
 			"service", "AuthService",

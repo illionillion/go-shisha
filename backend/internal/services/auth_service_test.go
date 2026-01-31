@@ -147,7 +147,7 @@ func TestRegister(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error for duplicate email, got nil")
 		}
-		if !errors.Is(err, ErrEmailAlreadyExists) {
+		if !errors.Is(err, repositories.ErrEmailAlreadyExists) {
 			t.Fatalf("expected ErrEmailAlreadyExists error, got %v", err)
 		}
 	})
