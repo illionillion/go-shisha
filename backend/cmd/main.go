@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -53,14 +52,18 @@ func main() {
 		if err := v.RegisterValidation("imageurl", validation.ValidateImageURL); err != nil {
 			// バリデーション登録の失敗はアプリケーション起動時の致命的エラーとして扱う
 			// セキュリティ上重要なバリデーションが動作しない状態での起動を防ぐ
-			logging.L.Error("failed to register imageurl validation", "error", err)
-			panic(fmt.Sprintf("failed to register imageurl validation: %v", err))
+			logging.L.Error("critical: custom validation registration failed",
+				"validation", "imageurl",
+				"error", err,
+				"action", "aborting startup")
+			panic("imageurl validation registration failed")
 		}
 		logging.L.Info("custom validation registered", "name", "imageurl")
 	} else {
 		// validator.Validateの型アサーション失敗もアプリケーション起動時の致命的エラーとして扱う
-		logging.L.Error("failed to get validator engine")
-		panic("failed to get validator engine")
+		logging.L.Error("critical: validator engine type assertion failed",
+			"action", "aborting startup")
+		panic("validator engine unavailable")
 	}
 
 	r := gin.Default()

@@ -115,7 +115,7 @@ func TestValidateImageURL(t *testing.T) {
 			imageURL:  "wss://example.com/socket",
 			wantValid: false,
 		},
-		// 空白文字のトリミングテスト（修正：トリミング前後で異なる場合は拒否）
+		// 空白文字のトリミングテスト（トリミング前後で異なる場合は拒否される）
 		{
 			name:      "先頭に空白がある有効なパス（拒否される）",
 			imageURL:  " /images/test.jpg",

@@ -170,6 +170,97 @@ func TestCreatePost_InvalidBody(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
+func TestCreatePost_ImageURLValidation(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.POST("/posts", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.CreatePost(c)
+	})
+
+	tests := []struct {
+		name          string
+		imageURL      string
+		expectedCode  int
+		expectSuccess bool
+	}{
+		{
+			name:          "危険なスキーム: javascript:",
+			imageURL:      "javascript:alert(1)",
+			expectedCode:  http.StatusBadRequest,
+			expectSuccess: false,
+		},
+		{
+			name:          "危険なスキーム: data:",
+			imageURL:      "data:text/html,<script>alert(1)</script>",
+			expectedCode:  http.StatusBadRequest,
+			expectSuccess: false,
+		},
+		{
+			name:          "無効な相対パス",
+			imageURL:      "/other/test.jpg",
+			expectedCode:  http.StatusBadRequest,
+			expectSuccess: false,
+		},
+		{
+			name:          "空白を含むURL",
+			imageURL:      " /images/test.jpg",
+			expectedCode:  http.StatusBadRequest,
+			expectSuccess: false,
+		},
+		{
+			name:          "有効な相対パス",
+			imageURL:      "/images/test.jpg",
+			expectedCode:  http.StatusCreated,
+			expectSuccess: true,
+		},
+		{
+			name:          "有効なHTTPS URL",
+			imageURL:      "https://example.com/image.jpg",
+			expectedCode:  http.StatusCreated,
+			expectSuccess: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.expectSuccess {
+				mockService.createPostFunc = func(userID int, input *models.CreatePostInput) (*models.Post, error) {
+					return &models.Post{
+						ID:     1,
+						UserID: userID,
+						Slides: []models.Slide{
+							{ImageURL: input.Slides[0].ImageURL, Text: input.Slides[0].Text},
+						},
+					}, nil
+				}
+			}
+
+			reqBody := map[string]interface{}{
+				"slides": []map[string]interface{}{
+					{
+						"image_url": tt.imageURL,
+						"text":      "test",
+					},
+				},
+			}
+			body, _ := json.Marshal(reqBody)
+
+			req := httptest.NewRequest(http.MethodPost, "/posts", bytes.NewBuffer(body))
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			router.ServeHTTP(rec, req)
+
+			assert.Equal(t, tt.expectedCode, rec.Code)
+		})
+	}
+}
+
 func TestCreatePost_UserNotFound(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
