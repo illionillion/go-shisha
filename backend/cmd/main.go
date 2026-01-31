@@ -13,6 +13,7 @@ import (
 	"go-shisha-backend/internal/handlers"
 	"go-shisha-backend/internal/middleware"
 	_ "go-shisha-backend/internal/models" // Swagger型定義用
+	"go-shisha-backend/internal/repositories"
 	"go-shisha-backend/internal/repositories/postgres"
 	"go-shisha-backend/internal/services"
 	"go-shisha-backend/pkg/db"
@@ -116,12 +117,13 @@ func main() {
 	userRepo := postgres.NewUserRepository(gormDB)
 	refreshTokenRepo := postgres.NewRefreshTokenRepository(gormDB)
 	flavorRepo := postgres.NewFlavorRepository(gormDB)
+	uploadRepo := repositories.NewUploadRepository(gormDB)
 
 	// Service層
 	userService := services.NewUserService(userRepo, postRepo)
-	postService := services.NewPostService(postRepo, userRepo, flavorRepo)
+	postService := services.NewPostService(postRepo, userRepo, flavorRepo, uploadRepo)
 	authService := services.NewAuthService(userRepo, refreshTokenRepo)
-	uploadService := services.NewUploadService(logging.L)
+	uploadService := services.NewUploadService(uploadRepo, logging.L)
 
 	// Handler層
 	userHandler := handlers.NewUserHandler(userService)

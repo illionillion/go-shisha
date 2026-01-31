@@ -10,18 +10,23 @@ import (
 	"strings"
 	"time"
 
+	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories"
+
 	"github.com/google/uuid"
 )
 
 // UploadService 画像アップロードサービス
 type UploadService struct {
-	logger *slog.Logger
+	uploadRepo repositories.UploadRepository
+	logger     *slog.Logger
 }
 
 // NewUploadService UploadServiceのコンストラクタ
-func NewUploadService(logger *slog.Logger) *UploadService {
+func NewUploadService(uploadRepo repositories.UploadRepository, logger *slog.Logger) *UploadService {
 	return &UploadService{
-		logger: logger,
+		uploadRepo: uploadRepo,
+		logger:     logger,
 	}
 }
 
@@ -38,7 +43,7 @@ var allowedMimeTypes = map[string]bool{
 const maxFileSize = 10 * 1024 * 1024
 
 // UploadImages 複数の画像をアップロードする
-func (s *UploadService) UploadImages(files []*multipart.FileHeader) ([]string, error) {
+func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) ([]string, error) {
 	if len(files) == 0 {
 		s.logger.Warn("アップロードファイルが0件")
 		return nil, fmt.Errorf("ファイルが指定されていません")
@@ -52,6 +57,7 @@ func (s *UploadService) UploadImages(files []*multipart.FileHeader) ([]string, e
 	}
 
 	var urls []string
+	var uploadRecords []models.UploadDB
 
 	for _, fileHeader := range files {
 		// ファイルサイズチェック
@@ -60,6 +66,8 @@ func (s *UploadService) UploadImages(files []*multipart.FileHeader) ([]string, e
 				"filename", fileHeader.Filename,
 				"size", fileHeader.Size,
 				"max", maxFileSize)
+			// 既に保存したファイルをロールバック
+			s.rollbackFiles(uploadRecords)
 			return nil, fmt.Errorf("ファイルサイズが10MBを超えています: %s", fileHeader.Filename)
 		}
 
@@ -69,6 +77,8 @@ func (s *UploadService) UploadImages(files []*multipart.FileHeader) ([]string, e
 			s.logger.Warn("不正なファイル形式",
 				"filename", fileHeader.Filename,
 				"contentType", contentType)
+			// 既に保存したファイルをロールバック
+			s.rollbackFiles(uploadRecords)
 			return nil, fmt.Errorf("サポートされていないファイル形式です: %s (許可: jpg, jpeg, png, webp, gif)", fileHeader.Filename)
 		}
 
@@ -76,6 +86,7 @@ func (s *UploadService) UploadImages(files []*multipart.FileHeader) ([]string, e
 		file, err := fileHeader.Open()
 		if err != nil {
 			s.logger.Error("ファイルオープン失敗", "error", err, "filename", fileHeader.Filename)
+			s.rollbackFiles(uploadRecords)
 			return nil, fmt.Errorf("ファイルの読み込みに失敗しました")
 		}
 		defer func() {
@@ -90,6 +101,7 @@ func (s *UploadService) UploadImages(files []*multipart.FileHeader) ([]string, e
 		ext = strings.ToLower(strings.TrimPrefix(ext, "."))
 		if !isValidExtension(ext) {
 			s.logger.Warn("不正な拡張子", "filename", fileHeader.Filename, "ext", ext)
+			s.rollbackFiles(uploadRecords)
 			return nil, fmt.Errorf("サポートされていない拡張子です: %s", fileHeader.Filename)
 		}
 
@@ -101,6 +113,7 @@ func (s *UploadService) UploadImages(files []*multipart.FileHeader) ([]string, e
 		dst, err := os.Create(savePath)
 		if err != nil {
 			s.logger.Error("ファイル作成失敗", "error", err, "path", savePath)
+			s.rollbackFiles(uploadRecords)
 			return nil, fmt.Errorf("ファイルの保存に失敗しました")
 		}
 		defer func() {
@@ -115,20 +128,59 @@ func (s *UploadService) UploadImages(files []*multipart.FileHeader) ([]string, e
 			if removeErr := os.Remove(savePath); removeErr != nil {
 				s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
 			}
+			s.rollbackFiles(uploadRecords)
 			return nil, fmt.Errorf("ファイルの保存に失敗しました")
 		}
 
 		// URLを生成（publicからの相対パス）
 		url := fmt.Sprintf("/images/%s", filename)
+
+		// DB記録を作成
+		uploadRecord := models.UploadDB{
+			UserID:       userID,
+			FilePath:     url,
+			OriginalName: fileHeader.Filename,
+			MimeType:     contentType,
+			FileSize:     fileHeader.Size,
+			Status:       "uploaded",
+			CreatedAt:    time.Now(),
+		}
+
+		// DBに保存
+		if err := s.uploadRepo.Create(&uploadRecord); err != nil {
+			s.logger.Error("DB保存失敗", "error", err, "path", url)
+			// ファイルを削除
+			if removeErr := os.Remove(savePath); removeErr != nil {
+				s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
+			}
+			s.rollbackFiles(uploadRecords)
+			return nil, fmt.Errorf("画像情報の保存に失敗しました")
+		}
+
+		uploadRecords = append(uploadRecords, uploadRecord)
 		urls = append(urls, url)
 
 		s.logger.Info("画像アップロード成功",
+			"user_id", userID,
 			"filename", fileHeader.Filename,
 			"savedAs", filename,
 			"size", fileHeader.Size)
 	}
 
 	return urls, nil
+}
+
+// rollbackFiles 保存に失敗した場合、既に保存したファイルとDB記録を削除する
+func (s *UploadService) rollbackFiles(uploadRecords []models.UploadDB) {
+	for _, record := range uploadRecords {
+		// ファイル削除
+		filePath := filepath.Join("public", record.FilePath)
+		if err := os.Remove(filePath); err != nil {
+			s.logger.Warn("ロールバック時ファイル削除失敗", "error", err, "path", filePath)
+		}
+		// DB記録は削除しない（status='uploaded'のまま残し、後でクリーンアップバッチで処理）
+		// 理由: トランザクション管理が複雑になるため、orphanedレコードは定期クリーンアップで対応
+	}
 }
 
 // isValidExtension 有効な拡張子かチェック

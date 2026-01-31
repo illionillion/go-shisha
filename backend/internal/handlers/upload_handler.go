@@ -64,8 +64,16 @@ func (h *UploadHandler) UploadImages(c *gin.Context) {
 		return
 	}
 
+	// user_idを整数型に変換
+	uid, ok := userID.(int)
+	if !ok {
+		h.logger.Error("user_idの型が不正", "user_id", userID)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "認証情報が不正です"})
+		return
+	}
+
 	// サービス層でアップロード処理
-	urls, err := h.uploadService.UploadImages(files)
+	urls, err := h.uploadService.UploadImages(uid, files)
 	if err != nil {
 		// エラーメッセージに応じてステータスコードを変更
 		statusCode := http.StatusInternalServerError
