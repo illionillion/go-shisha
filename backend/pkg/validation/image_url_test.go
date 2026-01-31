@@ -89,21 +89,47 @@ func TestValidateImageURL(t *testing.T) {
 			imageURL:  "",
 			wantValid: false,
 		},
-		// 空白文字のトリミングテスト
+		// 新しく追加された危険なスキーム
 		{
-			name:      "先頭に空白がある有効なパス",
+			name:      "blob: スキーム",
+			imageURL:  "blob:https://example.com/uuid",
+			wantValid: false,
+		},
+		{
+			name:      "ftp: スキーム（SSRF対策）",
+			imageURL:  "ftp://example.com/file.jpg",
+			wantValid: false,
+		},
+		{
+			name:      "ftps: スキーム（SSRF対策）",
+			imageURL:  "ftps://example.com/file.jpg",
+			wantValid: false,
+		},
+		{
+			name:      "ws: スキーム（WebSocket）",
+			imageURL:  "ws://example.com/socket",
+			wantValid: false,
+		},
+		{
+			name:      "wss: スキーム（WebSocket）",
+			imageURL:  "wss://example.com/socket",
+			wantValid: false,
+		},
+		// 空白文字のトリミングテスト（修正：トリミング前後で異なる場合は拒否）
+		{
+			name:      "先頭に空白がある有効なパス（拒否される）",
 			imageURL:  " /images/test.jpg",
-			wantValid: true,
+			wantValid: false,
 		},
 		{
-			name:      "末尾に空白がある有効なパス",
+			name:      "末尾に空白がある有効なパス（拒否される）",
 			imageURL:  "/images/test.jpg ",
-			wantValid: true,
+			wantValid: false,
 		},
 		{
-			name:      "前後に空白がある有効なURL",
+			name:      "前後に空白がある有効なURL（拒否される）",
 			imageURL:  "  https://example.com/image.jpg  ",
-			wantValid: true,
+			wantValid: false,
 		},
 		{
 			name:      "空白のみ",

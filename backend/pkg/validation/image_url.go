@@ -13,8 +13,16 @@ import (
 //
 // 禁止:
 //   - javascript:, data:, file:, vbscript:, about: などの危険なスキーム（SSRF/XSS対策）
+//   - 先頭・末尾に空白を含む値（トリミング前後で異なる値）
 func ValidateImageURL(fl validator.FieldLevel) bool {
-	imageURL := strings.TrimSpace(fl.Field().String())
+	raw := fl.Field().String()
+	imageURL := strings.TrimSpace(raw)
+
+	// トリミング前後で値が異なる場合（先頭・末尾に空白が含まれる）は拒否
+	// これにより、意図しない空白文字によるバリデーションバイパスを防ぐ
+	if raw != imageURL {
+		return false
+	}
 
 	// 危険なスキームをブロック（SSRF/XSS対策）
 	dangerousSchemes := []string{
@@ -23,6 +31,11 @@ func ValidateImageURL(fl validator.FieldLevel) bool {
 		"file:",
 		"vbscript:",
 		"about:",
+		"blob:",
+		"ftp:",
+		"ftps:",
+		"ws:",
+		"wss:",
 	}
 
 	lowerURL := strings.ToLower(imageURL)
