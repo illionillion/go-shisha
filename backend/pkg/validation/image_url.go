@@ -13,12 +13,13 @@ import (
 //
 // 禁止:
 //   - javascript:, data:, file:, vbscript:, about: などの危険なスキーム（SSRF/XSS対策）
-//   - 先頭・末尾に空白を含む値（トリミング前後で異なる値）
+//   - 先頭・末尾に空白文字（スペース、タブ、改行など）を含む値（トリミング前後で異なる値）
 func ValidateImageURL(fl validator.FieldLevel) bool {
 	raw := fl.Field().String()
 	imageURL := strings.TrimSpace(raw)
 
-	// トリミング前後で値が異なる場合（先頭・末尾に空白が含まれる）は拒否
+	// トリミング前後で値が異なる場合（先頭・末尾に空白文字が含まれる）は拒否
+	// strings.TrimSpaceは空白（space）、タブ(\t)、改行(\n、\r)などの全てのUnicode空白文字を削除する
 	// これにより、意図しない空白文字によるバリデーションバイパスを防ぐ
 	if raw != imageURL {
 		return false

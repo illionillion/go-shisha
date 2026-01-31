@@ -2,11 +2,11 @@ package postgres
 
 import (
 	"errors"
-	"fmt"
 
 	"gorm.io/gorm"
 
 	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories"
 	"go-shisha-backend/pkg/logging"
 )
 
@@ -35,10 +35,10 @@ func (r *FlavorRepository) GetByID(id int) (*models.Flavor, error) {
 	if err := r.db.First(&fm, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			logging.L.Debug("flavor not found", "repository", "FlavorRepository", "method", "GetByID", "flavor_id", id)
-			return nil, fmt.Errorf("flavor not found: id=%d", id)
+			return nil, repositories.ErrFlavorNotFound
 		}
 		logging.L.Error("failed to query flavor", "repository", "FlavorRepository", "method", "GetByID", "flavor_id", id, "error", err)
-		return nil, fmt.Errorf("failed to query flavor by id=%d: %w", id, err)
+		return nil, err
 	}
 	flavor := r.toDomain(&fm)
 	logging.L.Debug("flavor found", "repository", "FlavorRepository", "method", "GetByID", "flavor_id", id, "name", flavor.Name)
@@ -50,7 +50,7 @@ func (r *FlavorRepository) GetAll() ([]models.Flavor, error) {
 	var fms []flavorModel
 	if err := r.db.Order("id").Find(&fms).Error; err != nil {
 		logging.L.Error("failed to query flavors", "repository", "FlavorRepository", "method", "GetAll", "error", err)
-		return nil, fmt.Errorf("failed to query all flavors: %w", err)
+		return nil, err
 	}
 	logging.L.Debug("fetched flavors", "repository", "FlavorRepository", "method", "GetAll", "count", len(fms))
 	var flavors []models.Flavor

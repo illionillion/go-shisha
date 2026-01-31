@@ -269,7 +269,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "新しい投稿を作成します（認証必須）",
+                "description": "新しい投稿を作成します（認証必須）。注意: slides内のflavor_idが無効な場合、そのスライドはFlavorなしで作成されます（エラーにはなりません）",
                 "consumes": [
                     "application/json"
                 ],

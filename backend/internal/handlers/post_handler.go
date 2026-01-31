@@ -95,7 +95,7 @@ func (h *PostHandler) GetPost(c *gin.Context) {
  * CreatePost handles POST /api/v1/posts
  */
 // @Summary 投稿作成
-// @Description 新しい投稿を作成します（認証必須）
+// @Description 新しい投稿を作成します（認証必須）。注意: slides内のflavor_idが無効な場合、そのスライドはFlavorなしで作成されます（エラーにはなりません）
 // @Tags posts
 // @Accept json
 // @Produce json

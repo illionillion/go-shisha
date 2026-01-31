@@ -11,6 +11,8 @@ var (
 	ErrEmailAlreadyExists = errors.New("email already exists")
 	// ErrUserNotFound はユーザーが見つからない場合のエラー
 	ErrUserNotFound = errors.New("user not found")
+	// ErrFlavorNotFound はフレーバーが見つからない場合のエラー
+	ErrFlavorNotFound = errors.New("flavor not found")
 )
 
 /**

@@ -63,12 +63,13 @@ func (s *PostService) CreatePost(userID int, input *models.CreatePostInput) (*mo
 			ImageURL: slideInput.ImageURL,
 			Text:     slideInput.Text,
 		}
-		// Get flavor information if flavor_id is provided
+		// flavor_idが指定されている場合はフレーバー情報を取得
 		if slideInput.FlavorID != nil {
 			flavor, err := s.flavorRepo.GetByID(*slideInput.FlavorID)
 			if err != nil {
-				// Flavor not found, but we don't want to fail the entire post creation
-				// Log the error and continue without flavor data
+				// フレーバーが見つからない場合でも投稿作成全体は失敗させない
+				// エラーをログに記録し、フレーバーなしで続行する
+				// 注意: 無効なflavor_idは静かに無視され、該当スライドのFlavorはnilになります
 				logging.L.Warn("flavor not found for slide", "flavor_id", *slideInput.FlavorID, "error", err)
 			} else {
 				slide.Flavor = flavor
