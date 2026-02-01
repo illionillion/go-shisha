@@ -93,14 +93,14 @@ func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) 
 		buffer := make([]byte, 512)
 		n, err := file.Read(buffer)
 		if err != nil && err != io.EOF {
-			file.Close()
+			_ = file.Close()
 			s.logger.Error("ファイル読み込み失敗", "error", err, "filename", fileHeader.Filename)
 			s.rollbackFiles(uploadRecords)
 			return nil, fmt.Errorf("ファイルの読み込みに失敗しました")
 		}
 		detectedType := http.DetectContentType(buffer[:n])
 		if !allowedMimeTypes[detectedType] {
-			file.Close()
+			_ = file.Close()
 			s.logger.Warn("不正なファイル形式",
 				"filename", fileHeader.Filename,
 				"detectedType", detectedType)
@@ -110,7 +110,7 @@ func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) 
 
 		// ファイルポインタを先頭に戻す
 		if _, err := file.Seek(0, 0); err != nil {
-			file.Close()
+			_ = file.Close()
 			s.logger.Error("ファイルシーク失敗", "error", err, "filename", fileHeader.Filename)
 			s.rollbackFiles(uploadRecords)
 			return nil, fmt.Errorf("ファイルの読み込みに失敗しました")
@@ -121,7 +121,7 @@ func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) 
 		// パストラバーサル対策: 拡張子のサニタイゼーション
 		ext = strings.ToLower(strings.TrimPrefix(ext, "."))
 		if !isValidExtension(ext) {
-			file.Close()
+			_ = file.Close()
 			s.logger.Warn("不正な拡張子", "filename", fileHeader.Filename, "ext", ext)
 			s.rollbackFiles(uploadRecords)
 			return nil, fmt.Errorf("%w: %s", ErrInvalidExtension, fileHeader.Filename)
@@ -134,7 +134,7 @@ func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) 
 		// ファイル保存
 		dst, err := os.Create(savePath)
 		if err != nil {
-			file.Close()
+			_ = file.Close()
 			s.logger.Error("ファイル作成失敗", "error", err, "path", savePath)
 			s.rollbackFiles(uploadRecords)
 			return nil, fmt.Errorf("ファイルの保存に失敗しました")
@@ -142,8 +142,8 @@ func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) 
 
 		// io.Copyとクローズ処理
 		_, copyErr := io.Copy(dst, file)
-		file.Close()
-		dst.Close()
+		_ = file.Close()
+		_ = dst.Close()
 
 		if copyErr != nil {
 			s.logger.Error("ファイル書き込み失敗", "error", copyErr, "path", savePath)

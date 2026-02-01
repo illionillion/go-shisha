@@ -182,8 +182,18 @@ func createTestImageFiles(t *testing.T, testFiles []testFile) []*multipart.FileH
 		part, err := writer.CreateFormFile("images", tf.filename)
 		assert.NoError(t, err)
 
-		// ダミーデータを書き込み
-		data := bytes.Repeat([]byte("x"), int(tf.size))
+		// 実際の画像バイナリデータを書き込み（MIMEタイプ検証に対応）
+		var data []byte
+		if strings.Contains(tf.contentType, "image/jpeg") {
+			// JPEGマジックバイト + ダミーデータ
+			data = append([]byte{0xFF, 0xD8, 0xFF, 0xE0}, bytes.Repeat([]byte("x"), int(tf.size)-4)...)
+		} else if strings.Contains(tf.contentType, "image/png") {
+			// PNGマジックバイト + ダミーデータ
+			data = append([]byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A}, bytes.Repeat([]byte("x"), int(tf.size)-8)...)
+		} else {
+			// 非画像ファイル（text/plainなど）
+			data = bytes.Repeat([]byte("x"), int(tf.size))
+		}
 		_, err = part.Write(data)
 		assert.NoError(t, err)
 

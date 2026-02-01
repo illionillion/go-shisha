@@ -5,7 +5,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
-	"net/httptest"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -31,8 +31,8 @@ func TestUploadHandler_UploadImages_Unauthorized(t *testing.T) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	part, _ := writer.CreateFormFile("images", "test.jpg")
-	io.WriteString(part, "fake image content")
-	writer.Close()
+	_, _ = io.WriteString(part, "fake image content")
+	_ = writer.Close()
 
 	// リクエスト作成（user_idなし）
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/images", body)
@@ -61,7 +61,7 @@ func TestUploadHandler_UploadImages_NoFiles(t *testing.T) {
 	// 空のリクエストボディ
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	writer.Close()
+	_ = writer.Close()
 
 	// リクエスト作成
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/images", body)
@@ -84,6 +84,6 @@ func TestUploadHandler_UploadImages_NoFiles(t *testing.T) {
 // クリーンアップ
 func TestMain(m *testing.M) {
 	code := m.Run()
-	os.RemoveAll("public/images")
+	_ = os.RemoveAll("public/images")
 	os.Exit(code)
 }
