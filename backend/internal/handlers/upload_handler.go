@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"log/slog"
+	"mime/multipart"
 	"net/http"
 
 	"go-shisha-backend/internal/models"
@@ -11,9 +12,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// UploadServiceInterface 画像アップロードサービスのインターフェース
+type UploadServiceInterface interface {
+	UploadImages(userID int, files []*multipart.FileHeader) ([]string, error)
+}
+
 // UploadHandler 画像アップロードハンドラー
 type UploadHandler struct {
-	uploadService *services.UploadService
+	uploadService UploadServiceInterface
 	logger        *slog.Logger
 }
 
