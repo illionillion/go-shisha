@@ -116,15 +116,13 @@ func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) 
 			return nil, fmt.Errorf("ファイルの読み込みに失敗しました")
 		}
 
-		// ファイル名生成（タイムスタンプ + UUID + 拡張子）
-		ext := filepath.Ext(fileHeader.Filename)
-		// パストラバーサル対策: 拡張子のサニタイゼーション
-		ext = strings.ToLower(strings.TrimPrefix(ext, "."))
-		if !isValidExtension(ext) {
+		// MIMEタイプから拡張子を決定（セキュリティ向上）
+		ext := getExtensionFromMIME(detectedType)
+		if ext == "" {
 			_ = file.Close()
-			s.logger.Warn("不正な拡張子", "filename", fileHeader.Filename, "ext", ext)
+			s.logger.Warn("サポートされていないMIMEタイプ", "filename", fileHeader.Filename, "mimeType", detectedType)
 			s.rollbackFiles(uploadRecords)
-			return nil, fmt.Errorf("%w: %s", ErrInvalidExtension, fileHeader.Filename)
+			return nil, fmt.Errorf("%w: %s", ErrInvalidExtension, detectedType)
 		}
 
 		timestamp := time.Now().Format("20060102")
@@ -211,14 +209,13 @@ func (s *UploadService) rollbackFiles(uploadRecords []models.UploadDB) {
 	}
 }
 
-// isValidExtension 有効な拡張子かチェック
-func isValidExtension(ext string) bool {
-	validExts := map[string]bool{
-		"jpg":  true,
-		"jpeg": true,
-		"png":  true,
-		"webp": true,
-		"gif":  true,
+// getExtensionFromMIME MIMEタイプから拡張子を決定（セキュリティ向上）
+func getExtensionFromMIME(mimeType string) string {
+	mimeToExt := map[string]string{
+		"image/jpeg": "jpg",
+		"image/png":  "png",
+		"image/webp": "webp",
+		"image/gif":  "gif",
 	}
-	return validExts[ext]
+	return mimeToExt[mimeType]
 }

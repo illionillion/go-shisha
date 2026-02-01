@@ -134,16 +134,16 @@ func TestUploadService_UploadImages(t *testing.T) {
 		assert.Contains(t, err.Error(), "サポートされていないファイル形式です")
 	})
 
-	t.Run("異常系_不正な拡張子", func(t *testing.T) {
+	t.Run("異常系_サポートされていないMIMEタイプ", func(t *testing.T) {
 		files := createTestImageFiles(t, []testFile{
-			{filename: "test.exe", contentType: "image/jpeg", size: 1024},
+			{filename: "test.exe", contentType: "application/x-msdownload", size: 1024},
 		})
 
 		urls, err := service.UploadImages(1, files)
 
 		assert.Error(t, err)
 		assert.Nil(t, urls)
-		assert.Contains(t, err.Error(), "サポートされていない拡張子です")
+		assert.Contains(t, err.Error(), "サポートされていないファイル形式です")
 	})
 
 	t.Run("異常系_DB保存失敗", func(t *testing.T) {
