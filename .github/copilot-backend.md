@@ -4,6 +4,10 @@
 
 ## コメント記述規則
 - **Backend（Go）**: godoc標準の`//`形式を使用する。Swaggoアノテーションも`//`形式で記述する。JSDoc形式は使用しない
+- **コメント言語**: すべてのコメント（godoc、関数説明、インラインコメント等）は日本語で記述する。英語コメントは禁止
+  - ✅ OK: `// UploadRepository はアップロードデータ操作のインターフェース`
+  - ❌ NG: `// UploadRepository interface for upload data operations`
+  - 例外: エラーメッセージ文字列、テスト関数名、定数名は英語でも可
 
 ## 構造化ログ（slog）運用ルール
 
@@ -122,9 +126,24 @@ func main() {
   - `/handlers` : HTTPハンドラー（Controller層）
   - `/services` : ビジネスロジック（UseCase層）
   - `/repositories` : データアクセス層（Repository層）
+    - **interface定義のみ**: 各リポジトリのインターフェースを定義（例: `upload_repository.go`）
+    - `/postgres` : GORM実装
+      - **実装とテスト**: 各リポジトリのGORM実装とテストを配置（例: `upload_repository.go`, `upload_repository_test.go`）
   - `/models` : エンティティ・ドメインモデル
   - `/middleware` : ミドルウェア
 - `/pkg` : 外部パッケージ、共通ライブラリ
+
+### Repository層の構造ルール
+- **interface層と実装層を分離**: 新しいRepositoryを追加する際は必ず以下の構造に従う
+  - `internal/repositories/{entity}_repository.go`: インターフェース定義のみ
+  - `internal/repositories/postgres/{entity}_repository.go`: GORM実装
+  - `internal/repositories/postgres/{entity}_repository_test.go`: テスト
+- **理由**: 
+  - 関心の分離（インターフェースと実装の明確な分離）
+  - テスト容易性（interfaceだけでモックが作れる）
+  - 将来の拡張性（MongoDB版などを追加しやすい）
+  - プロジェクト全体の統一性（PostRepository等と同じパターン）
+- **エラー定義**: Repository固有のエラー（例: `ErrUploadNotFound`）は実装層（`postgres`パッケージ）で定義する
 
 ## Swagger/OpenAPI生成（swaggo）ルール
 
