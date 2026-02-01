@@ -10,6 +10,15 @@ import (
 	"go-shisha-backend/pkg/logging"
 )
 
+// 画像URL検証用カスタムエラー
+var (
+	ErrInvalidImagePath      = errors.New("不正な画像URLパス")
+	ErrImageNotAllowed       = errors.New("許可されていない画像URL")
+	ErrImageNotFound         = errors.New("画像が存在しません")
+	ErrImagePermissionDenied = errors.New("画像を使用する権限がありません")
+	ErrImageDeleted          = errors.New("削除された画像は使用できません")
+)
+
 /**
  * PostService handles post-related business logic
  */
@@ -119,19 +128,19 @@ func (s *PostService) CreatePost(userID int, input *models.CreatePostInput) (*mo
 func (s *PostService) validateImageURL(userID int, imageURL string) error {
 	// 1. パストラバーサル対策
 	if strings.Contains(imageURL, "..") {
-		return fmt.Errorf("不正なパス: %s", imageURL)
+		return fmt.Errorf("%w: %s", ErrInvalidImagePath, imageURL)
 	}
 
 	// 2. 許可されたプレフィックスのチェック
 	if !strings.HasPrefix(imageURL, "/images/") {
-		return fmt.Errorf("許可されていないパス: %s", imageURL)
+		return fmt.Errorf("%w: %s", ErrImageNotAllowed, imageURL)
 	}
 
 	// 3. DBでアップロード記録を確認
 	upload, err := s.uploadRepo.GetByFilePath(imageURL)
 	if err != nil {
 		if errors.Is(err, repositories.ErrUploadNotFound) {
-			return fmt.Errorf("画像が存在しません: %s", imageURL)
+			return fmt.Errorf("%w: %s", ErrImageNotFound, imageURL)
 		}
 		return fmt.Errorf("画像情報の取得に失敗しました: %w", err)
 	}
@@ -142,12 +151,12 @@ func (s *PostService) validateImageURL(userID int, imageURL string) error {
 			"post_user_id", userID,
 			"upload_user_id", upload.UserID,
 			"image_url", imageURL)
-		return fmt.Errorf("この画像を使用する権限がありません")
+		return ErrImagePermissionDenied
 	}
 
 	// 5. 既に削除済みでないか確認
 	if upload.Status == "deleted" {
-		return fmt.Errorf("削除された画像は使用できません: %s", imageURL)
+		return fmt.Errorf("%w: %s", ErrImageDeleted, imageURL)
 	}
 
 	return nil

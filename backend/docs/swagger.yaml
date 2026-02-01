@@ -106,8 +106,8 @@ definitions:
     properties:
       urls:
         example:
-        - /images/20260129_abc123.jpg
-        - /images/20260129_def456.png
+        - '["/images/20260129_abc123.jpg"'
+        - '"/images/20260129_def456.png"]'
         items:
           type: string
         type: array

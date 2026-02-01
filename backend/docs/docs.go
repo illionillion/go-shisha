@@ -814,8 +814,8 @@ const docTemplate = `{
                         "type": "string"
                     },
                     "example": [
-                        "/images/20260129_abc123.jpg",
-                        "/images/20260129_def456.png"
+                        "[\"/images/20260129_abc123.jpg\"",
+                        "\"/images/20260129_def456.png\"]"
                     ]
                 }
             }

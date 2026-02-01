@@ -68,9 +68,9 @@ func main() {
 
 	r := gin.Default()
 
-	// multipart/form-dataのメモリ制限（10MB/ファイル）
+	// multipart/form-dataのメモリ使用上限（合計10MBまではメモリ上で処理し、超過分は一時ファイルに退避）
 	r.MaxMultipartMemory = 10 << 20 // 10MB
-	logging.L.Info("max multipart memory set", "size", "10MB")
+	logging.L.Info("max multipart memory set", "in_memory_limit", "10MB")
 
 	// CORS設定
 	frontendURL := os.Getenv("FRONTEND_URL")

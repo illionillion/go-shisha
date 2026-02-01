@@ -1,10 +1,12 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"mime/multipart"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,6 +16,14 @@ import (
 	"go-shisha-backend/internal/repositories"
 
 	"github.com/google/uuid"
+)
+
+// カスタムエラー型
+var (
+	ErrNoFiles          = errors.New("ファイルが指定されていません")
+	ErrFileTooLarge     = errors.New("ファイルサイズが10MBを超えています")
+	ErrInvalidFileType  = errors.New("サポートされていないファイル形式です")
+	ErrInvalidExtension = errors.New("サポートされていない拡張子です")
 )
 
 // UploadService 画像アップロードサービス
@@ -46,7 +56,7 @@ const maxFileSize = 10 * 1024 * 1024
 func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) ([]string, error) {
 	if len(files) == 0 {
 		s.logger.Warn("アップロードファイルが0件")
-		return nil, fmt.Errorf("ファイルが指定されていません")
+		return nil, ErrNoFiles
 	}
 
 	// 保存先ディレクトリの確保
@@ -68,18 +78,7 @@ func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) 
 				"max", maxFileSize)
 			// 既に保存したファイルをロールバック
 			s.rollbackFiles(uploadRecords)
-			return nil, fmt.Errorf("ファイルサイズが10MBを超えています: %s", fileHeader.Filename)
-		}
-
-		// MIMEタイプチェック
-		contentType := fileHeader.Header.Get("Content-Type")
-		if !allowedMimeTypes[contentType] {
-			s.logger.Warn("不正なファイル形式",
-				"filename", fileHeader.Filename,
-				"contentType", contentType)
-			// 既に保存したファイルをロールバック
-			s.rollbackFiles(uploadRecords)
-			return nil, fmt.Errorf("サポートされていないファイル形式です: %s (許可: jpg, jpeg, png, webp, gif)", fileHeader.Filename)
+			return nil, fmt.Errorf("%w: %s", ErrFileTooLarge, fileHeader.Filename)
 		}
 
 		// ファイルを開く
@@ -89,20 +88,43 @@ func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) 
 			s.rollbackFiles(uploadRecords)
 			return nil, fmt.Errorf("ファイルの読み込みに失敗しました")
 		}
-		defer func() {
-			if err := file.Close(); err != nil {
-				s.logger.Warn("ファイルクローズ失敗", "error", err)
-			}
-		}()
+
+		// MIMEタイプチェック（実データから検証）
+		buffer := make([]byte, 512)
+		n, err := file.Read(buffer)
+		if err != nil && err != io.EOF {
+			file.Close()
+			s.logger.Error("ファイル読み込み失敗", "error", err, "filename", fileHeader.Filename)
+			s.rollbackFiles(uploadRecords)
+			return nil, fmt.Errorf("ファイルの読み込みに失敗しました")
+		}
+		detectedType := http.DetectContentType(buffer[:n])
+		if !allowedMimeTypes[detectedType] {
+			file.Close()
+			s.logger.Warn("不正なファイル形式",
+				"filename", fileHeader.Filename,
+				"detectedType", detectedType)
+			s.rollbackFiles(uploadRecords)
+			return nil, fmt.Errorf("%w: %s (検出: %s)", ErrInvalidFileType, fileHeader.Filename, detectedType)
+		}
+
+		// ファイルポインタを先頭に戻す
+		if _, err := file.Seek(0, 0); err != nil {
+			file.Close()
+			s.logger.Error("ファイルシーク失敗", "error", err, "filename", fileHeader.Filename)
+			s.rollbackFiles(uploadRecords)
+			return nil, fmt.Errorf("ファイルの読み込みに失敗しました")
+		}
 
 		// ファイル名生成（タイムスタンプ + UUID + 拡張子）
 		ext := filepath.Ext(fileHeader.Filename)
 		// パストラバーサル対策: 拡張子のサニタイゼーション
 		ext = strings.ToLower(strings.TrimPrefix(ext, "."))
 		if !isValidExtension(ext) {
+			file.Close()
 			s.logger.Warn("不正な拡張子", "filename", fileHeader.Filename, "ext", ext)
 			s.rollbackFiles(uploadRecords)
-			return nil, fmt.Errorf("サポートされていない拡張子です: %s", fileHeader.Filename)
+			return nil, fmt.Errorf("%w: %s", ErrInvalidExtension, fileHeader.Filename)
 		}
 
 		timestamp := time.Now().Format("20060102")
@@ -112,18 +134,19 @@ func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) 
 		// ファイル保存
 		dst, err := os.Create(savePath)
 		if err != nil {
+			file.Close()
 			s.logger.Error("ファイル作成失敗", "error", err, "path", savePath)
 			s.rollbackFiles(uploadRecords)
 			return nil, fmt.Errorf("ファイルの保存に失敗しました")
 		}
-		defer func() {
-			if err := dst.Close(); err != nil {
-				s.logger.Warn("ファイルクローズ失敗", "error", err)
-			}
-		}()
 
-		if _, err := io.Copy(dst, file); err != nil {
-			s.logger.Error("ファイル書き込み失敗", "error", err, "path", savePath)
+		// io.Copyとクローズ処理
+		_, copyErr := io.Copy(dst, file)
+		file.Close()
+		dst.Close()
+
+		if copyErr != nil {
+			s.logger.Error("ファイル書き込み失敗", "error", copyErr, "path", savePath)
 			// 失敗したファイルを削除
 			if removeErr := os.Remove(savePath); removeErr != nil {
 				s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
@@ -140,7 +163,7 @@ func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) 
 			UserID:       userID,
 			FilePath:     url,
 			OriginalName: fileHeader.Filename,
-			MimeType:     contentType,
+			MimeType:     detectedType,
 			FileSize:     fileHeader.Size,
 			Status:       "uploaded",
 			CreatedAt:    time.Now(),
@@ -173,13 +196,18 @@ func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) 
 // rollbackFiles 保存に失敗した場合、既に保存したファイルとDB記録を削除する
 func (s *UploadService) rollbackFiles(uploadRecords []models.UploadDB) {
 	for _, record := range uploadRecords {
-		// ファイル削除
-		filePath := filepath.Join("public", record.FilePath)
+		// ファイル削除（先頭の"/"を除去してから結合）
+		relativePath := strings.TrimPrefix(record.FilePath, "/")
+		filePath := filepath.Join("public", relativePath)
 		if err := os.Remove(filePath); err != nil {
 			s.logger.Warn("ロールバック時ファイル削除失敗", "error", err, "path", filePath)
 		}
-		// DB記録は削除しない（status='uploaded'のまま残し、後でクリーンアップバッチで処理）
-		// 理由: トランザクション管理が複雑になるため、orphanedレコードは定期クリーンアップで対応
+		// DB記録のstatusを'deleted'に更新（PostServiceの検証で弾かれるようにする）
+		if record.ID != 0 {
+			if err := s.uploadRepo.UpdateStatus(record.ID, "deleted"); err != nil {
+				s.logger.Warn("ロールバック時DB更新失敗", "error", err, "id", record.ID)
+			}
+		}
 	}
 }
 

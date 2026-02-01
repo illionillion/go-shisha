@@ -7,6 +7,7 @@ import (
 
 	"go-shisha-backend/internal/models"
 	"go-shisha-backend/internal/repositories"
+	"go-shisha-backend/internal/services"
 	"go-shisha-backend/pkg/logging"
 
 	"github.com/gin-gonic/gin"
@@ -136,6 +137,23 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 		if errors.Is(err, repositories.ErrUserNotFound) {
 			logging.L.Warn("user not found for post creation", "handler", "PostHandler", "method", "CreatePost", "user_id", userID)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+			return
+		}
+		// 画像関連エラーのハンドリング
+		if errors.Is(err, services.ErrInvalidImagePath) || errors.Is(err, services.ErrImageNotAllowed) || 
+		   errors.Is(err, services.ErrImageDeleted) {
+			logging.L.Warn("invalid image URL", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if errors.Is(err, services.ErrImagePermissionDenied) {
+			logging.L.Warn("image permission denied", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+			return
+		}
+		if errors.Is(err, services.ErrImageNotFound) {
+			logging.L.Warn("image not found", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
 		logging.L.Error("failed to create post", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)

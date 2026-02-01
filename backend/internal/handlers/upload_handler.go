@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -43,7 +44,7 @@ func (h *UploadHandler) UploadImages(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
 		h.logger.Warn("未認証のアップロードリクエスト")
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "認証が必要です"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
 
@@ -75,13 +76,13 @@ func (h *UploadHandler) UploadImages(c *gin.Context) {
 	// サービス層でアップロード処理
 	urls, err := h.uploadService.UploadImages(uid, files)
 	if err != nil {
-		// エラーメッセージに応じてステータスコードを変更
+		// エラー種別に応じてステータスコードを変更
 		statusCode := http.StatusInternalServerError
-		if err.Error() == "ファイルが指定されていません" {
+		if errors.Is(err, services.ErrNoFiles) {
 			statusCode = http.StatusBadRequest
-		} else if err.Error()[:8] == "ファイルサイズ" {
+		} else if errors.Is(err, services.ErrFileTooLarge) {
 			statusCode = http.StatusRequestEntityTooLarge
-		} else if err.Error()[:8] == "サポートさ" {
+		} else if errors.Is(err, services.ErrInvalidFileType) || errors.Is(err, services.ErrInvalidExtension) {
 			statusCode = http.StatusBadRequest
 		}
 

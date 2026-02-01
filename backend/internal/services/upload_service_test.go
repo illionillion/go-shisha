@@ -90,8 +90,9 @@ func TestUploadService_UploadImages(t *testing.T) {
 		assert.Len(t, urls, 2)
 		for _, url := range urls {
 			assert.True(t, strings.HasPrefix(url, "/images/"))
-			// ファイルが実際に存在することを確認
-			filePath := filepath.Join("public", url)
+			// ファイルが実際に存在することを確認（先頭の"/"を除去）
+			relativeURL := strings.TrimPrefix(url, "/")
+			filePath := filepath.Join("public", relativeURL)
 			_, err := os.Stat(filePath)
 			assert.NoError(t, err)
 		}
