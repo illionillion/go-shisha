@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"errors"
+
 	"go-shisha-backend/internal/models"
 	"time"
 )
@@ -15,3 +17,6 @@ type UploadRepository interface {
 	MarkAsUsed(filePath string) error
 	DeleteUnusedOlderThan(duration time.Duration) (int64, error)
 }
+
+// ErrUploadNotFound はアップロードが見つからないエラー
+var ErrUploadNotFound = errors.New("upload not found")

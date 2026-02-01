@@ -7,14 +7,12 @@ import (
 
 	"go-shisha-backend/internal/models"
 	"go-shisha-backend/internal/repositories"
-	"go-shisha-backend/internal/repositories/postgres"
 	"go-shisha-backend/pkg/logging"
 )
 
-// 画像URL検証用カスタムエラー
 var (
-	ErrInvalidImagePath      = errors.New("不正な画像URLパス")
-	ErrImageNotAllowed       = errors.New("許可されていない画像URL")
+	ErrInvalidImagePath      = errors.New("不正な画像パス形式です")
+	ErrImageNotAllowed       = errors.New("画像形式が許可されていません")
 	ErrImageNotFound         = errors.New("画像が存在しません")
 	ErrImagePermissionDenied = errors.New("画像を使用する権限がありません")
 	ErrImageDeleted          = errors.New("削除された画像は使用できません")
@@ -140,7 +138,7 @@ func (s *PostService) validateImageURL(userID int, imageURL string) error {
 	// 3. DBでアップロード記録を確認
 	upload, err := s.uploadRepo.GetByFilePath(imageURL)
 	if err != nil {
-		if errors.Is(err, postgres.ErrUploadNotFound) {
+		if errors.Is(err, repositories.ErrUploadNotFound) {
 			return fmt.Errorf("%w: %s", ErrImageNotFound, imageURL)
 		}
 		return fmt.Errorf("画像情報の取得に失敗しました: %w", err)

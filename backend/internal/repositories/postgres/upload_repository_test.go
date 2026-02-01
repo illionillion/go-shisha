@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories"
 
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/sqlite"
@@ -69,7 +70,7 @@ func TestUploadRepository_GetByFilePath(t *testing.T) {
 	notFound, err := repo.GetByFilePath("/images/notfound.jpg")
 	assert.Error(t, err)
 	assert.Nil(t, notFound)
-	assert.Equal(t, ErrUploadNotFound, err)
+	assert.Equal(t, repositories.ErrUploadNotFound, err)
 }
 
 func TestUploadRepository_MarkAsUsed(t *testing.T) {

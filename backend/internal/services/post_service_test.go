@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"go-shisha-backend/internal/models"
-	"go-shisha-backend/internal/repositories/postgres"
+	"go-shisha-backend/internal/repositories"
 )
 
 type mockPostRepo struct{}
@@ -295,7 +295,7 @@ type mockUploadRepoNotFound struct {
 }
 
 func (m *mockUploadRepoNotFound) GetByFilePath(filePath string) (*models.UploadDB, error) {
-	return nil, postgres.ErrUploadNotFound
+	return nil, repositories.ErrUploadNotFound
 }
 
 func TestCreatePost_ImageValidation_NotFound(t *testing.T) {

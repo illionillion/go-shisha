@@ -3,6 +3,7 @@ package postgres
 import (
 	"errors"
 	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories"
 	"time"
 
 	"gorm.io/gorm"
@@ -29,7 +30,7 @@ func (r *UploadRepository) GetByID(id int) (*models.UploadDB, error) {
 	err := r.db.Where("id = ?", id).First(&upload).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrUploadNotFound
+			return nil, repositories.ErrUploadNotFound
 		}
 		return nil, err
 	}
@@ -42,7 +43,7 @@ func (r *UploadRepository) GetByFilePath(filePath string) (*models.UploadDB, err
 	err := r.db.Where("file_path = ?", filePath).First(&upload).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrUploadNotFound
+			return nil, repositories.ErrUploadNotFound
 		}
 		return nil, err
 	}
@@ -73,7 +74,7 @@ func (r *UploadRepository) UpdateStatus(id int, status string) error {
 		return result.Error
 	}
 	if result.RowsAffected == 0 {
-		return ErrUploadNotFound
+		return repositories.ErrUploadNotFound
 	}
 	return nil
 }
@@ -94,6 +95,3 @@ func (r *UploadRepository) DeleteUnusedOlderThan(duration time.Duration) (int64,
 	result := r.db.Where("status = ? AND created_at < ?", "uploaded", threshold).Delete(&models.UploadDB{})
 	return result.RowsAffected, result.Error
 }
-
-// ErrUploadNotFound はアップロードが見つからないエラー
-var ErrUploadNotFound = errors.New("upload not found")
