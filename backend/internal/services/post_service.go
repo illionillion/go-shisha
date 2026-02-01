@@ -7,6 +7,7 @@ import (
 
 	"go-shisha-backend/internal/models"
 	"go-shisha-backend/internal/repositories"
+	"go-shisha-backend/internal/repositories/postgres"
 	"go-shisha-backend/pkg/logging"
 )
 
@@ -139,7 +140,7 @@ func (s *PostService) validateImageURL(userID int, imageURL string) error {
 	// 3. DBでアップロード記録を確認
 	upload, err := s.uploadRepo.GetByFilePath(imageURL)
 	if err != nil {
-		if errors.Is(err, repositories.ErrUploadNotFound) {
+		if errors.Is(err, postgres.ErrUploadNotFound) {
 			return fmt.Errorf("%w: %s", ErrImageNotFound, imageURL)
 		}
 		return fmt.Errorf("画像情報の取得に失敗しました: %w", err)

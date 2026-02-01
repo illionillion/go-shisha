@@ -1,4 +1,4 @@
-package repositories
+package postgres
 
 import (
 	"testing"
@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func setupTestDB(t *testing.T) *gorm.DB {
+func setupUploadTestDB(t *testing.T) *gorm.DB {
 	t.Helper()
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	assert.NoError(t, err)
@@ -24,7 +24,7 @@ func setupTestDB(t *testing.T) *gorm.DB {
 }
 
 func TestUploadRepository_Create(t *testing.T) {
-	db := setupTestDB(t)
+	db := setupUploadTestDB(t)
 	repo := NewUploadRepository(db)
 
 	upload := &models.UploadDB{
@@ -43,7 +43,7 @@ func TestUploadRepository_Create(t *testing.T) {
 }
 
 func TestUploadRepository_GetByFilePath(t *testing.T) {
-	db := setupTestDB(t)
+	db := setupUploadTestDB(t)
 	repo := NewUploadRepository(db)
 
 	// テストデータ作成
@@ -73,7 +73,7 @@ func TestUploadRepository_GetByFilePath(t *testing.T) {
 }
 
 func TestUploadRepository_MarkAsUsed(t *testing.T) {
-	db := setupTestDB(t)
+	db := setupUploadTestDB(t)
 	repo := NewUploadRepository(db)
 
 	// テストデータ作成
@@ -101,7 +101,7 @@ func TestUploadRepository_MarkAsUsed(t *testing.T) {
 }
 
 func TestUploadRepository_GetByUserID(t *testing.T) {
-	db := setupTestDB(t)
+	db := setupUploadTestDB(t)
 	repo := NewUploadRepository(db)
 
 	// 複数のテストデータ作成
