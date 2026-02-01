@@ -7,4 +7,4 @@
  * OpenAPI spec version: 1.0
  */
 
-export type GetUsersIdPosts404 = { [key: string]: unknown };
+export type PostPosts500 = { [key: string]: unknown };
