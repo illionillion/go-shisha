@@ -75,7 +75,9 @@ func TestUploadService_UploadImages(t *testing.T) {
 	}()
 
 	t.Run("正常系_複数画像アップロード", func(t *testing.T) {
-		mockRepo.ExpectedCalls = nil // リセット
+		// subtestごとにモックの状態を完全にリセット
+		mockRepo.ExpectedCalls = nil
+		mockRepo.Calls = nil
 		mockRepo.On("Create", mock.AnythingOfType("*models.UploadDB")).Return(nil).Times(2)
 
 		// テスト画像データを作成
@@ -145,7 +147,9 @@ func TestUploadService_UploadImages(t *testing.T) {
 	})
 
 	t.Run("異常系_DB保存失敗", func(t *testing.T) {
-		mockRepo.ExpectedCalls = nil // リセット
+		// subtestごとにモックの状態を完全にリセット
+		mockRepo.ExpectedCalls = nil
+		mockRepo.Calls = nil
 		mockRepo.On("Create", mock.AnythingOfType("*models.UploadDB")).Return(errors.New("DB error"))
 
 		files := createTestImageFiles(t, []testFile{

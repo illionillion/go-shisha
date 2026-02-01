@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories/postgres"
 )
 
 type mockPostRepo struct{}
@@ -240,5 +241,129 @@ func TestUnlikePost_Error(t *testing.T) {
 	_, err := postSvc.UnlikePost(1)
 	if err == nil {
 		t.Fatalf("expected error when DecrementLikes fails, got nil")
+	}
+}
+
+// 画像URL検証のテスト
+
+// mockUploadRepoInvalidPath は".."を含むパスでエラーを返すモック
+type mockUploadRepoInvalidPath struct {
+	mockUploadRepo
+}
+
+func (m *mockUploadRepoInvalidPath) GetByFilePath(filePath string) (*models.UploadDB, error) {
+	// パストラバーサルのケースでは呼ばれない（事前検証で弾かれる）
+	return m.mockUploadRepo.GetByFilePath(filePath)
+}
+
+func TestCreatePost_ImageValidation_InvalidPath(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepoInvalidPath{})
+	input := &models.CreatePostInput{
+		Slides: []models.SlideInput{{ImageURL: "/images/../etc/passwd", Text: "hack"}},
+	}
+	_, err := postSvc.CreatePost(1, input)
+	if err == nil {
+		t.Fatalf("expected error for path traversal, got nil")
+	}
+	if !errors.Is(err, ErrInvalidImagePath) {
+		t.Fatalf("expected ErrInvalidImagePath, got %v", err)
+	}
+}
+
+// mockUploadRepoNotAllowed は/images/以外のパスでテスト
+type mockUploadRepoNotAllowed struct {
+	mockUploadRepo
+}
+
+func TestCreatePost_ImageValidation_NotAllowed(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepoNotAllowed{})
+	input := &models.CreatePostInput{
+		Slides: []models.SlideInput{{ImageURL: "/uploads/test.jpg", Text: "wrong prefix"}},
+	}
+	_, err := postSvc.CreatePost(1, input)
+	if err == nil {
+		t.Fatalf("expected error for disallowed path prefix, got nil")
+	}
+	if !errors.Is(err, ErrImageNotAllowed) {
+		t.Fatalf("expected ErrImageNotAllowed, got %v", err)
+	}
+}
+
+// mockUploadRepoNotFound はDB未存在でエラーを返すモック
+type mockUploadRepoNotFound struct {
+	mockUploadRepo
+}
+
+func (m *mockUploadRepoNotFound) GetByFilePath(filePath string) (*models.UploadDB, error) {
+	return nil, postgres.ErrUploadNotFound
+}
+
+func TestCreatePost_ImageValidation_NotFound(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepoNotFound{})
+	input := &models.CreatePostInput{
+		Slides: []models.SlideInput{{ImageURL: "/images/notfound.jpg", Text: "missing"}},
+	}
+	_, err := postSvc.CreatePost(1, input)
+	if err == nil {
+		t.Fatalf("expected error for missing image, got nil")
+	}
+	if !errors.Is(err, ErrImageNotFound) {
+		t.Fatalf("expected ErrImageNotFound, got %v", err)
+	}
+}
+
+// mockUploadRepoWrongUser は他ユーザーの画像を返すモック
+type mockUploadRepoWrongUser struct {
+	mockUploadRepo
+}
+
+func (m *mockUploadRepoWrongUser) GetByFilePath(filePath string) (*models.UploadDB, error) {
+	return &models.UploadDB{
+		ID:       1,
+		UserID:   999, // 異なるユーザーID
+		FilePath: filePath,
+		Status:   "uploaded",
+	}, nil
+}
+
+func TestCreatePost_ImageValidation_PermissionDenied(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepoWrongUser{})
+	input := &models.CreatePostInput{
+		Slides: []models.SlideInput{{ImageURL: "/images/others.jpg", Text: "not mine"}},
+	}
+	_, err := postSvc.CreatePost(1, input) // userID=1だが画像はuserID=999のもの
+	if err == nil {
+		t.Fatalf("expected error for permission denied, got nil")
+	}
+	if !errors.Is(err, ErrImagePermissionDenied) {
+		t.Fatalf("expected ErrImagePermissionDenied, got %v", err)
+	}
+}
+
+// mockUploadRepoDeleted は削除済み画像を返すモック
+type mockUploadRepoDeleted struct {
+	mockUploadRepo
+}
+
+func (m *mockUploadRepoDeleted) GetByFilePath(filePath string) (*models.UploadDB, error) {
+	return &models.UploadDB{
+		ID:       1,
+		UserID:   1,
+		FilePath: filePath,
+		Status:   "deleted", // 削除済み
+	}, nil
+}
+
+func TestCreatePost_ImageValidation_Deleted(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepoDeleted{})
+	input := &models.CreatePostInput{
+		Slides: []models.SlideInput{{ImageURL: "/images/deleted.jpg", Text: "gone"}},
+	}
+	_, err := postSvc.CreatePost(1, input)
+	if err == nil {
+		t.Fatalf("expected error for deleted image, got nil")
+	}
+	if !errors.Is(err, ErrImageDeleted) {
+		t.Fatalf("expected ErrImageDeleted, got %v", err)
 	}
 }
