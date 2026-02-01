@@ -7,4 +7,8 @@
  * OpenAPI spec version: 1.0
  */
 
-export type GetUsersIdPosts404 = { [key: string]: unknown };
+export interface GoShishaBackendInternalModelsSlideInput {
+  flavor_id?: number;
+  image_url: string;
+  text?: string;
+}
