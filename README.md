@@ -60,6 +60,9 @@ cp .env.example .env
 cp frontend/.env.example frontend/.env
 echo "JWT_SECRET=$(openssl rand -base64 64 | tr -d '\n')" >> .env
 echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env
+# ※バックエンドの定義がなければコピー
+mkdir -p frontend/openapi
+cp backend/docs/swagger.yaml frontend/openapi/openapi.yml
 
 # 3. 依存関係をインストール
 pnpm install
