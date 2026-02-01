@@ -37,14 +37,14 @@ func TestUploadHandler_UploadImages_Unauthorized(t *testing.T) {
 	// リクエスト作成（user_idなし）
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/images", body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	
+
 	w := httptest.NewRecorder()
 	router := setupTestRouter()
 	router.POST("/api/v1/uploads/images", func(c *gin.Context) {
 		// user_idをセットしない
 		handler.UploadImages(c)
 	})
-	
+
 	router.ServeHTTP(w, req)
 
 	// アサーション
@@ -66,14 +66,14 @@ func TestUploadHandler_UploadImages_NoFiles(t *testing.T) {
 	// リクエスト作成
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/images", body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	
+
 	w := httptest.NewRecorder()
 	router := setupTestRouter()
 	router.POST("/api/v1/uploads/images", func(c *gin.Context) {
 		c.Set("user_id", 1)
 		handler.UploadImages(c)
 	})
-	
+
 	router.ServeHTTP(w, req)
 
 	// アサーション

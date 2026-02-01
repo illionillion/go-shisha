@@ -62,7 +62,7 @@ func (m *mockFlavorRepo) GetAll() ([]models.Flavor, error) {
 
 type mockUploadRepo struct{}
 
-func (m *mockUploadRepo) Create(upload *models.UploadDB) error { return nil }
+func (m *mockUploadRepo) Create(upload *models.UploadDB) error     { return nil }
 func (m *mockUploadRepo) GetByID(id int) (*models.UploadDB, error) { return nil, nil }
 func (m *mockUploadRepo) GetByFilePath(filePath string) (*models.UploadDB, error) {
 	return &models.UploadDB{
@@ -73,8 +73,8 @@ func (m *mockUploadRepo) GetByFilePath(filePath string) (*models.UploadDB, error
 	}, nil
 }
 func (m *mockUploadRepo) GetByUserID(userID int) ([]models.UploadDB, error) { return nil, nil }
-func (m *mockUploadRepo) UpdateStatus(id int, status string) error { return nil }
-func (m *mockUploadRepo) MarkAsUsed(filePath string) error { return nil }
+func (m *mockUploadRepo) UpdateStatus(id int, status string) error          { return nil }
+func (m *mockUploadRepo) MarkAsUsed(filePath string) error                  { return nil }
 func (m *mockUploadRepo) DeleteUnusedOlderThan(duration time.Duration) (int64, error) {
 	return 0, nil
 }

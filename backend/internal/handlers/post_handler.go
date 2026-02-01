@@ -140,8 +140,8 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 			return
 		}
 		// 画像関連エラーのハンドリング
-		if errors.Is(err, services.ErrInvalidImagePath) || errors.Is(err, services.ErrImageNotAllowed) || 
-		   errors.Is(err, services.ErrImageDeleted) {
+		if errors.Is(err, services.ErrInvalidImagePath) || errors.Is(err, services.ErrImageNotAllowed) ||
+			errors.Is(err, services.ErrImageDeleted) {
 			logging.L.Warn("invalid image URL", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

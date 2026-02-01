@@ -78,12 +78,12 @@ func (r *uploadRepositoryImpl) UpdateStatus(id int, status string) error {
 	updates := map[string]interface{}{
 		"status": status,
 	}
-	
+
 	// statusが"used"の場合、used_atも更新
 	if status == "used" {
 		updates["used_at"] = now
 	}
-	
+
 	result := r.db.Model(&models.UploadDB{}).Where("id = ?", id).Updates(updates)
 	if result.Error != nil {
 		return result.Error
