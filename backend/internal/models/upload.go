@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-// UploadDB represents an upload record in the database
+// UploadDB はアップロード記録のDBモデル
 type UploadDB struct {
 	ID           int       `gorm:"primaryKey;autoIncrement"`
 	UserID       int       `gorm:"not null;index"`
@@ -15,12 +15,12 @@ type UploadDB struct {
 	UsedAt       *time.Time
 }
 
-// TableName specifies the table name for UploadDB
+// TableName はUploadDBのテーブル名を返す
 func (UploadDB) TableName() string {
 	return "uploads"
 }
 
 // UploadImagesResponse 画像アップロードレスポンス
 type UploadImagesResponse struct {
-	URLs []string `json:"urls" example:"[\"/images/20260129_abc123.jpg\",\"/images/20260129_def456.png\"]"`
+	URLs []string `json:"urls"`
 }
