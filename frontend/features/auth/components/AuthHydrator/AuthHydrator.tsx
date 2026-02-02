@@ -41,8 +41,11 @@ export const AuthHydrator = () => {
       return;
     }
 
-    // 実行開始時は読み込み中フラグを true にしておく
-    setIsLoading(true);
+    // data も error もない = まだクエリ実行中
+    if (!data && !isError) {
+      setIsLoading(true);
+      return;
+    }
 
     if (data && isSuccessResponse(data) && data.data.user) {
       setUser(data.data.user);
@@ -50,24 +53,22 @@ export const AuthHydrator = () => {
       return;
     }
 
-    if (!isError) {
-      // クエリがまだ解決していない場合はそのまま
-      return;
-    }
+    // エラーが発生した場合の処理
+    if (isError) {
+      const apiError = error as ApiError | undefined;
+      if (!apiError) {
+        setIsLoading(false);
+        return;
+      }
 
-    const apiError = error as ApiError | undefined;
-    if (!apiError) {
+      // 401の場合のみ明示的にサインアウト扱いにする
+      // 500系エラーは一時的な障害の可能性があるためストアは維持
+      if (apiError.status === 401) {
+        clearUser();
+      }
+
       setIsLoading(false);
-      return;
     }
-
-    // 401の場合のみ明示的にサインアウト扱いにする
-    // 500系エラーは一時的な障害の可能性があるためストアは維持
-    if (apiError.status === 401) {
-      clearUser();
-    }
-
-    setIsLoading(false);
   }, [shouldSkip, data, error, isError, setUser, clearUser, setIsLoading]);
 
   return null;
