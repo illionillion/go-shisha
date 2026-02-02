@@ -42,7 +42,7 @@ const createWrapper = () => {
 describe("UserMenu", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useAuthStore.setState({ user: null });
+    useAuthStore.setState({ user: null, isLoading: false });
   });
 
   describe("未ログイン時", () => {
@@ -63,7 +63,7 @@ describe("UserMenu", () => {
 
   describe("ログイン済み時", () => {
     beforeEach(() => {
-      useAuthStore.setState({ user: mockUser });
+      useAuthStore.setState({ user: mockUser, isLoading: false });
     });
 
     it("アバターが表示される", () => {

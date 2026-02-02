@@ -22,7 +22,7 @@ const SKIP_AUTH_CHECK_PATHS = ["/login", "/register"];
  */
 export const AuthHydrator = () => {
   const pathname = usePathname();
-  const { setUser, clearUser } = useAuthStore();
+  const { setUser, clearUser, setIsLoading } = useAuthStore();
 
   // ログインページなどでは認証チェックをスキップ
   const shouldSkip = SKIP_AUTH_CHECK_PATHS.includes(pathname || "");
@@ -35,19 +35,29 @@ export const AuthHydrator = () => {
   });
 
   useEffect(() => {
-    if (shouldSkip) return;
+    if (shouldSkip) {
+      // 認証チェックをスキップするパスではハイドレーションは不要
+      setIsLoading(false);
+      return;
+    }
+
+    // 実行開始時は読み込み中フラグを true にしておく
+    setIsLoading(true);
 
     if (data && isSuccessResponse(data) && data.data.user) {
       setUser(data.data.user);
+      setIsLoading(false);
       return;
     }
 
     if (!isError) {
+      // クエリがまだ解決していない場合はそのまま
       return;
     }
 
     const apiError = error as ApiError | undefined;
     if (!apiError) {
+      setIsLoading(false);
       return;
     }
 
@@ -56,7 +66,9 @@ export const AuthHydrator = () => {
     if (apiError.status === 401) {
       clearUser();
     }
-  }, [shouldSkip, data, error, isError, setUser, clearUser]);
+
+    setIsLoading(false);
+  }, [shouldSkip, data, error, isError, setUser, clearUser, setIsLoading]);
 
   return null;
 };

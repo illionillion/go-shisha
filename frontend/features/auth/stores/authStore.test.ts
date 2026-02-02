@@ -13,7 +13,7 @@ describe("authStore", () => {
 
   beforeEach(() => {
     // 各テスト前にストアをリセット
-    useAuthStore.setState({ user: null });
+    useAuthStore.setState({ user: null, isLoading: false });
   });
 
   describe("初期状態", () => {
