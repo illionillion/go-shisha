@@ -45,7 +45,7 @@ type Story = StoryObj<typeof meta>;
 export const LoggedIn: Story = {
   decorators: [
     (Story) => {
-      useAuthStore.setState({ user: mockUser });
+      useAuthStore.setState({ user: mockUser, isLoading: false });
       return <Story />;
     },
   ],
@@ -57,7 +57,7 @@ export const LoggedIn: Story = {
 export const LoggedOut: Story = {
   decorators: [
     (Story) => {
-      useAuthStore.setState({ user: null });
+      useAuthStore.setState({ user: null, isLoading: false });
       return <Story />;
     },
   ],
