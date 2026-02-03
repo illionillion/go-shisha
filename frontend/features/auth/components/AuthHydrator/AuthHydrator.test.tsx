@@ -88,7 +88,11 @@ describe("AuthHydrator", () => {
 
     vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
       queryKey: ["auth", "me"],
-      queryFn: async () => ({ user: mockUser }),
+      queryFn: async () => ({
+        data: { user: mockUser },
+        status: 200,
+        headers: new Headers(),
+      }),
     } as unknown as ReturnType<typeof getGetAuthMeQueryOptions>);
 
     const { container } = renderWithClient(queryClient);
