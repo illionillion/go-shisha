@@ -12,13 +12,11 @@ vi.mock("@/api/auth", () => ({
 
 // usePathname のモックを動的に制御できるようにする
 const mockUsePathname = vi.fn(() => "/");
-vi.mock("next/navigation", async () => {
-  const actual = await vi.importActual("next/navigation");
-  return {
-    ...actual,
-    usePathname: () => mockUsePathname(),
-  };
-});
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(() => ({ push: vi.fn(), prefetch: vi.fn(), back: vi.fn() })),
+  usePathname: () => mockUsePathname(),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
+}));
 
 const mockUser = {
   id: 1,
