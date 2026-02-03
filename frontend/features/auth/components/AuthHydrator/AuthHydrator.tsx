@@ -48,7 +48,8 @@ export const AuthHydrator = () => {
 
     if (data && isSuccessResponse(data)) {
       // 成功レスポンスの場合、userの有無にかかわらずstoreに設定
-      setUser(data.data.user);
+      // data.user は optional なので undefined の場合は null に正規化
+      setUser(data.data.user ?? null);
       setIsLoading(false);
       return;
     }
