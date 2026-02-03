@@ -29,7 +29,6 @@ export const AuthHydrator = () => {
 
   const { data, error, isError } = useQuery({
     ...getGetAuthMeQueryOptions(),
-    retry: 3,
     staleTime: 5 * 60 * 1000, // 5分
     enabled: !shouldSkip, // スキップ対象のページでは実行しない
   });
@@ -47,7 +46,8 @@ export const AuthHydrator = () => {
       return;
     }
 
-    if (data && isSuccessResponse(data) && data.data.user) {
+    if (data && isSuccessResponse(data)) {
+      // 成功レスポンスの場合、userの有無にかかわらずstoreに設定
       setUser(data.data.user);
       setIsLoading(false);
       return;
