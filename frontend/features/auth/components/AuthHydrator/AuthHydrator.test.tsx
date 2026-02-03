@@ -32,7 +32,11 @@ const mockUser = {
 describe("AuthHydrator", () => {
   let queryClient: QueryClient;
 
-  // QueryClient 生成ヘルパー（テストコード重複削減）
+  /**
+   * テスト用 QueryClient 生成ヘルパー
+   * - retry: 0 でリトライを無効化し、テストの高速化と予測可能性を向上
+   * - staleTime は本番環境と同じ設定を使用
+   */
   const createTestQueryClient = () => {
     return new QueryClient({
       defaultOptions: {
@@ -140,7 +144,7 @@ describe("AuthHydrator", () => {
       });
     });
 
-    it("成功時（ユーザーなし: user: null）: isLoading が false になる", async () => {
+    it("成功時（user が null）: isLoading が false になる", async () => {
       queryClient = createTestQueryClient();
 
       vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
@@ -161,7 +165,7 @@ describe("AuthHydrator", () => {
       });
     });
 
-    it("成功時（ユーザーなし: user キー欠落）: isLoading が false になり user は null に正規化される", async () => {
+    it("成功時（user キー欠落）: isLoading が false になり user は null に正規化される", async () => {
       queryClient = createTestQueryClient();
 
       vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
