@@ -227,7 +227,7 @@ describe("AuthHydrator", () => {
         },
       });
 
-      // クエリは実行されないが、念のため設定
+      // enabled: false のためクエリは実行されないが、一貫性のため queryOptions を設定
       vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
         queryKey: ["auth", "me"],
         queryFn: async () => ({
