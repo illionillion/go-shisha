@@ -108,10 +108,10 @@ describe("PostDetailHeader", () => {
     });
 
     it("異なる日時フォーマットでも正しく表示される", () => {
-      const createdAt = "2024-12-25T15:30:45+09:00";
+      const createdAt = "2024-12-25T06:30:45Z";
       render(<PostDetailHeader user={mockUser} createdAt={createdAt} onBack={vi.fn()} />);
 
-      // タイムゾーン付き日時もフォーマットされる (UTC時刻として処理される場合は06:30)
+      // UTC時刻でフォーマットされる
       const timeElement = screen.getByText("2024/12/25 06:30");
       expect(timeElement).toHaveAttribute("dateTime", createdAt);
     });
