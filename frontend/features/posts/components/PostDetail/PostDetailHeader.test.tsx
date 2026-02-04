@@ -25,7 +25,8 @@ describe("PostDetailHeader", () => {
       const createdAt = "2024-01-01T12:00:00Z";
       render(<PostDetailHeader user={mockUser} createdAt={createdAt} onBack={vi.fn()} />);
 
-      const timeElement = screen.getByText(createdAt);
+      // フォーマット済みの日時が表示される
+      const timeElement = screen.getByText("2024/01/01 12:00");
       expect(timeElement).toBeInTheDocument();
       expect(timeElement.tagName).toBe("TIME");
       expect(timeElement).toHaveAttribute("dateTime", createdAt);
@@ -110,7 +111,8 @@ describe("PostDetailHeader", () => {
       const createdAt = "2024-12-25T15:30:45+09:00";
       render(<PostDetailHeader user={mockUser} createdAt={createdAt} onBack={vi.fn()} />);
 
-      const timeElement = screen.getByText(createdAt);
+      // タイムゾーン付き日時もフォーマットされる (UTC時刻として処理される場合は06:30)
+      const timeElement = screen.getByText("2024/12/25 06:30");
       expect(timeElement).toHaveAttribute("dateTime", createdAt);
     });
   });
@@ -237,7 +239,8 @@ describe("PostDetailHeader", () => {
       const createdAt = "2024-01-01T12:00:00Z";
       render(<PostDetailHeader user={mockUser} createdAt={createdAt} onBack={vi.fn()} />);
 
-      const timeContainer = screen.getByText(createdAt).parentElement;
+      // フォーマット済みの日時でテキストを検索
+      const timeContainer = screen.getByText("2024/01/01 12:00").parentElement;
       expect(timeContainer).toHaveClass("text-sm", "text-gray-500");
     });
   });
