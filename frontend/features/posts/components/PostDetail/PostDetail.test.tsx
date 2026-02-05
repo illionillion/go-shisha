@@ -45,6 +45,7 @@ const mockPost: Post = {
   ],
   likes: 5,
   is_liked: false,
+  created_at: "2024-01-15T12:34:56Z",
   user: {
     id: 2,
     display_name: "投稿者",
@@ -369,6 +370,53 @@ describe("PostDetail", () => {
     render(<PostDetail postId={2} />);
 
     expect(screen.getByText("匿名")).toBeInTheDocument();
+  });
+
+  test("created_at が yyyy/mm/dd hh:mm 形式でフォーマットされて表示される", () => {
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: {
+        data: {
+          id: 12,
+          likes: 0,
+          created_at: "2024-01-15T12:34:56Z",
+          user: { id: 1, display_name: "テストユーザー", email: "test@example.com" },
+        } as unknown as Post,
+        status: 200,
+        headers: new Headers(),
+      },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    render(<PostDetail postId={12} />);
+
+    expect(screen.getByText("2024/01/15 12:34")).toBeInTheDocument();
+  });
+
+  test("created_at が undefined の場合は空文字列が表示される", () => {
+    (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: {
+        data: {
+          id: 13,
+          likes: 0,
+          created_at: undefined,
+          user: { id: 1, display_name: "テストユーザー", email: "test@example.com" },
+        } as unknown as Post,
+        status: 200,
+        headers: new Headers(),
+      },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    render(<PostDetail postId={13} />);
+
+    // time要素は存在するが、テキストは空
+    const timeElement = document.querySelector("time");
+    expect(timeElement).toBeInTheDocument();
+    expect(timeElement?.textContent).toBe("");
   });
 
   test("戻るボタンで history.back が呼ばれる / location.href が設定されるパス", async () => {
