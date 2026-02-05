@@ -10,6 +10,14 @@ vi.mock("@/api/auth", () => ({
   getGetAuthMeQueryOptions: vi.fn(),
 }));
 
+// usePathname のモックを動的に制御できるようにする
+const mockUsePathname = vi.fn(() => "/");
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(() => ({ push: vi.fn(), prefetch: vi.fn(), back: vi.fn() })),
+  usePathname: () => mockUsePathname(),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
+}));
+
 const mockUser = {
   id: 1,
   display_name: "テストユーザー",
@@ -22,9 +30,28 @@ const mockUser = {
 describe("AuthHydrator", () => {
   let queryClient: QueryClient;
 
+  /**
+   * テスト用 QueryClient 生成ヘルパー
+   * - retry: 0 でリトライを無効化し、テストの高速化と予測可能性を向上
+   * - staleTime は本番環境と同じ設定を使用
+   */
+  const createTestQueryClient = () => {
+    return new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: 0,
+          staleTime: 5 * 60 * 1000,
+        },
+      },
+    });
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
-    useAuthStore.setState({ user: null });
+    // ストアを初期状態にリセット（isLoading: true, user: null）
+    useAuthStore.getState().reset();
+    // デフォルトのパスは "/" にリセット
+    mockUsePathname.mockReturnValue("/");
   });
 
   const renderWithClient = (client: QueryClient) => {
@@ -36,14 +63,7 @@ describe("AuthHydrator", () => {
   };
 
   it("API成功時にユーザー情報をストアに設定する", async () => {
-    queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          retry: 3,
-          staleTime: 5 * 60 * 1000,
-        },
-      },
-    });
+    queryClient = createTestQueryClient();
 
     // Orval 8.x形式: { data: { user }, status: 200, headers }
     vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
@@ -64,18 +84,15 @@ describe("AuthHydrator", () => {
   });
 
   it("コンポーネントは何もレンダリングしない（nullを返す）", async () => {
-    queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          retry: 3,
-          staleTime: 5 * 60 * 1000,
-        },
-      },
-    });
+    queryClient = createTestQueryClient();
 
     vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
       queryKey: ["auth", "me"],
-      queryFn: async () => ({ user: mockUser }),
+      queryFn: async () => ({
+        data: { user: mockUser },
+        status: 200,
+        headers: new Headers(),
+      }),
     } as unknown as ReturnType<typeof getGetAuthMeQueryOptions>);
 
     const { container } = renderWithClient(queryClient);
@@ -86,14 +103,7 @@ describe("AuthHydrator", () => {
     // 初期状態でユーザーをセット
     useAuthStore.setState({ user: mockUser });
 
-    queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          retry: 0, // リトライなし
-          staleTime: 5 * 60 * 1000,
-        },
-      },
-    });
+    queryClient = createTestQueryClient();
 
     vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
       queryKey: ["auth", "me"],
@@ -112,5 +122,144 @@ describe("AuthHydrator", () => {
     await new Promise((resolve) => setTimeout(resolve, 100));
     const state = useAuthStore.getState();
     expect(state.user).toEqual(mockUser);
+  });
+
+  describe("isLoading 状態遷移", () => {
+    it("成功時（ユーザーあり）: isLoading が false になる", async () => {
+      queryClient = createTestQueryClient();
+
+      vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
+        queryKey: ["auth", "me"],
+        queryFn: async () => ({
+          data: { user: mockUser },
+          status: 200,
+          headers: new Headers(),
+        }),
+      } as unknown as ReturnType<typeof getGetAuthMeQueryOptions>);
+
+      renderWithClient(queryClient);
+
+      await waitFor(() => {
+        const state = useAuthStore.getState();
+        expect(state.user).toEqual(mockUser);
+        expect(state.isLoading).toBe(false);
+      });
+    });
+
+    it("成功時（user が null）: isLoading が false になる", async () => {
+      queryClient = createTestQueryClient();
+
+      vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
+        queryKey: ["auth", "me"],
+        queryFn: async () => ({
+          data: { user: null },
+          status: 200,
+          headers: new Headers(),
+        }),
+      } as unknown as ReturnType<typeof getGetAuthMeQueryOptions>);
+
+      renderWithClient(queryClient);
+
+      await waitFor(() => {
+        const state = useAuthStore.getState();
+        expect(state.user).toBeNull();
+        expect(state.isLoading).toBe(false);
+      });
+    });
+
+    it("成功時（user キー欠落）: isLoading が false になり user は null に正規化される", async () => {
+      queryClient = createTestQueryClient();
+
+      vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
+        queryKey: ["auth", "me"],
+        queryFn: async () => ({
+          data: {}, // user キーが欠落している場合
+          status: 200,
+          headers: new Headers(),
+        }),
+      } as unknown as ReturnType<typeof getGetAuthMeQueryOptions>);
+
+      renderWithClient(queryClient);
+
+      await waitFor(() => {
+        const state = useAuthStore.getState();
+        expect(state.user).toBeNull(); // undefined ではなく null に正規化される
+        expect(state.isLoading).toBe(false);
+      });
+    });
+
+    it("401 エラー時: isLoading が false になる", async () => {
+      queryClient = createTestQueryClient();
+
+      vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
+        queryKey: ["auth", "me"],
+        queryFn: async () => {
+          const error = Object.assign(new Error("Unauthorized"), {
+            status: 401,
+            statusText: "Unauthorized",
+          });
+          throw error;
+        },
+      } as unknown as ReturnType<typeof getGetAuthMeQueryOptions>);
+
+      renderWithClient(queryClient);
+
+      await waitFor(() => {
+        const state = useAuthStore.getState();
+        expect(state.user).toBeNull();
+        expect(state.isLoading).toBe(false);
+      });
+    });
+
+    it("スキップパス（/login）時: isLoading が即座に false になる", async () => {
+      // /login パスに設定
+      mockUsePathname.mockReturnValue("/login");
+
+      queryClient = createTestQueryClient();
+
+      // enabled: false のためクエリは実行されないが、一貫性のため queryOptions を設定
+      vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
+        queryKey: ["auth", "me"],
+        queryFn: async () => ({
+          data: { user: mockUser },
+          status: 200,
+          headers: new Headers(),
+        }),
+      } as unknown as ReturnType<typeof getGetAuthMeQueryOptions>);
+
+      renderWithClient(queryClient);
+
+      // スキップパスでは即座に isLoading が false になる
+      await waitFor(() => {
+        const state = useAuthStore.getState();
+        expect(state.isLoading).toBe(false);
+      });
+
+      // クエリが実行されないため、user は null のまま
+      const state = useAuthStore.getState();
+      expect(state.user).toBeNull();
+    });
+
+    it("500 エラー時: isLoading が false になる", async () => {
+      queryClient = createTestQueryClient();
+
+      vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
+        queryKey: ["auth", "me"],
+        queryFn: async () => {
+          const error = Object.assign(new Error("Internal Server Error"), {
+            status: 500,
+            statusText: "Internal Server Error",
+          });
+          throw error;
+        },
+      } as unknown as ReturnType<typeof getGetAuthMeQueryOptions>);
+
+      renderWithClient(queryClient);
+
+      await waitFor(() => {
+        const state = useAuthStore.getState();
+        expect(state.isLoading).toBe(false);
+      });
+    });
   });
 });

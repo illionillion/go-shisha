@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/Avatar";
+import DefaultAvatar from "@/components/Avatar/DefaultAvatar";
 import { authApi } from "@/features/auth/api/authApi";
 import { useAuthStore } from "@/features/auth/stores/authStore";
 
@@ -14,7 +15,7 @@ import { useAuthStore } from "@/features/auth/stores/authStore";
  * - 未ログイン: ログインボタン表示
  */
 export const UserMenu = () => {
-  const { user, clearUser } = useAuthStore();
+  const { user, clearUser, isLoading } = useAuthStore();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -58,6 +59,15 @@ export const UserMenu = () => {
       document.removeEventListener("keydown", handleEscapeKey);
     };
   }, [isOpen]);
+
+  // 初回ハイドレーション中は非インタラクティブなプレースホルダ（DefaultAvatar）を表示
+  if (isLoading) {
+    return (
+      <div className="relative">
+        <DefaultAvatar size={40} />
+      </div>
+    );
+  }
 
   // 未ログイン状態
   if (!user) {

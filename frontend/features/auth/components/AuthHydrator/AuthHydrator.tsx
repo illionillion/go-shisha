@@ -22,41 +22,55 @@ const SKIP_AUTH_CHECK_PATHS = ["/login", "/register"];
  */
 export const AuthHydrator = () => {
   const pathname = usePathname();
-  const { setUser, clearUser } = useAuthStore();
+  const { setUser, clearUser, setIsLoading } = useAuthStore();
 
   // ログインページなどでは認証チェックをスキップ
   const shouldSkip = SKIP_AUTH_CHECK_PATHS.includes(pathname || "");
 
   const { data, error, isError } = useQuery({
     ...getGetAuthMeQueryOptions(),
-    retry: 3,
     staleTime: 5 * 60 * 1000, // 5分
     enabled: !shouldSkip, // スキップ対象のページでは実行しない
   });
 
   useEffect(() => {
-    if (shouldSkip) return;
-
-    if (data && isSuccessResponse(data) && data.data.user) {
-      setUser(data.data.user);
+    if (shouldSkip) {
+      // 認証チェックをスキップするパスではハイドレーションは不要
+      setIsLoading(false);
       return;
     }
 
-    if (!isError) {
+    // data も error もない = まだクエリ実行中
+    if (!data && !isError) {
+      setIsLoading(true);
       return;
     }
 
-    const apiError = error as ApiError | undefined;
-    if (!apiError) {
+    if (data && isSuccessResponse(data)) {
+      // 成功レスポンスの場合、userの有無にかかわらずstoreに設定
+      // data.data.user は optional なので undefined の場合は null に正規化
+      setUser(data.data.user ?? null);
+      setIsLoading(false);
       return;
     }
 
-    // 401の場合のみ明示的にサインアウト扱いにする
-    // 500系エラーは一時的な障害の可能性があるためストアは維持
-    if (apiError.status === 401) {
-      clearUser();
+    // エラーが発生した場合の処理
+    if (isError) {
+      const apiError = error as ApiError | undefined;
+      if (!apiError) {
+        setIsLoading(false);
+        return;
+      }
+
+      // 401の場合のみ明示的にサインアウト扱いにする
+      // 500系エラーは一時的な障害の可能性があるためストアは維持
+      if (apiError.status === 401) {
+        clearUser();
+      }
+
+      setIsLoading(false);
     }
-  }, [shouldSkip, data, error, isError, setUser, clearUser]);
+  }, [shouldSkip, data, error, isError, setUser, clearUser, setIsLoading]);
 
   return null;
 };

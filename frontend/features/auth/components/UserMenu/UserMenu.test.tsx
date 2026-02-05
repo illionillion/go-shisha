@@ -42,10 +42,37 @@ const createWrapper = () => {
 describe("UserMenu", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useAuthStore.setState({ user: null });
+    useAuthStore.getState().reset();
+  });
+
+  describe("ハイドレーション中（isLoading: true）", () => {
+    it("DefaultAvatarが表示される", () => {
+      // 初期状態は isLoading: true なのでそのまま
+      render(<UserMenu />, { wrapper: createWrapper() });
+
+      // DefaultAvatar が表示されている
+      const avatar = screen.getByRole("img", { hidden: true });
+      expect(avatar).toBeInTheDocument();
+    });
+
+    it("ログインボタンは表示されない", () => {
+      render(<UserMenu />, { wrapper: createWrapper() });
+
+      expect(screen.queryByRole("link", { name: /ログイン/i })).not.toBeInTheDocument();
+    });
+
+    it("ユーザーアバターボタンは表示されない", () => {
+      render(<UserMenu />, { wrapper: createWrapper() });
+
+      expect(screen.queryByRole("button", { name: /メニュー/i })).not.toBeInTheDocument();
+    });
   });
 
   describe("未ログイン時", () => {
+    beforeEach(() => {
+      useAuthStore.setState({ user: null, isLoading: false });
+    });
+
     it("ログインボタンが表示される", () => {
       render(<UserMenu />, { wrapper: createWrapper() });
 
@@ -63,7 +90,7 @@ describe("UserMenu", () => {
 
   describe("ログイン済み時", () => {
     beforeEach(() => {
-      useAuthStore.setState({ user: mockUser });
+      useAuthStore.setState({ user: mockUser, isLoading: false });
     });
 
     it("アバターが表示される", () => {
