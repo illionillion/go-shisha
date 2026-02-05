@@ -143,7 +143,7 @@ func main() {
   - テスト容易性（interfaceだけでモックが作れる）
   - 将来の拡張性（MongoDB版などを追加しやすい）
   - プロジェクト全体の統一性（PostRepository等と同じパターン）
-- **エラー定義**: Repository固有のエラー（例: `ErrUploadNotFound`）は実装層（`postgres`パッケージ）で定義する
+- **エラー定義**: Repository固有のエラー（例: `ErrUserNotFound`, `ErrUploadNotFound`）は interface 層（`internal/repositories`パッケージ）で定義し、実装層（`postgres` など）はそれらを返すだけにする。既存の UserRepository と同じ方針に統一する
 
 ## Swagger/OpenAPI生成（swaggo）ルール
 

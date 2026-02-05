@@ -24,7 +24,7 @@ type UploadHandler struct {
 }
 
 // NewUploadHandler UploadHandlerのコンストラクタ
-func NewUploadHandler(uploadService *services.UploadService, logger *slog.Logger) *UploadHandler {
+func NewUploadHandler(uploadService UploadServiceInterface, logger *slog.Logger) *UploadHandler {
 	return &UploadHandler{
 		uploadService: uploadService,
 		logger:        logger,
