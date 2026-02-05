@@ -70,6 +70,16 @@ func main() {
 	r.MaxMultipartMemory = 10 << 20 // 10MB
 	logging.L.Info("max multipart memory set", "in_memory_limit", "10MB")
 
+	// リクエストボディの最大サイズ制限（ディスク消費によるDoS対策）
+	// multipart以外のエンドポイントも含め、1リクエストあたり20MBをハードリミットとする
+	const maxRequestBodySize = 20 << 20 // 20MB
+	r.Use(func(c *gin.Context) {
+		// http.MaxBytesReaderでリクエストボディの読み込み上限を設定
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxRequestBodySize)
+		c.Next()
+	})
+	logging.L.Info("max request body size set", "hard_limit", "20MB")
+
 	// CORS設定
 	frontendURL := os.Getenv("FRONTEND_URL")
 	if frontendURL == "" {
