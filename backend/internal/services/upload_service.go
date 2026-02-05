@@ -21,6 +21,7 @@ import (
 // カスタムエラー型
 var (
 	ErrNoFiles          = errors.New("ファイルが指定されていません")
+	ErrTooManyFiles     = errors.New("一度に10枚までアップロード可能です")
 	ErrFileTooLarge     = errors.New("ファイルサイズが10MBを超えています")
 	ErrInvalidFileType  = errors.New("サポートされていないファイル形式です")
 	ErrInvalidExtension = errors.New("サポートされていない拡張子です")
@@ -49,14 +50,22 @@ var allowedMimeTypes = map[string]bool{
 	"image/gif":  true,
 }
 
-// 最大ファイルサイズ（10MB）
-const maxFileSize = 10 * 1024 * 1024
+// 定数定義
+const (
+	maxFileSize = 10 * 1024 * 1024 // 最大ファイルサイズ（10MB）
+	maxFiles    = 10               // 最大ファイル数（スライド上限と一致）
+)
 
 // UploadImages 複数の画像をアップロードする
 func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) ([]string, error) {
 	if len(files) == 0 {
 		s.logger.Warn("アップロードファイルが0件")
 		return nil, ErrNoFiles
+	}
+
+	if len(files) > maxFiles {
+		s.logger.Warn("ファイル数超過", "count", len(files), "max", maxFiles)
+		return nil, ErrTooManyFiles
 	}
 
 	// 保存先ディレクトリの確保

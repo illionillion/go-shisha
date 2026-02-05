@@ -58,7 +58,7 @@ type SlideInput struct {
 
 // CreatePostInput represents the input for creating a post
 type CreatePostInput struct {
-	Slides []SlideInput `json:"slides" binding:"required,min=1,dive"`
+	Slides []SlideInput `json:"slides" binding:"required,min=1,max=10,dive"`
 }
 
 // PostsResponse represents the response for post list

@@ -3,6 +3,7 @@ package services
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log/slog"
 	"mime/multipart"
 	"os"
@@ -66,8 +67,6 @@ func (m *MockUploadRepository) DeleteUnusedOlderThan(duration time.Duration) (in
 func TestUploadService_UploadImages(t *testing.T) {
 	// テスト用ロガー
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
-	mockRepo := new(MockUploadRepository)
-	service := NewUploadService(mockRepo, logger)
 
 	// テスト後のクリーンアップ
 	defer func() {
@@ -75,9 +74,9 @@ func TestUploadService_UploadImages(t *testing.T) {
 	}()
 
 	t.Run("正常系_複数画像アップロード", func(t *testing.T) {
-		// subtestごとにモックの状態を完全にリセット
-		mockRepo.ExpectedCalls = nil
-		mockRepo.Calls = nil
+		// subtestごとに新しいモックを作成
+		mockRepo := new(MockUploadRepository)
+		service := NewUploadService(mockRepo, logger)
 		mockRepo.On("Create", mock.AnythingOfType("*models.UploadDB")).Return(nil).Times(2)
 
 		// テスト画像データを作成
@@ -102,14 +101,40 @@ func TestUploadService_UploadImages(t *testing.T) {
 	})
 
 	t.Run("異常系_ファイルが0件", func(t *testing.T) {
+		mockRepo := new(MockUploadRepository)
+		service := NewUploadService(mockRepo, logger)
+
 		urls, err := service.UploadImages(1, []*multipart.FileHeader{})
 
 		assert.Error(t, err)
 		assert.Nil(t, urls)
 		assert.Contains(t, err.Error(), "ファイルが指定されていません")
 	})
+	t.Run("異常系_ファイル数超過", func(t *testing.T) {
+		mockRepo := new(MockUploadRepository)
+		service := NewUploadService(mockRepo, logger)
 
+		// 11枚のファイルを作成（上限10枚超過）
+		testFiles := make([]testFile, 11)
+		for i := 0; i < 11; i++ {
+			testFiles[i] = testFile{
+				filename:    fmt.Sprintf("test%d.jpg", i+1),
+				contentType: "image/jpeg",
+				size:        1024,
+			}
+		}
+		files := createTestImageFiles(t, testFiles)
+
+		urls, err := service.UploadImages(1, files)
+
+		assert.Error(t, err)
+		assert.Nil(t, urls)
+		assert.Contains(t, err.Error(), "一度に10枚までアップロード可能です")
+	})
 	t.Run("異常系_ファイルサイズ超過", func(t *testing.T) {
+		mockRepo := new(MockUploadRepository)
+		service := NewUploadService(mockRepo, logger)
+
 		// 10MBを超えるファイルを作成
 		files := createTestImageFiles(t, []testFile{
 			{filename: "large.jpg", contentType: "image/jpeg", size: 11 * 1024 * 1024},
@@ -123,6 +148,9 @@ func TestUploadService_UploadImages(t *testing.T) {
 	})
 
 	t.Run("異常系_不正なファイル形式", func(t *testing.T) {
+		mockRepo := new(MockUploadRepository)
+		service := NewUploadService(mockRepo, logger)
+
 		files := createTestImageFiles(t, []testFile{
 			{filename: "test.txt", contentType: "text/plain", size: 1024},
 		})
@@ -135,6 +163,9 @@ func TestUploadService_UploadImages(t *testing.T) {
 	})
 
 	t.Run("異常系_サポートされていないMIMEタイプ", func(t *testing.T) {
+		mockRepo := new(MockUploadRepository)
+		service := NewUploadService(mockRepo, logger)
+
 		files := createTestImageFiles(t, []testFile{
 			{filename: "test.exe", contentType: "application/x-msdownload", size: 1024},
 		})
@@ -147,9 +178,9 @@ func TestUploadService_UploadImages(t *testing.T) {
 	})
 
 	t.Run("異常系_DB保存失敗", func(t *testing.T) {
-		// subtestごとにモックの状態を完全にリセット
-		mockRepo.ExpectedCalls = nil
-		mockRepo.Calls = nil
+		// subtestごとに新しいモックを作成
+		mockRepo := new(MockUploadRepository)
+		service := NewUploadService(mockRepo, logger)
 		mockRepo.On("Create", mock.AnythingOfType("*models.UploadDB")).Return(errors.New("DB error"))
 
 		files := createTestImageFiles(t, []testFile{
