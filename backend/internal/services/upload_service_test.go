@@ -208,6 +208,10 @@ func createTestImageFiles(t *testing.T, testFiles []testFile) []*multipart.FileH
 		reader := multipart.NewReader(body, writer.Boundary())
 		form, err := reader.ReadForm(tf.size + 1024)
 		assert.NoError(t, err)
+		// テスト終了時に一時ファイルをクリーンアップ
+		t.Cleanup(func() {
+			_ = form.RemoveAll()
+		})
 
 		formFiles := form.File["images"]
 		assert.Len(t, formFiles, 1)

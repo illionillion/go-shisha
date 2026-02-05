@@ -2,9 +2,9 @@ package repositories
 
 import (
 	"errors"
+	"time"
 
 	"go-shisha-backend/internal/models"
-	"time"
 )
 
 // UploadRepository はアップロードデータ操作のインターフェース

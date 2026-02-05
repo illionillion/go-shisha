@@ -2,9 +2,10 @@ package postgres
 
 import (
 	"errors"
+	"time"
+
 	"go-shisha-backend/internal/models"
 	"go-shisha-backend/internal/repositories"
-	"time"
 
 	"gorm.io/gorm"
 )

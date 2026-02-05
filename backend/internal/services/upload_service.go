@@ -191,7 +191,7 @@ func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) 
 	return urls, nil
 }
 
-// rollbackFiles 保存に失敗した場合、既に保存したファイルとDB記録を削除する
+// rollbackFiles 保存に失敗した場合、既に保存したファイルを削除し、DB記録のstatusを'deleted'に更新する
 func (s *UploadService) rollbackFiles(uploadRecords []models.UploadDB) {
 	for _, record := range uploadRecords {
 		// ファイル削除（先頭の"/"を除去してから結合）
