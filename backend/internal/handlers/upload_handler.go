@@ -84,7 +84,7 @@ func (h *UploadHandler) UploadImages(c *gin.Context) {
 	if err != nil {
 		// エラー種別に応じてステータスコードを変更
 		statusCode := http.StatusInternalServerError
-		if errors.Is(err, services.ErrNoFiles) {
+		if errors.Is(err, services.ErrNoFiles) || errors.Is(err, services.ErrTooManyFiles) {
 			statusCode = http.StatusBadRequest
 		} else if errors.Is(err, services.ErrFileTooLarge) {
 			statusCode = http.StatusRequestEntityTooLarge

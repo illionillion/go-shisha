@@ -665,6 +665,7 @@ const docTemplate = `{
             "properties": {
                 "slides": {
                     "type": "array",
+                    "maxItems": 10,
                     "minItems": 1,
                     "items": {
                         "$ref": "#/definitions/go-shisha-backend_internal_models.SlideInput"

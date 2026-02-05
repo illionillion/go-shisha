@@ -10,6 +10,7 @@ definitions:
       slides:
         items:
           $ref: '#/definitions/go-shisha-backend_internal_models.SlideInput'
+        maxItems: 10
         minItems: 1
         type: array
     required:
