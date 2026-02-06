@@ -111,13 +111,16 @@ func (s *PostService) CreatePost(userID int, input *models.CreatePostInput) (*mo
 	}
 
 	// 使用した画像のステータスを"used"に更新
+	// 設計方針: 投稿作成が優先。ステータス更新失敗してもログのみで処理継続
+	// （画像の使い回しは許可、クリーンアップは別途バッチ処理で対応）
 	for _, slide := range slides {
 		if err := s.uploadRepo.MarkAsUsed(slide.ImageURL); err != nil {
-			// ステータス更新失敗はデータ不整合につながるためエラーを返す
-			logging.L.Error("画像ステータス更新失敗",
+			logging.L.Warn("画像ステータス更新失敗（投稿作成は成功）",
+				"post_id", post.ID,
 				"image_url", slide.ImageURL,
 				"error", err)
-			return nil, fmt.Errorf("画像ステータス更新に失敗しました: %w", err)
+			// 投稿作成は成功として扱うため、処理を継続
+			continue
 		}
 	}
 
