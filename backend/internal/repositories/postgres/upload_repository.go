@@ -80,14 +80,9 @@ func (r *UploadRepository) UpdateStatus(id int, status string) error {
 	return nil
 }
 
-// MarkAsUsed はアップロードを使用済みにマークする（便利メソッド）
+// MarkAsUsed はアップロードを使用済みにマークする
+// N+1問題を回避するため、file_pathから直接1回のクエリで更新
 func (r *UploadRepository) MarkAsUsed(filePath string) error {
-	return r.MarkAsUsedByPath(filePath)
-}
-
-// MarkAsUsedByPath は file_path を条件に直接アップロードを使用済みにマークする
-// N+1問題を回避するため、GetByFilePath + UpdateStatus の2回のクエリではなく1回で更新
-func (r *UploadRepository) MarkAsUsedByPath(filePath string) error {
 	now := time.Now()
 
 	result := r.db.Model(&models.UploadDB{}).
