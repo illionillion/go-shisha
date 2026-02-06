@@ -41,10 +41,9 @@ func NewUploadService(uploadRepo repositories.UploadRepository, logger *slog.Log
 	}
 }
 
-// 許可する画像形式のMIMEタイプ
+// 許可する画像形式のMIMEタイプ（http.DetectContentTypeで検出される標準タイプのみ）
 var allowedMimeTypes = map[string]bool{
 	"image/jpeg": true,
-	"image/jpg":  true,
 	"image/png":  true,
 	"image/webp": true,
 	"image/gif":  true,
