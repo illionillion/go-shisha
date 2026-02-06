@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories"
 )
 
 type mockPostRepo struct{}
@@ -60,9 +61,28 @@ func (m *mockFlavorRepo) GetAll() ([]models.Flavor, error) {
 	}, nil
 }
 
+type mockUploadRepo struct{}
+
+func (m *mockUploadRepo) Create(upload *models.UploadDB) error     { return nil }
+func (m *mockUploadRepo) GetByID(id int) (*models.UploadDB, error) { return nil, nil }
+func (m *mockUploadRepo) GetByFilePath(filePath string) (*models.UploadDB, error) {
+	return &models.UploadDB{
+		ID:       1,
+		UserID:   1,
+		FilePath: filePath,
+		Status:   "uploaded",
+	}, nil
+}
+func (m *mockUploadRepo) GetByUserID(userID int) ([]models.UploadDB, error) { return nil, nil }
+func (m *mockUploadRepo) UpdateStatus(id int, status string) error          { return nil }
+func (m *mockUploadRepo) MarkAsUsed(filePath string) error                  { return nil }
+func (m *mockUploadRepo) DeleteUnusedOlderThan(duration time.Duration) (int64, error) {
+	return 0, nil
+}
+
 func TestCreatePost(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
-	input := &models.CreatePostInput{Slides: []models.SlideInput{{ImageURL: "i.jpg", Text: "hello"}}}
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	input := &models.CreatePostInput{Slides: []models.SlideInput{{ImageURL: "/images/test.jpg", Text: "hello"}}}
 	p, err := postSvc.CreatePost(1, input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -76,12 +96,12 @@ func TestCreatePost(t *testing.T) {
 }
 
 func TestCreatePost_WithFlavor(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
 	flavorID := 1
 	input := &models.CreatePostInput{
 		Slides: []models.SlideInput{
 			{
-				ImageURL: "i.jpg",
+				ImageURL: "/images/test.jpg",
 				Text:     "ミント味最高！",
 				FlavorID: &flavorID,
 			},
@@ -106,12 +126,12 @@ func TestCreatePost_WithFlavor(t *testing.T) {
 }
 
 func TestCreatePost_WithInvalidFlavorID(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
 	invalidFlavorID := 999
 	input := &models.CreatePostInput{
 		Slides: []models.SlideInput{
 			{
-				ImageURL: "i.jpg",
+				ImageURL: "/images/test.jpg",
 				Text:     "無効なFlavor ID",
 				FlavorID: &invalidFlavorID,
 			},
@@ -125,8 +145,8 @@ func TestCreatePost_WithInvalidFlavorID(t *testing.T) {
 		t.Fatalf("expected 1 slide, got %d", len(p.Slides))
 	}
 	// ImageURLとTextが正しく設定されていることを確認
-	if p.Slides[0].ImageURL != "i.jpg" {
-		t.Fatalf("expected ImageURL 'i.jpg', got '%s'", p.Slides[0].ImageURL)
+	if p.Slides[0].ImageURL != "/images/test.jpg" {
+		t.Fatalf("expected ImageURL '/images/test.jpg', got '%s'", p.Slides[0].ImageURL)
 	}
 	if p.Slides[0].Text != "無効なFlavor ID" {
 		t.Fatalf("expected Text '無効なFlavor ID', got '%s'", p.Slides[0].Text)
@@ -138,7 +158,7 @@ func TestCreatePost_WithInvalidFlavorID(t *testing.T) {
 }
 
 func TestLikeUnlikePost(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
 	liked, err := postSvc.LikePost(2)
 	if err != nil {
 		t.Fatalf("unexpected error like: %v", err)
@@ -157,7 +177,7 @@ func TestLikeUnlikePost(t *testing.T) {
 }
 
 func TestGetAllPosts(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
 	posts, err := postSvc.GetAllPosts()
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -191,8 +211,8 @@ func (m *mockUserRepoMissing) GetByID(id int) (*models.User, error) {
 }
 
 func TestCreatePost_UserMissing(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoMissing{}, &mockFlavorRepo{})
-	input := &models.CreatePostInput{Slides: []models.SlideInput{{ImageURL: "i.jpg", Text: "hello"}}}
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoMissing{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	input := &models.CreatePostInput{Slides: []models.SlideInput{{ImageURL: "/images/test.jpg", Text: "hello"}}}
 	_, err := postSvc.CreatePost(999, input)
 	if err == nil {
 		t.Fatalf("expected error when user is missing, got nil")
@@ -200,8 +220,8 @@ func TestCreatePost_UserMissing(t *testing.T) {
 }
 
 func TestCreatePost_PostCreateError(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
-	input := &models.CreatePostInput{Slides: []models.SlideInput{{ImageURL: "i.jpg", Text: "hello"}}}
+	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	input := &models.CreatePostInput{Slides: []models.SlideInput{{ImageURL: "/images/test.jpg", Text: "hello"}}}
 	_, err := postSvc.CreatePost(1, input)
 	if err == nil {
 		t.Fatalf("expected error when post create fails, got nil")
@@ -209,7 +229,7 @@ func TestCreatePost_PostCreateError(t *testing.T) {
 }
 
 func TestLikePost_Error(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
+	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
 	_, err := postSvc.LikePost(1)
 	if err == nil {
 		t.Fatalf("expected error when IncrementLikes fails, got nil")
@@ -217,9 +237,133 @@ func TestLikePost_Error(t *testing.T) {
 }
 
 func TestUnlikePost_Error(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{}, &mockFlavorRepo{})
+	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
 	_, err := postSvc.UnlikePost(1)
 	if err == nil {
 		t.Fatalf("expected error when DecrementLikes fails, got nil")
+	}
+}
+
+// 画像URL検証のテスト
+
+// mockUploadRepoInvalidPath は".."を含むパスでエラーを返すモック
+type mockUploadRepoInvalidPath struct {
+	mockUploadRepo
+}
+
+func (m *mockUploadRepoInvalidPath) GetByFilePath(filePath string) (*models.UploadDB, error) {
+	// パストラバーサルのケースでは呼ばれない（事前検証で弾かれる）
+	return m.mockUploadRepo.GetByFilePath(filePath)
+}
+
+func TestCreatePost_ImageValidation_InvalidPath(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepoInvalidPath{})
+	input := &models.CreatePostInput{
+		Slides: []models.SlideInput{{ImageURL: "/images/../etc/passwd", Text: "hack"}},
+	}
+	_, err := postSvc.CreatePost(1, input)
+	if err == nil {
+		t.Fatalf("expected error for path traversal, got nil")
+	}
+	if !errors.Is(err, ErrInvalidImagePath) {
+		t.Fatalf("expected ErrInvalidImagePath, got %v", err)
+	}
+}
+
+// mockUploadRepoNotAllowed は/images/以外のパスでテスト
+type mockUploadRepoNotAllowed struct {
+	mockUploadRepo
+}
+
+func TestCreatePost_ImageValidation_NotAllowed(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepoNotAllowed{})
+	input := &models.CreatePostInput{
+		Slides: []models.SlideInput{{ImageURL: "/uploads/test.jpg", Text: "wrong prefix"}},
+	}
+	_, err := postSvc.CreatePost(1, input)
+	if err == nil {
+		t.Fatalf("expected error for disallowed path prefix, got nil")
+	}
+	if !errors.Is(err, ErrImageNotAllowed) {
+		t.Fatalf("expected ErrImageNotAllowed, got %v", err)
+	}
+}
+
+// mockUploadRepoNotFound はDB未存在でエラーを返すモック
+type mockUploadRepoNotFound struct {
+	mockUploadRepo
+}
+
+func (m *mockUploadRepoNotFound) GetByFilePath(filePath string) (*models.UploadDB, error) {
+	return nil, repositories.ErrUploadNotFound
+}
+
+func TestCreatePost_ImageValidation_NotFound(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepoNotFound{})
+	input := &models.CreatePostInput{
+		Slides: []models.SlideInput{{ImageURL: "/images/notfound.jpg", Text: "missing"}},
+	}
+	_, err := postSvc.CreatePost(1, input)
+	if err == nil {
+		t.Fatalf("expected error for missing image, got nil")
+	}
+	if !errors.Is(err, ErrImageNotFound) {
+		t.Fatalf("expected ErrImageNotFound, got %v", err)
+	}
+}
+
+// mockUploadRepoWrongUser は他ユーザーの画像を返すモック
+type mockUploadRepoWrongUser struct {
+	mockUploadRepo
+}
+
+func (m *mockUploadRepoWrongUser) GetByFilePath(filePath string) (*models.UploadDB, error) {
+	return &models.UploadDB{
+		ID:       1,
+		UserID:   999, // 異なるユーザーID
+		FilePath: filePath,
+		Status:   "uploaded",
+	}, nil
+}
+
+func TestCreatePost_ImageValidation_PermissionDenied(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepoWrongUser{})
+	input := &models.CreatePostInput{
+		Slides: []models.SlideInput{{ImageURL: "/images/others.jpg", Text: "not mine"}},
+	}
+	_, err := postSvc.CreatePost(1, input) // userID=1だが画像はuserID=999のもの
+	if err == nil {
+		t.Fatalf("expected error for permission denied, got nil")
+	}
+	if !errors.Is(err, ErrImagePermissionDenied) {
+		t.Fatalf("expected ErrImagePermissionDenied, got %v", err)
+	}
+}
+
+// mockUploadRepoDeleted は削除済み画像を返すモック
+type mockUploadRepoDeleted struct {
+	mockUploadRepo
+}
+
+func (m *mockUploadRepoDeleted) GetByFilePath(filePath string) (*models.UploadDB, error) {
+	return &models.UploadDB{
+		ID:       1,
+		UserID:   1,
+		FilePath: filePath,
+		Status:   "deleted", // 削除済み
+	}, nil
+}
+
+func TestCreatePost_ImageValidation_Deleted(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepoDeleted{})
+	input := &models.CreatePostInput{
+		Slides: []models.SlideInput{{ImageURL: "/images/deleted.jpg", Text: "gone"}},
+	}
+	_, err := postSvc.CreatePost(1, input)
+	if err == nil {
+		t.Fatalf("expected error for deleted image, got nil")
+	}
+	if !errors.Is(err, ErrImageDeleted) {
+		t.Fatalf("expected ErrImageDeleted, got %v", err)
 	}
 }

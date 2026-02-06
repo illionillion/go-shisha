@@ -460,6 +460,71 @@ const docTemplate = `{
                 }
             }
         },
+        "/uploads/images": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "複数の画像を一括アップロードし、保存されたURLの配列を返却します",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "uploads"
+                ],
+                "summary": "画像アップロード",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "アップロードする画像（複数可）",
+                        "name": "images",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UploadImagesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "バリデーションエラー",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "認証エラー",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "413": {
+                        "description": "ファイルサイズ超過",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "全てのユーザーの一覧を取得します（総数付き）",
@@ -600,6 +665,7 @@ const docTemplate = `{
             "properties": {
                 "slides": {
                     "type": "array",
+                    "maxItems": 10,
                     "minItems": 1,
                     "items": {
                         "$ref": "#/definitions/go-shisha-backend_internal_models.SlideInput"
@@ -737,6 +803,17 @@ const docTemplate = `{
                 },
                 "text": {
                     "type": "string"
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.UploadImagesResponse": {
+            "type": "object",
+            "properties": {
+                "urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
