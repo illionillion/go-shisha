@@ -2,6 +2,7 @@
 
 import { Avatar } from "@/components/Avatar/Avatar";
 import { PrevIcon } from "@/components/icons/";
+import { formatDate } from "@/lib/formatDate";
 import type { User } from "@/types/domain";
 
 interface Props {
@@ -36,7 +37,7 @@ export function PostDetailHeader({ user, createdAt, onBack }: Props) {
         <div>
           <div className="font-medium">{user?.display_name || "匿名"}</div>
           <div className="text-sm text-gray-500">
-            <time dateTime={createdAt ?? undefined}>{createdAt ?? ""}</time>
+            <time dateTime={createdAt ?? undefined}>{formatDate(createdAt)}</time>
           </div>
         </div>
       </div>
