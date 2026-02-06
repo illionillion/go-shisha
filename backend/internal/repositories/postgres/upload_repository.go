@@ -82,11 +82,27 @@ func (r *UploadRepository) UpdateStatus(id int, status string) error {
 
 // MarkAsUsed はアップロードを使用済みにマークする（便利メソッド）
 func (r *UploadRepository) MarkAsUsed(filePath string) error {
-	upload, err := r.GetByFilePath(filePath)
-	if err != nil {
-		return err
+	return r.MarkAsUsedByPath(filePath)
+}
+
+// MarkAsUsedByPath は file_path を条件に直接アップロードを使用済みにマークする
+// N+1問題を回避するため、GetByFilePath + UpdateStatus の2回のクエリではなく1回で更新
+func (r *UploadRepository) MarkAsUsedByPath(filePath string) error {
+	now := time.Now()
+
+	result := r.db.Model(&models.UploadDB{}).
+		Where("file_path = ?", filePath).
+		Updates(map[string]interface{}{
+			"status":  "used",
+			"used_at": now,
+		})
+	if result.Error != nil {
+		return result.Error
 	}
-	return r.UpdateStatus(upload.ID, "used")
+	if result.RowsAffected == 0 {
+		return repositories.ErrUploadNotFound
+	}
+	return nil
 }
 
 // DeleteUnusedOlderThan は指定期間より古い未使用アップロードを削除する
