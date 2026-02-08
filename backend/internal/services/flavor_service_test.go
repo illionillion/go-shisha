@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"go-shisha-backend/internal/models"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type mockFlavorRepoForService struct{}
@@ -38,21 +40,15 @@ func (m *mockFlavorRepoErrorForService) GetAll() ([]models.Flavor, error) {
 func TestGetAllFlavors(t *testing.T) {
 	svc := NewFlavorService(&mockFlavorRepoForService{})
 	flavors, err := svc.GetAllFlavors()
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if len(flavors) != 3 {
-		t.Fatalf("expected 3 flavors, got %d", len(flavors))
-	}
-	if flavors[0].Name != "ミント" {
-		t.Fatalf("expected first flavor to be 'ミント', got %s", flavors[0].Name)
-	}
+
+	assert.NoError(t, err)
+	assert.Len(t, flavors, 3)
+	assert.Equal(t, "ミント", flavors[0].Name)
 }
 
 func TestGetAllFlavors_Error(t *testing.T) {
 	svc := NewFlavorService(&mockFlavorRepoErrorForService{})
 	_, err := svc.GetAllFlavors()
-	if err == nil {
-		t.Fatalf("expected error from GetAllFlavors, got nil")
-	}
+
+	assert.Error(t, err)
 }

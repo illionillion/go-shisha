@@ -11,6 +11,7 @@ import (
 	"go-shisha-backend/internal/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 func init() {
@@ -60,22 +61,13 @@ func TestFlavorHandler_GetAllFlavors_Success(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Assert
-	if w.Code != http.StatusOK {
-		t.Fatalf("expected status 200, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusOK, w.Code)
 
 	var flavors []models.Flavor
-	if err := json.Unmarshal(w.Body.Bytes(), &flavors); err != nil {
-		t.Fatalf("failed to unmarshal response: %v", err)
-	}
-
-	if len(flavors) != 3 {
-		t.Fatalf("expected 3 flavors, got %d", len(flavors))
-	}
-
-	if flavors[0].Name != "ミント" {
-		t.Fatalf("expected first flavor to be 'ミント', got %s", flavors[0].Name)
-	}
+	err := json.Unmarshal(w.Body.Bytes(), &flavors)
+	assert.NoError(t, err)
+	assert.Len(t, flavors, 3)
+	assert.Equal(t, "ミント", flavors[0].Name)
 }
 
 func TestFlavorHandler_GetAllFlavors_DBError(t *testing.T) {
@@ -92,16 +84,10 @@ func TestFlavorHandler_GetAllFlavors_DBError(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Assert
-	if w.Code != http.StatusInternalServerError {
-		t.Fatalf("expected status 500, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 	var response map[string]interface{}
-	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
-		t.Fatalf("failed to unmarshal response: %v", err)
-	}
-
-	if response["error"] != "Failed to fetch flavors" {
-		t.Fatalf("expected error message 'Failed to fetch flavors', got %v", response["error"])
-	}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "Failed to fetch flavors", response["error"])
 }
