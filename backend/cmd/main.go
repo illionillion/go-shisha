@@ -135,12 +135,14 @@ func main() {
 	postService := services.NewPostService(postRepo, userRepo, flavorRepo, uploadRepo)
 	authService := services.NewAuthService(userRepo, refreshTokenRepo)
 	uploadService := services.NewUploadService(uploadRepo, logging.L)
+	flavorService := services.NewFlavorService(flavorRepo)
 
 	// Handler層
 	userHandler := handlers.NewUserHandler(userService)
 	postHandler := handlers.NewPostHandler(postService)
 	authHandler := handlers.NewAuthHandler(authService)
 	uploadHandler := handlers.NewUploadHandler(uploadService, logging.L)
+	flavorHandler := handlers.NewFlavorHandler(flavorService)
 
 	// レート制限ミドルウェア（認証エンドポイント用）
 	// 1分間に5リクエストまで（12秒 × 5 = 60秒）、バースト5リクエスト
@@ -190,6 +192,9 @@ func main() {
 		api.GET("/users", userHandler.GetAllUsers)
 		api.GET("/users/:id", userHandler.GetUser)
 		api.GET("/users/:id/posts", userHandler.GetUserPosts)
+
+		// Flavors endpoints
+		api.GET("/flavors", flavorHandler.GetAllFlavors)
 
 		// Uploads endpoints (認証必須)
 		uploads := api.Group("/uploads")
