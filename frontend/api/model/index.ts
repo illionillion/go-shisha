@@ -7,6 +7,7 @@
  * OpenAPI spec version: 1.0
  */
 
+export * from "./getFlavors500";
 export * from "./getPosts500";
 export * from "./getPostsId400";
 export * from "./getPostsId404";
@@ -25,6 +26,7 @@ export * from "./goShishaBackendInternalModelsPost";
 export * from "./goShishaBackendInternalModelsPostsResponse";
 export * from "./goShishaBackendInternalModelsSlide";
 export * from "./goShishaBackendInternalModelsSlideInput";
+export * from "./goShishaBackendInternalModelsUploadImagesResponse";
 export * from "./goShishaBackendInternalModelsUser";
 export * from "./goShishaBackendInternalModelsUsersResponse";
 export * from "./postAuthLogout200";
@@ -37,3 +39,8 @@ export * from "./postPostsIdLike400";
 export * from "./postPostsIdLike404";
 export * from "./postPostsIdUnlike400";
 export * from "./postPostsIdUnlike404";
+export * from "./postUploadsImages400";
+export * from "./postUploadsImages401";
+export * from "./postUploadsImages413";
+export * from "./postUploadsImages500";
+export * from "./postUploadsImagesBody";
