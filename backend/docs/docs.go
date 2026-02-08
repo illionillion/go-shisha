@@ -234,6 +234,39 @@ const docTemplate = `{
                 }
             }
         },
+        "/flavors": {
+            "get": {
+                "description": "全てのフレーバーの一覧を取得します",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flavors"
+                ],
+                "summary": "フレーバー一覧取得",
+                "responses": {
+                    "200": {
+                        "description": "フレーバー一覧",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/go-shisha-backend_internal_models.Flavor"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/posts": {
             "get": {
                 "description": "全ての投稿の一覧を取得します（総数付き）",

@@ -284,6 +284,28 @@ paths:
       summary: ユーザー登録
       tags:
       - auth
+  /flavors:
+    get:
+      consumes:
+      - application/json
+      description: 全てのフレーバーの一覧を取得します
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: フレーバー一覧
+          schema:
+            items:
+              $ref: '#/definitions/go-shisha-backend_internal_models.Flavor'
+            type: array
+        "500":
+          description: サーバーエラー
+          schema:
+            additionalProperties: true
+            type: object
+      summary: フレーバー一覧取得
+      tags:
+      - flavors
   /posts:
     get:
       consumes:
