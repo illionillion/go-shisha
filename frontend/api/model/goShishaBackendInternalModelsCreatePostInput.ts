@@ -9,6 +9,9 @@
 import type { GoShishaBackendInternalModelsSlideInput } from "./goShishaBackendInternalModelsSlideInput";
 
 export interface GoShishaBackendInternalModelsCreatePostInput {
-  /** @minItems 1 */
+  /**
+   * @minItems 1
+   * @maxItems 10
+   */
   slides: GoShishaBackendInternalModelsSlideInput[];
 }
