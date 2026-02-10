@@ -1,4 +1,6 @@
+import type { getFlavors } from "@/api/flavors";
 import { useGetFlavors as useGetFlavorsGenerated } from "@/api/flavors";
+import type { ApiError } from "@/lib/api-client";
 import { isSuccessResponse } from "@/lib/api-helpers";
 import type { Flavor } from "@/types/domain";
 
@@ -6,7 +8,7 @@ import type { Flavor } from "@/types/domain";
  * フレーバー一覧を取得するカスタムフック
  *
  * TanStack Query を使用してフレーバー一覧をキャッシュ付きで取得します。
- * - キャッシュ期間: 5分（フレーバーは頻繁に変更されないため）
+ * - キャッシュ設定: staleTime: 5分 / gcTime: 10分（フレーバーは頻繁に変更されないため）
  * - 投稿作成時のフレーバー選択UI（FlavorSelector）で使用
  *
  * @returns TanStack Query の useQuery 結果
@@ -23,7 +25,7 @@ import type { Flavor } from "@/types/domain";
  * ```
  */
 export function useGetFlavors() {
-  return useGetFlavorsGenerated({
+  return useGetFlavorsGenerated<Awaited<ReturnType<typeof getFlavors>>, ApiError>({
     query: {
       // フレーバー一覧は頻繁に変更されないため、5分間キャッシュを有効とする
       staleTime: 5 * 60 * 1000, // 5分
