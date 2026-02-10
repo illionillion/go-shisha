@@ -1,4 +1,5 @@
 import { useGetFlavors as useGetFlavorsGenerated } from "@/api/flavors";
+import { isSuccessResponse } from "@/lib/api-helpers";
 import type { Flavor } from "@/types/domain";
 
 /**
@@ -11,10 +12,14 @@ import type { Flavor } from "@/types/domain";
  * @returns TanStack Query の useQuery 結果
  * @example
  * ```tsx
- * const { data, isLoading, error } = useGetFlavors();
- * if (isLoading) return <div>Loading...</div>;
- * if (error) return <div>Error: {error.message}</div>;
- * return <FlavorSelector flavors={data.data} />;
+ * const query = useGetFlavors();
+ * const flavors = getFlavorsData(query);
+ *
+ * if (query.isLoading) return <div>Loading...</div>;
+ * if (query.error) return <div>フレーバーの取得に失敗しました</div>;
+ * if (!flavors) return null;
+ *
+ * return <FlavorSelector flavors={flavors} />;
  * ```
  */
 export function useGetFlavors() {
@@ -34,13 +39,18 @@ export function useGetFlavors() {
  * useGetFlavors フックの戻り値からフレーバー配列を取得するヘルパー関数
  *
  * API レスポンスの data.data から Flavor[] を安全に取得します。
+ * エラー時や成功レスポンスではない場合は undefined を返します。
  *
  * @param response - useGetFlavors の戻り値
- * @returns Flavor[] または undefined（ローディング中・エラー時）
+ * @returns Flavor[] または undefined（ローディング中・エラー時・非成功レスポンス時）
  */
 export function getFlavorsData(response: ReturnType<typeof useGetFlavors>): Flavor[] | undefined {
-  // レスポンスがステータス200の場合のみdataにアクセス
-  if (response.data && response.data.status === 200) {
+  // エラー状態の場合は undefined を返す（TanStack Query がキャッシュデータを保持していても安全）
+  if (response.isError || !response.data) {
+    return undefined;
+  }
+  // レスポンスが成功（2xx）の場合のみdataにアクセス
+  if (isSuccessResponse(response.data)) {
     return response.data.data;
   }
   return undefined;
