@@ -6,8 +6,11 @@ import type { UploadImagesResponse } from "@/types/domain";
 
 /**
  * APIエラーメッセージを日本語に変換
+ *
+ * @param error - API エラーオブジェクト
+ * @returns 日本語エラーメッセージ
  */
-const translateErrorMessage = (error: ApiError): string => {
+export const translateErrorMessage = (error: ApiError): string => {
   // ApiError.bodyJsonからエラーメッセージを取得
   if (
     error.bodyJson &&
@@ -43,13 +46,16 @@ const translateErrorMessage = (error: ApiError): string => {
  *     setUploadedUrls(urls); // 状態管理に保存
  *   },
  *   onError: (error) => {
- *     alert(error); // エラー表示
+ *     toast.error(error); // エラー表示
  *   },
  * });
  *
+ * // ファイル選択時に即座にアップロード（X/Twitterパターン）
  * const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
  *   const files = Array.from(e.target.files || []);
- *   uploadImages(files); // 即座にアップロード
+ *   if (files.length > 0) {
+ *     uploadImages(files);
+ *   }
  * };
  * ```
  */
@@ -107,13 +113,4 @@ export function useUploadImages(options?: {
     error: mutation.error,
     reset: mutation.reset,
   };
-}
-
-/**
- * レスポンスからURLリストを取得するヘルパー関数
- *
- * @deprecated 使用されていないため、将来削除予定
- */
-export function getUploadedUrls(urls: string[] | undefined): string[] | undefined {
-  return urls;
 }

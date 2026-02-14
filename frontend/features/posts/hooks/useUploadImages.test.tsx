@@ -2,8 +2,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { ApiError } from "@/lib/api-client";
 import * as apiClient from "@/lib/api-client";
-import { useUploadImages } from "./useUploadImages";
+import { useUploadImages, translateErrorMessage } from "./useUploadImages";
 
 vi.mock("@/lib/api-client", () => ({
   apiFetch: vi.fn(),
@@ -122,6 +123,66 @@ describe("useUploadImages", () => {
 
       expect(onError).toHaveBeenCalledWith("画像を選択してください");
       expect(apiClient.apiFetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("translateErrorMessage", () => {
+    it("ファイルサイズエラーを日本語に変換する", () => {
+      const error: ApiError = {
+        bodyJson: { error: "file size exceeds limit" },
+      } as ApiError;
+
+      const result = translateErrorMessage(error);
+
+      expect(result).toBe("ファイルサイズが10MBを超えています");
+    });
+
+    it("ファイル数エラーを日本語に変換する", () => {
+      const error: ApiError = {
+        bodyJson: { error: "too many files" },
+      } as ApiError;
+
+      const result = translateErrorMessage(error);
+
+      expect(result).toBe("画像は最大10枚までアップロードできます");
+    });
+
+    it("ファイル形式エラーを日本語に変換する", () => {
+      const error: ApiError = {
+        bodyJson: { error: "invalid file type" },
+      } as ApiError;
+
+      const result = translateErrorMessage(error);
+
+      expect(result).toBe("JPEG, PNG, WebP, GIF形式のみ対応しています");
+    });
+
+    it("未知のエラーをデフォルトメッセージに変換する", () => {
+      const error: ApiError = {
+        bodyJson: { error: "unknown server error" },
+      } as ApiError;
+
+      const result = translateErrorMessage(error);
+
+      expect(result).toBe("画像のアップロードに失敗しました");
+    });
+
+    it("bodyJsonがない場合はデフォルトメッセージを返す", () => {
+      const error: ApiError = {} as ApiError;
+
+      const result = translateErrorMessage(error);
+
+      expect(result).toBe("画像のアップロードに失敗しました");
+    });
+
+    it("bodyJson.errorが文字列でない場合はデフォルトメッセージを返す", () => {
+      const error: ApiError = {
+        bodyJson: { error: 123 },
+      } as unknown as ApiError;
+
+      const result = translateErrorMessage(error);
+
+      expect(result).toBe("画像のアップロードに失敗しました");
     });
   });
 });
