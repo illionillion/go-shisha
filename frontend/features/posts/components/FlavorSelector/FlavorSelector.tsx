@@ -1,3 +1,4 @@
+"use client";
 import clsx from "clsx";
 import type { FC } from "react";
 import { FlavorLabel } from "@/components/FlavorLabel";
@@ -78,7 +79,10 @@ export const FlavorSelector: FC<FlavorSelectorProps> = ({
 
   return (
     <div className={clsx(["w-full", className])}>
-      <label htmlFor="flavor-select" className="block text-sm font-medium text-gray-700 mb-1">
+      <label
+        htmlFor="flavor-select"
+        className={clsx(["block", "text-sm", "font-medium", "text-gray-700", "mb-1"])}
+      >
         フレーバー（任意）
       </label>
       <div className="flex items-center gap-2">
@@ -143,12 +147,12 @@ export const FlavorSelector: FC<FlavorSelectorProps> = ({
         )}
       </div>
       {selectedFlavor && (
-        <div className="mt-2">
+        <div className={clsx(["mt-2"])}>
           <FlavorLabel flavor={selectedFlavor} />
         </div>
       )}
       {error && (
-        <p id="flavor-error" className="mt-1 text-sm text-red-600" role="alert">
+        <p id="flavor-error" className={clsx(["mt-1", "text-sm", "text-red-600"])} role="alert">
           {error}
         </p>
       )}
