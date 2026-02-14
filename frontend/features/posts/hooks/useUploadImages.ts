@@ -1,13 +1,21 @@
-import { usePostUploadsImages } from "@/api/uploads";
+import { useMutation } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api-client";
 import type { ApiError } from "@/lib/api-client";
 import { isSuccessResponse } from "@/lib/api-helpers";
+import type { UploadImagesResponse } from "@/types/domain";
 
 /**
  * APIエラーメッセージを日本語に変換
  */
-const translateErrorMessage = (error: unknown): string => {
-  if (typeof error === "object" && error !== null && "error" in error) {
-    const errorMsg = String((error as { error: unknown }).error);
+const translateErrorMessage = (error: ApiError): string => {
+  // ApiError.bodyJsonからエラーメッセージを取得
+  if (
+    error.bodyJson &&
+    typeof error.bodyJson === "object" &&
+    "error" in error.bodyJson &&
+    typeof error.bodyJson.error === "string"
+  ) {
+    const errorMsg = error.bodyJson.error;
     if (errorMsg.includes("file size exceeds limit")) {
       return "ファイルサイズが10MBを超えています";
     }
@@ -49,30 +57,47 @@ export function useUploadImages(options?: {
   onSuccess?: (urls: string[]) => void;
   onError?: (error: string) => void;
 }) {
-  const mutation = usePostUploadsImages<ApiError>({
-    mutation: {
-      onSuccess: (response) => {
-        if (isSuccessResponse(response) && response.data.urls) {
-          options?.onSuccess?.(response.data.urls);
-        }
-      },
-      onError: (error) => {
-        const message = translateErrorMessage(error);
-        options?.onError?.(message);
-      },
+  const mutation = useMutation<
+    { data: UploadImagesResponse; status: 200; headers: Headers },
+    ApiError,
+    File[]
+  >({
+    mutationFn: async (files: File[]) => {
+      const formData = new FormData();
+      // 複数ファイルを同じ名前（images）で追加
+      files.forEach((file) => {
+        formData.append("images", file);
+      });
+
+      const response = await apiFetch<{
+        data: UploadImagesResponse;
+        status: 200;
+        headers: Headers;
+      }>("/uploads/images", {
+        method: "POST",
+        body: formData,
+      });
+
+      return response as { data: UploadImagesResponse; status: 200; headers: Headers };
+    },
+    onSuccess: (response) => {
+      if (isSuccessResponse(response) && response.data.urls) {
+        options?.onSuccess?.(response.data.urls);
+      }
+    },
+    onError: (error) => {
+      const message = translateErrorMessage(error);
+      options?.onError?.(message);
     },
   });
 
   const uploadImages = (files: File[]) => {
-    // FormDataを作成してアップロード
-    const formData = new FormData();
-    files.forEach((file) => {
-      formData.append("images", file);
-    });
+    if (files.length === 0) {
+      options?.onError?.("画像を選択してください");
+      return;
+    }
 
-    mutation.mutate({
-      data: { images: files[0] }, // TODO: 複数ファイル対応が必要な場合は修正
-    });
+    mutation.mutate(files);
   };
 
   return {
@@ -86,13 +111,9 @@ export function useUploadImages(options?: {
 
 /**
  * レスポンスからURLリストを取得するヘルパー関数
+ *
+ * @deprecated 使用されていないため、将来削除予定
  */
-export function getUploadedUrls(
-  response: ReturnType<typeof usePostUploadsImages>["data"]
-): string[] | undefined {
-  if (!response) return undefined;
-  if (isSuccessResponse(response) && response.data.urls) {
-    return response.data.urls;
-  }
-  return undefined;
+export function getUploadedUrls(urls: string[] | undefined): string[] | undefined {
+  return urls;
 }
