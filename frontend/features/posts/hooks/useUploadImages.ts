@@ -2,32 +2,6 @@ import { usePostUploadsImages } from "@/api/uploads";
 import type { ApiError } from "@/lib/api-client";
 import { isSuccessResponse } from "@/lib/api-helpers";
 
-// 定数
-const MAX_FILES = 10;
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-
-/**
- * 画像ファイルのバリデーション
- */
-export const validateImages = (files: File[]): string | null => {
-  if (files.length === 0) {
-    return "画像を選択してください";
-  }
-  if (files.length > MAX_FILES) {
-    return "画像は最大10枚までアップロードできます";
-  }
-  for (const file of files) {
-    if (file.size > MAX_FILE_SIZE) {
-      return `ファイルサイズが10MBを超えています: ${file.name}`;
-    }
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return "JPEG, PNG, WebP, GIF形式のみ対応しています";
-    }
-  }
-  return null;
-};
-
 /**
  * APIエラーメッセージを日本語に変換
  */
@@ -51,28 +25,23 @@ const translateErrorMessage = (error: unknown): string => {
  * 画像アップロード用カスタムフック
  *
  * 画像ファイルをバックエンドにアップロードし、URLを取得します。
- * - クライアント側バリデーション（枚数・サイズ・形式チェック）
- * - エラーハンドリング（日本語メッセージ）
- * - Progress状態管理
+ * バリデーションはサーバー側で行われ、エラーは日本語メッセージに変換されます。
  *
  * @example
  * ```tsx
- * const { mutate, isPending } = useUploadImages({
+ * const { uploadImages, isPending } = useUploadImages({
  *   onSuccess: (urls) => {
  *     console.log("アップロード成功:", urls);
+ *     setUploadedUrls(urls); // 状態管理に保存
  *   },
  *   onError: (error) => {
- *     console.error("エラー:", error);
+ *     alert(error); // エラー表示
  *   },
  * });
  *
- * const handleUpload = (files: File[]) => {
- *   const error = validateImages(files);
- *   if (error) {
- *     alert(error);
- *     return;
- *   }
- *   mutate(files);
+ * const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+ *   const files = Array.from(e.target.files || []);
+ *   uploadImages(files); // 即座にアップロード
  * };
  * ```
  */
@@ -95,13 +64,6 @@ export function useUploadImages(options?: {
   });
 
   const uploadImages = (files: File[]) => {
-    // クライアント側バリデーション
-    const validationError = validateImages(files);
-    if (validationError) {
-      options?.onError?.(validationError);
-      return;
-    }
-
     // FormDataを作成してアップロード
     const formData = new FormData();
     files.forEach((file) => {
@@ -109,7 +71,7 @@ export function useUploadImages(options?: {
     });
 
     mutation.mutate({
-      data: { images: formData.get("images") as File },
+      data: { images: files[0] }, // TODO: 複数ファイル対応が必要な場合は修正
     });
   };
 
