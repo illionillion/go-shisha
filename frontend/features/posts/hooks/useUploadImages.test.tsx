@@ -92,11 +92,11 @@ describe("useUploadImages", () => {
       });
     });
 
-    it("APIエラー時にonErrorが日本語エラーメッセージで呼ばれる", async () => {
+    it("APIエラー時にonErrorがサーバーの日本語エラーメッセージで呼ばれる", async () => {
       const onError = vi.fn();
       const mockError = {
         bodyJson: {
-          error: "invalid file type",
+          error: "サポートされていないファイル形式です",
         },
       };
 
@@ -108,7 +108,7 @@ describe("useUploadImages", () => {
       result.current.uploadImages(files);
 
       await waitFor(() => {
-        expect(onError).toHaveBeenCalledWith("JPEG, PNG, WebP, GIF形式のみ対応しています");
+        expect(onError).toHaveBeenCalledWith("サポートされていないファイル形式です");
       });
     });
   });
@@ -127,9 +127,9 @@ describe("useUploadImages", () => {
   });
 
   describe("translateErrorMessage", () => {
-    it("ファイルサイズエラーを日本語に変換する", () => {
+    it("バックエンドの日本語エラーメッセージをそのまま返す（ファイルサイズ）", () => {
       const error: ApiError = {
-        bodyJson: { error: "file size exceeds limit" },
+        bodyJson: { error: "ファイルサイズが10MBを超えています" },
       } as ApiError;
 
       const result = translateErrorMessage(error);
@@ -137,34 +137,34 @@ describe("useUploadImages", () => {
       expect(result).toBe("ファイルサイズが10MBを超えています");
     });
 
-    it("ファイル数エラーを日本語に変換する", () => {
+    it("バックエンドの日本語エラーメッセージをそのまま返す（ファイル数）", () => {
       const error: ApiError = {
-        bodyJson: { error: "too many files" },
+        bodyJson: { error: "一度に10枚までアップロード可能です" },
       } as ApiError;
 
       const result = translateErrorMessage(error);
 
-      expect(result).toBe("画像は最大10枚までアップロードできます");
+      expect(result).toBe("一度に10枚までアップロード可能です");
     });
 
-    it("ファイル形式エラーを日本語に変換する", () => {
+    it("バックエンドの日本語エラーメッセージをそのまま返す（ファイル形式）", () => {
       const error: ApiError = {
-        bodyJson: { error: "invalid file type" },
+        bodyJson: { error: "サポートされていないファイル形式です" },
       } as ApiError;
 
       const result = translateErrorMessage(error);
 
-      expect(result).toBe("JPEG, PNG, WebP, GIF形式のみ対応しています");
+      expect(result).toBe("サポートされていないファイル形式です");
     });
 
-    it("未知のエラーをデフォルトメッセージに変換する", () => {
+    it("バックエンドのその他のエラーメッセージもそのまま返す", () => {
       const error: ApiError = {
-        bodyJson: { error: "unknown server error" },
+        bodyJson: { error: "予期しないエラーが発生しました" },
       } as ApiError;
 
       const result = translateErrorMessage(error);
 
-      expect(result).toBe("画像のアップロードに失敗しました");
+      expect(result).toBe("予期しないエラーが発生しました");
     });
 
     it("bodyJsonがない場合はデフォルトメッセージを返す", () => {

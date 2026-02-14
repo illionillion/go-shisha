@@ -5,7 +5,10 @@ import { isSuccessResponse } from "@/lib/api-helpers";
 import type { UploadImagesResponse } from "@/types/domain";
 
 /**
- * APIエラーメッセージを日本語に変換
+ * APIエラーメッセージを処理
+ *
+ * バックエンドが日本語エラーメッセージを返すため、基本的にはそのまま返す。
+ * エラー情報が取得できない場合のみデフォルトメッセージを返す。
  *
  * @param error - API エラーオブジェクト
  * @returns 日本語エラーメッセージ
@@ -18,16 +21,8 @@ export const translateErrorMessage = (error: ApiError): string => {
     "error" in error.bodyJson &&
     typeof error.bodyJson.error === "string"
   ) {
-    const errorMsg = error.bodyJson.error;
-    if (errorMsg.includes("file size exceeds limit")) {
-      return "ファイルサイズが10MBを超えています";
-    }
-    if (errorMsg.includes("too many files")) {
-      return "画像は最大10枚までアップロードできます";
-    }
-    if (errorMsg.includes("invalid file type")) {
-      return "JPEG, PNG, WebP, GIF形式のみ対応しています";
-    }
+    // バックエンドが日本語メッセージを返すのでそのまま使用
+    return error.bodyJson.error;
   }
   return "画像のアップロードに失敗しました";
 };
@@ -36,8 +31,7 @@ export const translateErrorMessage = (error: ApiError): string => {
  * 画像アップロード用カスタムフック
  *
  * 画像ファイルをバックエンドにアップロードし、URLを取得します。
- * ファイル未選択などの基本的なチェックはクライアント側で行い、それ以外のバリデーションはサーバー側で行われます。
- * サーバーからのエラーは日本語メッセージに変換されます。
+ * バリデーションはサーバー側で行われ、エラーメッセージはそのまま日本語で返されます。
  *
  * @example
  * ```tsx
