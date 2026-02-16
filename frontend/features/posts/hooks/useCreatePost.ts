@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGetPostsQueryKey } from "@/api/posts";
 import type { ApiError } from "@/lib/api-client";
 import { apiFetch } from "@/lib/api-client";
-import { isSuccessResponse } from "@/lib/api-helpers";
 import type { CreatePostInput, Post } from "@/types/domain";
 
 /**
@@ -99,10 +98,9 @@ export function useCreatePost(options?: {
           "total" in old.data &&
           typeof old.data.total === "number"
         ) {
-          // 仮の投稿オブジェクトを作成（IDは仮）
           const optimisticPost: Post = {
-            id: Date.now(), // 仮ID（サーバーからの実IDで後で置き換わる）
-            user_id: 0, // 認証情報から取得できればベター（今は仮）
+            id: Date.now(),
+            user_id: 0,
             created_at: new Date().toISOString(),
             user: {
               id: 0,
@@ -133,16 +131,12 @@ export function useCreatePost(options?: {
         return old;
       });
 
-      // ロールバック用に以前のデータを返す
       return { previousPosts } as { previousPosts: unknown };
     },
-    onSuccess: (response, _variables, _context) => {
-      if (isSuccessResponse(response) && response.data) {
-        // 投稿成功後、タイムラインキャッシュを無効化して最新データをフェッチ
-        queryClient.invalidateQueries({ queryKey: getGetPostsQueryKey() });
-
-        options?.onSuccess?.(response.data);
-      }
+    onSuccess: (response) => {
+      // 投稿成功後、タイムラインキャッシュを無効化して最新データをフェッチ
+      queryClient.invalidateQueries({ queryKey: getGetPostsQueryKey() });
+      options?.onSuccess?.(response.data);
     },
     onError: (error, _variables, context) => {
       // エラー発生時、楽観的更新をロールバック
