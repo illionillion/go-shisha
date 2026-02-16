@@ -10,7 +10,6 @@ import { useCreatePost, translateErrorMessage } from "./useCreatePost";
 
 vi.mock("@/lib/api-client", () => ({
   apiFetch: vi.fn(),
-  isSuccessResponse: vi.fn((response) => response.status >= 200 && response.status < 300),
 }));
 
 describe("useCreatePost", () => {
