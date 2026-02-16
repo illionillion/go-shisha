@@ -4,11 +4,11 @@ import { PostCreateForm } from "./PostCreateForm";
 
 // モックフレーバーデータ
 const mockFlavors: Flavor[] = [
-  { id: 1, name: "ミント", color: "#00D9FF" },
-  { id: 2, name: "アップル", color: "#80FF00" },
-  { id: 3, name: "グレープ", color: "#9D00FF" },
-  { id: 4, name: "レモン", color: "#FFD800" },
-  { id: 5, name: "ストロベリー", color: "#FF0080" },
+  { id: 1, name: "ミント", color: "bg-green-500" },
+  { id: 2, name: "アップル", color: "bg-yellow-500" },
+  { id: 3, name: "グレープ", color: "bg-purple-500" },
+  { id: 4, name: "レモン", color: "bg-orange-500" },
+  { id: 5, name: "ストロベリー", color: "bg-red-500" },
 ];
 
 const meta = {

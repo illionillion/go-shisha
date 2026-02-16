@@ -1,10 +1,48 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import { ImageUploader } from "./ImageUploader";
 
-// モックファイル作成ヘルパー
-const createMockFile = (name: string, size: number, type: string): File => {
-  const blob = new Blob(["a".repeat(size)], { type });
-  return new File([blob], name, { type });
+// Base64エンコードされた小さな画像データ（1x1px カラフルなPNG）
+const createImageFile = (name: string, color: string, sizeKB: number): File => {
+  // 1x1pxのPNG画像をCanvas APIで生成
+  const canvas = document.createElement("canvas");
+  canvas.width = 200;
+  canvas.height = 150;
+  const ctx = canvas.getContext("2d");
+
+  if (ctx) {
+    // 背景色
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, 200, 150);
+
+    // ファイル名表示
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "bold 16px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(name, 100, 75);
+  }
+
+  // DataURLを取得
+  const dataUrl = canvas.toDataURL("image/png");
+
+  // DataURLをBlobに変換
+  const arr = dataUrl.split(",");
+  const mime = arr[0].match(/:(.*?);/)?.[1] || "image/png";
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  // 指定されたサイズに近づけるためにパディング追加
+  const targetSize = sizeKB * 1024;
+  const currentSize = u8arr.length;
+  const paddingSize = Math.max(0, targetSize - currentSize);
+  const paddedArray = new Uint8Array(u8arr.length + paddingSize);
+  paddedArray.set(u8arr);
+
+  return new File([new Blob([paddedArray])], name, { type: mime });
 };
 
 const meta = {
@@ -142,9 +180,9 @@ export const WithPreview: Story = {
       console.log("Selected files:", files);
     },
     value: [
-      createMockFile("beach-sunset.jpg", 2 * 1024 * 1024, "image/jpeg"),
-      createMockFile("mountain-view.png", 1.5 * 1024 * 1024, "image/png"),
-      createMockFile("city-night.webp", 3 * 1024 * 1024, "image/webp"),
+      createImageFile("beach-sunset.jpg", "#FF6B6B", 2048),
+      createImageFile("mountain-view.png", "#4ECDC4", 1536),
+      createImageFile("city-night.webp", "#45B7D1", 3072),
     ],
   },
   decorators: [
@@ -167,9 +205,17 @@ export const AlmostFull: Story = {
     onFilesSelected: (files) => {
       console.log("Selected files:", files);
     },
-    value: Array.from({ length: 9 }, (_, i) =>
-      createMockFile(`image-${i + 1}.jpg`, (i + 1) * 0.5 * 1024 * 1024, "image/jpeg")
-    ),
+    value: [
+      createImageFile("image-1.jpg", "#FF6B6B", 512),
+      createImageFile("image-2.jpg", "#4ECDC4", 1024),
+      createImageFile("image-3.jpg", "#45B7D1", 1536),
+      createImageFile("image-4.jpg", "#96CEB4", 2048),
+      createImageFile("image-5.jpg", "#FFEAA7", 2560),
+      createImageFile("image-6.jpg", "#DFE6E9", 3072),
+      createImageFile("image-7.jpg", "#74B9FF", 3584),
+      createImageFile("image-8.jpg", "#A29BFE", 4096),
+      createImageFile("image-9.jpg", "#FD79A8", 4608),
+    ],
   },
   decorators: [
     (Story) => (
