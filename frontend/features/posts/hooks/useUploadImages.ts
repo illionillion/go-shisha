@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-client";
 import type { ApiError } from "@/lib/api-client";
-import { isSuccessResponse } from "@/lib/api-helpers";
 import type { UploadImagesResponse } from "@/types/domain";
 
 /**
@@ -82,9 +81,7 @@ export function useUploadImages(options?: {
       return response as { data: UploadImagesResponse; status: 200; headers: Headers };
     },
     onSuccess: (response) => {
-      if (isSuccessResponse(response) && response.data.urls) {
-        options?.onSuccess?.(response.data.urls);
-      }
+      options?.onSuccess?.(response.data.urls ?? []);
     },
     onError: (error) => {
       const message = translateErrorMessage(error);
