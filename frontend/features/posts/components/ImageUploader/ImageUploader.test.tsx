@@ -33,7 +33,7 @@ describe("ImageUploader", () => {
       const mockOnFilesSelected = vi.fn();
       render(<ImageUploader onFilesSelected={mockOnFilesSelected} maxFiles={5} />);
 
-      expect(screen.getByText(/最大5枚/)).toBeInTheDocument();
+      expect(screen.getByText(/あと5枚/)).toBeInTheDocument();
     });
 
     it("カスタムmaxSizeMBが表示される", () => {
@@ -295,6 +295,229 @@ describe("ImageUploader", () => {
 
       const input = screen.getByLabelText("画像ファイルを選択");
       expect(input).toBeInTheDocument();
+    });
+  });
+
+  describe("プレビュー表示", () => {
+    it("ファイル選択後にプレビューが表示される", async () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const file = createMockFile("test.jpg", 1024 * 1024, "image/jpeg");
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+
+      await userEvent.upload(input, file);
+
+      await waitFor(() => {
+        expect(screen.getByText(/選択中の画像/)).toBeInTheDocument();
+        expect(screen.getByText("test.jpg")).toBeInTheDocument();
+        expect(screen.getByAltText("プレビュー 1")).toBeInTheDocument();
+      });
+    });
+
+    it("複数ファイルのプレビューが表示される", async () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const files = [
+        createMockFile("test1.jpg", 1024 * 1024, "image/jpeg"),
+        createMockFile("test2.png", 2 * 1024 * 1024, "image/png"),
+      ];
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+
+      await userEvent.upload(input, files);
+
+      await waitFor(() => {
+        expect(screen.getByText("test1.jpg")).toBeInTheDocument();
+        expect(screen.getByText("test2.png")).toBeInTheDocument();
+        expect(screen.getByText(/選択中の画像 \(2\/10枚\)/)).toBeInTheDocument();
+      });
+    });
+
+    it("value propsで初期プレビューが表示される", () => {
+      const mockOnFilesSelected = vi.fn();
+      const files = [createMockFile("initial.jpg", 1024 * 1024, "image/jpeg")];
+
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} value={files} />);
+
+      expect(screen.getByText("initial.jpg")).toBeInTheDocument();
+      expect(screen.getByText(/選択中の画像 \(1\/10枚\)/)).toBeInTheDocument();
+    });
+
+    it("ファイルサイズが表示される", async () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const file = createMockFile("test.jpg", 2.5 * 1024 * 1024, "image/jpeg");
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+
+      await userEvent.upload(input, file);
+
+      await waitFor(() => {
+        expect(screen.getByText(/2\.50 MB/)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("ファイル削除", () => {
+    it("削除ボタンでファイルを削除できる", async () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const file = createMockFile("test.jpg", 1024 * 1024, "image/jpeg");
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+
+      await userEvent.upload(input, file);
+
+      await waitFor(() => {
+        expect(screen.getByText("test.jpg")).toBeInTheDocument();
+      });
+
+      const deleteButton = screen.getByLabelText("画像1を削除");
+      await userEvent.click(deleteButton);
+
+      await waitFor(() => {
+        expect(screen.queryByText("test.jpg")).not.toBeInTheDocument();
+        expect(mockOnFilesSelected).toHaveBeenCalledWith([]);
+      });
+    });
+
+    it("複数ファイルから特定のファイルを削除できる", async () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const files = [
+        createMockFile("test1.jpg", 1024 * 1024, "image/jpeg"),
+        createMockFile("test2.jpg", 1024 * 1024, "image/jpeg"),
+        createMockFile("test3.jpg", 1024 * 1024, "image/jpeg"),
+      ];
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+
+      await userEvent.upload(input, files);
+
+      await waitFor(() => {
+        expect(screen.getByText("test2.jpg")).toBeInTheDocument();
+      });
+
+      const deleteButton = screen.getByLabelText("画像2を削除");
+      await userEvent.click(deleteButton);
+
+      await waitFor(() => {
+        expect(screen.queryByText("test2.jpg")).not.toBeInTheDocument();
+        expect(screen.getByText("test1.jpg")).toBeInTheDocument();
+        expect(screen.getByText("test3.jpg")).toBeInTheDocument();
+      });
+    });
+
+    it("削除後にエラーがクリアされる", async () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} maxFiles={1} />);
+
+      // 2ファイル選択してエラー表示
+      const files = [
+        createMockFile("test1.jpg", 1024 * 1024, "image/jpeg"),
+        createMockFile("test2.jpg", 1024 * 1024, "image/jpeg"),
+      ];
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+
+      await userEvent.upload(input, files);
+
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toBeInTheDocument();
+      });
+
+      // 1ファイルだけ選択し直す
+      const singleFile = createMockFile("test.jpg", 1024 * 1024, "image/jpeg");
+      await userEvent.upload(input, singleFile);
+
+      await waitFor(() => {
+        expect(screen.getByText("test.jpg")).toBeInTheDocument();
+      });
+
+      // 削除
+      const deleteButton = screen.getByLabelText("画像1を削除");
+      await userEvent.click(deleteButton);
+
+      await waitFor(() => {
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe("追加アップロード", () => {
+    it("プレビュー表示後も追加でファイルを選択できる", async () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const file1 = createMockFile("test1.jpg", 1024 * 1024, "image/jpeg");
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+
+      await userEvent.upload(input, file1);
+
+      await waitFor(() => {
+        expect(screen.getByText("test1.jpg")).toBeInTheDocument();
+      });
+
+      // 追加アップロード
+      const file2 = createMockFile("test2.jpg", 1024 * 1024, "image/jpeg");
+      await userEvent.upload(input, file2);
+
+      await waitFor(() => {
+        expect(screen.getByText("test1.jpg")).toBeInTheDocument();
+        expect(screen.getByText("test2.jpg")).toBeInTheDocument();
+        expect(screen.getByText(/選択中の画像 \(2\/10枚\)/)).toBeInTheDocument();
+      });
+    });
+
+    it("上限到達時は追加アップロードUIが非表示になる", async () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} maxFiles={2} />);
+
+      const files = [
+        createMockFile("test1.jpg", 1024 * 1024, "image/jpeg"),
+        createMockFile("test2.jpg", 1024 * 1024, "image/jpeg"),
+      ];
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+
+      await userEvent.upload(input, files);
+
+      await waitFor(() => {
+        expect(screen.queryByText(/画像を追加/)).not.toBeInTheDocument();
+        expect(screen.queryByLabelText("画像ファイルを選択")).not.toBeInTheDocument();
+      });
+    });
+
+    it("既存ファイルがある状態でファイル数超過するとエラーが表示される", async () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} maxFiles={3} />);
+
+      // 最初に2ファイル選択
+      const files1 = [
+        createMockFile("test1.jpg", 1024 * 1024, "image/jpeg"),
+        createMockFile("test2.jpg", 1024 * 1024, "image/jpeg"),
+      ];
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+
+      await userEvent.upload(input, files1);
+
+      await waitFor(() => {
+        expect(screen.getByText("test1.jpg")).toBeInTheDocument();
+      });
+
+      // 追加で3ファイル選択（合計5ファイルで上限超過）
+      const files2 = [
+        createMockFile("test3.jpg", 1024 * 1024, "image/jpeg"),
+        createMockFile("test4.jpg", 1024 * 1024, "image/jpeg"),
+        createMockFile("test5.jpg", 1024 * 1024, "image/jpeg"),
+      ];
+
+      await userEvent.upload(input, files2);
+
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toHaveTextContent(
+          /最大3枚まで選択できます（現在2枚選択中）/
+        );
+      });
     });
   });
 });

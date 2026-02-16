@@ -1,8 +1,9 @@
-import { useCallback, useState } from "react";
-import { PlusIcon } from "@/components/icons";
+import { useCallback, useEffect, useState } from "react";
+import { PlusIcon, XIcon } from "@/components/icons";
 
 export type ImageUploaderProps = {
   onFilesSelected: (files: File[]) => void;
+  value?: File[];
   maxFiles?: number;
   maxSizeMB?: number;
   acceptedFormats?: string[];
@@ -26,6 +27,7 @@ export type ImageUploaderProps = {
  */
 export function ImageUploader({
   onFilesSelected,
+  value,
   maxFiles = 10,
   maxSizeMB = 10,
   acceptedFormats = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"],
@@ -33,16 +35,24 @@ export function ImageUploader({
 }: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [internalFiles, setInternalFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+
+  // Controlled/Uncontrolled両対応
+  const files = value ?? internalFiles;
 
   const validateFiles = useCallback(
-    (files: FileList | File[]): { valid: File[]; error: string | null } => {
-      const fileArray = Array.from(files);
+    (
+      newFiles: FileList | File[],
+      existingFiles: File[] = []
+    ): { valid: File[]; error: string | null } => {
+      const fileArray = Array.from(newFiles);
 
-      // ファイル数チェック
-      if (fileArray.length > maxFiles) {
+      // ファイル数チェック（既存ファイル含む）
+      if (fileArray.length + existingFiles.length > maxFiles) {
         return {
           valid: [],
-          error: `最大${maxFiles}枚まで選択できます`,
+          error: `最大${maxFiles}枚まで選択できます（現在${existingFiles.length}枚選択中）`,
         };
       }
 
@@ -102,12 +112,16 @@ export function ImageUploader({
 
       if (disabled) return;
 
-      const { files } = e.dataTransfer;
-      if (files && files.length > 0) {
-        const { valid, error: validationError } = validateFiles(files);
+      const { files: droppedFiles } = e.dataTransfer;
+      if (droppedFiles && droppedFiles.length > 0) {
+        const { valid, error: validationError } = validateFiles(droppedFiles, files);
         setError(validationError);
         if (valid.length > 0) {
-          onFilesSelected(valid);
+          const newFiles = [...files, ...valid];
+          if (!value) {
+            setInternalFiles(newFiles);
+          }
+          onFilesSelected(newFiles);
         }
       }
     },
@@ -116,53 +130,124 @@ export function ImageUploader({
 
   const handleFileInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const { files } = e.target;
-      if (files && files.length > 0) {
-        const { valid, error: validationError } = validateFiles(files);
+      const { files: selectedFiles } = e.target;
+      if (selectedFiles && selectedFiles.length > 0) {
+        const { valid, error: validationError } = validateFiles(selectedFiles, files);
         setError(validationError);
         if (valid.length > 0) {
-          onFilesSelected(valid);
+          const newFiles = [...files, ...valid];
+          if (!value) {
+            setInternalFiles(newFiles);
+          }
+          onFilesSelected(newFiles);
         }
       }
       // input要素をリセット（同じファイルを再選択可能にする）
       e.target.value = "";
     },
-    [validateFiles, onFilesSelected]
+    [validateFiles, onFilesSelected, files, value]
   );
+
+  const handleRemoveFile = useCallback(
+    (index: number) => {
+      const newFiles = files.filter((_, i) => i !== index);
+      if (!value) {
+        setInternalFiles(newFiles);
+      }
+      onFilesSelected(newFiles);
+      setError(null);
+    },
+    [files, value, onFilesSelected]
+  );
+
+  // プレビューURL生成とクリーンアップ
+  useEffect(() => {
+    // 既存のURLをクリーンアップ
+    previewUrls.forEach((url) => URL.revokeObjectURL(url));
+
+    // 新しいプレビューURLを生成
+    const newUrls = files.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(newUrls);
+
+    // クリーンアップ関数
+    return () => {
+      newUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [files]);
 
   return (
     <div className="w-full">
-      <div
-        onDragEnter={handleDragEnter}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        className={`
-          relative flex min-h-[200px] cursor-pointer flex-col items-center justify-center
-          rounded-lg border-2 border-dashed p-8 transition-all
-          ${isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50"}
-          ${disabled ? "cursor-not-allowed opacity-50" : "hover:border-blue-400 hover:bg-blue-50"}
-        `}
-      >
-        <input
-          type="file"
-          multiple
-          accept={acceptedFormats.join(",")}
-          onChange={handleFileInputChange}
-          disabled={disabled}
-          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-          aria-label="画像ファイルを選択"
-        />
+      {/* プレビュー表示 */}
+      {files.length > 0 && (
+        <div className="mb-4">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-sm font-medium text-gray-700">
+              選択中の画像 ({files.length}/{maxFiles}枚)
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            {files.map((file, index) => (
+              <div key={`${file.name}-${index}`} className="group relative aspect-square">
+                <img
+                  src={previewUrls[index]}
+                  alt={`プレビュー ${index + 1}`}
+                  className="h-full w-full rounded-lg object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveFile(index)}
+                  disabled={disabled}
+                  className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1.5 text-white shadow-md transition-all hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label={`画像${index + 1}を削除`}
+                >
+                  <XIcon className="h-3 w-3" />
+                </button>
+                <div className="absolute bottom-0 left-0 right-0 rounded-b-lg bg-black bg-opacity-50 px-2 py-1">
+                  <p className="truncate text-xs text-white">{file.name}</p>
+                  <p className="text-xs text-gray-300">
+                    {(file.size / (1024 * 1024)).toFixed(2)} MB
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-        <PlusIcon className="mb-4 h-12 w-12 text-gray-400" />
+      {/* ファイル選択エリア（上限未満の場合のみ表示） */}
+      {files.length < maxFiles && (
+        <div
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`
+            relative flex min-h-[200px] cursor-pointer flex-col items-center justify-center
+            rounded-lg border-2 border-dashed p-8 transition-all
+            ${isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50"}
+            ${disabled ? "cursor-not-allowed opacity-50" : "hover:border-blue-400 hover:bg-blue-50"}
+          `}
+        >
+          <input
+            type="file"
+            multiple
+            accept={acceptedFormats.join(",")}
+            onChange={handleFileInputChange}
+            disabled={disabled}
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+            aria-label="画像ファイルを選択"
+          />
 
-        <p className="mb-2 text-sm font-medium text-gray-700">
-          クリックまたはドラッグ&ドロップで画像を選択
-        </p>
-        <p className="text-xs text-gray-500">
-          JPG、PNG、WebP、GIF ({maxSizeMB}MB以下、最大{maxFiles}枚)
-        </p>
-      </div>
+          <PlusIcon className="mb-4 h-12 w-12 text-gray-400" />
+
+          <p className="mb-2 text-sm font-medium text-gray-700">
+            {files.length === 0 ? "クリックまたはドラッグ&ドロップで画像を選択" : "画像を追加"}
+          </p>
+          <p className="text-xs text-gray-500">
+            JPG、PNG、WebP、GIF ({maxSizeMB}MB以下、あと{maxFiles - files.length}枚)
+          </p>
+        </div>
+      )}
 
       {error && (
         <p className="mt-2 text-sm text-red-600" role="alert">
