@@ -126,7 +126,7 @@ export function ImageUploader({
         }
       }
     },
-    [disabled, validateFiles, onFilesSelected]
+    [disabled, validateFiles, onFilesSelected, files, value]
   );
 
   const handleFileInputChange = useCallback(
@@ -163,14 +163,11 @@ export function ImageUploader({
 
   // プレビューURL生成とクリーンアップ
   useEffect(() => {
-    // 既存のURLをクリーンアップ
-    previewUrls.forEach((url) => URL.revokeObjectURL(url));
-
     // 新しいプレビューURLを生成
     const newUrls = files.map((file) => URL.createObjectURL(file));
     setPreviewUrls(newUrls);
 
-    // クリーンアップ関数
+    // クリーンアップ関数（前回生成したURLを破棄）
     return () => {
       newUrls.forEach((url) => URL.revokeObjectURL(url));
     };
