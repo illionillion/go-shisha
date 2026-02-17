@@ -7,9 +7,7 @@ import { SlideEditForm } from "./SlideEditForm";
 export type PostCreateFormProps = {
   /** フレーバー一覧 */
   flavors: Flavor[];
-  /** 投稿作成時のコ
-
-ールバック */
+  /** 投稿作成時のコールバック */
   onSubmit: (slides: EditableSlide[]) => void | Promise<void>;
   /** キャンセル時のコールバック */
   onCancel?: () => void;

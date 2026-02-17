@@ -47,7 +47,7 @@ export const translateErrorMessage = (error: ApiError): string => {
  *   createPost({
  *     slides: [
  *       { image_url: "/uploads/image1.jpg", text: "おいしかった", flavor_id: 1 },
- *       { image_url: "/uploads/image2.jpg", text: "", flavor_id: null },
+ *       { image_url: "/uploads/image2.jpg", text: "" },
  *     ],
  *   });
  * };
