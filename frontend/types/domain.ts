@@ -84,5 +84,24 @@ export type Flavor = GoShishaBackendInternalModelsFlavor;
  */
 export type UploadImagesResponse = GoShishaBackendInternalModelsUploadImagesResponse;
 
+// ========================================
+// フロントエンド専用型（API非依存）
+// ========================================
+/**
+ * 投稿作成フォーム用のスライド編集データ
+ * - 画像アップロード〜詳細入力までの状態を管理
+ * - PostCreateFormコンポーネントで使用
+ */
+export type EditableSlide = {
+  /** 元のファイルオブジェクト */
+  file: File;
+  /** プレビュー表示用のBlobURL（URL.createObjectURL生成） */
+  previewUrl: string;
+  /** 選択されたフレーバーID（未選択時はundefined） */
+  flavorId?: number;
+  /** 説明文（最大100文字） */
+  description: string;
+};
+
 // If you need to normalize fields (e.g. date strings, optional fields),
 // add converter functions under `frontend/lib/adapters` instead of changing aliases.
