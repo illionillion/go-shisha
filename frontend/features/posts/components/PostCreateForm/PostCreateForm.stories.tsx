@@ -40,6 +40,7 @@ export const Default: Story = {
       console.log("Cancel");
     },
   },
+  tags: ["vrt", "vrt-sp"],
   decorators: [
     (Story) => (
       <div className="h-screen w-full bg-gray-50 p-4">
@@ -64,6 +65,7 @@ export const NoFlavors: Story = {
       console.log("Cancel");
     },
   },
+  tags: ["vrt", "vrt-sp"],
   decorators: [
     (Story) => (
       <div className="h-screen w-full bg-gray-50 p-4">
@@ -89,6 +91,7 @@ export const Disabled: Story = {
       console.log("Cancel");
     },
   },
+  tags: ["vrt", "vrt-sp"],
   decorators: [
     (Story) => (
       <div className="h-screen w-full bg-gray-50 p-4">
@@ -114,6 +117,7 @@ export const LimitedFiles: Story = {
       console.log("Cancel");
     },
   },
+  tags: ["vrt", "vrt-sp"],
   decorators: [
     (Story) => (
       <div className="h-screen w-full bg-gray-50 p-4">

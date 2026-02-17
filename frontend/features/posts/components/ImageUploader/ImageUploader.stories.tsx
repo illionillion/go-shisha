@@ -71,6 +71,7 @@ export const Default: Story = {
       console.log("Selected files:", files);
     },
   },
+  tags: ["vrt"],
   decorators: [
     (Story) => (
       <div className="w-full max-w-2xl p-8">
@@ -93,6 +94,7 @@ export const LimitedFiles: Story = {
     },
     maxFiles: 3,
   },
+  tags: ["vrt"],
   decorators: [
     (Story) => (
       <div className="w-full max-w-2xl p-8">
@@ -115,6 +117,7 @@ export const SizeLimit: Story = {
     },
     maxSizeMB: 5,
   },
+  tags: ["vrt"],
   decorators: [
     (Story) => (
       <div className="w-full max-w-2xl p-8">
@@ -137,6 +140,7 @@ export const Disabled: Story = {
     },
     disabled: true,
   },
+  tags: ["vrt"],
   decorators: [
     (Story) => (
       <div className="w-full max-w-2xl p-8">
@@ -159,6 +163,7 @@ export const LimitedFormats: Story = {
     },
     acceptedFormats: ["image/jpeg", "image/jpg", "image/png"],
   },
+  tags: ["vrt"],
   decorators: [
     (Story) => (
       <div className="w-full max-w-2xl p-8">
@@ -185,6 +190,7 @@ export const WithPreview: Story = {
       createImageFile("city-night.webp", "#45B7D1", 3072),
     ],
   },
+  tags: ["vrt"],
   decorators: [
     (Story) => (
       <div className="w-full max-w-2xl p-8">
@@ -217,6 +223,7 @@ export const AlmostFull: Story = {
       createImageFile("image-9.jpg", "#FD79A8", 4608),
     ],
   },
+  tags: ["vrt"],
   decorators: [
     (Story) => (
       <div className="w-full max-w-2xl p-8">
