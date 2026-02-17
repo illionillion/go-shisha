@@ -64,12 +64,12 @@ export function PostCreateForm({
     setSlides(newSlides);
   }, []);
 
-  // プレビューURLのクリーンアップ
+  // プレビューURLのクリーンアップ（unmount時のみ）
   useEffect(() => {
     return () => {
       slides.forEach((slide) => URL.revokeObjectURL(slide.previewUrl));
     };
-  }, [slides]);
+  }, []);
 
   // Step 1 → Step 2
   const handleNext = useCallback(() => {
