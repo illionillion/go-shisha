@@ -157,10 +157,8 @@ export function PostDetailCarousel({
                   aria-current={i === current}
                   onClick={() => onDotClick(i)}
                   className={clsx([
-                    i === current ? "w-3" : "w-2",
-                    i === current ? "h-3" : "h-2",
                     "rounded-full",
-                    i === current ? "bg-white" : "bg-white/50",
+                    ...(i === current ? ["w-3", "h-3", "bg-white"] : ["w-2", "h-2", "bg-white/50"]),
                   ])}
                 />
               ))}
