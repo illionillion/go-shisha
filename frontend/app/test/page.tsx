@@ -22,7 +22,9 @@ export default async function TestPage() {
       <h1 className={clsx(["text-2xl", "font-bold", "mb-4"])}>API環境変数テスト</h1>
 
       <div className={clsx(["mb-8"])}>
-        <h2 className={clsx(["text-xl", "font-semibold", "mb-2"])}>🖥️ サーバー側（RSC）からのAPI呼び出し</h2>
+        <h2 className={clsx(["text-xl", "font-semibold", "mb-2"])}>
+          🖥️ サーバー側（RSC）からのAPI呼び出し
+        </h2>
         <p className={clsx(["text-sm", "text-gray-600", "mb-2"])}>使用URL: {apiBaseUrl}</p>
         {serverError ? (
           <div className={clsx(["bg-red-100", "p-4", "rounded"])}>
@@ -31,7 +33,9 @@ export default async function TestPage() {
         ) : (
           <div className={clsx(["bg-green-100", "p-4", "rounded"])}>
             <p className={clsx(["text-green-700"])}>成功！</p>
-            <pre className={clsx(["text-xs", "mt-2", "overflow-auto"])}>{JSON.stringify(serverData, null, 2)}</pre>
+            <pre className={clsx(["text-xs", "mt-2", "overflow-auto"])}>
+              {JSON.stringify(serverData, null, 2)}
+            </pre>
           </div>
         )}
       </div>

@@ -68,7 +68,18 @@ export function SlideEditForm({
             type="button"
             onClick={onPrevious}
             disabled={disabled || currentIndex === 1}
-            className={clsx(["rounded-md", "bg-gray-200", "px-3", "py-1", "text-sm", "font-medium", "text-gray-700", "hover:bg-gray-300", "disabled:cursor-not-allowed", "disabled:opacity-50"])}
+            className={clsx([
+              "rounded-md",
+              "bg-gray-200",
+              "px-3",
+              "py-1",
+              "text-sm",
+              "font-medium",
+              "text-gray-700",
+              "hover:bg-gray-300",
+              "disabled:cursor-not-allowed",
+              "disabled:opacity-50",
+            ])}
           >
             ← 前
           </button>
@@ -76,7 +87,18 @@ export function SlideEditForm({
             type="button"
             onClick={onNext}
             disabled={disabled || currentIndex === totalCount}
-            className={clsx(["rounded-md", "bg-gray-200", "px-3", "py-1", "text-sm", "font-medium", "text-gray-700", "hover:bg-gray-300", "disabled:cursor-not-allowed", "disabled:opacity-50"])}
+            className={clsx([
+              "rounded-md",
+              "bg-gray-200",
+              "px-3",
+              "py-1",
+              "text-sm",
+              "font-medium",
+              "text-gray-700",
+              "hover:bg-gray-300",
+              "disabled:cursor-not-allowed",
+              "disabled:opacity-50",
+            ])}
           >
             次 →
           </button>
@@ -84,7 +106,16 @@ export function SlideEditForm({
       </div>
 
       {/* 画像プレビュー */}
-      <div className={clsx(["relative", "aspect-square", "w-full", "overflow-hidden", "rounded-lg", "bg-gray-100"])}>
+      <div
+        className={clsx([
+          "relative",
+          "aspect-square",
+          "w-full",
+          "overflow-hidden",
+          "rounded-lg",
+          "bg-gray-100",
+        ])}
+      >
         <img
           src={slide.previewUrl}
           alt={`プレビュー ${currentIndex}`}
@@ -127,7 +158,19 @@ export function SlideEditForm({
           rows={4}
           maxLength={100}
           placeholder="この画像の説明を入力..."
-          className={clsx(["w-full", "rounded-md", "border", "border-gray-300", "p-3", "text-sm", "focus:border-blue-500", "focus:ring-1", "focus:ring-blue-500", "disabled:cursor-not-allowed", "disabled:bg-gray-100"])}
+          className={clsx([
+            "w-full",
+            "rounded-md",
+            "border",
+            "border-gray-300",
+            "p-3",
+            "text-sm",
+            "focus:border-blue-500",
+            "focus:ring-1",
+            "focus:ring-blue-500",
+            "disabled:cursor-not-allowed",
+            "disabled:bg-gray-100",
+          ])}
         />
         <p className={clsx(["mt-1", "text-right", "text-xs", "text-gray-500"])}>
           {slide.description.length} / 100文字

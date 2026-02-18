@@ -21,7 +21,17 @@ export const BackButton = () => {
         type="button"
         onClick={handleBack}
         aria-label="戻る"
-        className={clsx(["inline-flex", "items-center", "gap-2", "text-sm", "text-gray-700", "focus-visible:outline-none", "focus-visible:ring-2", "focus-visible:ring-offset-2", "focus-visible:ring-indigo-500"])}
+        className={clsx([
+          "inline-flex",
+          "items-center",
+          "gap-2",
+          "text-sm",
+          "text-gray-700",
+          "focus-visible:outline-none",
+          "focus-visible:ring-2",
+          "focus-visible:ring-offset-2",
+          "focus-visible:ring-indigo-500",
+        ])}
       >
         <PrevIcon className={clsx(["w-4", "h-4", "text-black"])} />
         <span>戻る</span>

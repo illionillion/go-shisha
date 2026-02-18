@@ -123,10 +123,21 @@ export function PostCreateForm({
             type="button"
             onClick={onCancel}
             disabled={disabled}
-            className={clsx(["rounded-full", "p-2", "hover:bg-gray-100", "disabled:cursor-not-allowed", "disabled:opacity-50"])}
+            className={clsx([
+              "rounded-full",
+              "p-2",
+              "hover:bg-gray-100",
+              "disabled:cursor-not-allowed",
+              "disabled:opacity-50",
+            ])}
             aria-label="閉じる"
           >
-            <svg className={clsx(["h-6", "w-6"])} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className={clsx(["h-6", "w-6"])}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -177,7 +188,17 @@ export function PostCreateForm({
                 type="button"
                 onClick={handleNext}
                 disabled={disabled || slides.length === 0}
-                className={clsx(["rounded-md", "bg-blue-500", "px-6", "py-2", "font-medium", "text-white", "hover:bg-blue-600", "disabled:cursor-not-allowed", "disabled:bg-gray-300"])}
+                className={clsx([
+                  "rounded-md",
+                  "bg-blue-500",
+                  "px-6",
+                  "py-2",
+                  "font-medium",
+                  "text-white",
+                  "hover:bg-blue-600",
+                  "disabled:cursor-not-allowed",
+                  "disabled:bg-gray-300",
+                ])}
               >
                 次へ
               </button>
@@ -190,7 +211,18 @@ export function PostCreateForm({
                 type="button"
                 onClick={handleBack}
                 disabled={disabled}
-                className={clsx(["rounded-md", "border", "border-gray-300", "px-6", "py-2", "font-medium", "text-gray-700", "hover:bg-gray-50", "disabled:cursor-not-allowed", "disabled:opacity-50"])}
+                className={clsx([
+                  "rounded-md",
+                  "border",
+                  "border-gray-300",
+                  "px-6",
+                  "py-2",
+                  "font-medium",
+                  "text-gray-700",
+                  "hover:bg-gray-50",
+                  "disabled:cursor-not-allowed",
+                  "disabled:opacity-50",
+                ])}
               >
                 戻る
               </button>
@@ -198,7 +230,17 @@ export function PostCreateForm({
                 type="button"
                 onClick={handleSubmit}
                 disabled={disabled}
-                className={clsx(["rounded-md", "bg-blue-500", "px-6", "py-2", "font-medium", "text-white", "hover:bg-blue-600", "disabled:cursor-not-allowed", "disabled:bg-gray-300"])}
+                className={clsx([
+                  "rounded-md",
+                  "bg-blue-500",
+                  "px-6",
+                  "py-2",
+                  "font-medium",
+                  "text-white",
+                  "hover:bg-blue-600",
+                  "disabled:cursor-not-allowed",
+                  "disabled:bg-gray-300",
+                ])}
               >
                 投稿する
               </button>

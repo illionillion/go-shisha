@@ -108,54 +108,110 @@ export const RegisterForm = ({
       <h2 className={clsx(["mb-6", "text-2xl", "font-bold"])}>登録</h2>
 
       {errorMessage && (
-        <div className={clsx(["mb-4", "rounded-md", "bg-red-50", "p-3", "text-sm", "text-red-600"])}>{errorMessage}</div>
+        <div
+          className={clsx(["mb-4", "rounded-md", "bg-red-50", "p-3", "text-sm", "text-red-600"])}
+        >
+          {errorMessage}
+        </div>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className={clsx(["space-y-4"])}>
         {/* メールアドレス */}
         <div>
-          <label htmlFor="email" className={clsx(["block", "text-sm", "font-medium", "text-gray-700"])}>
+          <label
+            htmlFor="email"
+            className={clsx(["block", "text-sm", "font-medium", "text-gray-700"])}
+          >
             メールアドレス
           </label>
           <input
             {...register("email")}
             id="email"
             type="email"
-            className={clsx(["mt-1", "block", "w-full", "rounded-md", "border", "border-gray-300", "px-3", "py-2", "shadow-sm", "focus:border-purple-500", "focus:outline-none", "focus:ring-purple-500"])}
+            className={clsx([
+              "mt-1",
+              "block",
+              "w-full",
+              "rounded-md",
+              "border",
+              "border-gray-300",
+              "px-3",
+              "py-2",
+              "shadow-sm",
+              "focus:border-purple-500",
+              "focus:outline-none",
+              "focus:ring-purple-500",
+            ])}
             placeholder="your@email.com"
             disabled={isLoading}
           />
-          {errors.email && <p className={clsx(["mt-1", "text-sm", "text-red-600"])}>{errors.email.message}</p>}
+          {errors.email && (
+            <p className={clsx(["mt-1", "text-sm", "text-red-600"])}>{errors.email.message}</p>
+          )}
         </div>
 
         {/* 表示名 */}
         <div>
-          <label htmlFor="displayName" className={clsx(["block", "text-sm", "font-medium", "text-gray-700"])}>
+          <label
+            htmlFor="displayName"
+            className={clsx(["block", "text-sm", "font-medium", "text-gray-700"])}
+          >
             表示名
           </label>
           <input
             {...register("displayName")}
             id="displayName"
             type="text"
-            className={clsx(["mt-1", "block", "w-full", "rounded-md", "border", "border-gray-300", "px-3", "py-2", "shadow-sm", "focus:border-purple-500", "focus:outline-none", "focus:ring-purple-500"])}
+            className={clsx([
+              "mt-1",
+              "block",
+              "w-full",
+              "rounded-md",
+              "border",
+              "border-gray-300",
+              "px-3",
+              "py-2",
+              "shadow-sm",
+              "focus:border-purple-500",
+              "focus:outline-none",
+              "focus:ring-purple-500",
+            ])}
             placeholder="山田太郎"
             disabled={isLoading}
           />
           {errors.displayName && (
-            <p className={clsx(["mt-1", "text-sm", "text-red-600"])}>{errors.displayName.message}</p>
+            <p className={clsx(["mt-1", "text-sm", "text-red-600"])}>
+              {errors.displayName.message}
+            </p>
           )}
         </div>
 
         {/* パスワード */}
         <div>
-          <label htmlFor="password" className={clsx(["block", "text-sm", "font-medium", "text-gray-700"])}>
+          <label
+            htmlFor="password"
+            className={clsx(["block", "text-sm", "font-medium", "text-gray-700"])}
+          >
             パスワード
           </label>
           <input
             {...register("password")}
             id="password"
             type="password"
-            className={clsx(["mt-1", "block", "w-full", "rounded-md", "border", "border-gray-300", "px-3", "py-2", "shadow-sm", "focus:border-purple-500", "focus:outline-none", "focus:ring-purple-500"])}
+            className={clsx([
+              "mt-1",
+              "block",
+              "w-full",
+              "rounded-md",
+              "border",
+              "border-gray-300",
+              "px-3",
+              "py-2",
+              "shadow-sm",
+              "focus:border-purple-500",
+              "focus:outline-none",
+              "focus:ring-purple-500",
+            ])}
             placeholder="••••••••••••"
             disabled={isLoading}
           />
@@ -167,19 +223,37 @@ export const RegisterForm = ({
 
         {/* パスワード（確認） */}
         <div>
-          <label htmlFor="confirmPassword" className={clsx(["block", "text-sm", "font-medium", "text-gray-700"])}>
+          <label
+            htmlFor="confirmPassword"
+            className={clsx(["block", "text-sm", "font-medium", "text-gray-700"])}
+          >
             パスワード（確認）
           </label>
           <input
             {...register("confirmPassword")}
             id="confirmPassword"
             type="password"
-            className={clsx(["mt-1", "block", "w-full", "rounded-md", "border", "border-gray-300", "px-3", "py-2", "shadow-sm", "focus:border-purple-500", "focus:outline-none", "focus:ring-purple-500"])}
+            className={clsx([
+              "mt-1",
+              "block",
+              "w-full",
+              "rounded-md",
+              "border",
+              "border-gray-300",
+              "px-3",
+              "py-2",
+              "shadow-sm",
+              "focus:border-purple-500",
+              "focus:outline-none",
+              "focus:ring-purple-500",
+            ])}
             placeholder="••••••••••••"
             disabled={isLoading}
           />
           {errors.confirmPassword && (
-            <p className={clsx(["mt-1", "text-sm", "text-red-600"])}>{errors.confirmPassword.message}</p>
+            <p className={clsx(["mt-1", "text-sm", "text-red-600"])}>
+              {errors.confirmPassword.message}
+            </p>
           )}
         </div>
 
@@ -187,7 +261,17 @@ export const RegisterForm = ({
         <button
           type="submit"
           disabled={isLoading}
-          className={clsx(["w-full", "rounded-md", "bg-purple-600", "px-4", "py-2", "text-white", "hover:bg-purple-700", "disabled:cursor-not-allowed", "disabled:opacity-50"])}
+          className={clsx([
+            "w-full",
+            "rounded-md",
+            "bg-purple-600",
+            "px-4",
+            "py-2",
+            "text-white",
+            "hover:bg-purple-700",
+            "disabled:cursor-not-allowed",
+            "disabled:opacity-50",
+          ])}
         >
           {isLoading ? "登録中..." : "登録"}
         </button>
@@ -195,7 +279,10 @@ export const RegisterForm = ({
         {/* ログインリンク */}
         <div className={clsx(["text-center", "text-sm", "text-gray-600"])}>
           既にアカウントをお持ちの方は
-          <Link href={loginHref ?? "/login"} className={clsx(["ml-1", "text-purple-600", "hover:underline"])}>
+          <Link
+            href={loginHref ?? "/login"}
+            className={clsx(["ml-1", "text-purple-600", "hover:underline"])}
+          >
             こちら
           </Link>
         </div>

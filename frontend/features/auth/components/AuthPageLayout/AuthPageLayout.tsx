@@ -34,7 +34,18 @@ export const AuthPageLayout = ({ children }: AuthPageLayoutProps) => {
       </div>
 
       {/* 右側: フォームエリア（PC: 40%, モバイル: 100%） */}
-      <div className={clsx(["flex", "w-full", "items-center", "justify-center", "bg-gray-50", "p-6", "md:w-2/5", "md:p-8"])}>
+      <div
+        className={clsx([
+          "flex",
+          "w-full",
+          "items-center",
+          "justify-center",
+          "bg-gray-50",
+          "p-6",
+          "md:w-2/5",
+          "md:p-8",
+        ])}
+      >
         <div className={clsx(["w-full", "max-w-md"])}>{children}</div>
       </div>
     </div>

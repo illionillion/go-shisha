@@ -15,7 +15,9 @@ export default async function Page({ params }: Props) {
   const id = Number(resolvedParams.id);
 
   if (Number.isNaN(id) || id <= 0) {
-    return <div className={clsx(["p-6", "text-center", "text-gray-600"])}>無効なユーザーIDです</div>;
+    return (
+      <div className={clsx(["p-6", "text-center", "text-gray-600"])}>無効なユーザーIDです</div>
+    );
   }
 
   // Fetch user first; only fetch posts if user exists to avoid unnecessary requests.

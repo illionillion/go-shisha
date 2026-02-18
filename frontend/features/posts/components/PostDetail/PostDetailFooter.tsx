@@ -32,12 +32,29 @@ export function PostDetailFooter({ currentSlide, optimisticLikes, isLiked, onLik
           onClick={onLike}
           aria-pressed={isLiked}
           className={clsx([
-            "inline-flex", "items-center", "gap-2", "px-3", "py-2", "border", "rounded", "transition-transform", "transform", "active:scale-95", "focus:outline-none", "focus:ring-2", "focus:ring-offset-1",
-            isLiked ? "text-red-500 bg-white" : "text-gray-700 bg-white"
+            "inline-flex",
+            "items-center",
+            "gap-2",
+            "px-3",
+            "py-2",
+            "border",
+            "rounded",
+            "transition-transform",
+            "transform",
+            "active:scale-95",
+            "focus:outline-none",
+            "focus:ring-2",
+            "focus:ring-offset-1",
+            isLiked ? "text-red-500 bg-white" : "text-gray-700 bg-white",
           ])}
         >
           {isLiked ? (
-            <svg className={clsx(["w-4", "h-4"])} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <svg
+              className={clsx(["w-4", "h-4"])}
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden
+            >
               <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
           ) : (
@@ -71,7 +88,23 @@ export function PostDetailFooter({ currentSlide, optimisticLikes, isLiked, onLik
             }
           }}
           aria-label="シェア"
-          className={clsx(["inline-flex", "items-center", "gap-2", "px-3", "py-2", "border", "rounded", "transition-transform", "transform", "active:scale-95", "focus:outline-none", "focus:ring-2", "focus:ring-offset-1", "text-gray-700", "bg-white"])}
+          className={clsx([
+            "inline-flex",
+            "items-center",
+            "gap-2",
+            "px-3",
+            "py-2",
+            "border",
+            "rounded",
+            "transition-transform",
+            "transform",
+            "active:scale-95",
+            "focus:outline-none",
+            "focus:ring-2",
+            "focus:ring-offset-1",
+            "text-gray-700",
+            "bg-white",
+          ])}
         >
           <svg
             className={clsx(["w-4", "h-4"])}

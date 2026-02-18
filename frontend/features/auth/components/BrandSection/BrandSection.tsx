@@ -26,7 +26,18 @@ const FeatureItem = ({ icon, text, delay }: FeatureItemProps) => {
       transition={{ duration: 0.5, delay }}
       className={clsx(["flex", "items-center", "gap-3"])}
     >
-      <div className={clsx(["flex", "h-12", "w-12", "items-center", "justify-center", "rounded-full", "bg-white/20", "text-2xl"])}>
+      <div
+        className={clsx([
+          "flex",
+          "h-12",
+          "w-12",
+          "items-center",
+          "justify-center",
+          "rounded-full",
+          "bg-white/20",
+          "text-2xl",
+        ])}
+      >
         {icon}
       </div>
       <p className={clsx(["text-lg", "font-medium"])}>{text}</p>
@@ -49,7 +60,23 @@ const FeatureItem = ({ icon, text, delay }: FeatureItemProps) => {
  */
 export const BrandSection = () => {
   return (
-    <div className={clsx(["flex", "h-full", "w-full", "flex-col", "items-center", "justify-center", "gap-12", "bg-gradient-to-br", "from-purple-600", "via-pink-500", "to-orange-400", "p-12", "text-white"])}>
+    <div
+      className={clsx([
+        "flex",
+        "h-full",
+        "w-full",
+        "flex-col",
+        "items-center",
+        "justify-center",
+        "gap-12",
+        "bg-gradient-to-br",
+        "from-purple-600",
+        "via-pink-500",
+        "to-orange-400",
+        "p-12",
+        "text-white",
+      ])}
+    >
       {/* ロゴ・キャッチコピーエリア */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

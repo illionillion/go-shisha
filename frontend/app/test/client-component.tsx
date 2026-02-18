@@ -9,8 +9,12 @@ export function ClientComponent() {
 
   return (
     <div>
-      <h2 className={clsx(["text-xl", "font-semibold", "mb-2"])}>🌐 クライアント側（ブラウザ）からのAPI呼び出し</h2>
-      <p className={clsx(["text-sm", "text-gray-600", "mb-2"])}>使用URL: {process.env.NEXT_PUBLIC_API_URL}</p>
+      <h2 className={clsx(["text-xl", "font-semibold", "mb-2"])}>
+        🌐 クライアント側（ブラウザ）からのAPI呼び出し
+      </h2>
+      <p className={clsx(["text-sm", "text-gray-600", "mb-2"])}>
+        使用URL: {process.env.NEXT_PUBLIC_API_URL}
+      </p>
       <p className={clsx(["text-xs", "text-gray-500", "mb-2"])}>
         ✨ TanStack Query使用（自動キャッシュ・リトライ・ポーリング対応）
       </p>
@@ -27,7 +31,9 @@ export function ClientComponent() {
       ) : (
         <div className={clsx(["bg-blue-100", "p-4", "rounded"])}>
           <p className={clsx(["text-blue-700"])}>成功！</p>
-          <pre className={clsx(["text-xs", "mt-2", "overflow-auto"])}>{JSON.stringify(data, null, 2)}</pre>
+          <pre className={clsx(["text-xs", "mt-2", "overflow-auto"])}>
+            {JSON.stringify(data, null, 2)}
+          </pre>
         </div>
       )}
     </div>

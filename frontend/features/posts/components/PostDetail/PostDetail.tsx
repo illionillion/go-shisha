@@ -59,7 +59,10 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
     return (
       <div className={clsx(["p-4", "text-center"])}>
         <p className={clsx(["text-red-600", "mb-2"])}>投稿を取得できませんでした。</p>
-        <button className={clsx(["px-4", "py-2", "bg-blue-500", "text-white", "rounded"])} onClick={() => refetch()}>
+        <button
+          className={clsx(["px-4", "py-2", "bg-blue-500", "text-white", "rounded"])}
+          onClick={() => refetch()}
+        >
           再試行
         </button>
       </div>
