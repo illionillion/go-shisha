@@ -184,9 +184,14 @@ export function ImageUploader({
               選択中の画像 ({files.length}/{maxFiles}枚)
             </p>
           </div>
-          <div className={clsx(["grid", "grid-cols-2", "gap-3", "sm:grid-cols-3", "md:grid-cols-4"])}>
+          <div
+            className={clsx(["grid", "grid-cols-2", "gap-3", "sm:grid-cols-3", "md:grid-cols-4"])}
+          >
             {files.map((file, index) => (
-              <div key={`${file.name}-${index}`} className={clsx(["group", "relative", "aspect-square"])}>
+              <div
+                key={`${file.name}-${index}`}
+                className={clsx(["group", "relative", "aspect-square"])}
+              >
                 <img
                   src={previewUrls[index]}
                   alt={`プレビュー ${index + 1}`}
@@ -196,12 +201,37 @@ export function ImageUploader({
                   type="button"
                   onClick={() => handleRemoveFile(index)}
                   disabled={disabled}
-                  className={clsx(["absolute", "-right-2", "-top-2", "rounded-full", "bg-red-500", "p-1.5", "text-white", "shadow-md", "transition-all", "hover:bg-red-600", "disabled:cursor-not-allowed", "disabled:opacity-50"])}
+                  className={clsx([
+                    "absolute",
+                    "-right-2",
+                    "-top-2",
+                    "rounded-full",
+                    "bg-red-500",
+                    "p-1.5",
+                    "text-white",
+                    "shadow-md",
+                    "transition-all",
+                    "hover:bg-red-600",
+                    "disabled:cursor-not-allowed",
+                    "disabled:opacity-50",
+                  ])}
                   aria-label={`画像${index + 1}を削除`}
                 >
                   <XIcon className={clsx(["h-3", "w-3"])} />
                 </button>
-                <div className={clsx(["absolute", "bottom-0", "left-0", "right-0", "rounded-b-lg", "bg-black", "bg-opacity-50", "px-2", "py-1"])}>
+                <div
+                  className={clsx([
+                    "absolute",
+                    "bottom-0",
+                    "left-0",
+                    "right-0",
+                    "rounded-b-lg",
+                    "bg-black",
+                    "bg-opacity-50",
+                    "px-2",
+                    "py-1",
+                  ])}
+                >
                   <p className={clsx(["truncate", "text-xs", "text-white"])}>{file.name}</p>
                   <p className={clsx(["text-xs", "text-gray-300"])}>
                     {(file.size / (1024 * 1024)).toFixed(2)} MB
@@ -233,7 +263,14 @@ export function ImageUploader({
             accept={acceptedFormats.join(",")}
             onChange={handleFileInputChange}
             disabled={disabled}
-            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+            className={clsx([
+              "absolute",
+              "inset-0",
+              "h-full",
+              "w-full",
+              "cursor-pointer",
+              "opacity-0",
+            ])}
             aria-label="画像ファイルを選択"
           />
 
