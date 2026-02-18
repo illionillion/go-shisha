@@ -1,3 +1,4 @@
+import { clsx } from "clsx";
 import { notFound } from "next/navigation";
 import { getUsersId, getUsersIdPosts } from "@/api/users";
 import { BackButton } from "@/components/BackButton";
@@ -14,7 +15,7 @@ export default async function Page({ params }: Props) {
   const id = Number(resolvedParams.id);
 
   if (Number.isNaN(id) || id <= 0) {
-    return <div className="p-6 text-center text-gray-600">無効なユーザーIDです</div>;
+    return <div className={clsx(["p-6", "text-center", "text-gray-600"])}>無効なユーザーIDです</div>;
   }
 
   // Fetch user first; only fetch posts if user exists to avoid unnecessary requests.
@@ -33,7 +34,7 @@ export default async function Page({ params }: Props) {
   return (
     <div>
       <ProfileHeader user={userResponse.data} />
-      <main className="max-w-3xl mx-auto py-6">
+      <main className={clsx(["max-w-3xl", "mx-auto", "py-6"])}>
         <BackButton />
         <TimelineContainer initialPosts={initialPosts} userId={id} />
       </main>

@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { clsx } from "clsx";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import type { RegisterInput } from "@/types/auth";
@@ -55,15 +56,15 @@ const PasswordStrengthIndicator = ({ password }: { password: string }) => {
   if (!password) return null;
 
   return (
-    <div className="mt-2">
-      <div className="flex items-center gap-2">
-        <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-200">
+    <div className={clsx(["mt-2"])}>
+      <div className={clsx(["flex", "items-center", "gap-2"])}>
+        <div className={clsx(["h-2", "flex-1", "overflow-hidden", "rounded-full", "bg-gray-200"])}>
           <div
-            className={`h-full transition-all ${getColor()}`}
+            className={clsx(["h-full", "transition-all", getColor()])}
             style={{ width: `${strength}%` }}
           />
         </div>
-        <span className="text-xs text-gray-600">{getLabel()}</span>
+        <span className={clsx(["text-xs", "text-gray-600"])}>{getLabel()}</span>
       </div>
     </div>
   );
@@ -103,82 +104,82 @@ export const RegisterForm = ({
   const password = watch("password", "");
 
   return (
-    <div className="w-full rounded-lg bg-white p-8 shadow-2xl">
-      <h2 className="mb-6 text-2xl font-bold">登録</h2>
+    <div className={clsx(["w-full", "rounded-lg", "bg-white", "p-8", "shadow-2xl"])}>
+      <h2 className={clsx(["mb-6", "text-2xl", "font-bold"])}>登録</h2>
 
       {errorMessage && (
-        <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">{errorMessage}</div>
+        <div className={clsx(["mb-4", "rounded-md", "bg-red-50", "p-3", "text-sm", "text-red-600"])}>{errorMessage}</div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className={clsx(["space-y-4"])}>
         {/* メールアドレス */}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="email" className={clsx(["block", "text-sm", "font-medium", "text-gray-700"])}>
             メールアドレス
           </label>
           <input
             {...register("email")}
             id="email"
             type="email"
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-purple-500"
+            className={clsx(["mt-1", "block", "w-full", "rounded-md", "border", "border-gray-300", "px-3", "py-2", "shadow-sm", "focus:border-purple-500", "focus:outline-none", "focus:ring-purple-500"])}
             placeholder="your@email.com"
             disabled={isLoading}
           />
-          {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
+          {errors.email && <p className={clsx(["mt-1", "text-sm", "text-red-600"])}>{errors.email.message}</p>}
         </div>
 
         {/* 表示名 */}
         <div>
-          <label htmlFor="displayName" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="displayName" className={clsx(["block", "text-sm", "font-medium", "text-gray-700"])}>
             表示名
           </label>
           <input
             {...register("displayName")}
             id="displayName"
             type="text"
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-purple-500"
+            className={clsx(["mt-1", "block", "w-full", "rounded-md", "border", "border-gray-300", "px-3", "py-2", "shadow-sm", "focus:border-purple-500", "focus:outline-none", "focus:ring-purple-500"])}
             placeholder="山田太郎"
             disabled={isLoading}
           />
           {errors.displayName && (
-            <p className="mt-1 text-sm text-red-600">{errors.displayName.message}</p>
+            <p className={clsx(["mt-1", "text-sm", "text-red-600"])}>{errors.displayName.message}</p>
           )}
         </div>
 
         {/* パスワード */}
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="password" className={clsx(["block", "text-sm", "font-medium", "text-gray-700"])}>
             パスワード
           </label>
           <input
             {...register("password")}
             id="password"
             type="password"
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-purple-500"
+            className={clsx(["mt-1", "block", "w-full", "rounded-md", "border", "border-gray-300", "px-3", "py-2", "shadow-sm", "focus:border-purple-500", "focus:outline-none", "focus:ring-purple-500"])}
             placeholder="••••••••••••"
             disabled={isLoading}
           />
           <PasswordStrengthIndicator password={password} />
           {errors.password && (
-            <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+            <p className={clsx(["mt-1", "text-sm", "text-red-600"])}>{errors.password.message}</p>
           )}
         </div>
 
         {/* パスワード（確認） */}
         <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="confirmPassword" className={clsx(["block", "text-sm", "font-medium", "text-gray-700"])}>
             パスワード（確認）
           </label>
           <input
             {...register("confirmPassword")}
             id="confirmPassword"
             type="password"
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-purple-500"
+            className={clsx(["mt-1", "block", "w-full", "rounded-md", "border", "border-gray-300", "px-3", "py-2", "shadow-sm", "focus:border-purple-500", "focus:outline-none", "focus:ring-purple-500"])}
             placeholder="••••••••••••"
             disabled={isLoading}
           />
           {errors.confirmPassword && (
-            <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
+            <p className={clsx(["mt-1", "text-sm", "text-red-600"])}>{errors.confirmPassword.message}</p>
           )}
         </div>
 
@@ -186,15 +187,15 @@ export const RegisterForm = ({
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-md bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className={clsx(["w-full", "rounded-md", "bg-purple-600", "px-4", "py-2", "text-white", "hover:bg-purple-700", "disabled:cursor-not-allowed", "disabled:opacity-50"])}
         >
           {isLoading ? "登録中..." : "登録"}
         </button>
 
         {/* ログインリンク */}
-        <div className="text-center text-sm text-gray-600">
+        <div className={clsx(["text-center", "text-sm", "text-gray-600"])}>
           既にアカウントをお持ちの方は
-          <Link href={loginHref ?? "/login"} className="ml-1 text-purple-600 hover:underline">
+          <Link href={loginHref ?? "/login"} className={clsx(["ml-1", "text-purple-600", "hover:underline"])}>
             こちら
           </Link>
         </div>

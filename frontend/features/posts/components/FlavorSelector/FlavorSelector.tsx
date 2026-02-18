@@ -1,5 +1,5 @@
 "use client";
-import clsx from "clsx";
+import { clsx } from "clsx";
 import type { FC } from "react";
 import { FlavorLabel } from "@/components/FlavorLabel";
 import type { Flavor } from "@/types/domain";
@@ -85,7 +85,7 @@ export const FlavorSelector: FC<FlavorSelectorProps> = ({
       >
         フレーバー（任意）
       </label>
-      <div className="flex items-center gap-2">
+      <div className={clsx(["flex", "items-center", "gap-2"])}>
         <select
           id="flavor-select"
           value={selectedFlavorId ?? ""}

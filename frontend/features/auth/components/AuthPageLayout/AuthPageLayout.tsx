@@ -1,3 +1,4 @@
+import { clsx } from "clsx";
 import type { ReactNode } from "react";
 import { BrandSection } from "../BrandSection";
 
@@ -26,15 +27,15 @@ export interface AuthPageLayoutProps {
  */
 export const AuthPageLayout = ({ children }: AuthPageLayoutProps) => {
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <div className={clsx(["flex", "min-h-screen", "flex-col", "md:flex-row"])}>
       {/* 左側: ブランドエリア（PC: 60%, モバイル: 非表示） */}
-      <div className="hidden md:flex md:w-3/5">
+      <div className={clsx(["hidden", "md:flex", "md:w-3/5"])}>
         <BrandSection />
       </div>
 
       {/* 右側: フォームエリア（PC: 40%, モバイル: 100%） */}
-      <div className="flex w-full items-center justify-center bg-gray-50 p-6 md:w-2/5 md:p-8">
-        <div className="w-full max-w-md">{children}</div>
+      <div className={clsx(["flex", "w-full", "items-center", "justify-center", "bg-gray-50", "p-6", "md:w-2/5", "md:p-8"])}>
+        <div className={clsx(["w-full", "max-w-md"])}>{children}</div>
       </div>
     </div>
   );
