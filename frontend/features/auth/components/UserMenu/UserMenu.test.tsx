@@ -245,5 +245,117 @@ describe("UserMenu", () => {
         expect(avatar).toHaveAttribute("aria-expanded", "false");
       });
     });
+
+    it("プロフィールリンクをクリックするとメニューが閉じる", async () => {
+      const user = userEvent.setup();
+      render(<UserMenu />, { wrapper: createWrapper() });
+
+      const avatar = screen.getByRole("button", { name: /メニュー/i });
+      await user.click(avatar);
+
+      await waitFor(() => {
+        expect(screen.getByText(/プロフィール/i)).toBeInTheDocument();
+      });
+
+      // プロフィールリンクをクリック
+      const profileLink = screen.getByText(/プロフィール/i);
+      await user.click(profileLink);
+
+      // メニューが閉じる
+      await waitFor(() => {
+        expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+      });
+    });
+
+    it("Escape以外のキーを押してもメニューが閉じない", async () => {
+      const user = userEvent.setup();
+      render(<UserMenu />, { wrapper: createWrapper() });
+
+      const avatar = screen.getByRole("button", { name: /メニュー/i });
+      await user.click(avatar);
+
+      await waitFor(() => {
+        expect(screen.getByText(/ログアウト/i)).toBeInTheDocument();
+      });
+
+      // Escape以外のキー（a）を押す
+      await user.keyboard("a");
+
+      // メニューは閉じない
+      expect(screen.getByText(/ログアウト/i)).toBeInTheDocument();
+    });
+
+    it("display_nameが空のユーザーでもアバターが表示される", () => {
+      useAuthStore.setState({ user: { ...mockUser, display_name: "" }, isLoading: false });
+      render(<UserMenu />, { wrapper: createWrapper() });
+
+      const avatar = screen.getByRole("button", { name: /メニュー/i });
+      expect(avatar).toBeInTheDocument();
+    });
+
+    it("ログアウト中はメニューを再度開くとボタンが「ログアウト中...」表示かつdisabledになる", async () => {
+      const user = userEvent.setup();
+      const { authApi } = await import("../../api/authApi");
+      let resolveLogout: () => void;
+      const mockLogout = vi.fn().mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveLogout = resolve;
+          })
+      );
+      vi.mocked(authApi.logout).mockImplementation(mockLogout);
+
+      render(<UserMenu />, { wrapper: createWrapper() });
+
+      // メニューを開く
+      const avatar = screen.getByRole("button", { name: /メニュー/i });
+      await user.click(avatar);
+
+      // ログアウトボタンをクリック（メニューが閉じてmutationが開始）
+      const logoutButton = await screen.findByText(/^ログアウト$/i);
+      await user.click(logoutButton);
+
+      // mutationが開始されたことを確認
+      await waitFor(() => {
+        expect(mockLogout).toHaveBeenCalledTimes(1);
+      });
+
+      // メニューを再度開く（mutationが進行中）
+      await user.click(avatar);
+
+      // ログアウト中の表示・disabled状態を確認
+      await waitFor(() => {
+        expect(screen.getByText(/ログアウト中\.\.\./i)).toBeInTheDocument();
+        expect(screen.getByRole("menuitem", { name: /ログアウト中\.\.\./i })).toBeDisabled();
+      });
+
+      // 完了
+      resolveLogout!();
+    });
+
+    it("ログアウトに失敗した場合はアラートが表示される", async () => {
+      const user = userEvent.setup();
+      const { authApi } = await import("../../api/authApi");
+      const mockLogout = vi.fn().mockRejectedValue(new Error("Logout failed"));
+      vi.mocked(authApi.logout).mockImplementation(mockLogout);
+
+      const alertMock = vi.spyOn(window, "alert").mockImplementation(() => {});
+
+      render(<UserMenu />, { wrapper: createWrapper() });
+
+      const avatar = screen.getByRole("button", { name: /メニュー/i });
+      await user.click(avatar);
+
+      const logoutButton = await screen.findByText(/ログアウト/i);
+      await user.click(logoutButton);
+
+      await waitFor(() => {
+        expect(alertMock).toHaveBeenCalledWith(
+          "ログアウトに失敗しました。時間をおいて再度お試しください。"
+        );
+      });
+
+      alertMock.mockRestore();
+    });
   });
 });

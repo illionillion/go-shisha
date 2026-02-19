@@ -261,5 +261,67 @@ describe("AuthHydrator", () => {
         expect(state.isLoading).toBe(false);
       });
     });
+
+    it("isError=true かつ error が falsy の場合: isLoading が false になる", async () => {
+      queryClient = createTestQueryClient();
+
+      vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
+        queryKey: ["auth", "me"],
+
+        queryFn: async () => {
+          throw null; // error が null になる（falsy）
+        },
+      } as unknown as ReturnType<typeof getGetAuthMeQueryOptions>);
+
+      renderWithClient(queryClient);
+
+      await waitFor(() => {
+        const state = useAuthStore.getState();
+        expect(state.isLoading).toBe(false);
+      });
+    });
+
+    it("pathname が null の場合: スキップしない（通常のパスとして扱われる）", async () => {
+      mockUsePathname.mockReturnValue(null as unknown as string);
+
+      queryClient = createTestQueryClient();
+
+      vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
+        queryKey: ["auth", "me"],
+        queryFn: async () => ({
+          data: { user: mockUser },
+          status: 200,
+          headers: new Headers(),
+        }),
+      } as unknown as ReturnType<typeof getGetAuthMeQueryOptions>);
+
+      renderWithClient(queryClient);
+
+      await waitFor(() => {
+        const state = useAuthStore.getState();
+        expect(state.user).toEqual(mockUser);
+        expect(state.isLoading).toBe(false);
+      });
+    });
+
+    it("クエリが非2xxレスポンスを返した場合（エラーなし）: ローディング状態は変化しない", async () => {
+      queryClient = createTestQueryClient();
+
+      vi.mocked(getGetAuthMeQueryOptions).mockReturnValue({
+        queryKey: ["auth", "me"],
+        queryFn: async () => ({
+          data: {},
+          status: 400,
+          headers: new Headers(),
+        }),
+      } as unknown as ReturnType<typeof getGetAuthMeQueryOptions>);
+
+      renderWithClient(queryClient);
+
+      // 非2xxレスポンスかつisErrorがfalseの場合、条件に一致せずローディング状態が変化しない
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      const state = useAuthStore.getState();
+      expect(state.isLoading).toBe(true);
+    });
   });
 });
