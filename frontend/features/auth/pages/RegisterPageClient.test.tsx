@@ -318,4 +318,48 @@ describe("RegisterPageClient", () => {
       expect(loginLink).toHaveAttribute("href", "/login?redirectUrl=encrypted-token-abc");
     });
   });
+
+  describe("エラーメッセージの種類", () => {
+    it("409エラー時にメールアドレス重複エラーメッセージが表示される", async () => {
+      const user = userEvent.setup();
+      const { authApi } = await import("../api/authApi");
+      vi.mocked(authApi.register).mockRejectedValue({
+        status: 409,
+        error: "Conflict",
+      });
+
+      render(<RegisterPageClient />, { wrapper: createWrapper() });
+
+      await user.type(screen.getByLabelText(/表示名/i), "新規ユーザー");
+      await user.type(screen.getByLabelText(/メールアドレス/i), "existing@example.com");
+      await user.type(screen.getByLabelText(/^パスワード$/i), "Password123!");
+      await user.type(screen.getByLabelText(/パスワード（確認）/i), "Password123!");
+      await user.click(screen.getByRole("button", { name: /登録/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/このメールアドレスは既に使用されています/i)).toBeInTheDocument();
+      });
+    });
+
+    it("その他のエラー時に通信エラーメッセージが表示される", async () => {
+      const user = userEvent.setup();
+      const { authApi } = await import("../api/authApi");
+      vi.mocked(authApi.register).mockRejectedValue({
+        status: 500,
+        error: "Internal Server Error",
+      });
+
+      render(<RegisterPageClient />, { wrapper: createWrapper() });
+
+      await user.type(screen.getByLabelText(/表示名/i), "新規ユーザー");
+      await user.type(screen.getByLabelText(/メールアドレス/i), "newuser@example.com");
+      await user.type(screen.getByLabelText(/^パスワード$/i), "Password123!");
+      await user.type(screen.getByLabelText(/パスワード（確認）/i), "Password123!");
+      await user.click(screen.getByRole("button", { name: /登録/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/通信エラーが発生しました/i)).toBeInTheDocument();
+      });
+    });
+  });
 });

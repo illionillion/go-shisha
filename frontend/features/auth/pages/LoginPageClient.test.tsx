@@ -276,5 +276,118 @@ describe("LoginPageClient", () => {
         expect(mockReplace).toHaveBeenCalledWith("/");
       });
     });
+
+    it("fetchが例外を投げた場合、デフォルトの/へリダイレクトする", async () => {
+      const { authApi } = await import("../api/authApi");
+      const user = userEvent.setup();
+
+      mockSearchParams.get.mockImplementation((key: string) =>
+        key === "redirectUrl" ? "some-token" : null
+      );
+
+      vi.mocked(authApi.login).mockResolvedValue({ user: mockUser });
+      global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
+
+      render(<LoginPageClient />, { wrapper: createWrapper() });
+
+      const emailInput = screen.getByLabelText(/メールアドレス/i);
+      const passwordInput = screen.getByLabelText(/パスワード/i);
+      const submitButton = screen.getByRole("button", { name: /ログイン/i });
+
+      await user.type(emailInput, "test@example.com");
+      await user.type(passwordInput, "Password123!");
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockReplace).toHaveBeenCalledWith("/");
+      });
+    });
+
+    it("redirectPathが安全でないパスの場合、デフォルトの/へリダイレクトする", async () => {
+      const { authApi } = await import("../api/authApi");
+      const user = userEvent.setup();
+
+      mockSearchParams.get.mockImplementation((key: string) =>
+        key === "redirectUrl" ? "some-token" : null
+      );
+
+      vi.mocked(authApi.login).mockResolvedValue({ user: mockUser });
+      // path は存在するが安全でない（/login はisSafeRedirectPathがfalseを返す）
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ path: "/login" }),
+      });
+
+      render(<LoginPageClient />, { wrapper: createWrapper() });
+
+      await user.type(screen.getByLabelText(/メールアドレス/i), "test@example.com");
+      await user.type(screen.getByLabelText(/パスワード/i), "Password123!");
+      await user.click(screen.getByRole("button", { name: /ログイン/i }));
+
+      await waitFor(() => {
+        expect(mockReplace).toHaveBeenCalledWith("/");
+      });
+    });
+  });
+
+  describe("フォーム送信（ユーザー情報の取り扱い）", () => {
+    it("ログインレスポンスにuserが含まれない場合、ストアのuserがnullになる", async () => {
+      const user = userEvent.setup();
+      const { authApi } = await import("../api/authApi");
+      // user が undefined の場合（AuthResponse の user は optional）
+      vi.mocked(authApi.login).mockResolvedValue({ user: undefined });
+
+      render(<LoginPageClient />, { wrapper: createWrapper() });
+
+      await user.type(screen.getByLabelText(/メールアドレス/i), "test@example.com");
+      await user.type(screen.getByLabelText(/パスワード/i), "Password123!");
+      await user.click(screen.getByRole("button", { name: /ログイン/i }));
+
+      await waitFor(() => {
+        expect(useAuthStore.getState().user).toBeNull();
+      });
+
+      expect(mockReplace).toHaveBeenCalledWith("/");
+    });
+  });
+
+  describe("エラーメッセージの種類", () => {
+    it("400エラー時にエラーメッセージが表示される", async () => {
+      const user = userEvent.setup();
+      const { authApi } = await import("../api/authApi");
+      vi.mocked(authApi.login).mockRejectedValue({
+        status: 400,
+        error: "Bad Request",
+      });
+
+      render(<LoginPageClient />, { wrapper: createWrapper() });
+
+      await user.type(screen.getByLabelText(/メールアドレス/i), "test@example.com");
+      await user.type(screen.getByLabelText(/パスワード/i), "Password123!");
+      await user.click(screen.getByRole("button", { name: /ログイン/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/入力値を確認してください/i)).toBeInTheDocument();
+      });
+    });
+
+    it("その他のエラー時に通信エラーメッセージが表示される", async () => {
+      const user = userEvent.setup();
+      const { authApi } = await import("../api/authApi");
+      vi.mocked(authApi.login).mockRejectedValue({
+        status: 500,
+        error: "Internal Server Error",
+      });
+
+      render(<LoginPageClient />, { wrapper: createWrapper() });
+
+      await user.type(screen.getByLabelText(/メールアドレス/i), "test@example.com");
+      await user.type(screen.getByLabelText(/パスワード/i), "Password123!");
+      await user.click(screen.getByRole("button", { name: /ログイン/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/通信エラーが発生しました/i)).toBeInTheDocument();
+      });
+    });
   });
 });
