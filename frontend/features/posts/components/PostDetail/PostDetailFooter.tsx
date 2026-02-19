@@ -45,7 +45,8 @@ export function PostDetailFooter({ currentSlide, optimisticLikes, isLiked, onLik
             "focus:outline-none",
             "focus:ring-2",
             "focus:ring-offset-1",
-            isLiked ? "text-red-500 bg-white" : "text-gray-700 bg-white",
+            "bg-white",
+            ...(isLiked ? ["text-red-500"] : ["text-gray-700"]),
           ])}
         >
           {isLiked ? (
