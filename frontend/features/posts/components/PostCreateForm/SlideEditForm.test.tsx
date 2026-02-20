@@ -105,7 +105,7 @@ describe("SlideEditForm", () => {
       );
 
       const textarea = screen.getByRole("textbox");
-      // fire change event directly with a value that exceeds 100 chars
+      // Fire change event directly with a value that exceeds 100 chars
       fireEvent.change(textarea, { target: { value: "a".repeat(101) } });
 
       expect(onUpdate).not.toHaveBeenCalled();
