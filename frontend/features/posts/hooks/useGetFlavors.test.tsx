@@ -155,5 +155,22 @@ describe("useGetFlavors", () => {
 
       expect(flavors).toBeUndefined();
     });
+
+    it("非成功レスポンス（4xx/5xx）の場合はundefinedを返す", () => {
+      const mockResponse = {
+        data: {
+          data: { error: "Not Found" },
+          status: 404,
+          headers: new Headers(),
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useGetFlavors>;
+
+      const flavors = getFlavorsData(mockResponse);
+
+      expect(flavors).toBeUndefined();
+    });
   });
 });

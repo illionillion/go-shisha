@@ -61,4 +61,22 @@ describe("PostDetailCarousel", () => {
     await userEvent.click(dot2);
     expect(onDotClick).toHaveBeenCalledWith(1);
   });
+
+  test("スライドのtextがない場合にalt属性が「投稿画像」になる", () => {
+    const slides = [{ image_url: "https://example.com/a.jpg", text: undefined }];
+
+    render(
+      <PostDetailCarousel
+        slides={slides as unknown as Array<Record<string, unknown>>}
+        current={0}
+        onPrev={vi.fn()}
+        onNext={vi.fn()}
+        onDotClick={vi.fn()}
+        handleBack={vi.fn()}
+      />
+    );
+
+    const img = screen.getByRole("img");
+    expect(img).toHaveAttribute("alt", "投稿画像");
+  });
 });
