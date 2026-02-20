@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
+import { clsx } from "clsx";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -63,7 +64,7 @@ export const UserMenu = () => {
   // 初回ハイドレーション中は非インタラクティブなプレースホルダ（DefaultAvatar）を表示
   if (isLoading) {
     return (
-      <div className="relative">
+      <div className={clsx(["relative"])}>
         <DefaultAvatar size={40} />
       </div>
     );
@@ -74,7 +75,16 @@ export const UserMenu = () => {
     return (
       <Link
         href="/login"
-        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+        className={clsx([
+          "px-4",
+          "py-2",
+          "text-sm",
+          "font-medium",
+          "text-white",
+          "bg-blue-600",
+          "rounded-lg",
+          "hover:bg-blue-700",
+        ])}
       >
         ログイン
       </Link>
@@ -83,10 +93,10 @@ export const UserMenu = () => {
 
   // ログイン済み状態
   return (
-    <div className="relative" ref={menuRef}>
+    <div className={clsx(["relative"])} ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 focus:outline-none"
+        className={clsx(["flex", "items-center", "space-x-2", "focus:outline-none"])}
         aria-label="ユーザーメニュー"
         aria-haspopup="true"
         aria-expanded={isOpen}
@@ -96,13 +106,32 @@ export const UserMenu = () => {
 
       {isOpen && (
         <div
-          className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50"
+          className={clsx([
+            "absolute",
+            "right-0",
+            "mt-2",
+            "w-48",
+            "bg-white",
+            "rounded-lg",
+            "shadow-lg",
+            "border",
+            "border-gray-200",
+            "py-1",
+            "z-50",
+          ])}
           role="menu"
           aria-orientation="vertical"
         >
           <Link
             href={`/profile/${user.id}`}
-            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            className={clsx([
+              "block",
+              "px-4",
+              "py-2",
+              "text-sm",
+              "text-gray-700",
+              "hover:bg-gray-100",
+            ])}
             onClick={() => setIsOpen(false)}
             role="menuitem"
           >
@@ -114,7 +143,16 @@ export const UserMenu = () => {
               logout();
             }}
             disabled={isPending}
-            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 disabled:opacity-50"
+            className={clsx([
+              "w-full",
+              "text-left",
+              "px-4",
+              "py-2",
+              "text-sm",
+              "text-red-600",
+              "hover:bg-gray-100",
+              "disabled:opacity-50",
+            ])}
             role="menuitem"
           >
             {isPending ? "ログアウト中..." : "ログアウト"}

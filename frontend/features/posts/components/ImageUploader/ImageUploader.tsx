@@ -1,4 +1,5 @@
 "use client";
+import { clsx } from "clsx";
 import { useCallback, useEffect, useState } from "react";
 import { PlusIcon, XIcon } from "@/components/icons";
 
@@ -174,35 +175,65 @@ export function ImageUploader({
   }, [files]);
 
   return (
-    <div className="w-full">
+    <div className={clsx(["w-full"])}>
       {/* プレビュー表示 */}
       {files.length > 0 && (
-        <div className="mb-4">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-sm font-medium text-gray-700">
+        <div className={clsx(["mb-4"])}>
+          <div className={clsx(["mb-2", "flex", "items-center", "justify-between"])}>
+            <p className={clsx(["text-sm", "font-medium", "text-gray-700"])}>
               選択中の画像 ({files.length}/{maxFiles}枚)
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+          <div
+            className={clsx(["grid", "grid-cols-2", "gap-3", "sm:grid-cols-3", "md:grid-cols-4"])}
+          >
             {files.map((file, index) => (
-              <div key={`${file.name}-${index}`} className="group relative aspect-square">
+              <div
+                key={`${file.name}-${index}`}
+                className={clsx(["group", "relative", "aspect-square"])}
+              >
                 <img
                   src={previewUrls[index]}
                   alt={`プレビュー ${index + 1}`}
-                  className="h-full w-full rounded-lg object-cover"
+                  className={clsx(["h-full", "w-full", "rounded-lg", "object-cover"])}
                 />
                 <button
                   type="button"
                   onClick={() => handleRemoveFile(index)}
                   disabled={disabled}
-                  className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1.5 text-white shadow-md transition-all hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={clsx([
+                    "absolute",
+                    "-right-2",
+                    "-top-2",
+                    "rounded-full",
+                    "bg-red-500",
+                    "p-1.5",
+                    "text-white",
+                    "shadow-md",
+                    "transition-all",
+                    "hover:bg-red-600",
+                    "disabled:cursor-not-allowed",
+                    "disabled:opacity-50",
+                  ])}
                   aria-label={`画像${index + 1}を削除`}
                 >
-                  <XIcon className="h-3 w-3" />
+                  <XIcon className={clsx(["h-3", "w-3"])} />
                 </button>
-                <div className="absolute bottom-0 left-0 right-0 rounded-b-lg bg-black bg-opacity-50 px-2 py-1">
-                  <p className="truncate text-xs text-white">{file.name}</p>
-                  <p className="text-xs text-gray-300">
+                <div
+                  className={clsx([
+                    "absolute",
+                    "bottom-0",
+                    "left-0",
+                    "right-0",
+                    "rounded-b-lg",
+                    "bg-black",
+                    "bg-opacity-50",
+                    "px-2",
+                    "py-1",
+                  ])}
+                >
+                  <p className={clsx(["truncate", "text-xs", "text-white"])}>{file.name}</p>
+                  <p className={clsx(["text-xs", "text-gray-300"])}>
                     {(file.size / (1024 * 1024)).toFixed(2)} MB
                   </p>
                 </div>
@@ -232,23 +263,30 @@ export function ImageUploader({
             accept={acceptedFormats.join(",")}
             onChange={handleFileInputChange}
             disabled={disabled}
-            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+            className={clsx([
+              "absolute",
+              "inset-0",
+              "h-full",
+              "w-full",
+              "cursor-pointer",
+              "opacity-0",
+            ])}
             aria-label="画像ファイルを選択"
           />
 
-          <PlusIcon className="mb-4 h-12 w-12 text-gray-400" />
+          <PlusIcon className={clsx(["mb-4", "h-12", "w-12", "text-gray-400"])} />
 
-          <p className="mb-2 text-sm font-medium text-gray-700">
+          <p className={clsx(["mb-2", "text-sm", "font-medium", "text-gray-700"])}>
             {files.length === 0 ? "クリックまたはドラッグ&ドロップで画像を選択" : "画像を追加"}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className={clsx(["text-xs", "text-gray-500"])}>
             JPG、PNG、WebP、GIF ({maxSizeMB}MB以下、あと{maxFiles - files.length}枚)
           </p>
         </div>
       )}
 
       {error && (
-        <p className="mt-2 text-sm text-red-600" role="alert">
+        <p className={clsx(["mt-2", "text-sm", "text-red-600"])} role="alert">
           {error}
         </p>
       )}

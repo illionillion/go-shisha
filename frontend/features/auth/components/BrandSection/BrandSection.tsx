@@ -1,5 +1,6 @@
 "use client";
 
+import { clsx } from "clsx";
 import { motion } from "framer-motion";
 
 /**
@@ -23,12 +24,23 @@ const FeatureItem = ({ icon, text, delay }: FeatureItemProps) => {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, delay }}
-      className="flex items-center gap-3"
+      className={clsx(["flex", "items-center", "gap-3"])}
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-2xl">
+      <div
+        className={clsx([
+          "flex",
+          "h-12",
+          "w-12",
+          "items-center",
+          "justify-center",
+          "rounded-full",
+          "bg-white/20",
+          "text-2xl",
+        ])}
+      >
         {icon}
       </div>
-      <p className="text-lg font-medium">{text}</p>
+      <p className={clsx(["text-lg", "font-medium"])}>{text}</p>
     </motion.div>
   );
 };
@@ -48,20 +60,36 @@ const FeatureItem = ({ icon, text, delay }: FeatureItemProps) => {
  */
 export const BrandSection = () => {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-12 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-12 text-white">
+    <div
+      className={clsx([
+        "flex",
+        "h-full",
+        "w-full",
+        "flex-col",
+        "items-center",
+        "justify-center",
+        "gap-12",
+        "bg-gradient-to-br",
+        "from-purple-600",
+        "via-pink-500",
+        "to-orange-400",
+        "p-12",
+        "text-white",
+      ])}
+    >
       {/* ロゴ・キャッチコピーエリア */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-center"
+        className={clsx(["text-center"])}
       >
-        <h1 className="text-5xl font-bold">Go Shisha</h1>
-        <p className="mt-4 text-2xl">あなたのシーシャ体験を共有しよう</p>
+        <h1 className={clsx(["text-5xl", "font-bold"])}>Go Shisha</h1>
+        <p className={clsx(["mt-4", "text-2xl"])}>あなたのシーシャ体験を共有しよう</p>
       </motion.div>
 
       {/* 特徴リスト */}
-      <div className="space-y-6">
+      <div className={clsx(["space-y-6"])}>
         <FeatureItem icon="📸" text="投稿でシェア" delay={0.2} />
         <FeatureItem icon="❤️" text="いいねで交流" delay={0.3} />
         <FeatureItem icon="👥" text="コミュニティ参加" delay={0.4} />

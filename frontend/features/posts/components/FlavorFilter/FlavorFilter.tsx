@@ -1,6 +1,6 @@
 "use client";
 
-import clsx from "clsx";
+import { clsx } from "clsx";
 import type { Flavor } from "@/types/domain";
 
 interface FlavorFilterProps {
@@ -22,9 +22,11 @@ export function FlavorFilter({ flavors, selectedFlavorIds, onFlavorToggle }: Fla
   }
 
   return (
-    <div className="mb-6">
-      <h2 className="mb-3 text-sm font-semibold text-gray-700">フレーバーで絞り込み</h2>
-      <div className="flex flex-wrap gap-2">
+    <div className={clsx(["mb-6"])}>
+      <h2 className={clsx(["mb-3", "text-sm", "font-semibold", "text-gray-700"])}>
+        フレーバーで絞り込み
+      </h2>
+      <div className={clsx(["flex", "flex-wrap", "gap-2"])}>
         {flavors.map((flavor) => {
           const isSelected = selectedFlavorIds.includes(flavor.id ?? 0);
           return (
@@ -120,7 +122,7 @@ export function FlavorFilter({ flavors, selectedFlavorIds, onFlavorToggle }: Fla
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-3 w-3 text-gray-700"
+                className={clsx(["h-3", "w-3", "text-gray-700"])}
               >
                 <path
                   d="M6 6L18 18"

@@ -1,3 +1,4 @@
+import { clsx } from "clsx";
 import Link from "next/link";
 import type { FC } from "react";
 import type { User } from "@/types/domain";
@@ -17,19 +18,38 @@ export const ProfileHeader: FC<Props> = ({ user }) => {
   const external = user.external_url ?? null;
 
   return (
-    <div className="w-full bg-white border-b border-gray-100">
-      <div className="max-w-3xl mx-auto px-4 py-6 flex items-start space-x-4">
-        <Avatar src={user.icon_url ?? null} alt={name} size={80} className="flex-shrink-0" />
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-gray-900">{name}</h2>
+    <div className={clsx(["w-full", "bg-white", "border-b", "border-gray-100"])}>
+      <div
+        className={clsx([
+          "max-w-3xl",
+          "mx-auto",
+          "px-4",
+          "py-6",
+          "flex",
+          "items-start",
+          "space-x-4",
+        ])}
+      >
+        <Avatar
+          src={user.icon_url ?? null}
+          alt={name}
+          size={80}
+          className={clsx(["flex-shrink-0"])}
+        />
+        <div className={clsx(["flex-1"])}>
+          <div className={clsx(["flex", "items-center", "justify-between"])}>
+            <h2 className={clsx(["text-2xl", "font-semibold", "text-gray-900"])}>{name}</h2>
           </div>
-          {bio && <p className="mt-2 text-sm text-gray-700 whitespace-pre-wrap">{bio}</p>}
+          {bio && (
+            <p className={clsx(["mt-2", "text-sm", "text-gray-700", "whitespace-pre-wrap"])}>
+              {bio}
+            </p>
+          )}
           {external && (
-            <p className="mt-3">
+            <p className={clsx(["mt-3"])}>
               <Link
                 href={external}
-                className="text-sm text-blue-600 hover:underline"
+                className={clsx(["text-sm", "text-blue-600", "hover:underline"])}
                 target="_blank"
                 rel="noopener noreferrer"
               >

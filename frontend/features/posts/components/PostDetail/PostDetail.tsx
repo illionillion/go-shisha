@@ -1,5 +1,6 @@
 "use client";
 
+import { clsx } from "clsx";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useGetPostsId } from "@/api/posts";
@@ -46,19 +47,22 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
 
   if (isLoading) {
     return (
-      <div className="p-4">
-        <div className="h-80 bg-gray-200 rounded-lg mb-4" />
-        <div className="h-6 bg-gray-200 rounded w-3/4 mb-2" />
-        <div className="h-4 bg-gray-200 rounded w-1/2" />
+      <div className={clsx(["p-4"])}>
+        <div className={clsx(["h-80", "bg-gray-200", "rounded-lg", "mb-4"])} />
+        <div className={clsx(["h-6", "bg-gray-200", "rounded", "w-3/4", "mb-2"])} />
+        <div className={clsx(["h-4", "bg-gray-200", "rounded", "w-1/2"])} />
       </div>
     );
   }
 
   if (isError || !post) {
     return (
-      <div className="p-4 text-center">
-        <p className="text-red-600 mb-2">投稿を取得できませんでした。</p>
-        <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={() => refetch()}>
+      <div className={clsx(["p-4", "text-center"])}>
+        <p className={clsx(["text-red-600", "mb-2"])}>投稿を取得できませんでした。</p>
+        <button
+          className={clsx(["px-4", "py-2", "bg-blue-500", "text-white", "rounded"])}
+          onClick={() => refetch()}
+        >
           再試行
         </button>
       </div>
@@ -96,8 +100,8 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
   const currentSlide = slides.length > 0 ? slides[current] : undefined;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
-      <div className="flex flex-col md:flex-row gap-6">
+    <div className={clsx(["mx-auto", "max-w-3xl", "px-4", "py-6"])}>
+      <div className={clsx(["flex", "flex-col", "md:flex-row", "gap-6"])}>
         <PostDetailCarousel
           slides={slides}
           current={current}

@@ -227,7 +227,7 @@ export function PostCard({ post, onLike, onUnlike, autoPlayInterval = 3000 }: Po
         )}
 
         <div className={clsx(["absolute", "bottom-0", "left-0", "right-0", "p-4", "text-white"])}>
-          <div className="flex items-center gap-3 mb-2">
+          <div className={clsx(["flex", "items-center", "gap-3", "mb-2"])}>
             <Avatar
               src={post.user?.icon_url ?? null}
               alt={post.user?.display_name ?? "ユーザー"}
@@ -235,7 +235,9 @@ export function PostCard({ post, onLike, onUnlike, autoPlayInterval = 3000 }: Po
               userId={post.user?.id}
               linkMode="router"
             />
-            <div className="text-sm font-medium">{post.user?.display_name ?? "匿名"}</div>
+            <div className={clsx(["text-sm", "font-medium"])}>
+              {post.user?.display_name ?? "匿名"}
+            </div>
           </div>
 
           <p className={clsx(["text-sm", "line-clamp-3"])}>{displayText}</p>

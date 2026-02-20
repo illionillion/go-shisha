@@ -1,4 +1,5 @@
 "use client";
+import { clsx } from "clsx";
 import { useCallback, useEffect, useState } from "react";
 import type { EditableSlide, Flavor } from "@/types/domain";
 import { ImageUploader } from "../ImageUploader";
@@ -113,19 +114,30 @@ export function PostCreateForm({
   }, [slides, onSubmit]);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className={clsx(["flex", "h-full", "flex-col"])}>
       {/* ヘッダー */}
-      <div className="border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">投稿を作成</h2>
+      <div className={clsx(["border-b", "border-gray-200", "px-6", "py-4"])}>
+        <div className={clsx(["flex", "items-center", "justify-between"])}>
+          <h2 className={clsx(["text-xl", "font-bold"])}>投稿を作成</h2>
           <button
             type="button"
             onClick={onCancel}
             disabled={disabled}
-            className="rounded-full p-2 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className={clsx([
+              "rounded-full",
+              "p-2",
+              "hover:bg-gray-100",
+              "disabled:cursor-not-allowed",
+              "disabled:opacity-50",
+            ])}
             aria-label="閉じる"
           >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className={clsx(["h-6", "w-6"])}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -138,9 +150,9 @@ export function PostCreateForm({
       </div>
 
       {/* コンテンツ */}
-      <div className="flex-1 overflow-y-auto px-6 py-6">
+      <div className={clsx(["flex-1", "overflow-y-auto", "px-6", "py-6"])}>
         {step === "upload" && (
-          <div className="space-y-4">
+          <div className={clsx(["space-y-4"])}>
             <ImageUploader
               onFilesSelected={handleFilesSelected}
               maxFiles={maxFiles}
@@ -165,18 +177,28 @@ export function PostCreateForm({
       </div>
 
       {/* フッター */}
-      <div className="border-t border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
+      <div className={clsx(["border-t", "border-gray-200", "px-6", "py-4"])}>
+        <div className={clsx(["flex", "items-center", "justify-between"])}>
           {step === "upload" && (
             <>
-              <div className="text-sm text-gray-600">
+              <div className={clsx(["text-sm", "text-gray-600"])}>
                 {slides.length > 0 && `${slides.length}枚選択中`}
               </div>
               <button
                 type="button"
                 onClick={handleNext}
                 disabled={disabled || slides.length === 0}
-                className="rounded-md bg-blue-500 px-6 py-2 font-medium text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+                className={clsx([
+                  "rounded-md",
+                  "bg-blue-500",
+                  "px-6",
+                  "py-2",
+                  "font-medium",
+                  "text-white",
+                  "hover:bg-blue-600",
+                  "disabled:cursor-not-allowed",
+                  "disabled:bg-gray-300",
+                ])}
               >
                 次へ
               </button>
@@ -189,7 +211,18 @@ export function PostCreateForm({
                 type="button"
                 onClick={handleBack}
                 disabled={disabled}
-                className="rounded-md border border-gray-300 px-6 py-2 font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className={clsx([
+                  "rounded-md",
+                  "border",
+                  "border-gray-300",
+                  "px-6",
+                  "py-2",
+                  "font-medium",
+                  "text-gray-700",
+                  "hover:bg-gray-50",
+                  "disabled:cursor-not-allowed",
+                  "disabled:opacity-50",
+                ])}
               >
                 戻る
               </button>
@@ -197,7 +230,17 @@ export function PostCreateForm({
                 type="button"
                 onClick={handleSubmit}
                 disabled={disabled}
-                className="rounded-md bg-blue-500 px-6 py-2 font-medium text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+                className={clsx([
+                  "rounded-md",
+                  "bg-blue-500",
+                  "px-6",
+                  "py-2",
+                  "font-medium",
+                  "text-white",
+                  "hover:bg-blue-600",
+                  "disabled:cursor-not-allowed",
+                  "disabled:bg-gray-300",
+                ])}
               >
                 投稿する
               </button>
