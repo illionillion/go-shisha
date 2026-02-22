@@ -167,6 +167,90 @@ describe("useLike", () => {
       expect(rolledBackPost).toEqual(initialPost);
     });
 
+    it("エラー時にリスト内の投稿もロールバックされる", () => {
+      const postId = 1;
+      const initialPost: Post = {
+        id: postId,
+        user_id: 1,
+        likes: 10,
+        is_liked: false,
+        slides: [],
+      };
+
+      const initialList = [
+        { id: postId, user_id: 1, likes: 10, is_liked: false, slides: [] },
+        { id: 2, user_id: 2, likes: 5, is_liked: false, slides: [] },
+      ];
+
+      // 詳細とユーザー一覧（/users/1/posts）両方にキャッシュを設定
+      queryClient.setQueryData(["posts", postId], initialPost);
+      queryClient.setQueryData(["/users/1/posts"], { posts: initialList });
+
+      const mockMutate = vi.fn((params, options) => {
+        if (options?.onError) {
+          options.onError(new Error("Network error"), params, undefined);
+        }
+      });
+
+      vi.mocked(postsApi.usePostPostsIdLike).mockReturnValue({
+        mutate: mockMutate,
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdLike>);
+
+      vi.mocked(postsApi.usePostPostsIdUnlike).mockReturnValue({
+        mutate: vi.fn(),
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdUnlike>);
+
+      const { result } = renderHook(() => useLike(), { wrapper });
+
+      result.current.onLike(postId);
+
+      // 詳細がロールバックされる
+      const detail = queryClient.getQueryData<Post>(["posts", postId]);
+      expect(detail).toEqual(initialPost);
+
+      // ユーザー一覧の該当投稿もロールバックされる
+      const list = queryClient.getQueryData<{ posts: Post[] }>(["/users/1/posts"]);
+      expect(list?.posts[0]).toEqual(initialList[0]);
+      expect(list?.posts[1]).toEqual(initialList[1]);
+    });
+
+    it("エラー時にキャッシュがクリアされていた場合もロールバックがクラッシュしない", () => {
+      const postId = 1;
+      const initialPost: Post = {
+        id: postId,
+        user_id: 1,
+        likes: 10,
+        is_liked: false,
+        slides: [],
+      };
+
+      const initialList = [{ id: postId, user_id: 1, likes: 10, is_liked: false, slides: [] }];
+
+      queryClient.setQueryData(["posts", postId], initialPost);
+      queryClient.setQueryData(["posts"], { posts: initialList });
+
+      const mockMutate = vi.fn((params, options) => {
+        // エラーコールバック前にキャッシュを空データに更新
+        queryClient.setQueryData(["posts"], { noPostsField: [] });
+        if (options?.onError) {
+          options.onError(new Error("Network error"), params, undefined);
+        }
+      });
+
+      vi.mocked(postsApi.usePostPostsIdLike).mockReturnValue({
+        mutate: mockMutate,
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdLike>);
+
+      vi.mocked(postsApi.usePostPostsIdUnlike).mockReturnValue({
+        mutate: vi.fn(),
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdUnlike>);
+
+      const { result } = renderHook(() => useLike(), { wrapper });
+
+      // クラッシュしないことを確認
+      expect(() => result.current.onLike(postId)).not.toThrow();
+    });
+
     it("リスト内の投稿も楽観的に更新される", () => {
       const mockMutate = vi.fn();
       vi.mocked(postsApi.usePostPostsIdLike).mockReturnValue({
@@ -449,6 +533,43 @@ describe("useLike", () => {
       const list = queryClient.getQueryData<{ posts: Post[] }>(["/users/1/posts"]);
       expect(list?.posts[0]).toEqual(initialList[0]);
       expect(list?.posts[1]).toEqual(initialList[1]);
+    });
+
+    it("エラー時にキャッシュがクリアされていた場合もロールバックがクラッシュしない", () => {
+      const postId = 1;
+      const initialPost: Post = {
+        id: postId,
+        user_id: 1,
+        likes: 10,
+        is_liked: true,
+        slides: [],
+      };
+
+      const initialList = [{ id: postId, user_id: 1, likes: 10, is_liked: true, slides: [] }];
+
+      queryClient.setQueryData(["posts", postId], initialPost);
+      queryClient.setQueryData(["posts"], { posts: initialList });
+
+      const mockMutate = vi.fn((params, options) => {
+        // エラーコールバック前にキャッシュを空データに更新
+        queryClient.setQueryData(["posts"], { noPostsField: [] });
+        if (options?.onError) {
+          options.onError(new Error("Network error"), params, undefined);
+        }
+      });
+
+      vi.mocked(postsApi.usePostPostsIdUnlike).mockReturnValue({
+        mutate: mockMutate,
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdUnlike>);
+
+      vi.mocked(postsApi.usePostPostsIdLike).mockReturnValue({
+        mutate: vi.fn(),
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdLike>);
+
+      const { result } = renderHook(() => useLike(), { wrapper });
+
+      // クラッシュしないことを確認
+      expect(() => result.current.onUnlike(postId)).not.toThrow();
     });
 
     it("リスト内の投稿も楽観的に更新される", () => {

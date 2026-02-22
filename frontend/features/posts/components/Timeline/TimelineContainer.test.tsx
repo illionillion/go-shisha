@@ -142,6 +142,16 @@ describe("TimelineContainer", () => {
     expect(screen.getByTestId("timeline-mock")).toHaveTextContent("availableFlavors:2");
   });
 
+  test("CSR: 成功レスポンスでpostsがnullの場合、空配列が使われる", () => {
+    (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: { data: { posts: null }, status: 200, headers: new Headers() },
+      isLoading: false,
+      error: null,
+    });
+    render(<TimelineContainer />);
+    expect(screen.getByTestId("timeline-mock")).toHaveTextContent("posts:0");
+  });
+
   test("CSR: エラー時はerrorが正しくTimelineに渡る", () => {
     (useGetPosts as ReturnType<typeof vi.fn>).mockReturnValue({
       data: undefined,

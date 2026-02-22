@@ -77,6 +77,25 @@ describe("useUploadImages", () => {
       });
     });
 
+    it("アップロード成功時にurlsがundefinedの場合、空配列でonSuccessが呼ばれる", async () => {
+      const onSuccess = vi.fn();
+
+      vi.mocked(apiClient.apiFetch).mockResolvedValue({
+        data: { urls: undefined },
+        status: 200,
+        headers: new Headers(),
+      });
+
+      const { result } = renderHook(() => useUploadImages({ onSuccess }), { wrapper });
+
+      const files = [new File(["test"], "test.jpg", { type: "image/jpeg" })];
+      result.current.uploadImages(files);
+
+      await waitFor(() => {
+        expect(onSuccess).toHaveBeenCalledWith([]);
+      });
+    });
+
     it("アップロード中はisPendingがtrueになる", async () => {
       vi.mocked(apiClient.apiFetch).mockImplementation(
         () => new Promise((resolve) => setTimeout(resolve, 100))

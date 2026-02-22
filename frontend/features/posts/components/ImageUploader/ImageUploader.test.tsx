@@ -216,6 +216,24 @@ describe("ImageUploader", () => {
       });
     });
 
+    it("dragOverイベントのデフォルト動作が防止される", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const dropZone = screen
+        .getByText(/クリックまたはドラッグ&ドロップで画像を選択/)
+        .closest("div") as HTMLElement;
+
+      const dragOverEvent = new Event("dragover", { bubbles: true });
+      const preventDefaultSpy = vi.spyOn(dragOverEvent, "preventDefault");
+      const stopPropagationSpy = vi.spyOn(dragOverEvent, "stopPropagation");
+
+      dropZone.dispatchEvent(dragOverEvent);
+
+      expect(preventDefaultSpy).toHaveBeenCalled();
+      expect(stopPropagationSpy).toHaveBeenCalled();
+    });
+
     it("ドロップ後にドラッグ状態が解除される", () => {
       const mockOnFilesSelected = vi.fn();
       render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
@@ -518,6 +536,49 @@ describe("ImageUploader", () => {
           /最大3枚まで選択できます（現在2枚選択中）/
         );
       });
+    });
+  });
+
+  describe("制御モード（value prop指定時）", () => {
+    it("value prop指定時にドロップしてもinternalFilesを更新せずonFilesSelectedが呼ばれる", async () => {
+      const mockOnFilesSelected = vi.fn();
+      const initialFiles = [createMockFile("initial.jpg", 1024 * 1024, "image/jpeg")];
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} value={initialFiles} />);
+
+      const newFile = createMockFile("new.jpg", 1024 * 1024, "image/jpeg");
+      const dropZone = screen.getByText(/画像を追加/).closest("div") as HTMLElement;
+
+      const dataTransfer = { files: [newFile], types: ["Files"] };
+      fireEvent.drop(dropZone, { dataTransfer });
+
+      await waitFor(() => {
+        expect(mockOnFilesSelected).toHaveBeenCalled();
+      });
+    });
+
+    it("value prop指定時にファイル入力してもinternalFilesを更新せずonFilesSelectedが呼ばれる", async () => {
+      const mockOnFilesSelected = vi.fn();
+      const initialFiles = [createMockFile("initial.jpg", 1024 * 1024, "image/jpeg")];
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} value={initialFiles} />);
+
+      const newFile = createMockFile("new.jpg", 1024 * 1024, "image/jpeg");
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+      await userEvent.upload(input, newFile);
+
+      await waitFor(() => {
+        expect(mockOnFilesSelected).toHaveBeenCalled();
+      });
+    });
+
+    it("value prop指定時に削除ボタンを押してもinternalFilesを更新せずonFilesSelectedが呼ばれる", async () => {
+      const mockOnFilesSelected = vi.fn();
+      const initialFiles = [createMockFile("initial.jpg", 1024 * 1024, "image/jpeg")];
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} value={initialFiles} />);
+
+      const deleteButton = screen.getByLabelText("画像1を削除");
+      await userEvent.click(deleteButton);
+
+      expect(mockOnFilesSelected).toHaveBeenCalledWith([]);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import type { Flavor } from "@/types/domain";
@@ -45,6 +45,18 @@ describe("PostCreateForm", () => {
 
       const nextButton = screen.getByRole("button", { name: "次へ" });
       expect(nextButton).toBeDisabled();
+    });
+
+    it("画像未選択状態でhandleNextを呼び出しても編集ステップに移行しない", () => {
+      const mockOnSubmit = vi.fn();
+      render(<PostCreateForm flavors={mockFlavors} onSubmit={mockOnSubmit} />);
+
+      const nextButton = screen.getByRole("button", { name: "次へ" });
+      // fireEventはdisabledボタンのonClickも発火できる
+      fireEvent.click(nextButton);
+
+      // 画像選択ステップのままであることを確認
+      expect(screen.getByText(/クリックまたはドラッグ&ドロップで画像を選択/)).toBeInTheDocument();
     });
 
     it("画像選択後に選択枚数が表示される", async () => {
@@ -189,6 +201,38 @@ describe("PostCreateForm", () => {
       await waitFor(() => {
         expect(screen.getByText("画像 1 / 2")).toBeInTheDocument();
       });
+    });
+  });
+
+  describe("スライド更新", () => {
+    it("編集ステップで説明を入力するとスライドが更新される", async () => {
+      const mockOnSubmit = vi.fn();
+      render(<PostCreateForm flavors={mockFlavors} onSubmit={mockOnSubmit} />);
+
+      const file = createMockFile("test.jpg", 1024 * 1024, "image/jpeg");
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+
+      await userEvent.upload(input, file);
+      await waitFor(() => screen.getByRole("button", { name: "次へ" }));
+      await userEvent.click(screen.getByRole("button", { name: "次へ" }));
+
+      await waitFor(() => screen.getByLabelText(/説明/));
+      const textarea = screen.getByLabelText(/説明/);
+      await userEvent.type(textarea, "テスト説明文");
+
+      await waitFor(() => {
+        expect(screen.getByText("6 / 100文字")).toBeInTheDocument();
+      });
+
+      await userEvent.click(screen.getByRole("button", { name: "投稿する" }));
+
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            description: "テスト説明文",
+          }),
+        ])
+      );
     });
   });
 
