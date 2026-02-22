@@ -121,7 +121,7 @@ export function PostCreateForm({
   }, [slides, onSubmit]);
 
   return (
-    <div className={clsx(["flex", "flex-1", "min-h-0", "flex-col"])}>
+    <div className={clsx(["flex", "flex-1", "min-h-0", "flex-col", "h-full"])}>
       {/* ヘッダー */}
       <div className={clsx(["border-b", "border-gray-200", "px-6", "py-4"])}>
         <div className={clsx(["flex", "items-center", "justify-between"])}>
@@ -157,7 +157,7 @@ export function PostCreateForm({
       </div>
 
       {/* コンテンツ */}
-      <div className={clsx(["flex-1", "overflow-y-auto", "px-6", "py-6"])}>
+      <div className={clsx(["flex-1", "overflow-y-auto", "px-6", "py-6", "h-full"])}>
         {step === "upload" && (
           <div className={clsx(["space-y-4"])}>
             <ImageUploader
