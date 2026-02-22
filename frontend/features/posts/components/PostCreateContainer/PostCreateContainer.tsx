@@ -156,7 +156,6 @@ export function PostCreateContainer() {
               "w-full",
               "sm:max-w-2xl",
               "h-[90vh]",
-              "sm:h-auto",
               "sm:max-h-[90vh]",
               "bg-white",
               "rounded-t-2xl",

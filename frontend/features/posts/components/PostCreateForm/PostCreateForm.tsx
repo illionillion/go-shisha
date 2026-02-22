@@ -121,7 +121,7 @@ export function PostCreateForm({
   }, [slides, onSubmit]);
 
   return (
-    <div className={clsx(["flex", "h-full", "flex-col"])}>
+    <div className={clsx(["flex", "flex-1", "min-h-0", "flex-col"])}>
       {/* ヘッダー */}
       <div className={clsx(["border-b", "border-gray-200", "px-6", "py-4"])}>
         <div className={clsx(["flex", "items-center", "justify-between"])}>
