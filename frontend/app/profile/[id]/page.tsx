@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getUsersId, getUsersIdPosts } from "@/api/users";
 import { BackButton } from "@/components/BackButton";
 import { ProfileHeader } from "@/components/ProfileHeader";
+import { PostCreateContainer } from "@/features/posts/components/PostCreateContainer";
 import { TimelineContainer } from "@/features/posts/components/Timeline";
 import { isSuccessResponse } from "@/lib/api-helpers";
 
@@ -40,6 +41,7 @@ export default async function Page({ params }: Props) {
         <BackButton />
         <TimelineContainer initialPosts={initialPosts} userId={id} />
       </main>
+      <PostCreateContainer />
     </div>
   );
 }

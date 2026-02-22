@@ -12,6 +12,8 @@ export type PostCreateFormProps = {
   onSubmit: (slides: EditableSlide[]) => void | Promise<void>;
   /** キャンセル時のコールバック */
   onCancel?: () => void;
+  /** 入力状態変化時のコールバック（コンテナ側でキャンセル確認に利用） */
+  onDirtyChange?: (dirty: boolean) => void;
   /** 最大画像枚数 */
   maxFiles?: number;
   /** 最大ファイルサイズ（MB） */
@@ -46,6 +48,7 @@ export function PostCreateForm({
   flavors,
   onSubmit,
   onCancel,
+  onDirtyChange,
   maxFiles = 10,
   maxSizeMB = 10,
   disabled = false,
@@ -55,15 +58,19 @@ export function PostCreateForm({
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   // 選択されたファイルからEditableSlideを生成
-  const handleFilesSelected = useCallback((files: File[]) => {
-    const newSlides: EditableSlide[] = files.map((file) => ({
-      file,
-      previewUrl: URL.createObjectURL(file),
-      flavorId: undefined,
-      description: "",
-    }));
-    setSlides(newSlides);
-  }, []);
+  const handleFilesSelected = useCallback(
+    (files: File[]) => {
+      const newSlides: EditableSlide[] = files.map((file) => ({
+        file,
+        previewUrl: URL.createObjectURL(file),
+        flavorId: undefined,
+        description: "",
+      }));
+      setSlides(newSlides);
+      onDirtyChange?.(files.length > 0);
+    },
+    [onDirtyChange]
+  );
 
   // プレビューURLのクリーンアップ（unmount時のみ）
   useEffect(() => {
@@ -114,7 +121,7 @@ export function PostCreateForm({
   }, [slides, onSubmit]);
 
   return (
-    <div className={clsx(["flex", "h-full", "flex-col"])}>
+    <div className={clsx(["flex", "flex-1", "min-h-0", "flex-col", "h-full"])}>
       {/* ヘッダー */}
       <div className={clsx(["border-b", "border-gray-200", "px-6", "py-4"])}>
         <div className={clsx(["flex", "items-center", "justify-between"])}>
@@ -150,7 +157,7 @@ export function PostCreateForm({
       </div>
 
       {/* コンテンツ */}
-      <div className={clsx(["flex-1", "overflow-y-auto", "px-6", "py-6"])}>
+      <div className={clsx(["flex-1", "overflow-y-auto", "px-6", "py-6", "h-full"])}>
         {step === "upload" && (
           <div className={clsx(["space-y-4"])}>
             <ImageUploader
