@@ -1,6 +1,6 @@
 "use client";
 import { clsx } from "clsx";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { EditableSlide, Flavor } from "@/types/domain";
 import { ImageUploader } from "../ImageUploader";
 import { SlideEditForm } from "./SlideEditForm";
@@ -57,25 +57,34 @@ export function PostCreateForm({
   const [slides, setSlides] = useState<EditableSlide[]>([]);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
+  // slidesの最新値をrefで保持（cleanup時のスタール参照を防ぐ）
+  const slidesRef = useRef(slides);
+  useEffect(() => {
+    slidesRef.current = slides;
+  }, [slides]);
+
   // 選択されたファイルからEditableSlideを生成
   const handleFilesSelected = useCallback(
     (files: File[]) => {
-      const newSlides: EditableSlide[] = files.map((file) => ({
-        file,
-        previewUrl: URL.createObjectURL(file),
-        flavorId: undefined,
-        description: "",
-      }));
-      setSlides(newSlides);
+      // 古いpreviewUrlを先に解放
+      setSlides((prev) => {
+        prev.forEach((slide) => URL.revokeObjectURL(slide.previewUrl));
+        return files.map((file) => ({
+          file,
+          previewUrl: URL.createObjectURL(file),
+          flavorId: undefined,
+          description: "",
+        }));
+      });
       onDirtyChange?.(files.length > 0);
     },
     [onDirtyChange]
   );
 
-  // プレビューURLのクリーンアップ（unmount時のみ）
+  // プレビューURLのクリーンアップ（unmount時）
   useEffect(() => {
     return () => {
-      slides.forEach((slide) => URL.revokeObjectURL(slide.previewUrl));
+      slidesRef.current.forEach((slide) => URL.revokeObjectURL(slide.previewUrl));
     };
   }, []);
 
