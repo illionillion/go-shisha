@@ -100,7 +100,7 @@ describe("PostCreateContainer", () => {
       await user.click(screen.getByRole("button", { name: "投稿作成" }));
       expect(screen.getByRole("dialog", { name: "投稿作成" })).toBeInTheDocument();
 
-      // バックドロップをクリック（直接DOMクリックなactでラップガ必要）
+      // バックドロップをクリック（直接DOMクリックなのでactでラップが必要）
       const backdrop = screen.getByTestId("post-create-backdrop");
       await act(async () => {
         backdrop.click();
