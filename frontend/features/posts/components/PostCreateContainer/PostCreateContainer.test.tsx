@@ -67,6 +67,13 @@ describe("PostCreateContainer", () => {
 
       expect(screen.queryByRole("button", { name: "投稿作成" })).not.toBeInTheDocument();
     });
+
+    it("ローディング中の場合はFABが表示されない", () => {
+      useAuthStore.setState({ user: mockUser, isLoading: true });
+      render(<PostCreateContainer />);
+
+      expect(screen.queryByRole("button", { name: "投稿作成" })).not.toBeInTheDocument();
+    });
   });
 
   describe("モーダル開閉", () => {
