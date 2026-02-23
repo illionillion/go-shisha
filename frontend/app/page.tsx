@@ -1,6 +1,7 @@
 import { isSuccessResponse } from "@/lib/api-helpers";
 import type { Post } from "@/types/domain";
 import { getPosts } from "../api/posts";
+import { PostCreateContainer } from "../features/posts/components/PostCreateContainer";
 import { TimelineContainer } from "../features/posts/components/Timeline/TimelineContainer";
 
 /**
@@ -26,6 +27,7 @@ export default async function Home() {
   return (
     <main className="min-h-screen">
       <TimelineContainer initialPosts={initialPosts} />
+      <PostCreateContainer />
     </main>
   );
 }
