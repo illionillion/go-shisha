@@ -24,7 +24,7 @@ import { PostCreateForm } from "../PostCreateForm";
  */
 export function PostCreateContainer() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, isLoading } = useAuthStore();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
@@ -120,7 +120,7 @@ export function PostCreateContainer() {
   }, []);
 
   // 未ログイン時はFABを表示しない
-  if (!user) return null;
+  if (!user || isLoading) return null;
 
   return (
     <>
