@@ -287,4 +287,50 @@ describe("PostCreateForm", () => {
       expect(mockOnCancel).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe("previewURLのクリーンアップ", () => {
+    it("アンマウント時にpreviewUrlがrevokeObjectURLで解放される", async () => {
+      const revokeObjectURL = vi.spyOn(URL, "revokeObjectURL");
+      const mockOnSubmit = vi.fn();
+      const { unmount } = render(<PostCreateForm flavors={mockFlavors} onSubmit={mockOnSubmit} />);
+
+      const file = createMockFile("test.jpg", 1024 * 1024, "image/jpeg");
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+      await userEvent.upload(input, file);
+
+      await waitFor(() => screen.getByText("1枚選択中"));
+
+      revokeObjectURL.mockClear();
+      unmount();
+
+      // PostCreateForm（slidesRef経由）が revokeObjectURL を呼ぶ
+      expect(revokeObjectURL).toHaveBeenCalled();
+      revokeObjectURL.mockRestore();
+    });
+
+    it("画像を選び直した時に古いpreviewUrlがrevokeObjectURLで解放される", async () => {
+      const revokeObjectURL = vi.spyOn(URL, "revokeObjectURL");
+      const mockOnSubmit = vi.fn();
+      render(<PostCreateForm flavors={mockFlavors} onSubmit={mockOnSubmit} />);
+
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+
+      // 1回目の選択
+      const file1 = createMockFile("test1.jpg", 1024 * 1024, "image/jpeg");
+      await userEvent.upload(input, file1);
+      await waitFor(() => screen.getByText("1枚選択中"));
+
+      revokeObjectURL.mockClear();
+
+      // 2回目の選択（選び直し）- 古いURLが解放されることを確認
+      const file2 = createMockFile("test2.jpg", 1024 * 1024, "image/jpeg");
+      await userEvent.upload(input, file2);
+
+      await waitFor(() => {
+        expect(revokeObjectURL).toHaveBeenCalled();
+      });
+
+      revokeObjectURL.mockRestore();
+    });
+  });
 });
