@@ -187,7 +187,7 @@ describe("PostCreateForm", () => {
       });
 
       // 次の画像へ
-      const nextSlideButton = screen.getByRole("button", { name: "次 →" });
+      const nextSlideButton = screen.getByRole("button", { name: "次の画像" });
       await userEvent.click(nextSlideButton);
 
       await waitFor(() => {
@@ -195,7 +195,7 @@ describe("PostCreateForm", () => {
       });
 
       // 前の画像へ
-      const prevSlideButton = screen.getByRole("button", { name: "← 前" });
+      const prevSlideButton = screen.getByRole("button", { name: "前の画像" });
       await userEvent.click(prevSlideButton);
 
       await waitFor(() => {

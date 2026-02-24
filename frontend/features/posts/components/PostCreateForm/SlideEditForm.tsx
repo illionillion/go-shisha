@@ -1,6 +1,7 @@
 "use client";
 import { clsx } from "clsx";
 import { useCallback } from "react";
+import { NextIcon, PrevIcon } from "@/components/icons";
 import type { EditableSlide, Flavor } from "@/types/domain";
 import { FlavorSelector } from "../FlavorSelector";
 
@@ -68,6 +69,7 @@ export function SlideEditForm({
             type="button"
             onClick={onPrevious}
             disabled={disabled || currentIndex === 1}
+            aria-label="前の画像"
             className={clsx([
               "rounded-md",
               "bg-gray-200",
@@ -79,14 +81,18 @@ export function SlideEditForm({
               "hover:bg-gray-300",
               "disabled:cursor-not-allowed",
               "disabled:opacity-50",
+              "flex",
+              "items-center",
+              "gap-1",
             ])}
           >
-            ← 前
+            <PrevIcon className="text-gray-700" />前
           </button>
           <button
             type="button"
             onClick={onNext}
             disabled={disabled || currentIndex === totalCount}
+            aria-label="次の画像"
             className={clsx([
               "rounded-md",
               "bg-gray-200",
@@ -98,9 +104,13 @@ export function SlideEditForm({
               "hover:bg-gray-300",
               "disabled:cursor-not-allowed",
               "disabled:opacity-50",
+              "flex",
+              "items-center",
+              "gap-1",
             ])}
           >
-            次 →
+            次
+            <NextIcon className="text-gray-700" />
           </button>
         </div>
       </div>

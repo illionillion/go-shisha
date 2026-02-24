@@ -1,6 +1,7 @@
 "use client";
 import { clsx } from "clsx";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { XIcon } from "@/components/icons";
 import type { EditableSlide, Flavor } from "@/types/domain";
 import { ImageUploader } from "../ImageUploader";
 import { SlideEditForm } from "./SlideEditForm";
@@ -148,19 +149,7 @@ export function PostCreateForm({
             ])}
             aria-label="閉じる"
           >
-            <svg
-              className={clsx(["h-6", "w-6"])}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <XIcon className="text-gray-700" />
           </button>
         </div>
       </div>
