@@ -126,7 +126,7 @@ describe("SlideEditForm", () => {
         />
       );
 
-      await userEvent.click(screen.getByRole("button", { name: "← 前" }));
+      await userEvent.click(screen.getByRole("button", { name: "前の画像" }));
       expect(onPrevious).toHaveBeenCalled();
     });
 
@@ -143,7 +143,7 @@ describe("SlideEditForm", () => {
         />
       );
 
-      await userEvent.click(screen.getByRole("button", { name: "次 →" }));
+      await userEvent.click(screen.getByRole("button", { name: "次の画像" }));
       expect(onNext).toHaveBeenCalled();
     });
   });

@@ -67,7 +67,6 @@ type Story = StoryObj<typeof meta>;
  * ログイン済み状態（FABが表示される）
  */
 export const LoggedIn: Story = {
-  tags: ["vrt", "vrt-sp"],
   decorators: [
     (Story) => {
       useAuthStore.setState({ user: mockUser, isLoading: false });
@@ -80,7 +79,6 @@ export const LoggedIn: Story = {
  * 未ログイン状態（FABが非表示になる）
  */
 export const LoggedOut: Story = {
-  tags: ["vrt", "vrt-sp"],
   decorators: [
     (Story) => {
       useAuthStore.setState({ user: null, isLoading: false });

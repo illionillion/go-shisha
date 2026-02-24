@@ -4,7 +4,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAuthStore } from "@/features/auth/stores/authStore";
 import { render, screen } from "@/test/utils";
 import type { User } from "@/types/domain";
+import { useUploadImages } from "../../hooks/useUploadImages";
 import { PostCreateContainer } from "./PostCreateContainer";
+
+// focus-trap-react をモック（子要素をそのままレンダリング）
+vi.mock("focus-trap-react", () => ({
+  FocusTrap: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 
 // フックをモック
 vi.mock("../../hooks/useGetFlavors", () => ({
@@ -188,6 +194,105 @@ describe("PostCreateContainer", () => {
       });
 
       expect(confirm).toHaveBeenCalledOnce();
+      confirm.mockRestore();
+    });
+  });
+
+  describe("アクセシビリティ機能", () => {
+    beforeEach(() => {
+      useAuthStore.setState({ user: mockUser, isLoading: false });
+    });
+
+    it("Escapeキーでモーダルが閉じる（dirty状態でない場合）", async () => {
+      const user = userEvent.setup();
+      render(<PostCreateContainer />);
+
+      await user.click(screen.getByRole("button", { name: "投稿作成" }));
+      expect(screen.getByRole("dialog", { name: "投稿作成" })).toBeInTheDocument();
+
+      // Escapeキーを押下
+      await user.keyboard("{Escape}");
+
+      expect(screen.queryByRole("dialog", { name: "投稿作成" })).not.toBeInTheDocument();
+    });
+
+    it("Escapeキーでモーダルが閉じる（dirty状態で確認ダイアログをOKした場合）", async () => {
+      const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+      const user = userEvent.setup();
+      render(<PostCreateContainer />);
+
+      await user.click(screen.getByRole("button", { name: "投稿作成" }));
+
+      // ファイル選択でdirtyにする
+      const file = new File(["dummy"], "test.jpg", { type: "image/jpeg" });
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+      await user.upload(input, file);
+      await screen.findByText("1枚選択中");
+
+      // Escapeキーを押下
+      await user.keyboard("{Escape}");
+
+      expect(confirm).toHaveBeenCalledOnce();
+      expect(screen.queryByRole("dialog", { name: "投稿作成" })).not.toBeInTheDocument();
+
+      confirm.mockRestore();
+    });
+
+    it("Escapeキーでモーダルが閉じない（dirty状態で確認ダイアログをキャンセルした場合）", async () => {
+      const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+      const user = userEvent.setup();
+      render(<PostCreateContainer />);
+
+      await user.click(screen.getByRole("button", { name: "投稿作成" }));
+
+      // ファイル選択でdirtyにする
+      const file = new File(["dummy"], "test.jpg", { type: "image/jpeg" });
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+      await user.upload(input, file);
+      await screen.findByText("1枚選択中");
+
+      // Escapeキーを押下
+      await user.keyboard("{Escape}");
+
+      expect(confirm).toHaveBeenCalledOnce();
+      expect(screen.getByRole("dialog", { name: "投稿作成" })).toBeInTheDocument();
+
+      confirm.mockRestore();
+    });
+
+    it("isSubmitting中はEscapeキーでモーダルが閉じない", async () => {
+      // isUploading: true にして isSubmitting 状態を再現
+      // mockReturnValueOnce だと再レンダー時に消費されるため mockReturnValue を使用
+      vi.mocked(useUploadImages).mockReturnValue({
+        uploadImages: vi.fn(),
+        isPending: true,
+        isError: false,
+        error: null,
+        reset: vi.fn(),
+      });
+
+      const confirm = vi.spyOn(window, "confirm");
+      const user = userEvent.setup();
+      render(<PostCreateContainer />);
+
+      await user.click(screen.getByRole("button", { name: "投稿作成" }));
+      expect(screen.getByRole("dialog", { name: "投稿作成" })).toBeInTheDocument();
+
+      // isSubmitting中にEscapeキーを押下してもモーダルは閉じない
+      await user.keyboard("{Escape}");
+
+      expect(screen.getByRole("dialog", { name: "投稿作成" })).toBeInTheDocument();
+      expect(confirm).not.toHaveBeenCalled();
+
+      // 他のテストへの影響を防ぐためリセット
+      vi.mocked(useUploadImages).mockReset();
+      vi.mocked(useUploadImages).mockImplementation((_opts?) => ({
+        uploadImages: vi.fn(),
+        isPending: false,
+        isError: false,
+        error: null,
+        reset: vi.fn(),
+      }));
       confirm.mockRestore();
     });
   });
