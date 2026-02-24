@@ -217,7 +217,7 @@ export function ImageUploader({
                   ])}
                   aria-label={`画像${index + 1}を削除`}
                 >
-                  <XIcon className={clsx(["h-3", "w-3"])} />
+                  <XIcon size="w-3 h-3" />
                 </button>
                 <div
                   className={clsx([

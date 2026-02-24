@@ -1,35 +1,43 @@
 import clsx from "clsx";
 
-export const PrevIcon = ({ className = "text-white" }: { className?: string }) => {
+export const PrevIcon = ({
+  className = "text-white",
+  size = "w-4 h-4",
+}: {
+  className?: string;
+  size?: string;
+}) => {
   return (
-    <svg
-      className={clsx(["w-4", "h-4", className])}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
+    <svg className={clsx([size, className])} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
     </svg>
   );
 };
 
-export const NextIcon = ({ className = "text-white" }: { className?: string }) => {
+export const NextIcon = ({
+  className = "text-white",
+  size = "w-4 h-4",
+}: {
+  className?: string;
+  size?: string;
+}) => {
   return (
-    <svg
-      className={clsx(["w-4", "h-4", className])}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
+    <svg className={clsx([size, className])} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
     </svg>
   );
 };
 
-export const PlusIcon = ({ className = "text-white" }: { className?: string }) => {
+export const PlusIcon = ({
+  className = "text-white",
+  size = "w-6 h-6",
+}: {
+  className?: string;
+  size?: string;
+}) => {
   return (
     <svg
-      className={clsx(["w-6", "h-6", className])}
+      className={clsx([size, className])}
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -40,10 +48,16 @@ export const PlusIcon = ({ className = "text-white" }: { className?: string }) =
   );
 };
 
-export const XIcon = ({ className = "text-white" }: { className?: string }) => {
+export const XIcon = ({
+  className = "text-white",
+  size = "w-4 h-4",
+}: {
+  className?: string;
+  size?: string;
+}) => {
   return (
     <svg
-      className={clsx(["w-4", "h-4", className])}
+      className={clsx([size, className])}
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"

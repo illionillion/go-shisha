@@ -149,7 +149,7 @@ export function PostCreateForm({
             ])}
             aria-label="閉じる"
           >
-            <XIcon className="text-gray-700" />
+            <XIcon size="w-6 h-6" className="text-gray-700" />
           </button>
         </div>
       </div>
