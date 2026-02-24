@@ -1,7 +1,8 @@
 "use client";
 import { clsx } from "clsx";
+import { FocusTrap } from "focus-trap-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@/features/auth/stores/authStore";
 import type { CreatePostInput, EditableSlide } from "@/types/domain";
 import { useCreatePost } from "../../hooks/useCreatePost";
@@ -119,6 +120,28 @@ export function PostCreateContainer() {
     setIsDirty(dirty);
   }, []);
 
+  /**
+   * Escapeキーでモーダルを閉じる
+   * 投稿中は無効化し、入力途中の場合は確認ダイアログを表示
+   */
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        if (!isSubmitting) {
+          handleClose();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isOpen, isSubmitting, handleClose]);
+
   // 未ログイン時はFABを表示しない
   if (!user || isLoading) return null;
 
@@ -127,71 +150,78 @@ export function PostCreateContainer() {
       <PostCreateFAB onClick={handleOpen} />
 
       {isOpen && (
-        <div
-          className={clsx([
-            "fixed",
-            "inset-0",
-            "z-50",
-            "flex",
-            "items-end",
-            "sm:items-center",
-            "justify-center",
-          ])}
-          role="dialog"
-          aria-modal="true"
-          aria-label="投稿作成"
+        <FocusTrap
+          active={isOpen}
+          focusTrapOptions={{
+            escapeDeactivates: false, // Escapeキーハンドラーを自分で制御
+          }}
         >
-          {/* バックドロップ */}
-          <div
-            data-testid="post-create-backdrop"
-            className={clsx(["fixed", "inset-0", "bg-black/50"])}
-            onClick={handleBackdropClick}
-            aria-hidden="true"
-          />
-
-          {/* モーダルパネル */}
           <div
             className={clsx([
-              "relative",
-              "w-full",
-              "sm:max-w-2xl",
-              "h-[90vh]",
-              "sm:max-h-[90vh]",
-              "bg-white",
-              "rounded-t-2xl",
-              "sm:rounded-xl",
-              "overflow-hidden",
+              "fixed",
+              "inset-0",
+              "z-50",
               "flex",
-              "flex-col",
+              "items-end",
+              "sm:items-center",
+              "justify-center",
             ])}
+            role="dialog"
+            aria-modal="true"
+            aria-label="投稿作成"
           >
-            {/* エラーバナー */}
-            {error && (
-              <div
-                role="alert"
-                className={clsx([
-                  "bg-red-50",
-                  "border-b",
-                  "border-red-200",
-                  "px-6",
-                  "py-3",
-                  "text-sm",
-                  "text-red-700",
-                ])}
-              >
-                {error}
-              </div>
-            )}
-
-            <PostCreateForm
-              flavors={flavors ?? []}
-              onSubmit={handleSubmit}
-              onCancel={handleClose}
-              onDirtyChange={handleDirtyChange}
-              disabled={isSubmitting}
+            {/* バックドロップ */}
+            <div
+              data-testid="post-create-backdrop"
+              className={clsx(["fixed", "inset-0", "bg-black/50"])}
+              onClick={handleBackdropClick}
+              aria-hidden="true"
             />
+
+            {/* モーダルパネル */}
+            <div
+              className={clsx([
+                "relative",
+                "w-full",
+                "sm:max-w-2xl",
+                "h-[90vh]",
+                "sm:max-h-[90vh]",
+                "bg-white",
+                "rounded-t-2xl",
+                "sm:rounded-xl",
+                "overflow-hidden",
+                "flex",
+                "flex-col",
+              ])}
+            >
+              {/* エラーバナー */}
+              {error && (
+                <div
+                  role="alert"
+                  className={clsx([
+                    "bg-red-50",
+                    "border-b",
+                    "border-red-200",
+                    "px-6",
+                    "py-3",
+                    "text-sm",
+                    "text-red-700",
+                  ])}
+                >
+                  {error}
+                </div>
+              )}
+
+              <PostCreateForm
+                flavors={flavors ?? []}
+                onSubmit={handleSubmit}
+                onCancel={handleClose}
+                onDirtyChange={handleDirtyChange}
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
-        </div>
+        </FocusTrap>
       )}
     </>
   );
