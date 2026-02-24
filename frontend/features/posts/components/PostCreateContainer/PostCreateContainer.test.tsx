@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAuthStore } from "@/features/auth/stores/authStore";
 import { render, screen } from "@/test/utils";
 import type { User } from "@/types/domain";
+import { useUploadImages } from "../../hooks/useUploadImages";
 import { PostCreateContainer } from "./PostCreateContainer";
 
 // focus-trap-react をモック（子要素をそのままレンダリング）
@@ -256,6 +257,42 @@ describe("PostCreateContainer", () => {
       expect(confirm).toHaveBeenCalledOnce();
       expect(screen.getByRole("dialog", { name: "投稿作成" })).toBeInTheDocument();
 
+      confirm.mockRestore();
+    });
+
+    it("isSubmitting中はEscapeキーでモーダルが閉じない", async () => {
+      // isUploading: true にして isSubmitting 状態を再現
+      // mockReturnValueOnce だと再レンダー時に消費されるため mockReturnValue を使用
+      vi.mocked(useUploadImages).mockReturnValue({
+        uploadImages: vi.fn(),
+        isPending: true,
+        isError: false,
+        error: null,
+        reset: vi.fn(),
+      });
+
+      const confirm = vi.spyOn(window, "confirm");
+      const user = userEvent.setup();
+      render(<PostCreateContainer />);
+
+      await user.click(screen.getByRole("button", { name: "投稿作成" }));
+      expect(screen.getByRole("dialog", { name: "投稿作成" })).toBeInTheDocument();
+
+      // isSubmitting中にEscapeキーを押下してもモーダルは閉じない
+      await user.keyboard("{Escape}");
+
+      expect(screen.getByRole("dialog", { name: "投稿作成" })).toBeInTheDocument();
+      expect(confirm).not.toHaveBeenCalled();
+
+      // 他のテストへの影響を防ぐためリセット
+      vi.mocked(useUploadImages).mockReset();
+      vi.mocked(useUploadImages).mockImplementation((_opts?) => ({
+        uploadImages: vi.fn(),
+        isPending: false,
+        isError: false,
+        error: null,
+        reset: vi.fn(),
+      }));
       confirm.mockRestore();
     });
   });
