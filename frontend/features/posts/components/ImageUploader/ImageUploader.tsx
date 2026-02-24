@@ -250,12 +250,22 @@ export function ImageUploader({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`
-            relative flex min-h-[200px] cursor-pointer flex-col items-center justify-center
-            rounded-lg border-2 border-dashed p-8 transition-all
-            ${isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50"}
-            ${disabled ? "cursor-not-allowed opacity-50" : "hover:border-blue-400 hover:bg-blue-50"}
-          `}
+          className={clsx([
+            "relative",
+            "flex",
+            "min-h-[200px]",
+            "cursor-pointer",
+            "flex-col",
+            "items-center",
+            "justify-center",
+            "rounded-lg",
+            "border-2",
+            "border-dashed",
+            "p-8",
+            "transition-all",
+            isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50",
+            disabled ? "cursor-not-allowed opacity-50" : "hover:border-blue-400 hover:bg-blue-50",
+          ])}
         >
           <input
             type="file"
