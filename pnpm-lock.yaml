@@ -11,6 +11,8 @@ overrides:
   '@isaacs/brace-expansion@<=5.0.0': '>=5.0.1'
   minimatch: '>=10.2.1'
   bn.js: '>=5.2.3'
+  ajv@<6.14.0: 6.14.0
+  ajv@>=7.0.0-alpha.0 <8.18.0: 8.18.0
 
 importers:
 
@@ -2780,7 +2782,7 @@ packages:
   ajv-draft-04@1.0.0:
     resolution: {integrity: sha512-mv00Te6nmYbRp5DCwclxtt7yV/joXJPGS7nM+97GdxvuttCOfgI3K4U25zboyeX0O+myI8ERluxQe5wljMmVIw==}
     peerDependencies:
-      ajv: ^8.5.0
+      ajv: 8.18.0
     peerDependenciesMeta:
       ajv:
         optional: true
@@ -2788,7 +2790,7 @@ packages:
   ajv-formats@2.1.1:
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
     peerDependencies:
-      ajv: ^8.0.0
+      ajv: 8.18.0
     peerDependenciesMeta:
       ajv:
         optional: true
@@ -2796,7 +2798,7 @@ packages:
   ajv-formats@3.0.1:
     resolution: {integrity: sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==}
     peerDependencies:
-      ajv: ^8.0.0
+      ajv: 8.18.0
     peerDependenciesMeta:
       ajv:
         optional: true
@@ -2804,18 +2806,15 @@ packages:
   ajv-keywords@3.5.2:
     resolution: {integrity: sha512-5p6WTN0DdTGVQk6VjcEju19IgaHudalcfabD7yhDGeA6bcQnmL+CpveLJq/3hvfwd1aof6L386Ougkx6RfyMIQ==}
     peerDependencies:
-      ajv: ^6.9.1
+      ajv: 6.14.0
 
   ajv-keywords@5.1.0:
     resolution: {integrity: sha512-YCS/JNFAUyr5vAuhk1DWm1CBxRHW9LbJ2ozWeemrIqpbsqKjHVxYPyi5GC0rjZIT5JxJ3virVTS8wk4i/Z+krw==}
     peerDependencies:
-      ajv: ^8.8.2
+      ajv: 8.18.0
 
-  ajv@6.12.6:
-    resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
-
-  ajv@8.17.1:
-    resolution: {integrity: sha512-B/gBuNg5SiMTrPkC+A2+cW0RszwxYmn6VYxB/inlBStS5nx6xHIt/ehKRhIMhqusl7a8LjQoZnjCs5vhwxOQ1g==}
+  ajv@6.14.0:
+    resolution: {integrity: sha512-IWrosm/yrn43eiKqkfkHis7QioDleaXQHdDVPKg0FSwwd/DuvyX79TZnFOnYpB7dcsFAMmtFztZuXPDvSePkFw==}
 
   ajv@8.18.0:
     resolution: {integrity: sha512-PlXPeEWMXMZ7sPYOHqmDyCJzcfNrUr3fGNKtezX14ykXOEIvyK81d+qydx89KY5O71FKMPaQ2vBfBFI5NHR63A==}
@@ -7828,7 +7827,7 @@ snapshots:
   '@commitlint/config-validator@20.4.0':
     dependencies:
       '@commitlint/types': 20.4.0
-      ajv: 8.17.1
+      ajv: 8.18.0
 
   '@commitlint/ensure@20.4.0':
     dependencies:
@@ -8131,7 +8130,7 @@ snapshots:
 
   '@eslint/eslintrc@3.3.3':
     dependencies:
-      ajv: 6.12.6
+      ajv: 6.14.0
       debug: 4.4.3(supports-color@5.5.0)
       espree: 10.4.0
       globals: 14.0.0
@@ -9808,28 +9807,21 @@ snapshots:
     optionalDependencies:
       ajv: 8.18.0
 
-  ajv-keywords@3.5.2(ajv@6.12.6):
+  ajv-keywords@3.5.2(ajv@6.14.0):
     dependencies:
-      ajv: 6.12.6
+      ajv: 6.14.0
 
   ajv-keywords@5.1.0(ajv@8.18.0):
     dependencies:
       ajv: 8.18.0
       fast-deep-equal: 3.1.3
 
-  ajv@6.12.6:
+  ajv@6.14.0:
     dependencies:
       fast-deep-equal: 3.1.3
       fast-json-stable-stringify: 2.1.0
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
-
-  ajv@8.17.1:
-    dependencies:
-      fast-deep-equal: 3.1.3
-      fast-uri: 3.1.0
-      json-schema-traverse: 1.0.0
-      require-from-string: 2.0.2
 
   ajv@8.18.0:
     dependencies:
@@ -11139,7 +11131,7 @@ snapshots:
       '@humanwhocodes/module-importer': 1.0.1
       '@humanwhocodes/retry': 0.4.3
       '@types/estree': 1.0.8
-      ajv: 6.12.6
+      ajv: 6.14.0
       chalk: 4.1.2
       cross-spawn: 7.0.6
       debug: 4.4.3(supports-color@5.5.0)
@@ -13639,8 +13631,8 @@ snapshots:
   schema-utils@3.3.0:
     dependencies:
       '@types/json-schema': 7.0.15
-      ajv: 6.12.6
-      ajv-keywords: 3.5.2(ajv@6.12.6)
+      ajv: 6.14.0
+      ajv-keywords: 3.5.2(ajv@6.14.0)
 
   schema-utils@4.3.3:
     dependencies:
