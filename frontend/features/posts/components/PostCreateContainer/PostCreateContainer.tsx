@@ -4,6 +4,7 @@ import { FocusTrap } from "focus-trap-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@/features/auth/stores/authStore";
+import { useConfirm } from "@/lib/useConfirm";
 import type { CreatePostInput, EditableSlide } from "@/types/domain";
 import { useCreatePost } from "../../hooks/useCreatePost";
 import { getFlavorsData, useGetFlavors } from "../../hooks/useGetFlavors";
@@ -26,6 +27,7 @@ import { PostCreateForm } from "../PostCreateForm";
 export function PostCreateContainer() {
   const router = useRouter();
   const { user, isLoading } = useAuthStore();
+  const confirm = useConfirm();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
@@ -77,9 +79,9 @@ export function PostCreateContainer() {
   }, []);
 
   /** モーダルを閉じる（入力途中の場合は確認ダイアログを表示） */
-  const handleClose = useCallback(() => {
+  const handleClose = useCallback(async () => {
     if (isDirty) {
-      if (!window.confirm("入力中の内容が破棄されます。閉じてもよいですか？")) {
+      if (!(await confirm("入力中の内容が破棄されます。閉じてもよいですか？"))) {
         return;
       }
     }
@@ -87,7 +89,7 @@ export function PostCreateContainer() {
     setIsDirty(false);
     setError(null);
     setPendingSlides(null);
-  }, [isDirty]);
+  }, [isDirty, confirm]);
 
   /**
    * バックドロップクリック時の処理

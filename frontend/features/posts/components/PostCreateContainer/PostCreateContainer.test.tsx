@@ -12,6 +12,12 @@ vi.mock("focus-trap-react", () => ({
   FocusTrap: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+// useConfirm をモック
+const mockConfirm = vi.fn();
+vi.mock("@/lib/useConfirm", () => ({
+  useConfirm: () => mockConfirm,
+}));
+
 // フックをモック
 vi.mock("../../hooks/useGetFlavors", () => ({
   useGetFlavors: vi.fn(() => ({
@@ -56,6 +62,7 @@ afterEach(() => {
   cleanup();
   useAuthStore.getState().reset();
   vi.clearAllMocks();
+  mockConfirm.mockReset();
 });
 
 describe("PostCreateContainer", () => {
@@ -154,38 +161,35 @@ describe("PostCreateContainer", () => {
       return user;
     }
 
-    it("dirty状態で閉じるボタンを押すとwindow.confirmが表示される", async () => {
-      const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    it("dirty状態で閉じるボタンを押すとconfirmが呼ばれる", async () => {
+      mockConfirm.mockResolvedValue(false);
 
       await openModalAndSelectFile();
       await userEvent.click(screen.getByRole("button", { name: "閉じる" }));
 
-      expect(confirm).toHaveBeenCalledOnce();
-      confirm.mockRestore();
+      expect(mockConfirm).toHaveBeenCalledOnce();
     });
 
     it("dirty状態で確認ダイアログをキャンセルするとモーダルが閉じない", async () => {
-      const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+      mockConfirm.mockResolvedValue(false);
 
       await openModalAndSelectFile();
       await userEvent.click(screen.getByRole("button", { name: "閉じる" }));
 
       expect(screen.getByRole("dialog", { name: "投稿作成" })).toBeInTheDocument();
-      confirm.mockRestore();
     });
 
     it("dirty状態で確認ダイアログをOKするとモーダルが閉じる", async () => {
-      const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+      mockConfirm.mockResolvedValue(true);
 
       await openModalAndSelectFile();
       await userEvent.click(screen.getByRole("button", { name: "閉じる" }));
 
       expect(screen.queryByRole("dialog", { name: "投稿作成" })).not.toBeInTheDocument();
-      confirm.mockRestore();
     });
 
-    it("dirty状態でバックドロップをクリックするとwindow.confirmが表示される", async () => {
-      const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    it("dirty状態でバックドロップをクリックするとconfirmが呼ばれる", async () => {
+      mockConfirm.mockResolvedValue(false);
 
       await openModalAndSelectFile();
       const backdrop = screen.getByTestId("post-create-backdrop");
@@ -193,8 +197,7 @@ describe("PostCreateContainer", () => {
         backdrop.click();
       });
 
-      expect(confirm).toHaveBeenCalledOnce();
-      confirm.mockRestore();
+      expect(mockConfirm).toHaveBeenCalledOnce();
     });
   });
 
@@ -217,7 +220,7 @@ describe("PostCreateContainer", () => {
     });
 
     it("Escapeキーでモーダルが閉じる（dirty状態で確認ダイアログをOKした場合）", async () => {
-      const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+      mockConfirm.mockResolvedValue(true);
       const user = userEvent.setup();
       render(<PostCreateContainer />);
 
@@ -232,14 +235,12 @@ describe("PostCreateContainer", () => {
       // Escapeキーを押下
       await user.keyboard("{Escape}");
 
-      expect(confirm).toHaveBeenCalledOnce();
+      expect(mockConfirm).toHaveBeenCalledOnce();
       expect(screen.queryByRole("dialog", { name: "投稿作成" })).not.toBeInTheDocument();
-
-      confirm.mockRestore();
     });
 
     it("Escapeキーでモーダルが閉じない（dirty状態で確認ダイアログをキャンセルした場合）", async () => {
-      const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+      mockConfirm.mockResolvedValue(false);
       const user = userEvent.setup();
       render(<PostCreateContainer />);
 
@@ -254,10 +255,8 @@ describe("PostCreateContainer", () => {
       // Escapeキーを押下
       await user.keyboard("{Escape}");
 
-      expect(confirm).toHaveBeenCalledOnce();
+      expect(mockConfirm).toHaveBeenCalledOnce();
       expect(screen.getByRole("dialog", { name: "投稿作成" })).toBeInTheDocument();
-
-      confirm.mockRestore();
     });
 
     it("isSubmitting中はEscapeキーでモーダルが閉じない", async () => {
@@ -271,7 +270,6 @@ describe("PostCreateContainer", () => {
         reset: vi.fn(),
       });
 
-      const confirm = vi.spyOn(window, "confirm");
       const user = userEvent.setup();
       render(<PostCreateContainer />);
 
@@ -282,7 +280,7 @@ describe("PostCreateContainer", () => {
       await user.keyboard("{Escape}");
 
       expect(screen.getByRole("dialog", { name: "投稿作成" })).toBeInTheDocument();
-      expect(confirm).not.toHaveBeenCalled();
+      expect(mockConfirm).not.toHaveBeenCalled();
 
       // 他のテストへの影響を防ぐためリセット
       vi.mocked(useUploadImages).mockReset();
@@ -293,7 +291,6 @@ describe("PostCreateContainer", () => {
         error: null,
         reset: vi.fn(),
       }));
-      confirm.mockRestore();
     });
   });
 });
