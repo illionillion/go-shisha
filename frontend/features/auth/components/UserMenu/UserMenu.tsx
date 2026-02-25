@@ -5,6 +5,7 @@ import { clsx } from "clsx";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Avatar } from "@/components/Avatar";
 import DefaultAvatar from "@/components/Avatar/DefaultAvatar";
 import { authApi } from "@/features/auth/api/authApi";
@@ -30,9 +31,7 @@ export const UserMenu = () => {
     onError: (error) => {
       console.error("UserMenu: logout failed", error);
       // サーバー側のログアウトに失敗した場合はクライアント状態を維持し、ユーザーにエラーを通知する
-      if (typeof window !== "undefined") {
-        window.alert("ログアウトに失敗しました。時間をおいて再度お試しください。");
-      }
+      toast.error("ログアウトに失敗しました。時間をおいて再度お試しください。");
     },
   });
 
