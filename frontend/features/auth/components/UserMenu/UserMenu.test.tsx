@@ -333,13 +333,14 @@ describe("UserMenu", () => {
       resolveLogout!();
     });
 
-    it("ログアウトに失敗した場合はアラートが表示される", async () => {
+    it("ログアウトに失敗した場合はトースト通知が表示される", async () => {
       const user = userEvent.setup();
       const { authApi } = await import("../../api/authApi");
       const mockLogout = vi.fn().mockRejectedValue(new Error("Logout failed"));
       vi.mocked(authApi.logout).mockImplementation(mockLogout);
 
-      const alertMock = vi.spyOn(window, "alert").mockImplementation(() => {});
+      const { toast } = await import("sonner");
+      const toastErrorMock = vi.spyOn(toast, "error").mockImplementation(() => "toast-id");
 
       render(<UserMenu />, { wrapper: createWrapper() });
 
@@ -350,12 +351,12 @@ describe("UserMenu", () => {
       await user.click(logoutButton);
 
       await waitFor(() => {
-        expect(alertMock).toHaveBeenCalledWith(
+        expect(toastErrorMock).toHaveBeenCalledWith(
           "ログアウトに失敗しました。時間をおいて再度お試しください。"
         );
       });
 
-      alertMock.mockRestore();
+      toastErrorMock.mockRestore();
     });
   });
 });

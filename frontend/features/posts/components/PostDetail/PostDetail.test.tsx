@@ -157,7 +157,8 @@ describe("PostDetail", () => {
       value: { writeText: clipboardWrite },
       configurable: true,
     });
-    (globalThis as unknown as { alert?: (message?: string) => void }).alert = vi.fn();
+    const { toast } = await import("sonner");
+    vi.spyOn(toast, "success").mockImplementation(() => "toast-id");
 
     const refetch = vi.fn();
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
@@ -175,11 +176,11 @@ describe("PostDetail", () => {
 
     expect(screen.getByText("No Image")).toBeInTheDocument();
 
-    // シェアボタンをクリックして clipboard.writeText と alert が呼ばれる
+    // シェアボタンをクリックして clipboard.writeText と toast.success が呼ばれる
     const shareBtn = screen.getByRole("button", { name: /シェア/ });
     await userEvent.click(shareBtn);
     expect(clipboardWrite).toHaveBeenCalled();
-    expect(global.alert).toHaveBeenCalledWith("URLをコピーしました");
+    expect(toast.success).toHaveBeenCalledWith("URLをコピーしました");
   });
 
   test("複数スライド時に Prev/Next ボタンで画像が切り替わる", async () => {
