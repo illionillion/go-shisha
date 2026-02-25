@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import type { Flavor } from "@/types/domain";
 import { PostDetailFooter } from "./PostDetailFooter";
@@ -6,7 +7,7 @@ import { PostDetailFooter } from "./PostDetailFooter";
 const mockFlavor: Flavor = {
   id: 1,
   name: "ダブルアップル",
-  color: "#e74c3c",
+  color: "bg-red-500",
 };
 
 /**
@@ -70,7 +71,12 @@ export const Liked: Story = {
 export const ShareSuccessToast: Story = {
   decorators: [
     (Story) => {
-      toast.success("URLをコピーしました");
+      useEffect(() => {
+        const id = toast.success("URLをコピーしました");
+        return () => {
+          toast.dismiss(id);
+        };
+      }, []);
       return <Story />;
     },
   ],

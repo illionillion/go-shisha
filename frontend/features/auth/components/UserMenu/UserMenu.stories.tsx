@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { toast } from "sonner";
 import { useAuthStore } from "@/features/auth/stores/authStore";
 import type { User } from "@/types/domain";
 import { UserMenu } from "./UserMenu";
@@ -83,9 +85,12 @@ export const LoggedOut: Story = {
 export const LogoutErrorToast: Story = {
   decorators: [
     (Story) => {
-      import("sonner").then(({ toast }) => {
-        toast.error("ログアウトに失敗しました。時間をおいて再度お試しください。");
-      });
+      useEffect(() => {
+        const id = toast.error("ログアウトに失敗しました。時間をおいて再度お試しください。");
+        return () => {
+          toast.dismiss(id);
+        };
+      }, []);
       useAuthStore.setState({ user: mockUser, isLoading: false });
       return <Story />;
     },

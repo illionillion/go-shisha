@@ -158,7 +158,7 @@ describe("PostDetail", () => {
       configurable: true,
     });
     const { toast } = await import("sonner");
-    vi.spyOn(toast, "success").mockImplementation(() => "toast-id");
+    const toastSpy = vi.spyOn(toast, "success").mockImplementation(() => "toast-id");
 
     const refetch = vi.fn();
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
@@ -180,7 +180,8 @@ describe("PostDetail", () => {
     const shareBtn = screen.getByRole("button", { name: /シェア/ });
     await userEvent.click(shareBtn);
     expect(clipboardWrite).toHaveBeenCalled();
-    expect(toast.success).toHaveBeenCalledWith("URLをコピーしました");
+    expect(toastSpy).toHaveBeenCalledWith("URLをコピーしました");
+    toastSpy.mockRestore();
   });
 
   test("複数スライド時に Prev/Next ボタンで画像が切り替わる", async () => {
