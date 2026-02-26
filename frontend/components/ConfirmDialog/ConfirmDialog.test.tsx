@@ -43,12 +43,12 @@ describe("ConfirmDialog", () => {
       useConfirmStore.setState({ isOpen: true, message: "確認しますか？" });
     });
 
-    it("role=\"dialog\" が設定されている", () => {
+    it('role="dialog" が設定されている', () => {
       render(<ConfirmDialog />);
       expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
 
-    it("aria-modal=\"true\" が設定されている", () => {
+    it('aria-modal="true" が設定されている', () => {
       render(<ConfirmDialog />);
       expect(screen.getByRole("dialog")).toHaveAttribute("aria-modal", "true");
     });
