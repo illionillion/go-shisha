@@ -4,7 +4,7 @@ import { useConfirmStore } from "./confirm-store";
 import { useConfirm } from "./useConfirm";
 
 afterEach(() => {
-  useConfirmStore.setState({ isOpen: false, message: "", resolve: null });
+  useConfirmStore.getState().reset();
 });
 
 describe("useConfirm", () => {

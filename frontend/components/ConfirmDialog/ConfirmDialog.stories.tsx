@@ -39,16 +39,7 @@ export const Open: Story = {
 /**
  * ダイアログが閉じた状態（何も表示されない）
  */
-export const Closed: Story = {
-  decorators: [
-    (Story) => {
-      useEffect(() => {
-        useConfirmStore.setState({ isOpen: false, message: "", resolve: null });
-      }, []);
-      return <Story />;
-    },
-  ],
-};
+export const Closed: Story = {};
 
 /**
  * 長いメッセージ

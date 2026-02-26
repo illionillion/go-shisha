@@ -62,7 +62,6 @@ afterEach(() => {
   cleanup();
   useAuthStore.getState().reset();
   vi.clearAllMocks();
-  mockConfirm.mockReset();
 });
 
 describe("PostCreateContainer", () => {

@@ -31,7 +31,7 @@ export function ConfirmDialog() {
         className={clsx([
           "fixed",
           "inset-0",
-          "z-[100]",
+          "z-60",
           "flex",
           "items-center",
           "justify-center",
@@ -43,6 +43,7 @@ export function ConfirmDialog() {
       >
         {/* バックドロップ */}
         <div
+          data-testid="confirm-dialog-backdrop"
           className={clsx(["fixed", "inset-0", "bg-black/50"])}
           onClick={cancel}
           aria-hidden="true"

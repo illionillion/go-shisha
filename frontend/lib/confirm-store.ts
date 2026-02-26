@@ -17,12 +17,25 @@ export type ConfirmState = {
   confirm: () => void;
   /** キャンセルボタン押下時: resolve(false) してダイアログを閉じる */
   cancel: () => void;
+  /**
+   * ストアを初期状態にリセットする
+   * - テストや Storybook での状態初期化用途を想定
+   */
+  reset: () => void;
 };
 
-export const useConfirmStore = create<ConfirmState>((set, get) => ({
+/**
+ * 確認ダイアログストアの初期状態
+ * - テスト等でのリセットに利用することを想定
+ */
+export const initialConfirmState: Pick<ConfirmState, "isOpen" | "message" | "resolve"> = {
   isOpen: false,
   message: "",
   resolve: null,
+};
+
+export const useConfirmStore = create<ConfirmState>((set, get) => ({
+  ...initialConfirmState,
   open: (message: string) => {
     return new Promise<boolean>((resolve) => {
       set({ isOpen: true, message, resolve });
@@ -38,4 +51,5 @@ export const useConfirmStore = create<ConfirmState>((set, get) => ({
     resolve?.(false);
     set({ isOpen: false, message: "", resolve: null });
   },
+  reset: () => set(initialConfirmState),
 }));
