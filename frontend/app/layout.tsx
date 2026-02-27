@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { Header } from "../components/Header";
 import "./globals.css";
 import { AppProvider } from "./providers";
@@ -30,6 +31,7 @@ export default function RootLayout({
         <AppProvider>
           <Header />
           {children}
+          <ConfirmDialog />
         </AppProvider>
       </body>
     </html>
