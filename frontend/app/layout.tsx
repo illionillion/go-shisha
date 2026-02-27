@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import { Header } from "../components/Header";
 import "./globals.css";
 import { AppProvider } from "./providers";
@@ -32,6 +33,7 @@ export default function RootLayout({
           <Toaster richColors position="top-center" />
           <Header />
           {children}
+          <ConfirmDialog />
         </AppProvider>
       </body>
     </html>
