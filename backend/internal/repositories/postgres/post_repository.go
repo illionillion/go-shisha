@@ -195,9 +195,13 @@ func (r *PostRepository) AddLike(userID, postID int) error {
 			}
 			return fmt.Errorf("failed to insert post_like: %w", err)
 		}
-		if err := tx.Model(&postModel{}).Where("id = ?", postID).
-			UpdateColumn("likes", gorm.Expr("likes + 1")).Error; err != nil {
-			return fmt.Errorf("failed to increment likes: %w", err)
+		result := tx.Model(&postModel{}).Where("id = ?", postID).
+			UpdateColumn("likes", gorm.Expr("likes + 1"))
+		if result.Error != nil {
+			return fmt.Errorf("failed to increment likes: %w", result.Error)
+		}
+		if result.RowsAffected == 0 {
+			return fmt.Errorf("post %d not found", postID)
 		}
 		return nil
 	})
