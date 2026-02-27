@@ -61,3 +61,15 @@ type flavorModel struct {
 func (flavorModel) TableName() string {
 	return "flavors"
 }
+
+// postLikeModel represents the post_likes table (who liked which post)
+type postLikeModel struct {
+	UserID    int64     `gorm:"primaryKey;column:user_id"`
+	PostID    int64     `gorm:"primaryKey;column:post_id"`
+	CreatedAt time.Time `gorm:"column:created_at"`
+}
+
+// TableName ensures GORM uses the post_likes table
+func (postLikeModel) TableName() string {
+	return "post_likes"
+}
