@@ -1,6 +1,6 @@
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
-import { describe, test, expect, vi, beforeEach } from "vitest";
+import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@/test/utils";
 import type { Post } from "@/types/domain";
 import { useGetPostsId } from "../../../../api/posts";
@@ -63,6 +63,10 @@ describe("PostDetail", () => {
     onLikeSpy = vi.fn();
     onUnlikeSpy = vi.fn();
     user = userEvent.setup();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   test("PostDetail の内部 handleBack が動作する (history.back / location.href)", async () => {
