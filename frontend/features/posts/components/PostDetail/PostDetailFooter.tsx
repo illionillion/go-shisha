@@ -1,6 +1,7 @@
 "use client";
 
 import { clsx } from "clsx";
+import { toast } from "sonner";
 import { FlavorLabel } from "@/components/FlavorLabel";
 import type { Flavor } from "@/types/domain";
 
@@ -81,7 +82,7 @@ export function PostDetailFooter({ currentSlide, optimisticLikes, isLiked, onLik
             try {
               if (navigator.clipboard) {
                 await navigator.clipboard.writeText(window.location.href);
-                alert("URLをコピーしました");
+                toast.success("URLをコピーしました");
               }
             } catch (error) {
               // クリップボードAPIが使用できない場合は何もしない

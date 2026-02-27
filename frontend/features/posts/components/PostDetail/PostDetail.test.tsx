@@ -1,6 +1,6 @@
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
-import { describe, test, expect, vi, beforeEach } from "vitest";
+import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, cleanup } from "@/test/utils";
 import type { Post } from "@/types/domain";
 import { useGetPostsId } from "../../../../api/posts";
@@ -63,6 +63,10 @@ describe("PostDetail", () => {
     onLikeSpy = vi.fn();
     onUnlikeSpy = vi.fn();
     user = userEvent.setup();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   test("PostDetail の内部 handleBack が動作する (history.back / location.href)", async () => {
@@ -157,7 +161,8 @@ describe("PostDetail", () => {
       value: { writeText: clipboardWrite },
       configurable: true,
     });
-    (globalThis as unknown as { alert?: (message?: string) => void }).alert = vi.fn();
+    const { toast } = await import("sonner");
+    const toastSpy = vi.spyOn(toast, "success").mockImplementation(() => "toast-id");
 
     const refetch = vi.fn();
     (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
@@ -175,11 +180,12 @@ describe("PostDetail", () => {
 
     expect(screen.getByText("No Image")).toBeInTheDocument();
 
-    // シェアボタンをクリックして clipboard.writeText と alert が呼ばれる
+    // シェアボタンをクリックして clipboard.writeText と toast.success が呼ばれる
     const shareBtn = screen.getByRole("button", { name: /シェア/ });
     await userEvent.click(shareBtn);
     expect(clipboardWrite).toHaveBeenCalled();
-    expect(global.alert).toHaveBeenCalledWith("URLをコピーしました");
+    expect(toastSpy).toHaveBeenCalledWith("URLをコピーしました");
+    toastSpy.mockRestore();
   });
 
   test("複数スライド時に Prev/Next ボタンで画像が切り替わる", async () => {

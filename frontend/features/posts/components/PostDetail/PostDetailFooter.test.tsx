@@ -5,13 +5,12 @@ import type { Flavor } from "@/types/domain";
 import { PostDetailFooter } from "./PostDetailFooter";
 
 describe("PostDetailFooter", () => {
-  // クリップボードAPIとalertのモック
+  // クリップボードAPIとtoastのモック
   let clipboardWriteTextMock: ReturnType<typeof vi.fn>;
-  let alertMock: ReturnType<typeof vi.fn>;
+  let toastSuccessMock: ReturnType<typeof vi.spyOn>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     clipboardWriteTextMock = vi.fn().mockResolvedValue(undefined);
-    alertMock = vi.fn();
 
     // クリップボードAPIのモック
     Object.defineProperty(navigator, "clipboard", {
@@ -22,8 +21,9 @@ describe("PostDetailFooter", () => {
       configurable: true,
     });
 
-    // window.alertのモック
-    vi.spyOn(window, "alert").mockImplementation(alertMock as (message?: string) => void);
+    // toast.successのモック
+    const { toast } = await import("sonner");
+    toastSuccessMock = vi.spyOn(toast, "success").mockImplementation(() => "toast-id");
   });
 
   afterEach(() => {
@@ -263,11 +263,11 @@ describe("PostDetailFooter", () => {
       const shareButton = screen.getByLabelText("シェア");
       await user.click(shareButton);
 
-      // alertが呼ばれることを確認（クリップボードAPIの代わり）
-      expect(alertMock).toHaveBeenCalledWith("URLをコピーしました");
+      // toast.successが呼ばれることを確認
+      expect(toastSuccessMock).toHaveBeenCalledWith("URLをコピーしました");
     });
 
-    it("シェアボタンをクリックするとアラートが表示される", async () => {
+    it("シェアボタンをクリックするとトースト通知が表示される", async () => {
       const user = userEvent.setup();
 
       render(
@@ -282,7 +282,7 @@ describe("PostDetailFooter", () => {
       const shareButton = screen.getByLabelText("シェア");
       await user.click(shareButton);
 
-      expect(alertMock).toHaveBeenCalledWith("URLをコピーしました");
+      expect(toastSuccessMock).toHaveBeenCalledWith("URLをコピーしました");
     });
 
     it("クリップボードAPIが存在しない場合、アラートは表示されない", async () => {
@@ -310,8 +310,8 @@ describe("PostDetailFooter", () => {
       // シェアボタンをクリック
       await user.click(shareButton);
 
-      // アラートが呼ばれないことを確認
-      expect(alertMock).not.toHaveBeenCalled();
+      // toast.successが呼ばれないことを確認
+      expect(toastSuccessMock).not.toHaveBeenCalled();
 
       // 元に戻す
       Object.defineProperty(navigator, "clipboard", {
@@ -353,8 +353,8 @@ describe("PostDetailFooter", () => {
       // writeTextが呼ばれたことを確認
       expect(errorMock).toHaveBeenCalled();
 
-      // アラートが呼ばれないことを確認
-      expect(alertMock).not.toHaveBeenCalled();
+      // toast.successが呼ばれないことを確認
+      expect(toastSuccessMock).not.toHaveBeenCalled();
     });
   });
 
