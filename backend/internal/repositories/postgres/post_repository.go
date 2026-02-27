@@ -203,13 +203,13 @@ func (r *PostRepository) AddLike(userID, postID int) error {
 	})
 	if err != nil {
 		if errors.Is(err, repositories.ErrAlreadyLiked) {
-			logging.L.Debug("user already liked post", "user_id", userID, "post_id", postID)
+			logging.L.Debug("user already liked post", "repository", "PostRepository", "method", "AddLike", "user_id", userID, "post_id", postID)
 			return repositories.ErrAlreadyLiked
 		}
 		logging.L.Error("failed to add like", "repository", "PostRepository", "method", "AddLike", "user_id", userID, "post_id", postID, "error", err)
 		return err
 	}
-	logging.L.Info("like added", "user_id", userID, "post_id", postID)
+	logging.L.Info("like added", "repository", "PostRepository", "method", "AddLike", "user_id", userID, "post_id", postID)
 	return nil
 }
 
@@ -233,13 +233,13 @@ func (r *PostRepository) RemoveLike(userID, postID int) error {
 	})
 	if err != nil {
 		if errors.Is(err, repositories.ErrNotLiked) {
-			logging.L.Debug("user has not liked post", "user_id", userID, "post_id", postID)
+			logging.L.Debug("user has not liked post", "repository", "PostRepository", "method", "RemoveLike", "user_id", userID, "post_id", postID)
 			return repositories.ErrNotLiked
 		}
 		logging.L.Error("failed to remove like", "repository", "PostRepository", "method", "RemoveLike", "user_id", userID, "post_id", postID, "error", err)
 		return err
 	}
-	logging.L.Info("like removed", "user_id", userID, "post_id", postID)
+	logging.L.Info("like removed", "repository", "PostRepository", "method", "RemoveLike", "user_id", userID, "post_id", postID)
 	return nil
 }
 
