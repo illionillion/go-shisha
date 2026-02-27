@@ -22,6 +22,12 @@ func setupTestDB(t *testing.T) *gorm.DB {
 		t.Fatalf("failed to open sqlite in-memory: %v", err)
 	}
 
+	// SQLite はデフォルトで外部キー制約が無効なため明示的に有効化
+	// これにより post_likes の user_id/post_id 参照整合性が Postgres に近い形で検証される
+	if err := db.Exec("PRAGMA foreign_keys = ON").Error; err != nil {
+		t.Fatalf("failed to enable foreign keys: %v", err)
+	}
+
 	// AutoMigrate schema for tests
 	if err := db.AutoMigrate(&userModel{}, &postModel{}, &slideModel{}, &flavorModel{}, &postLikeModel{}); err != nil {
 		t.Fatalf("failed to migrate schema: %v", err)
