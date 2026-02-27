@@ -12,8 +12,10 @@ import (
 
 type mockPostRepo struct{}
 
-func (m *mockPostRepo) GetAll() ([]models.Post, error) { return []models.Post{{ID: 1}}, nil }
-func (m *mockPostRepo) GetByID(id int) (*models.Post, error) {
+func (m *mockPostRepo) GetAll(userID *int) ([]models.Post, error) {
+	return []models.Post{{ID: 1}}, nil
+}
+func (m *mockPostRepo) GetByID(id int, userID *int) (*models.Post, error) {
 	p := &models.Post{ID: id, Likes: 0}
 	return p, nil
 }
@@ -30,6 +32,11 @@ func (m *mockPostRepo) IncrementLikes(id int) (*models.Post, error) {
 }
 func (m *mockPostRepo) DecrementLikes(id int) (*models.Post, error) {
 	return &models.Post{ID: id, Likes: 0}, nil
+}
+func (m *mockPostRepo) AddLike(userID, postID int) error    { return nil }
+func (m *mockPostRepo) RemoveLike(userID, postID int) error { return nil }
+func (m *mockPostRepo) HasLiked(userID, postID int) (bool, error) {
+	return false, nil
 }
 
 type mockUserRepoForPost struct{}
@@ -190,8 +197,12 @@ func TestGetAllPosts(t *testing.T) {
 // Error cases for PostService
 type mockPostRepoError struct{}
 
-func (m *mockPostRepoError) GetAll() ([]models.Post, error)       { return nil, errors.New("db error") }
-func (m *mockPostRepoError) GetByID(id int) (*models.Post, error) { return nil, errors.New("db error") }
+func (m *mockPostRepoError) GetAll(userID *int) ([]models.Post, error) {
+	return nil, errors.New("db error")
+}
+func (m *mockPostRepoError) GetByID(id int, userID *int) (*models.Post, error) {
+	return nil, errors.New("db error")
+}
 func (m *mockPostRepoError) GetByUserID(userID int) ([]models.Post, error) {
 	return nil, errors.New("db error")
 }
@@ -201,6 +212,11 @@ func (m *mockPostRepoError) IncrementLikes(id int) (*models.Post, error) {
 }
 func (m *mockPostRepoError) DecrementLikes(id int) (*models.Post, error) {
 	return nil, errors.New("db error")
+}
+func (m *mockPostRepoError) AddLike(userID, postID int) error    { return errors.New("db error") }
+func (m *mockPostRepoError) RemoveLike(userID, postID int) error { return errors.New("db error") }
+func (m *mockPostRepoError) HasLiked(userID, postID int) (bool, error) {
+	return false, errors.New("db error")
 }
 
 type mockUserRepoMissing struct{}

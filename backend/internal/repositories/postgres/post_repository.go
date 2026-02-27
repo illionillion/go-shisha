@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories"
 	"go-shisha-backend/pkg/logging"
 )
 
@@ -62,7 +63,7 @@ func (r *PostRepository) toDomain(pm *postModel) models.Post {
 	}
 }
 
-func (r *PostRepository) GetAll() ([]models.Post, error) {
+func (r *PostRepository) GetAll(userID *int) ([]models.Post, error) {
 	logging.L.Debug("querying posts from DB", "repository", "PostRepository", "method", "GetAll")
 	var pms []postModel
 	if err := r.db.Preload("User").Preload("Slides", func(db *gorm.DB) *gorm.DB {
@@ -74,12 +75,19 @@ func (r *PostRepository) GetAll() ([]models.Post, error) {
 	logging.L.Debug("fetched posts", "repository", "PostRepository", "method", "GetAll", "count", len(pms))
 	var posts []models.Post
 	for i := range pms {
-		posts = append(posts, r.toDomain(&pms[i]))
+		post := r.toDomain(&pms[i])
+		if userID != nil {
+			liked, err := r.HasLiked(*userID, post.ID)
+			if err == nil {
+				post.IsLiked = liked
+			}
+		}
+		posts = append(posts, post)
 	}
 	return posts, nil
 }
 
-func (r *PostRepository) GetByID(id int) (*models.Post, error) {
+func (r *PostRepository) GetByID(id int, userID *int) (*models.Post, error) {
 	logging.L.Debug("querying post by ID", "repository", "PostRepository", "method", "GetByID", "post_id", id)
 	var pm postModel
 	if err := r.db.Preload("User").Preload("Slides", func(db *gorm.DB) *gorm.DB {
@@ -93,6 +101,12 @@ func (r *PostRepository) GetByID(id int) (*models.Post, error) {
 		return nil, fmt.Errorf("failed to query post by id=%d: %w", id, err)
 	}
 	post := r.toDomain(&pm)
+	if userID != nil {
+		liked, err := r.HasLiked(*userID, post.ID)
+		if err == nil {
+			post.IsLiked = liked
+		}
+	}
 	logging.L.Debug("post found", "repository", "PostRepository", "method", "GetByID", "post_id", id)
 	return &post, nil
 }
@@ -148,7 +162,7 @@ func (r *PostRepository) IncrementLikes(id int) (*models.Post, error) {
 		logging.L.Error("failed to increment likes", "repository", "PostRepository", "method", "IncrementLikes", "post_id", id, "error", err)
 		return nil, fmt.Errorf("failed to increment likes for post id=%d: %w", id, err)
 	}
-	return r.GetByID(id)
+	return r.GetByID(id, nil)
 }
 
 func (r *PostRepository) DecrementLikes(id int) (*models.Post, error) {
@@ -157,7 +171,80 @@ func (r *PostRepository) DecrementLikes(id int) (*models.Post, error) {
 		logging.L.Error("failed to decrement likes", "repository", "PostRepository", "method", "DecrementLikes", "post_id", id, "error", err)
 		return nil, fmt.Errorf("failed to decrement likes for post id=%d: %w", id, err)
 	}
-	return r.GetByID(id)
+	return r.GetByID(id, nil)
+}
+
+// HasLiked returns true if userID has liked postID.
+func (r *PostRepository) HasLiked(userID, postID int) (bool, error) {
+	var count int64
+	if err := r.db.Model(&postLikeModel{}).Where("user_id = ? AND post_id = ?", userID, postID).Count(&count).Error; err != nil {
+		logging.L.Error("failed to check like", "repository", "PostRepository", "method", "HasLiked", "user_id", userID, "post_id", postID, "error", err)
+		return false, fmt.Errorf("failed to check like for user_id=%d post_id=%d: %w", userID, postID, err)
+	}
+	return count > 0, nil
+}
+
+// AddLike records a like by userID on postID.
+// Returns ErrAlreadyLiked if the user has already liked the post.
+func (r *PostRepository) AddLike(userID, postID int) error {
+	logging.L.Debug("adding like", "repository", "PostRepository", "method", "AddLike", "user_id", userID, "post_id", postID)
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&postLikeModel{UserID: int64(userID), PostID: int64(postID)}).Error; err != nil {
+			if errors.Is(err, gorm.ErrDuplicatedKey) {
+				return repositories.ErrAlreadyLiked
+			}
+			return fmt.Errorf("failed to insert post_like: %w", err)
+		}
+		result := tx.Model(&postModel{}).Where("id = ?", postID).
+			UpdateColumn("likes", gorm.Expr("likes + 1"))
+		if result.Error != nil {
+			return fmt.Errorf("failed to increment likes: %w", result.Error)
+		}
+		if result.RowsAffected == 0 {
+			return fmt.Errorf("post %d not found", postID)
+		}
+		return nil
+	})
+	if err != nil {
+		if errors.Is(err, repositories.ErrAlreadyLiked) {
+			logging.L.Debug("user already liked post", "repository", "PostRepository", "method", "AddLike", "user_id", userID, "post_id", postID)
+			return repositories.ErrAlreadyLiked
+		}
+		logging.L.Error("failed to add like", "repository", "PostRepository", "method", "AddLike", "user_id", userID, "post_id", postID, "error", err)
+		return err
+	}
+	logging.L.Info("like added", "repository", "PostRepository", "method", "AddLike", "user_id", userID, "post_id", postID)
+	return nil
+}
+
+// RemoveLike removes a like by userID on postID.
+// Returns ErrNotLiked if the user has not liked the post.
+func (r *PostRepository) RemoveLike(userID, postID int) error {
+	logging.L.Debug("removing like", "repository", "PostRepository", "method", "RemoveLike", "user_id", userID, "post_id", postID)
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		result := tx.Where("user_id = ? AND post_id = ?", userID, postID).Delete(&postLikeModel{})
+		if result.Error != nil {
+			return fmt.Errorf("failed to delete post_like: %w", result.Error)
+		}
+		if result.RowsAffected == 0 {
+			return repositories.ErrNotLiked
+		}
+		if err := tx.Model(&postModel{}).Where("id = ?", postID).
+			UpdateColumn("likes", gorm.Expr("CASE WHEN likes > 0 THEN likes - 1 ELSE 0 END")).Error; err != nil {
+			return fmt.Errorf("failed to decrement likes: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		if errors.Is(err, repositories.ErrNotLiked) {
+			logging.L.Debug("user has not liked post", "repository", "PostRepository", "method", "RemoveLike", "user_id", userID, "post_id", postID)
+			return repositories.ErrNotLiked
+		}
+		logging.L.Error("failed to remove like", "repository", "PostRepository", "method", "RemoveLike", "user_id", userID, "post_id", postID, "error", err)
+		return err
+	}
+	logging.L.Info("like removed", "repository", "PostRepository", "method", "RemoveLike", "user_id", userID, "post_id", postID)
+	return nil
 }
 
 func (r *PostRepository) GetByUserID(userID int) ([]models.Post, error) {

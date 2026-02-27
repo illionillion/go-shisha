@@ -44,14 +44,14 @@ func NewPostService(postRepo repositories.PostRepository, userRepo repositories.
  * GetAllPosts returns all posts
  */
 func (s *PostService) GetAllPosts() ([]models.Post, error) {
-	return s.postRepo.GetAll()
+	return s.postRepo.GetAll(nil)
 }
 
 /**
  * GetPostByID returns a post by ID
  */
 func (s *PostService) GetPostByID(id int) (*models.Post, error) {
-	return s.postRepo.GetByID(id)
+	return s.postRepo.GetByID(id, nil)
 }
 
 /**
