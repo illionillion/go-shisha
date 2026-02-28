@@ -194,7 +194,17 @@ func (r *PostRepository) AddLike(userID, postID int) error {
 				return repositories.ErrAlreadyLiked
 			}
 			if errors.Is(err, gorm.ErrForeignKeyViolated) {
-				return repositories.ErrPostNotFound
+				// post_likes.user_id / post_likes.post_id の両方が外部キーのため、
+				// FK違反時に post が本当に存在しないかを確認してから ErrPostNotFound を返す。
+				var count int64
+				if cerr := tx.Model(&postModel{}).Where("id = ?", postID).Count(&count).Error; cerr != nil {
+					return fmt.Errorf("failed to check post existence after foreign key violation: %w", cerr)
+				}
+				if count == 0 {
+					return repositories.ErrPostNotFound
+				}
+				// post が存在する場合は、user 側のFK違反など別要因とみなし、汎用エラーとして返す。
+				return fmt.Errorf("failed to insert post_like: %w", err)
 			}
 			return fmt.Errorf("failed to insert post_like: %w", err)
 		}
