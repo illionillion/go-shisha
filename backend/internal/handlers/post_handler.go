@@ -57,7 +57,8 @@ func (h *PostHandler) GetAllPosts(c *gin.Context) {
 
 	posts, err := h.postService.GetAllPosts(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		logging.L.Error("failed to get all posts", "handler", "PostHandler", "method", "GetAllPosts", "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
@@ -211,7 +212,8 @@ func (h *PostHandler) LikePost(c *gin.Context) {
 	}
 	userID, ok := userIDValue.(int)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id type"})
+		logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "LikePost")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
@@ -261,7 +263,8 @@ func (h *PostHandler) UnlikePost(c *gin.Context) {
 	}
 	userID, ok := userIDValue.(int)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id type"})
+		logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "UnlikePost")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
