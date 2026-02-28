@@ -39,7 +39,7 @@ func (m *mockPostRepo) HasLiked(userID, postID int) (bool, error) {
 	return false, nil
 }
 
-// spyPostRepo は AddLike/RemoveLike の呼び出しを記録するスパイ
+// spyPostRepo は AddLike/RemoveLike の呼び出しを記録し、状態を追跡するスパイ
 type spyPostRepo struct {
 	mockPostRepo
 	addLikeCalled    bool
@@ -48,19 +48,31 @@ type spyPostRepo struct {
 	removeLikeCalled bool
 	removeLikeUserID int
 	removeLikePostID int
+	// GetByID が返す状態（AddLike/RemoveLike 後の実挙動をシミュレート）
+	currentLikes   int
+	currentIsLiked bool
 }
 
 func (s *spyPostRepo) AddLike(userID, postID int) error {
 	s.addLikeCalled = true
 	s.addLikeUserID = userID
 	s.addLikePostID = postID
+	s.currentLikes++
+	s.currentIsLiked = true
 	return nil
 }
 func (s *spyPostRepo) RemoveLike(userID, postID int) error {
 	s.removeLikeCalled = true
 	s.removeLikeUserID = userID
 	s.removeLikePostID = postID
+	if s.currentLikes > 0 {
+		s.currentLikes--
+	}
+	s.currentIsLiked = false
 	return nil
+}
+func (s *spyPostRepo) GetByID(id int, userID *int) (*models.Post, error) {
+	return &models.Post{ID: id, Likes: s.currentLikes, IsLiked: s.currentIsLiked}, nil
 }
 
 type mockUserRepoForPost struct{}
@@ -202,12 +214,15 @@ func TestLikeUnlikePost(t *testing.T) {
 	if spy.addLikeUserID != 1 || spy.addLikePostID != 2 {
 		t.Errorf("expected AddLike(1, 2), got AddLike(%d, %d)", spy.addLikeUserID, spy.addLikePostID)
 	}
-	// GetByID で最新データを返す
+	// AddLike 後: Likes=1, IsLiked=true（いいね後の状態が反映されていることを確認）
 	if liked.ID != 2 {
 		t.Fatalf("expected post ID=2, got %+v", liked)
 	}
-	if liked.Likes != 0 {
-		t.Fatalf("expected Likes=0 (mock default), got %d", liked.Likes)
+	if liked.Likes != 1 {
+		t.Fatalf("expected Likes=1 after LikePost, got %d", liked.Likes)
+	}
+	if !liked.IsLiked {
+		t.Fatal("expected IsLiked=true after LikePost")
 	}
 
 	unliked, err := postSvc.UnlikePost(1, 2)
@@ -221,11 +236,15 @@ func TestLikeUnlikePost(t *testing.T) {
 	if spy.removeLikeUserID != 1 || spy.removeLikePostID != 2 {
 		t.Errorf("expected RemoveLike(1, 2), got RemoveLike(%d, %d)", spy.removeLikeUserID, spy.removeLikePostID)
 	}
+	// RemoveLike 後: Likes=0, IsLiked=false（いいね取り消し後の状態が反映されていることを確認）
 	if unliked.ID != 2 {
 		t.Fatalf("expected post ID=2, got %+v", unliked)
 	}
 	if unliked.Likes != 0 {
-		t.Fatalf("expected Likes=0 (mock default), got %d", unliked.Likes)
+		t.Fatalf("expected Likes=0 after UnlikePost, got %d", unliked.Likes)
+	}
+	if unliked.IsLiked {
+		t.Fatal("expected IsLiked=false after UnlikePost")
 	}
 }
 
