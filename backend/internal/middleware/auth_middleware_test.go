@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"go-shisha-backend/pkg/auth"
@@ -309,6 +310,10 @@ func TestOptionalAuthMiddleware_NoToken(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Errorf("expected status 200, got %d", w.Code)
 	}
+	// user_idがセットされていないことを確認
+	if !strings.Contains(w.Body.String(), `"has_user_id":false`) {
+		t.Errorf("expected has_user_id to be false, got %s", w.Body.String())
+	}
 }
 
 func TestOptionalAuthMiddleware_ValidCookie(t *testing.T) {
@@ -403,5 +408,9 @@ func TestOptionalAuthMiddleware_InvalidToken(t *testing.T) {
 	// 無効なトークンでも200を返す（エラーにしない）
 	if w.Code != http.StatusOK {
 		t.Errorf("expected status 200, got %d", w.Code)
+	}
+	// user_idがセットされていないことを確認
+	if !strings.Contains(w.Body.String(), `"has_user_id":false`) {
+		t.Errorf("expected has_user_id to be false, got %s", w.Body.String())
 	}
 }
