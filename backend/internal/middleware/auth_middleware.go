@@ -66,3 +66,48 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// OptionalAuthMiddleware はJWTがあれば検証してuser_idをコンテキストにセットする。
+// トークンがない・無効でもリクエストを通過させる（認証必須ではない）。
+func OptionalAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var tokenString string
+
+		// 1. Cookieから "access_token" を取得
+		cookie, err := c.Cookie("access_token")
+		if err == nil && cookie != "" {
+			tokenString = cookie
+		} else {
+			// 2. Authorization Headerから Bearer Tokenを取得
+			authHeader := c.GetHeader("Authorization")
+			if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
+				tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+			}
+		}
+
+		// トークンがない場合はそのまま通過
+		if tokenString == "" {
+			c.Next()
+			return
+		}
+
+		// トークンを検証（無効でもエラーを返さずに通過）
+		claims, err := auth.ValidateToken(tokenString)
+		if err != nil {
+			logging.L.Debug("optional auth: invalid token, proceeding without auth",
+				"middleware", "OptionalAuthMiddleware",
+				"path", c.Request.URL.Path)
+			c.Next()
+			return
+		}
+
+		// ユーザーIDをコンテキストに設定
+		c.Set("user_id", int(claims.UserID))
+		logging.L.Debug("optional auth: user authenticated",
+			"middleware", "OptionalAuthMiddleware",
+			"user_id", claims.UserID,
+			"path", c.Request.URL.Path)
+
+		c.Next()
+	}
+}
