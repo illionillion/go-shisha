@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { authApi } from "@/features/auth/api/authApi";
 import { RegisterForm } from "@/features/auth/components/RegisterForm";
+import { toCreateUserInput } from "@/features/auth/utils/registerAdapters";
 import { getRegisterErrorMessage } from "@/features/auth/utils/registerErrors";
 import type { RegisterInput } from "@/types/auth";
 import type { CreateUserInput } from "@/types/domain";
@@ -43,9 +44,3 @@ export const RegisterPageClient = () => {
     />
   );
 };
-
-const toCreateUserInput = (data: RegisterInput): CreateUserInput => ({
-  email: data.email,
-  password: data.password,
-  display_name: data.displayName,
-});
