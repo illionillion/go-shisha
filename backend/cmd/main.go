@@ -182,8 +182,8 @@ func main() {
 		}
 
 		// Posts endpoints
-		api.GET("/posts", postHandler.GetAllPosts)
-		api.GET("/posts/:id", postHandler.GetPost)
+		api.GET("/posts", middleware.OptionalAuthMiddleware(), postHandler.GetAllPosts)
+		api.GET("/posts/:id", middleware.OptionalAuthMiddleware(), postHandler.GetPost)
 		api.POST("/posts", middleware.AuthMiddleware(), postHandler.CreatePost)
 		api.POST("/posts/:id/like", middleware.AuthMiddleware(), postHandler.LikePost)
 		api.POST("/posts/:id/unlike", middleware.AuthMiddleware(), postHandler.UnlikePost)

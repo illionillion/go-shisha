@@ -39,6 +39,42 @@ func (m *mockPostRepo) HasLiked(userID, postID int) (bool, error) {
 	return false, nil
 }
 
+// spyPostRepo は AddLike/RemoveLike の呼び出しを記録し、状態を追跡するスパイ
+type spyPostRepo struct {
+	mockPostRepo
+	addLikeCalled    bool
+	addLikeUserID    int
+	addLikePostID    int
+	removeLikeCalled bool
+	removeLikeUserID int
+	removeLikePostID int
+	// GetByID が返す状態（AddLike/RemoveLike 後の実挙動をシミュレート）
+	currentLikes   int
+	currentIsLiked bool
+}
+
+func (s *spyPostRepo) AddLike(userID, postID int) error {
+	s.addLikeCalled = true
+	s.addLikeUserID = userID
+	s.addLikePostID = postID
+	s.currentLikes++
+	s.currentIsLiked = true
+	return nil
+}
+func (s *spyPostRepo) RemoveLike(userID, postID int) error {
+	s.removeLikeCalled = true
+	s.removeLikeUserID = userID
+	s.removeLikePostID = postID
+	if s.currentLikes > 0 {
+		s.currentLikes--
+	}
+	s.currentIsLiked = false
+	return nil
+}
+func (s *spyPostRepo) GetByID(id int, userID *int) (*models.Post, error) {
+	return &models.Post{ID: id, Likes: s.currentLikes, IsLiked: s.currentIsLiked}, nil
+}
+
 type mockUserRepoForPost struct{}
 
 func (m *mockUserRepoForPost) GetAll() ([]models.User, error) { return nil, nil }
@@ -165,27 +201,56 @@ func TestCreatePost_WithInvalidFlavorID(t *testing.T) {
 }
 
 func TestLikeUnlikePost(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
-	liked, err := postSvc.LikePost(2)
+	spy := &spyPostRepo{}
+	postSvc := NewPostService(spy, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	liked, err := postSvc.LikePost(1, 2)
 	if err != nil {
 		t.Fatalf("unexpected error like: %v", err)
 	}
-	if !liked.IsLiked || liked.Likes != 1 {
-		t.Fatalf("expected liked post with Likes=1 IsLiked=true, got %+v", liked)
+	// AddLike が userID=1, postID=2 で呼ばれたことを確認
+	if !spy.addLikeCalled {
+		t.Error("expected AddLike to be called")
+	}
+	if spy.addLikeUserID != 1 || spy.addLikePostID != 2 {
+		t.Errorf("expected AddLike(1, 2), got AddLike(%d, %d)", spy.addLikeUserID, spy.addLikePostID)
+	}
+	// AddLike 後: Likes=1, IsLiked=true（いいね後の状態が反映されていることを確認）
+	if liked.ID != 2 {
+		t.Fatalf("expected post ID=2, got %+v", liked)
+	}
+	if liked.Likes != 1 {
+		t.Fatalf("expected Likes=1 after LikePost, got %d", liked.Likes)
+	}
+	if !liked.IsLiked {
+		t.Fatal("expected IsLiked=true after LikePost")
 	}
 
-	unliked, err := postSvc.UnlikePost(2)
+	unliked, err := postSvc.UnlikePost(1, 2)
 	if err != nil {
 		t.Fatalf("unexpected error unlike: %v", err)
 	}
-	if unliked.IsLiked || unliked.Likes != 0 {
-		t.Fatalf("expected unliked post with Likes=0 IsLiked=false, got %+v", unliked)
+	// RemoveLike が userID=1, postID=2 で呼ばれたことを確認
+	if !spy.removeLikeCalled {
+		t.Error("expected RemoveLike to be called")
+	}
+	if spy.removeLikeUserID != 1 || spy.removeLikePostID != 2 {
+		t.Errorf("expected RemoveLike(1, 2), got RemoveLike(%d, %d)", spy.removeLikeUserID, spy.removeLikePostID)
+	}
+	// RemoveLike 後: Likes=0, IsLiked=false（いいね取り消し後の状態が反映されていることを確認）
+	if unliked.ID != 2 {
+		t.Fatalf("expected post ID=2, got %+v", unliked)
+	}
+	if unliked.Likes != 0 {
+		t.Fatalf("expected Likes=0 after UnlikePost, got %d", unliked.Likes)
+	}
+	if unliked.IsLiked {
+		t.Fatal("expected IsLiked=false after UnlikePost")
 	}
 }
 
 func TestGetAllPosts(t *testing.T) {
 	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
-	posts, err := postSvc.GetAllPosts()
+	posts, err := postSvc.GetAllPosts(nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -246,17 +311,17 @@ func TestCreatePost_PostCreateError(t *testing.T) {
 
 func TestLikePost_Error(t *testing.T) {
 	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
-	_, err := postSvc.LikePost(1)
+	_, err := postSvc.LikePost(1, 1)
 	if err == nil {
-		t.Fatalf("expected error when IncrementLikes fails, got nil")
+		t.Fatalf("expected error when AddLike fails, got nil")
 	}
 }
 
 func TestUnlikePost_Error(t *testing.T) {
 	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
-	_, err := postSvc.UnlikePost(1)
+	_, err := postSvc.UnlikePost(1, 1)
 	if err == nil {
-		t.Fatalf("expected error when DecrementLikes fails, got nil")
+		t.Fatalf("expected error when RemoveLike fails, got nil")
 	}
 }
 
@@ -381,5 +446,69 @@ func TestCreatePost_ImageValidation_Deleted(t *testing.T) {
 	}
 	if !errors.Is(err, ErrImageDeleted) {
 		t.Fatalf("expected ErrImageDeleted, got %v", err)
+	}
+}
+
+// いいね重複テスト用モック
+type mockPostRepoAlreadyLiked struct {
+	mockPostRepo
+}
+
+func (m *mockPostRepoAlreadyLiked) AddLike(userID, postID int) error {
+	return repositories.ErrAlreadyLiked
+}
+
+func TestLikePost_AlreadyLiked(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepoAlreadyLiked{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	_, err := postSvc.LikePost(1, 2)
+	if err == nil {
+		t.Fatalf("expected error for already liked, got nil")
+	}
+	if !errors.Is(err, repositories.ErrAlreadyLiked) {
+		t.Fatalf("expected ErrAlreadyLiked, got %v", err)
+	}
+}
+
+// いいね未実施テスト用モック
+type mockPostRepoNotLiked struct {
+	mockPostRepo
+}
+
+func (m *mockPostRepoNotLiked) RemoveLike(userID, postID int) error {
+	return repositories.ErrNotLiked
+}
+
+func TestUnlikePost_NotLiked(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepoNotLiked{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	_, err := postSvc.UnlikePost(1, 2)
+	if err == nil {
+		t.Fatalf("expected error for not liked, got nil")
+	}
+	if !errors.Is(err, repositories.ErrNotLiked) {
+		t.Fatalf("expected ErrNotLiked, got %v", err)
+	}
+}
+
+func TestGetAllPosts_WithUserID(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	userID := 1
+	posts, err := postSvc.GetAllPosts(&userID)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(posts) == 0 {
+		t.Fatalf("expected posts, got empty")
+	}
+}
+
+func TestGetPostByID_WithUserID(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	userID := 1
+	post, err := postSvc.GetPostByID(1, &userID)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if post.ID != 1 {
+		t.Fatalf("expected post ID=1, got %d", post.ID)
 	}
 }

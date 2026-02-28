@@ -75,28 +75,29 @@ func (h *UploadHandler) UploadImages(c *gin.Context) {
 	uid, ok := userID.(int)
 	if !ok {
 		h.logger.Error("user_idの型が不正", "user_id", userID)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "認証情報が不正です"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
 	// サービス層でアップロード処理
 	urls, err := h.uploadService.UploadImages(uid, files)
 	if err != nil {
-		// エラー種別に応じてステータスコードを変更
-		statusCode := http.StatusInternalServerError
-		if errors.Is(err, services.ErrNoFiles) || errors.Is(err, services.ErrTooManyFiles) {
-			statusCode = http.StatusBadRequest
-		} else if errors.Is(err, services.ErrFileTooLarge) {
-			statusCode = http.StatusRequestEntityTooLarge
-		} else if errors.Is(err, services.ErrInvalidFileType) || errors.Is(err, services.ErrInvalidExtension) {
-			statusCode = http.StatusBadRequest
-		}
-
 		h.logger.Error("画像アップロード失敗",
 			"error", err,
 			"user_id", userID,
 			"file_count", len(files))
-		c.JSON(statusCode, gin.H{"error": err.Error()})
+		// クライアント起因のエラーはメッセージをそのまま返す
+		if errors.Is(err, services.ErrNoFiles) || errors.Is(err, services.ErrTooManyFiles) ||
+			errors.Is(err, services.ErrInvalidFileType) || errors.Is(err, services.ErrInvalidExtension) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if errors.Is(err, services.ErrFileTooLarge) {
+			c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": err.Error()})
+			return
+		}
+		// サーバー起因のエラーは詳細を隠す
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 

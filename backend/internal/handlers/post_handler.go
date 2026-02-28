@@ -15,34 +15,28 @@ import (
 
 // PostServiceInterface はPostServiceのインターフェース（テスト用）
 type PostServiceInterface interface {
-	GetAllPosts() ([]models.Post, error)
-	GetPostByID(id int) (*models.Post, error)
+	GetAllPosts(userID *int) ([]models.Post, error)
+	GetPostByID(id int, userID *int) (*models.Post, error)
 	CreatePost(userID int, input *models.CreatePostInput) (*models.Post, error)
-	LikePost(id int) (*models.Post, error)
-	UnlikePost(id int) (*models.Post, error)
+	LikePost(userID, postID int) (*models.Post, error)
+	UnlikePost(userID, postID int) (*models.Post, error)
 }
 
-/**
- * PostHandler handles post-related HTTP requests
- */
+// PostHandler は投稿関連のHTTPリクエストを処理する
 type PostHandler struct {
 	postService PostServiceInterface
 }
 
-/**
- * NewPostHandler creates a new post handler
- */
+// NewPostHandler は新しいPostHandlerを作成する
 func NewPostHandler(postService PostServiceInterface) *PostHandler {
 	return &PostHandler{
 		postService: postService,
 	}
 }
 
-/**
- * GetAllPosts handles GET /api/v1/posts
- */
+// GetAllPosts は GET /api/v1/posts を処理する
 // @Summary 投稿一覧取得
-// @Description 全ての投稿の一覧を取得します（総数付き）
+// @Description 全ての投稿の一覧を取得します（総数付き）。認証済みの場合、各投稿のいいね状態（is_liked）を含みます
 // @Tags posts
 // @Accept json
 // @Produce json
@@ -50,9 +44,21 @@ func NewPostHandler(postService PostServiceInterface) *PostHandler {
 // @Failure 500 {object} map[string]interface{} "サーバーエラー"
 // @Router /posts [get]
 func (h *PostHandler) GetAllPosts(c *gin.Context) {
-	posts, err := h.postService.GetAllPosts()
+	var userID *int
+	if v, exists := c.Get("user_id"); exists {
+		uid, ok := v.(int)
+		if !ok {
+			logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "GetAllPosts")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
+		}
+		userID = &uid
+	}
+
+	posts, err := h.postService.GetAllPosts(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		logging.L.Error("failed to get all posts", "handler", "PostHandler", "method", "GetAllPosts", "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
@@ -63,11 +69,9 @@ func (h *PostHandler) GetAllPosts(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-/**
- * GetPost handles GET /api/v1/posts/:id
- */
+// GetPost は GET /api/v1/posts/:id を処理する
 // @Summary 投稿詳細取得
-// @Description 指定されたIDの投稿情報を取得します
+// @Description 指定されたIDの投稿情報を取得します。認証済みの場合、いいね状態（is_liked）を含みます
 // @Tags posts
 // @Accept json
 // @Produce json
@@ -75,6 +79,7 @@ func (h *PostHandler) GetAllPosts(c *gin.Context) {
 // @Success 200 {object} models.Post "投稿情報"
 // @Failure 400 {object} map[string]interface{} "無効な投稿ID"
 // @Failure 404 {object} map[string]interface{} "投稿が見つかりません"
+// @Failure 500 {object} map[string]interface{} "サーバーエラー"
 // @Router /posts/{id} [get]
 func (h *PostHandler) GetPost(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
@@ -83,18 +88,32 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 		return
 	}
 
-	post, err := h.postService.GetPostByID(id)
+	var userID *int
+	if v, exists := c.Get("user_id"); exists {
+		uid, ok := v.(int)
+		if !ok {
+			logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "GetPost")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
+		}
+		userID = &uid
+	}
+
+	post, err := h.postService.GetPostByID(id, userID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		if errors.Is(err, repositories.ErrPostNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			return
+		}
+		logging.L.Error("failed to get post", "handler", "PostHandler", "method", "GetPost", "post_id", id, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
 	c.JSON(http.StatusOK, post)
 }
 
-/**
- * CreatePost handles POST /api/v1/posts
- */
+// CreatePost は POST /api/v1/posts を処理する
 // @Summary 投稿作成
 // @Description 新しい投稿を作成します（認証必須）。注意: slides内のflavor_idが無効な場合、そのスライドはFlavorなしで作成されます（エラーにはなりません）
 // @Tags posts
@@ -118,8 +137,8 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 
 	userID, ok := userIDValue.(int)
 	if !ok {
-		logging.L.Error("invalid user_id type", "handler", "PostHandler", "method", "CreatePost", "type", "%T", userIDValue)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id type"})
+		logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "CreatePost")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
@@ -157,7 +176,7 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 			return
 		}
 		logging.L.Error("failed to create post", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
@@ -165,18 +184,20 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	c.JSON(http.StatusCreated, post)
 }
 
-/**
- * LikePost handles POST /api/v1/posts/:id/like
- */
+// LikePost は POST /api/v1/posts/:id/like を処理する
 // @Summary 投稿にいいね
-// @Description 指定された投稿にいいねを追加します
+// @Description 指定された投稿にいいねを追加します（認証必須）
 // @Tags posts
 // @Accept json
 // @Produce json
 // @Param id path int true "投稿ID"
 // @Success 200 {object} models.Post "いいねが追加された投稿"
 // @Failure 400 {object} map[string]interface{} "無効な投稿ID"
+// @Failure 401 {object} map[string]interface{} "認証エラー"
 // @Failure 404 {object} map[string]interface{} "投稿が見つかりません"
+// @Failure 409 {object} map[string]interface{} "既にいいね済み"
+// @Failure 500 {object} map[string]interface{} "サーバーエラー"
+// @Security BearerAuth
 // @Router /posts/{id}/like [post]
 func (h *PostHandler) LikePost(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
@@ -185,27 +206,54 @@ func (h *PostHandler) LikePost(c *gin.Context) {
 		return
 	}
 
-	post, err := h.postService.LikePost(id)
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	userID, ok := userIDValue.(int)
+	if !ok {
+		logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "LikePost")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	post, err := h.postService.LikePost(userID, id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		if errors.Is(err, repositories.ErrAlreadyLiked) {
+			c.JSON(http.StatusConflict, gin.H{"error": "already liked"})
+			return
+		}
+		if errors.Is(err, repositories.ErrPostNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			return
+		}
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+		logging.L.Error("failed to like post", "handler", "PostHandler", "method", "LikePost", "user_id", userID, "post_id", id, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
 	c.JSON(http.StatusOK, post)
 }
 
-/**
- * UnlikePost handles POST /api/v1/posts/:id/unlike
- */
+// UnlikePost は POST /api/v1/posts/:id/unlike を処理する
 // @Summary 投稿のいいねを取り消す
-// @Description 指定された投稿のいいねを取り消します
+// @Description 指定された投稿のいいねを取り消します（認証必須）
 // @Tags posts
 // @Accept json
 // @Produce json
 // @Param id path int true "投稿ID"
 // @Success 200 {object} models.Post "いいねが取り消された投稿"
 // @Failure 400 {object} map[string]interface{} "無効な投稿ID"
+// @Failure 401 {object} map[string]interface{} "認証エラー"
 // @Failure 404 {object} map[string]interface{} "投稿が見つかりません"
+// @Failure 409 {object} map[string]interface{} "いいねしていない投稿"
+// @Failure 500 {object} map[string]interface{} "サーバーエラー"
+// @Security BearerAuth
 // @Router /posts/{id}/unlike [post]
 func (h *PostHandler) UnlikePost(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
@@ -214,9 +262,34 @@ func (h *PostHandler) UnlikePost(c *gin.Context) {
 		return
 	}
 
-	post, err := h.postService.UnlikePost(id)
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	userID, ok := userIDValue.(int)
+	if !ok {
+		logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "UnlikePost")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	post, err := h.postService.UnlikePost(userID, id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		if errors.Is(err, repositories.ErrNotLiked) {
+			c.JSON(http.StatusConflict, gin.H{"error": "not liked"})
+			return
+		}
+		if errors.Is(err, repositories.ErrPostNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			return
+		}
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+		logging.L.Error("failed to unlike post", "handler", "PostHandler", "method", "UnlikePost", "user_id", userID, "post_id", id, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 

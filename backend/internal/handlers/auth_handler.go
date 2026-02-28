@@ -68,7 +68,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 			"method", "Register",
 			"email", input.Email,
 			"error", err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: "Internal server error"})
 		return
 	}
 
@@ -208,13 +208,19 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		return
 	}
 
-	if err := h.authService.Logout(int64(userID.(int))); err != nil {
+	uid, ok := userID.(int)
+	if !ok {
+		logging.L.Error("invalid user_id type in context", "handler", "AuthHandler", "method", "Logout")
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: "Internal server error"})
+		return
+	}
+	if err := h.authService.Logout(int64(uid)); err != nil {
 		logging.L.Error("logout failed",
 			"handler", "AuthHandler",
 			"method", "Logout",
-			"user_id", userID,
+			"user_id", uid,
 			"error", err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: "Internal server error"})
 		return
 	}
 
@@ -267,14 +273,20 @@ func (h *AuthHandler) Me(c *gin.Context) {
 		return
 	}
 
-	user, err := h.authService.GetCurrentUser(int64(userID.(int)))
+	uid, ok := userID.(int)
+	if !ok {
+		logging.L.Error("invalid user_id type in context", "handler", "AuthHandler", "method", "Me")
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: "Internal server error"})
+		return
+	}
+	user, err := h.authService.GetCurrentUser(int64(uid))
 	if err != nil {
 		logging.L.Error("failed to get current user",
 			"handler", "AuthHandler",
 			"method", "Me",
-			"user_id", userID,
+			"user_id", uid,
 			"error", err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: "Internal server error"})
 		return
 	}
 

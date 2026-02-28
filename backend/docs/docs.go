@@ -269,7 +269,7 @@ const docTemplate = `{
         },
         "/posts": {
             "get": {
-                "description": "全ての投稿の一覧を取得します（総数付き）",
+                "description": "全ての投稿の一覧を取得します（総数付き）。認証済みの場合、各投稿のいいね状態（is_liked）を含みます",
                 "consumes": [
                     "application/json"
                 ],
@@ -357,7 +357,7 @@ const docTemplate = `{
         },
         "/posts/{id}": {
             "get": {
-                "description": "指定されたIDの投稿情報を取得します",
+                "description": "指定されたIDの投稿情報を取得します。認証済みの場合、いいね状態（is_liked）を含みます",
                 "consumes": [
                     "application/json"
                 ],
@@ -397,13 +397,25 @@ const docTemplate = `{
                             "type": "object",
                             "additionalProperties": true
                         }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
                     }
                 }
             }
         },
         "/posts/{id}/like": {
             "post": {
-                "description": "指定された投稿にいいねを追加します",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "指定された投稿にいいねを追加します（認証必須）",
                 "consumes": [
                     "application/json"
                 ],
@@ -437,8 +449,29 @@ const docTemplate = `{
                             "additionalProperties": true
                         }
                     },
+                    "401": {
+                        "description": "認証エラー",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
                     "404": {
                         "description": "投稿が見つかりません",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "既にいいね済み",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -449,7 +482,12 @@ const docTemplate = `{
         },
         "/posts/{id}/unlike": {
             "post": {
-                "description": "指定された投稿のいいねを取り消します",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "指定された投稿のいいねを取り消します（認証必須）",
                 "consumes": [
                     "application/json"
                 ],
@@ -483,8 +521,29 @@ const docTemplate = `{
                             "additionalProperties": true
                         }
                     },
+                    "401": {
+                        "description": "認証エラー",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
                     "404": {
                         "description": "投稿が見つかりません",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "409": {
+                        "description": "いいねしていない投稿",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true

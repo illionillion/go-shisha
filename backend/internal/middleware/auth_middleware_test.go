@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -287,5 +288,137 @@ func TestAuthMiddleware_MalformedBearerHeader(t *testing.T) {
 				t.Errorf("%s: expected status 401, got %d", tc.name, w.Code)
 			}
 		})
+	}
+}
+
+// --- OptionalAuthMiddleware テスト ---
+
+func TestOptionalAuthMiddleware_NoToken(t *testing.T) {
+	// Ginルーターをセットアップ
+	r := gin.New()
+	r.Use(OptionalAuthMiddleware())
+	r.GET("/test", func(c *gin.Context) {
+		_, exists := c.Get("user_id")
+		c.JSON(http.StatusOK, gin.H{"has_user_id": exists})
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	// トークンなしでも200を返す
+	if w.Code != http.StatusOK {
+		t.Errorf("expected status 200, got %d", w.Code)
+	}
+	// user_idがセットされていないことを確認
+	var resp map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+	if resp["has_user_id"] != false {
+		t.Errorf("expected has_user_id to be false, got %v", resp["has_user_id"])
+	}
+}
+
+func TestOptionalAuthMiddleware_ValidCookie(t *testing.T) {
+	token, err := auth.GenerateAccessToken(123)
+	if err != nil {
+		t.Fatalf("failed to generate token: %v", err)
+	}
+
+	var actualUserID int
+	var hasUserID bool
+
+	r := gin.New()
+	r.Use(OptionalAuthMiddleware())
+	r.GET("/test", func(c *gin.Context) {
+		if v, exists := c.Get("user_id"); exists {
+			actualUserID = v.(int)
+			hasUserID = true
+		}
+		c.JSON(http.StatusOK, gin.H{"user_id": actualUserID})
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.AddCookie(&http.Cookie{
+		Name:  "access_token",
+		Value: token,
+	})
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("expected status 200, got %d", w.Code)
+	}
+	if !hasUserID {
+		t.Error("expected user_id to be set in context")
+	}
+	if actualUserID != 123 {
+		t.Errorf("expected user_id 123, got %d", actualUserID)
+	}
+}
+
+func TestOptionalAuthMiddleware_ValidBearerToken(t *testing.T) {
+	token, err := auth.GenerateAccessToken(456)
+	if err != nil {
+		t.Fatalf("failed to generate token: %v", err)
+	}
+
+	var actualUserID int
+	var hasUserID bool
+
+	r := gin.New()
+	r.Use(OptionalAuthMiddleware())
+	r.GET("/test", func(c *gin.Context) {
+		if v, exists := c.Get("user_id"); exists {
+			actualUserID = v.(int)
+			hasUserID = true
+		}
+		c.JSON(http.StatusOK, gin.H{"user_id": actualUserID})
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("expected status 200, got %d", w.Code)
+	}
+	if !hasUserID {
+		t.Error("expected user_id to be set in context")
+	}
+	if actualUserID != 456 {
+		t.Errorf("expected user_id 456, got %d", actualUserID)
+	}
+}
+
+func TestOptionalAuthMiddleware_InvalidToken(t *testing.T) {
+	r := gin.New()
+	r.Use(OptionalAuthMiddleware())
+	r.GET("/test", func(c *gin.Context) {
+		_, exists := c.Get("user_id")
+		c.JSON(http.StatusOK, gin.H{"has_user_id": exists})
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.Header.Set("Authorization", "Bearer invalid-token")
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	// 無効なトークンでも200を返す（エラーにしない）
+	if w.Code != http.StatusOK {
+		t.Errorf("expected status 200, got %d", w.Code)
+	}
+	// user_idがセットされていないことを確認
+	var resp map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+	if resp["has_user_id"] != false {
+		t.Errorf("expected has_user_id to be false, got %v", resp["has_user_id"])
 	}
 }

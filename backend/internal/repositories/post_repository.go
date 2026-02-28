@@ -11,6 +11,8 @@ var (
 	ErrAlreadyLiked = errors.New("already liked")
 	// ErrNotLiked is returned when a user tries to unlike a post they have not liked
 	ErrNotLiked = errors.New("not liked")
+	// ErrPostNotFound is returned when a post is not found
+	ErrPostNotFound = errors.New("post not found")
 )
 
 /**

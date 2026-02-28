@@ -95,7 +95,7 @@ func (r *PostRepository) GetByID(id int, userID *int) (*models.Post, error) {
 	}).Preload("Slides.Flavor").First(&pm, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			logging.L.Debug("post not found", "repository", "PostRepository", "method", "GetByID", "post_id", id)
-			return nil, fmt.Errorf("post not found: id=%d", id)
+			return nil, repositories.ErrPostNotFound
 		}
 		logging.L.Error("failed to query post", "repository", "PostRepository", "method", "GetByID", "post_id", id, "error", err)
 		return nil, fmt.Errorf("failed to query post by id=%d: %w", id, err)
@@ -193,6 +193,19 @@ func (r *PostRepository) AddLike(userID, postID int) error {
 			if errors.Is(err, gorm.ErrDuplicatedKey) {
 				return repositories.ErrAlreadyLiked
 			}
+			if errors.Is(err, gorm.ErrForeignKeyViolated) {
+				// post_likes.user_id / post_likes.post_id の両方が外部キーのため、
+				// FK違反時に post が本当に存在しないかを確認してから ErrPostNotFound を返す。
+				var count int64
+				if cerr := tx.Model(&postModel{}).Where("id = ?", postID).Count(&count).Error; cerr != nil {
+					return fmt.Errorf("failed to check post existence after foreign key violation: %w", cerr)
+				}
+				if count == 0 {
+					return repositories.ErrPostNotFound
+				}
+				// post が存在する場合は user 側のFK違反（ユーザー削除済み等）とみなす
+				return repositories.ErrUserNotFound
+			}
 			return fmt.Errorf("failed to insert post_like: %w", err)
 		}
 		result := tx.Model(&postModel{}).Where("id = ?", postID).
@@ -201,7 +214,7 @@ func (r *PostRepository) AddLike(userID, postID int) error {
 			return fmt.Errorf("failed to increment likes: %w", result.Error)
 		}
 		if result.RowsAffected == 0 {
-			return fmt.Errorf("post %d not found", postID)
+			return repositories.ErrPostNotFound
 		}
 		return nil
 	})
@@ -209,6 +222,14 @@ func (r *PostRepository) AddLike(userID, postID int) error {
 		if errors.Is(err, repositories.ErrAlreadyLiked) {
 			logging.L.Debug("user already liked post", "repository", "PostRepository", "method", "AddLike", "user_id", userID, "post_id", postID)
 			return repositories.ErrAlreadyLiked
+		}
+		if errors.Is(err, repositories.ErrPostNotFound) {
+			logging.L.Debug("post not found for like", "repository", "PostRepository", "method", "AddLike", "post_id", postID)
+			return repositories.ErrPostNotFound
+		}
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			logging.L.Debug("user not found for like (deleted?)", "repository", "PostRepository", "method", "AddLike", "user_id", userID)
+			return repositories.ErrUserNotFound
 		}
 		logging.L.Error("failed to add like", "repository", "PostRepository", "method", "AddLike", "user_id", userID, "post_id", postID, "error", err)
 		return err

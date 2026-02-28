@@ -18,9 +18,7 @@ var (
 	ErrImageDeleted          = errors.New("削除された画像は使用できません")
 )
 
-/**
- * PostService handles post-related business logic
- */
+// PostService は投稿関連のビジネスロジックを処理する
 type PostService struct {
 	postRepo   repositories.PostRepository
 	userRepo   repositories.UserRepository
@@ -28,9 +26,7 @@ type PostService struct {
 	uploadRepo repositories.UploadRepository
 }
 
-/**
- * NewPostService creates a new post service
- */
+// NewPostService は新しいPostServiceを作成する
 func NewPostService(postRepo repositories.PostRepository, userRepo repositories.UserRepository, flavorRepo repositories.FlavorRepository, uploadRepo repositories.UploadRepository) *PostService {
 	return &PostService{
 		postRepo:   postRepo,
@@ -40,23 +36,19 @@ func NewPostService(postRepo repositories.PostRepository, userRepo repositories.
 	}
 }
 
-/**
- * GetAllPosts returns all posts
- */
-func (s *PostService) GetAllPosts() ([]models.Post, error) {
-	return s.postRepo.GetAll(nil)
+// GetAllPosts はすべての投稿を取得する
+// userIDが指定されている場合、各投稿のいいね状態（is_liked）を含めて返す
+func (s *PostService) GetAllPosts(userID *int) ([]models.Post, error) {
+	return s.postRepo.GetAll(userID)
 }
 
-/**
- * GetPostByID returns a post by ID
- */
-func (s *PostService) GetPostByID(id int) (*models.Post, error) {
-	return s.postRepo.GetByID(id, nil)
+// GetPostByID は指定IDの投稿を取得する
+// userIDが指定されている場合、いいね状態（is_liked）を含めて返す
+func (s *PostService) GetPostByID(id int, userID *int) (*models.Post, error) {
+	return s.postRepo.GetByID(id, userID)
 }
 
-/**
- * CreatePost creates a new post
- */
+// CreatePost は新しい投稿を作成する
 func (s *PostService) CreatePost(userID int, input *models.CreatePostInput) (*models.Post, error) {
 	// Verify user exists and get user information
 	user, err := s.userRepo.GetByID(userID)
@@ -165,28 +157,20 @@ func (s *PostService) validateImageURL(userID int, imageURL string) error {
 	return nil
 }
 
-/**
- * LikePost increments the like count for a post
- */
-func (s *PostService) LikePost(id int) (*models.Post, error) {
-	post, err := s.postRepo.IncrementLikes(id)
-	if err != nil {
+// LikePost は指定された投稿にいいねを追加する
+// ユーザーIDと投稿IDを受け取り、AddLikeでDB登録後に最新データを返す
+func (s *PostService) LikePost(userID, postID int) (*models.Post, error) {
+	if err := s.postRepo.AddLike(userID, postID); err != nil {
 		return nil, err
 	}
-	// mark as liked for the current (mock) user
-	post.IsLiked = true
-	return post, nil
+	return s.postRepo.GetByID(postID, &userID)
 }
 
-/**
- * UnlikePost decrements the like count for a post and marks it as not liked
- */
-func (s *PostService) UnlikePost(id int) (*models.Post, error) {
-	post, err := s.postRepo.DecrementLikes(id)
-	if err != nil {
+// UnlikePost は指定された投稿のいいねを取り消す
+// ユーザーIDと投稿IDを受け取り、RemoveLikeでDB削除後に最新データを返す
+func (s *PostService) UnlikePost(userID, postID int) (*models.Post, error) {
+	if err := s.postRepo.RemoveLike(userID, postID); err != nil {
 		return nil, err
 	}
-	// mark as not liked for the current (mock) user
-	post.IsLiked = false
-	return post, nil
+	return s.postRepo.GetByID(postID, &userID)
 }

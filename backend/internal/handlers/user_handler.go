@@ -1,11 +1,14 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"go-shisha-backend/internal/models"
+	"go-shisha-backend/internal/repositories"
 	"go-shisha-backend/internal/services"
+	"go-shisha-backend/pkg/logging"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,7 +43,8 @@ func NewUserHandler(userService *services.UserService) *UserHandler {
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	users, err := h.userService.GetAllUsers()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		logging.L.Error("failed to get all users", "handler", "UserHandler", "method", "GetAllUsers", "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
@@ -73,7 +77,12 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 
 	user, err := h.userService.GetUserByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+		logging.L.Error("failed to get user", "handler", "UserHandler", "method", "GetUser", "user_id", id, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
@@ -102,7 +111,12 @@ func (h *UserHandler) GetUserPosts(c *gin.Context) {
 
 	posts, err := h.userService.GetUserPosts(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+		logging.L.Error("failed to get user posts", "handler", "UserHandler", "method", "GetUserPosts", "user_id", id, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
