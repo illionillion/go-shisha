@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -580,4 +581,44 @@ func TestGetPost_WithOptionalAuth(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, response.IsLiked)
 	})
+}
+
+func TestGetPost_NotFound_404(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		getPostByIDFunc: func(id int, userID *int) (*models.Post, error) {
+			return nil, repositories.ErrPostNotFound
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.GET("/posts/:id", handler.GetPost)
+
+	req := httptest.NewRequest(http.MethodGet, "/posts/99", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusNotFound, rec.Code)
+}
+
+func TestGetPost_InternalError_500(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		getPostByIDFunc: func(id int, userID *int) (*models.Post, error) {
+			return nil, errors.New("db connection failed")
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.GET("/posts/:id", handler.GetPost)
+
+	req := httptest.NewRequest(http.MethodGet, "/posts/1", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
 }
