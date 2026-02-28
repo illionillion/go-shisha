@@ -203,8 +203,8 @@ func (r *PostRepository) AddLike(userID, postID int) error {
 				if count == 0 {
 					return repositories.ErrPostNotFound
 				}
-				// post が存在する場合は、user 側のFK違反など別要因とみなし、汎用エラーとして返す。
-				return fmt.Errorf("failed to insert post_like: %w", err)
+				// post が存在する場合は user 側のFK違反（ユーザー削除済み等）とみなす
+				return repositories.ErrUserNotFound
 			}
 			return fmt.Errorf("failed to insert post_like: %w", err)
 		}
@@ -226,6 +226,10 @@ func (r *PostRepository) AddLike(userID, postID int) error {
 		if errors.Is(err, repositories.ErrPostNotFound) {
 			logging.L.Debug("post not found for like", "repository", "PostRepository", "method", "AddLike", "post_id", postID)
 			return repositories.ErrPostNotFound
+		}
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			logging.L.Debug("user not found for like (deleted?)", "repository", "PostRepository", "method", "AddLike", "user_id", userID)
+			return repositories.ErrUserNotFound
 		}
 		logging.L.Error("failed to add like", "repository", "PostRepository", "method", "AddLike", "user_id", userID, "post_id", postID, "error", err)
 		return err
