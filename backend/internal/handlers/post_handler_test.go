@@ -457,6 +457,29 @@ func TestLikePost_InternalError_500(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, rec.Code)
 }
 
+func TestLikePost_UserNotFound_401(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		likePostFunc: func(userID, postID int) (*models.Post, error) {
+			return nil, repositories.ErrUserNotFound
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.POST("/posts/:id/like", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.LikePost(c)
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/posts/1/like", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
 func TestUnlikePost_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -527,6 +550,52 @@ func TestUnlikePost_InvalidID(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
+}
+
+func TestUnlikePost_NotFound_404(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		unlikePostFunc: func(userID, postID int) (*models.Post, error) {
+			return nil, repositories.ErrPostNotFound
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.POST("/posts/:id/unlike", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UnlikePost(c)
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/posts/99/unlike", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusNotFound, rec.Code)
+}
+
+func TestUnlikePost_UserNotFound_401(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		unlikePostFunc: func(userID, postID int) (*models.Post, error) {
+			return nil, repositories.ErrUserNotFound
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.POST("/posts/:id/unlike", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UnlikePost(c)
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/posts/1/unlike", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
 func TestGetAllPosts_WithOptionalAuth(t *testing.T) {
