@@ -193,6 +193,9 @@ func (r *PostRepository) AddLike(userID, postID int) error {
 			if errors.Is(err, gorm.ErrDuplicatedKey) {
 				return repositories.ErrAlreadyLiked
 			}
+			if errors.Is(err, gorm.ErrForeignKeyViolated) {
+				return repositories.ErrPostNotFound
+			}
 			return fmt.Errorf("failed to insert post_like: %w", err)
 		}
 		result := tx.Model(&postModel{}).Where("id = ?", postID).
