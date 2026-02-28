@@ -15,10 +15,20 @@ const REGISTER_ERROR_MESSAGES = {
   [ServerErrorCode.internal_server_error]: "サーバーエラーが発生しました",
 } satisfies Record<RegisterErrorCode, string>;
 
+/** RegisterErrorCode かどうかを判定する型ガード */
+const isRegisterErrorCode = (code: unknown): code is RegisterErrorCode => {
+  return typeof code === "string" && code in REGISTER_ERROR_MESSAGES;
+};
+
 /** APIエラーから表示用メッセージを返す */
 export const getRegisterErrorMessage = (error: unknown): string => {
   const apiError = error as ApiError | undefined;
-  const code = (apiError?.bodyJson as ConflictError | ValidationError | ServerError | undefined)
-    ?.error;
-  return REGISTER_ERROR_MESSAGES[code as RegisterErrorCode] ?? "通信エラーが発生しました";
+  const bodyJson = apiError?.bodyJson as ConflictError | ValidationError | ServerError | undefined;
+  const code = bodyJson?.error;
+
+  if (isRegisterErrorCode(code)) {
+    return REGISTER_ERROR_MESSAGES[code];
+  }
+
+  return "通信エラーが発生しました";
 };
