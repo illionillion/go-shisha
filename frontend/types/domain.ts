@@ -3,17 +3,20 @@
 
 import type { GoShishaBackendInternalModelsAuthResponse } from "@/api/model/goShishaBackendInternalModelsAuthResponse";
 import type { GoShishaBackendInternalModelsConflictError } from "@/api/model/goShishaBackendInternalModelsConflictError";
+import { GoShishaBackendInternalModelsConflictErrorError } from "@/api/model/goShishaBackendInternalModelsConflictErrorError";
 import type { GoShishaBackendInternalModelsCreatePostInput } from "@/api/model/goShishaBackendInternalModelsCreatePostInput";
 import type { GoShishaBackendInternalModelsCreateUserInput } from "@/api/model/goShishaBackendInternalModelsCreateUserInput";
 import type { GoShishaBackendInternalModelsFlavor } from "@/api/model/goShishaBackendInternalModelsFlavor";
 import type { GoShishaBackendInternalModelsLoginInput } from "@/api/model/goShishaBackendInternalModelsLoginInput";
 import type { GoShishaBackendInternalModelsPost } from "@/api/model/goShishaBackendInternalModelsPost";
 import type { GoShishaBackendInternalModelsServerError } from "@/api/model/goShishaBackendInternalModelsServerError";
+import { GoShishaBackendInternalModelsServerErrorError } from "@/api/model/goShishaBackendInternalModelsServerErrorError";
 import type { GoShishaBackendInternalModelsSlide } from "@/api/model/goShishaBackendInternalModelsSlide";
 import type { GoShishaBackendInternalModelsSlideInput } from "@/api/model/goShishaBackendInternalModelsSlideInput";
 import type { GoShishaBackendInternalModelsUploadImagesResponse } from "@/api/model/goShishaBackendInternalModelsUploadImagesResponse";
 import type { GoShishaBackendInternalModelsUser } from "@/api/model/goShishaBackendInternalModelsUser";
 import type { GoShishaBackendInternalModelsValidationError } from "@/api/model/goShishaBackendInternalModelsValidationError";
+import { GoShishaBackendInternalModelsValidationErrorError } from "@/api/model/goShishaBackendInternalModelsValidationErrorError";
 import type { PostAuthLogout200 } from "@/api/model/postAuthLogout200";
 import type { PostPosts400 as GeneratedPostPosts400 } from "@/api/model/postPosts400";
 
@@ -38,25 +41,28 @@ export type LogoutResponse = PostAuthLogout200;
 /**
  * バリデーションエラーレスポンス（400 Bad Request）
  * - POST /api/v1/auth/register のバリデーションエラー時に返る
- * - error: エラー種別識別子（"validation failed"）
- * - message: ユーザー向けエラーメッセージ
+ * - error: "validation_failed"（エラーコード）
  */
 export type ValidationError = GoShishaBackendInternalModelsValidationError;
+/** ValidationError.error のエラーコード定数 */
+export const ValidationErrorCode = GoShishaBackendInternalModelsValidationErrorError;
 
 /**
  * リソース競合エラーレスポンス（409 Conflict）
  * - POST /api/v1/auth/register のメールアドレス重複時に返る
- * - error: エラー種別識別子（"email already exists"）
- * - message: ユーザー向けエラーメッセージ（日本語）
+ * - error: "email_already_exists"（エラーコード）
  */
 export type ConflictError = GoShishaBackendInternalModelsConflictError;
+/** ConflictError.error のエラーコード定数 */
+export const ConflictErrorCode = GoShishaBackendInternalModelsConflictErrorError;
 
 /**
  * サーバー内部エラーレスポンス（500 Internal Server Error）
- * - error: エラー種別識別子（"internal server error"）
- * - message: ユーザー向けエラーメッセージ
+ * - error: "internal_server_error"（エラーコード）
  */
 export type ServerError = GoShishaBackendInternalModelsServerError;
+/** ServerError.error のエラーコード定数 */
+export const ServerErrorCode = GoShishaBackendInternalModelsServerErrorError;
 
 // ========================================
 // ユーザー関連

@@ -6,13 +6,12 @@
 このAPIはシーシャの投稿、ユーザー管理を行います
  * OpenAPI spec version: 1.0
  */
+import type { GoShishaBackendInternalModelsServerErrorError } from "./goShishaBackendInternalModelsServerErrorError";
 
 /**
  * サーバー内部でエラーが発生した場合のエラーレスポンス
  */
 export interface GoShishaBackendInternalModelsServerError {
   /** エラー種別の識別子 */
-  error?: string;
-  /** ユーザー向けのエラーメッセージ */
-  message?: string;
+  error?: GoShishaBackendInternalModelsServerErrorError;
 }
