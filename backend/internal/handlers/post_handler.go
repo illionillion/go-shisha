@@ -137,8 +137,8 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 
 	userID, ok := userIDValue.(int)
 	if !ok {
-		logging.L.Error("invalid user_id type", "handler", "PostHandler", "method", "CreatePost", "type", "%T", userIDValue)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id type"})
+		logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "CreatePost")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
@@ -176,7 +176,7 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 			return
 		}
 		logging.L.Error("failed to create post", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
