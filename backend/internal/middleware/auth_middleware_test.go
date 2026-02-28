@@ -1,10 +1,10 @@
 package middleware
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"strings"
 	"testing"
 
 	"go-shisha-backend/pkg/auth"
@@ -311,8 +311,12 @@ func TestOptionalAuthMiddleware_NoToken(t *testing.T) {
 		t.Errorf("expected status 200, got %d", w.Code)
 	}
 	// user_idがセットされていないことを確認
-	if !strings.Contains(w.Body.String(), `"has_user_id":false`) {
-		t.Errorf("expected has_user_id to be false, got %s", w.Body.String())
+	var resp map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+	if resp["has_user_id"] != false {
+		t.Errorf("expected has_user_id to be false, got %v", resp["has_user_id"])
 	}
 }
 
@@ -410,7 +414,11 @@ func TestOptionalAuthMiddleware_InvalidToken(t *testing.T) {
 		t.Errorf("expected status 200, got %d", w.Code)
 	}
 	// user_idがセットされていないことを確認
-	if !strings.Contains(w.Body.String(), `"has_user_id":false`) {
-		t.Errorf("expected has_user_id to be false, got %s", w.Body.String())
+	var resp map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+	if resp["has_user_id"] != false {
+		t.Errorf("expected has_user_id to be false, got %v", resp["has_user_id"])
 	}
 }
