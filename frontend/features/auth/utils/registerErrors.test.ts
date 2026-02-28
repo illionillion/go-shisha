@@ -42,4 +42,9 @@ describe("getRegisterErrorMessage", () => {
   it("undefinedの場合 → フォールバックメッセージを返す", () => {
     expect(getRegisterErrorMessage(undefined)).toBe("通信エラーが発生しました");
   });
+
+  it("Object.prototype由来のキー（toString等）→ フォールバックメッセージを返す", () => {
+    const error = makeApiError(409, { error: "toString" });
+    expect(getRegisterErrorMessage(error)).toBe("通信エラーが発生しました");
+  });
 });

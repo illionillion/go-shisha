@@ -17,7 +17,7 @@ const REGISTER_ERROR_MESSAGES = {
 
 /** RegisterErrorCode かどうかを判定する型ガード */
 const isRegisterErrorCode = (code: unknown): code is RegisterErrorCode => {
-  return typeof code === "string" && code in REGISTER_ERROR_MESSAGES;
+  return typeof code === "string" && Object.hasOwn(REGISTER_ERROR_MESSAGES, code);
 };
 
 /** APIエラーから表示用メッセージを返す */
