@@ -392,6 +392,11 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "500":
+          description: サーバーエラー
+          schema:
+            additionalProperties: true
+            type: object
       summary: 投稿詳細取得
       tags:
       - posts
@@ -430,6 +435,11 @@ paths:
             type: object
         "409":
           description: 既にいいね済み
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: サーバーエラー
           schema:
             additionalProperties: true
             type: object
@@ -473,6 +483,11 @@ paths:
             type: object
         "409":
           description: いいねしていない投稿
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: サーバーエラー
           schema:
             additionalProperties: true
             type: object

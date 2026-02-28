@@ -397,6 +397,13 @@ const docTemplate = `{
                             "type": "object",
                             "additionalProperties": true
                         }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
                     }
                 }
             }
@@ -462,6 +469,13 @@ const docTemplate = `{
                             "type": "object",
                             "additionalProperties": true
                         }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
                     }
                 }
             }
@@ -523,6 +537,13 @@ const docTemplate = `{
                     },
                     "409": {
                         "description": "いいねしていない投稿",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
