@@ -105,6 +105,7 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 			return
 		}
+		logging.L.Error("failed to get post", "handler", "PostHandler", "method", "GetPost", "post_id", id, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
@@ -227,6 +228,7 @@ func (h *PostHandler) LikePost(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 			return
 		}
+		logging.L.Error("failed to like post", "handler", "PostHandler", "method", "LikePost", "user_id", userID, "post_id", id, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
@@ -278,6 +280,7 @@ func (h *PostHandler) UnlikePost(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 			return
 		}
+		logging.L.Error("failed to unlike post", "handler", "PostHandler", "method", "UnlikePost", "user_id", userID, "post_id", id, "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
