@@ -49,8 +49,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 			"method", "Register",
 			"error", err)
 		c.JSON(http.StatusBadRequest, models.ValidationError{
-			Error:   "validation failed",
-			Message: err.Error(),
+			Error: "validation_failed",
 		})
 		return
 	}
@@ -64,8 +63,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 				"method", "Register",
 				"email", input.Email)
 			c.JSON(http.StatusConflict, models.ConflictError{
-				Error:   "email already exists",
-				Message: "このメールアドレスは既に使用されています",
+				Error: "email_already_exists",
 			})
 			return
 		}
@@ -75,8 +73,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 			"email", input.Email,
 			"error", err)
 		c.JSON(http.StatusInternalServerError, models.ServerError{
-			Error:   "internal server error",
-			Message: "サーバーエラーが発生しました",
+			Error: "internal_server_error",
 		})
 		return
 	}

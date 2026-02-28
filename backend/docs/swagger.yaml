@@ -10,11 +10,9 @@ definitions:
     properties:
       error:
         description: エラー種別の識別子
-        example: resource conflict
-        type: string
-      message:
-        description: ユーザー向けのエラーメッセージ
-        example: このリソースは既に存在します
+        enum:
+        - email_already_exists
+        example: email_already_exists
         type: string
     type: object
   go-shisha-backend_internal_models.CreatePostInput:
@@ -98,11 +96,9 @@ definitions:
     properties:
       error:
         description: エラー種別の識別子
-        example: internal server error
-        type: string
-      message:
-        description: ユーザー向けのエラーメッセージ
-        example: サーバーエラーが発生しました
+        enum:
+        - internal_server_error
+        example: internal_server_error
         type: string
     type: object
   go-shisha-backend_internal_models.Slide:
@@ -163,11 +159,9 @@ definitions:
     properties:
       error:
         description: エラー種別の識別子
-        example: validation failed
-        type: string
-      message:
-        description: ユーザー向けのエラーメッセージ
-        example: 入力値を確認してください
+        enum:
+        - validation_failed
+        example: validation_failed
         type: string
     type: object
 host: localhost:8080

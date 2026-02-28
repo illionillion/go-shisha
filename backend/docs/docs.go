@@ -756,12 +756,10 @@ const docTemplate = `{
                 "error": {
                     "description": "エラー種別の識別子",
                     "type": "string",
-                    "example": "resource conflict"
-                },
-                "message": {
-                    "description": "ユーザー向けのエラーメッセージ",
-                    "type": "string",
-                    "example": "このリソースは既に存在します"
+                    "enum": [
+                        "email_already_exists"
+                    ],
+                    "example": "email_already_exists"
                 }
             }
         },
@@ -887,12 +885,10 @@ const docTemplate = `{
                 "error": {
                     "description": "エラー種別の識別子",
                     "type": "string",
-                    "example": "internal server error"
-                },
-                "message": {
-                    "description": "ユーザー向けのエラーメッセージ",
-                    "type": "string",
-                    "example": "サーバーエラーが発生しました"
+                    "enum": [
+                        "internal_server_error"
+                    ],
+                    "example": "internal_server_error"
                 }
             }
         },
@@ -985,12 +981,10 @@ const docTemplate = `{
                 "error": {
                     "description": "エラー種別の識別子",
                     "type": "string",
-                    "example": "validation failed"
-                },
-                "message": {
-                    "description": "ユーザー向けのエラーメッセージ",
-                    "type": "string",
-                    "example": "入力値を確認してください"
+                    "enum": [
+                        "validation_failed"
+                    ],
+                    "example": "validation_failed"
                 }
             }
         }

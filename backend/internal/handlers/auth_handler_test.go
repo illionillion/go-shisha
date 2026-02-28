@@ -155,11 +155,8 @@ func TestAuthHandler_Register_InvalidJSON(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
 		t.Fatalf("failed to unmarshal response: %v", err)
 	}
-	if response.Error != "validation failed" {
-		t.Errorf("expected error 'validation failed', got '%s'", response.Error)
-	}
-	if response.Message == "" {
-		t.Error("expected non-empty message")
+	if response.Error != "validation_failed" {
+		t.Errorf("expected error 'validation_failed', got '%s'", response.Error)
 	}
 }
 
@@ -199,11 +196,8 @@ func TestAuthHandler_Register_EmailAlreadyExists(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
 		t.Fatalf("failed to unmarshal response: %v", err)
 	}
-	if response.Error != "email already exists" {
-		t.Errorf("expected error 'email already exists', got '%s'", response.Error)
-	}
-	if response.Message != "このメールアドレスは既に使用されています" {
-		t.Errorf("expected message 'このメールアドレスは既に使用されています', got '%s'", response.Message)
+	if response.Error != "email_already_exists" {
+		t.Errorf("expected error 'email_already_exists', got '%s'", response.Error)
 	}
 }
 
