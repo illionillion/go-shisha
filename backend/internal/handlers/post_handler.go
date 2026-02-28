@@ -93,7 +93,11 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 
 	post, err := h.postService.GetPostByID(id, userID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		if errors.Is(err, repositories.ErrPostNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
@@ -209,7 +213,11 @@ func (h *PostHandler) LikePost(c *gin.Context) {
 			c.JSON(http.StatusConflict, gin.H{"error": "already liked"})
 			return
 		}
-		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		if errors.Is(err, repositories.ErrPostNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 
@@ -254,7 +262,11 @@ func (h *PostHandler) UnlikePost(c *gin.Context) {
 			c.JSON(http.StatusConflict, gin.H{"error": "not liked"})
 			return
 		}
-		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		if errors.Is(err, repositories.ErrPostNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
 

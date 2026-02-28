@@ -95,7 +95,7 @@ func (r *PostRepository) GetByID(id int, userID *int) (*models.Post, error) {
 	}).Preload("Slides.Flavor").First(&pm, "id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			logging.L.Debug("post not found", "repository", "PostRepository", "method", "GetByID", "post_id", id)
-			return nil, fmt.Errorf("post not found: id=%d", id)
+			return nil, repositories.ErrPostNotFound
 		}
 		logging.L.Error("failed to query post", "repository", "PostRepository", "method", "GetByID", "post_id", id, "error", err)
 		return nil, fmt.Errorf("failed to query post by id=%d: %w", id, err)
