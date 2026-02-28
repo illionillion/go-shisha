@@ -1,5 +1,13 @@
 package models
 
+// エラーコード定数 - ハンドラーと enums タグの単一ソース
+const (
+	ErrCodeValidationFailed   = "validation_failed"
+	ErrCodeEmailAlreadyExists = "email_already_exists"
+	ErrCodeUnauthorized       = "unauthorized"
+	ErrCodeInternalServer     = "internal_server_error"
+)
+
 // ValidationError はバリデーションエラーを表す（400 Bad Request）
 // @Description 入力値のバリデーションに失敗した場合のエラーレスポンス
 type ValidationError struct {
