@@ -39,6 +39,30 @@ func (m *mockPostRepo) HasLiked(userID, postID int) (bool, error) {
 	return false, nil
 }
 
+// spyPostRepo は AddLike/RemoveLike の呼び出しを記録するスパイ
+type spyPostRepo struct {
+	mockPostRepo
+	addLikeCalled    bool
+	addLikeUserID    int
+	addLikePostID    int
+	removeLikeCalled bool
+	removeLikeUserID int
+	removeLikePostID int
+}
+
+func (s *spyPostRepo) AddLike(userID, postID int) error {
+	s.addLikeCalled = true
+	s.addLikeUserID = userID
+	s.addLikePostID = postID
+	return nil
+}
+func (s *spyPostRepo) RemoveLike(userID, postID int) error {
+	s.removeLikeCalled = true
+	s.removeLikeUserID = userID
+	s.removeLikePostID = postID
+	return nil
+}
+
 type mockUserRepoForPost struct{}
 
 func (m *mockUserRepoForPost) GetAll() ([]models.User, error) { return nil, nil }
@@ -165,12 +189,20 @@ func TestCreatePost_WithInvalidFlavorID(t *testing.T) {
 }
 
 func TestLikeUnlikePost(t *testing.T) {
-	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	spy := &spyPostRepo{}
+	postSvc := NewPostService(spy, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
 	liked, err := postSvc.LikePost(1, 2)
 	if err != nil {
 		t.Fatalf("unexpected error like: %v", err)
 	}
-	// AddLikeがnilを返すのでGetByIDで取得。mockPostRepoのGetByIDはLikes:0を返す
+	// AddLike が userID=1, postID=2 で呼ばれたことを確認
+	if !spy.addLikeCalled {
+		t.Error("expected AddLike to be called")
+	}
+	if spy.addLikeUserID != 1 || spy.addLikePostID != 2 {
+		t.Errorf("expected AddLike(1, 2), got AddLike(%d, %d)", spy.addLikeUserID, spy.addLikePostID)
+	}
+	// GetByID で最新データを返す
 	if liked.ID != 2 {
 		t.Fatalf("expected post ID=2, got %+v", liked)
 	}
@@ -181,6 +213,13 @@ func TestLikeUnlikePost(t *testing.T) {
 	unliked, err := postSvc.UnlikePost(1, 2)
 	if err != nil {
 		t.Fatalf("unexpected error unlike: %v", err)
+	}
+	// RemoveLike が userID=1, postID=2 で呼ばれたことを確認
+	if !spy.removeLikeCalled {
+		t.Error("expected RemoveLike to be called")
+	}
+	if spy.removeLikeUserID != 1 || spy.removeLikePostID != 2 {
+		t.Errorf("expected RemoveLike(1, 2), got RemoveLike(%d, %d)", spy.removeLikeUserID, spy.removeLikePostID)
 	}
 	if unliked.ID != 2 {
 		t.Fatalf("expected post ID=2, got %+v", unliked)
