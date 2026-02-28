@@ -19,9 +19,9 @@ func NewDBFromEnv() (*gorm.DB, error) {
 
 	// GORM設定: ロガー、PrepareStmt、NowFuncを設定
 	config := &gorm.Config{
-		Logger:          logger.Default.LogMode(logger.Info), // 本番環境では logger.Silent に切り替え
-		PrepareStmt:     true,                                // プリペアドステートメントを有効化（パフォーマンス向上）
-		TranslateError:  true,                                // gorm.ErrDuplicatedKey 等への変換を有効化
+		Logger:         logger.Default.LogMode(logger.Info), // 本番環境では logger.Silent に切り替え
+		PrepareStmt:    true,                                // プリペアドステートメントを有効化（パフォーマンス向上）
+		TranslateError: true,                                // gorm.ErrDuplicatedKey 等への変換を有効化
 		NowFunc: func() time.Time {
 			return time.Now().UTC()
 		},

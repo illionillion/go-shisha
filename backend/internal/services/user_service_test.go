@@ -26,15 +26,15 @@ func (m *mockUserRepo) GetByID(id int) (*models.User, error) {
 
 type noopPostRepo struct{}
 
-func (n *noopPostRepo) GetAll(userID *int) ([]models.Post, error)     { return nil, nil }
+func (n *noopPostRepo) GetAll(userID *int) ([]models.Post, error)         { return nil, nil }
 func (n *noopPostRepo) GetByID(id int, userID *int) (*models.Post, error) { return nil, nil }
-func (n *noopPostRepo) GetByUserID(userID int) ([]models.Post, error) { return nil, nil }
-func (n *noopPostRepo) Create(post *models.Post) error                { return nil }
-func (n *noopPostRepo) IncrementLikes(id int) (*models.Post, error)   { return nil, nil }
-func (n *noopPostRepo) DecrementLikes(id int) (*models.Post, error)   { return nil, nil }
-func (n *noopPostRepo) AddLike(userID, postID int) error              { return nil }
-func (n *noopPostRepo) RemoveLike(userID, postID int) error           { return nil }
-func (n *noopPostRepo) HasLiked(userID, postID int) (bool, error)     { return false, nil }
+func (n *noopPostRepo) GetByUserID(userID int) ([]models.Post, error)     { return nil, nil }
+func (n *noopPostRepo) Create(post *models.Post) error                    { return nil }
+func (n *noopPostRepo) IncrementLikes(id int) (*models.Post, error)       { return nil, nil }
+func (n *noopPostRepo) DecrementLikes(id int) (*models.Post, error)       { return nil, nil }
+func (n *noopPostRepo) AddLike(userID, postID int) error                  { return nil }
+func (n *noopPostRepo) RemoveLike(userID, postID int) error               { return nil }
+func (n *noopPostRepo) HasLiked(userID, postID int) (bool, error)         { return false, nil }
 
 func TestGetAllUsers(t *testing.T) {
 	svc := NewUserService(&mockUserRepo{}, &noopPostRepo{})
