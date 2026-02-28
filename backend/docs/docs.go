@@ -752,6 +752,9 @@ const docTemplate = `{
         "go-shisha-backend_internal_models.ConflictError": {
             "description": "リソースが既に存在する場合のエラーレスポンス",
             "type": "object",
+            "required": [
+                "error"
+            ],
             "properties": {
                 "error": {
                     "description": "エラー種別の識別子",
@@ -881,6 +884,9 @@ const docTemplate = `{
         "go-shisha-backend_internal_models.ServerError": {
             "description": "サーバー内部でエラーが発生した場合のエラーレスポンス",
             "type": "object",
+            "required": [
+                "error"
+            ],
             "properties": {
                 "error": {
                     "description": "エラー種別の識別子",
@@ -977,6 +983,9 @@ const docTemplate = `{
         "go-shisha-backend_internal_models.ValidationError": {
             "description": "入力値のバリデーションに失敗した場合のエラーレスポンス",
             "type": "object",
+            "required": [
+                "error"
+            ],
             "properties": {
                 "error": {
                     "description": "エラー種別の識別子",

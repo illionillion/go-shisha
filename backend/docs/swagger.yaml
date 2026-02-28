@@ -14,6 +14,8 @@ definitions:
         - email_already_exists
         example: email_already_exists
         type: string
+    required:
+    - error
     type: object
   go-shisha-backend_internal_models.CreatePostInput:
     properties:
@@ -100,6 +102,8 @@ definitions:
         - internal_server_error
         example: internal_server_error
         type: string
+    required:
+    - error
     type: object
   go-shisha-backend_internal_models.Slide:
     properties:
@@ -163,6 +167,8 @@ definitions:
         - validation_failed
         example: validation_failed
         type: string
+    required:
+    - error
     type: object
 host: localhost:8080
 info:
