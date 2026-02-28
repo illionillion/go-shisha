@@ -13,5 +13,5 @@ import type { GoShishaBackendInternalModelsServerErrorError } from "./goShishaBa
  */
 export interface GoShishaBackendInternalModelsServerError {
   /** エラー種別の識別子 */
-  error?: GoShishaBackendInternalModelsServerErrorError;
+  error: GoShishaBackendInternalModelsServerErrorError;
 }

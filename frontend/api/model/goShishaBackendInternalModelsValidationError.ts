@@ -13,5 +13,5 @@ import type { GoShishaBackendInternalModelsValidationErrorError } from "./goShis
  */
 export interface GoShishaBackendInternalModelsValidationError {
   /** エラー種別の識別子 */
-  error?: GoShishaBackendInternalModelsValidationErrorError;
+  error: GoShishaBackendInternalModelsValidationErrorError;
 }

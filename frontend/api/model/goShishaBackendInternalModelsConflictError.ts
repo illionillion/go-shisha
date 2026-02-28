@@ -13,5 +13,5 @@ import type { GoShishaBackendInternalModelsConflictErrorError } from "./goShisha
  */
 export interface GoShishaBackendInternalModelsConflictError {
   /** エラー種別の識別子 */
-  error?: GoShishaBackendInternalModelsConflictErrorError;
+  error: GoShishaBackendInternalModelsConflictErrorError;
 }
