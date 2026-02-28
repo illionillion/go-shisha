@@ -149,6 +149,18 @@ func TestAuthHandler_Register_InvalidJSON(t *testing.T) {
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("expected status 400, got %d", w.Code)
 	}
+
+	// レスポンスボディがValidationError型であることを確認する
+	var response models.ValidationError
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+	if response.Error != "validation failed" {
+		t.Errorf("expected error 'validation failed', got '%s'", response.Error)
+	}
+	if response.Message == "" {
+		t.Error("expected non-empty message")
+	}
 }
 
 func TestAuthHandler_Register_EmailAlreadyExists(t *testing.T) {
@@ -180,6 +192,18 @@ func TestAuthHandler_Register_EmailAlreadyExists(t *testing.T) {
 
 	if w.Code != http.StatusConflict {
 		t.Errorf("expected status 409, got %d", w.Code)
+	}
+
+	// レスポンスボディがConflictError型であることを確認する
+	var response models.ConflictError
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+	if response.Error != "email already exists" {
+		t.Errorf("expected error 'email already exists', got '%s'", response.Error)
+	}
+	if response.Message != "このメールアドレスは既に使用されています" {
+		t.Errorf("expected message 'このメールアドレスは既に使用されています', got '%s'", response.Message)
 	}
 }
 

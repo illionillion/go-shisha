@@ -5,6 +5,18 @@ definitions:
       user:
         $ref: '#/definitions/go-shisha-backend_internal_models.User'
     type: object
+  go-shisha-backend_internal_models.ConflictError:
+    description: リソースが既に存在する場合のエラーレスポンス
+    properties:
+      error:
+        description: エラー種別の識別子
+        example: resource conflict
+        type: string
+      message:
+        description: ユーザー向けのエラーメッセージ
+        example: このリソースは既に存在します
+        type: string
+    type: object
   go-shisha-backend_internal_models.CreatePostInput:
     properties:
       slides:
@@ -81,6 +93,18 @@ definitions:
       total:
         type: integer
     type: object
+  go-shisha-backend_internal_models.ServerError:
+    description: サーバー内部でエラーが発生した場合のエラーレスポンス
+    properties:
+      error:
+        description: エラー種別の識別子
+        example: internal server error
+        type: string
+      message:
+        description: ユーザー向けのエラーメッセージ
+        example: サーバーエラーが発生しました
+        type: string
+    type: object
   go-shisha-backend_internal_models.Slide:
     properties:
       flavor:
@@ -133,6 +157,18 @@ definitions:
         items:
           $ref: '#/definitions/go-shisha-backend_internal_models.User'
         type: array
+    type: object
+  go-shisha-backend_internal_models.ValidationError:
+    description: 入力値のバリデーションに失敗した場合のエラーレスポンス
+    properties:
+      error:
+        description: エラー種別の識別子
+        example: validation failed
+        type: string
+      message:
+        description: ユーザー向けのエラーメッセージ
+        example: 入力値を確認してください
+        type: string
     type: object
 host: localhost:8080
 info:
@@ -272,15 +308,15 @@ paths:
         "400":
           description: バリデーションエラー
           schema:
-            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+            $ref: '#/definitions/go-shisha-backend_internal_models.ValidationError'
         "409":
           description: メールアドレス重複
           schema:
-            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+            $ref: '#/definitions/go-shisha-backend_internal_models.ConflictError'
         "500":
           description: サーバーエラー
           schema:
-            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
       summary: ユーザー登録
       tags:
       - auth

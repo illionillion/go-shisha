@@ -216,19 +216,19 @@ const docTemplate = `{
                     "400": {
                         "description": "バリデーションエラー",
                         "schema": {
-                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ValidationError"
                         }
                     },
                     "409": {
                         "description": "メールアドレス重複",
                         "schema": {
-                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ConflictError"
                         }
                     },
                     "500": {
                         "description": "サーバーエラー",
                         "schema": {
-                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
                         }
                     }
                 }
@@ -749,6 +749,22 @@ const docTemplate = `{
                 }
             }
         },
+        "go-shisha-backend_internal_models.ConflictError": {
+            "description": "リソースが既に存在する場合のエラーレスポンス",
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "エラー種別の識別子",
+                    "type": "string",
+                    "example": "resource conflict"
+                },
+                "message": {
+                    "description": "ユーザー向けのエラーメッセージ",
+                    "type": "string",
+                    "example": "このリソースは既に存在します"
+                }
+            }
+        },
         "go-shisha-backend_internal_models.CreatePostInput": {
             "type": "object",
             "required": [
@@ -864,6 +880,22 @@ const docTemplate = `{
                 }
             }
         },
+        "go-shisha-backend_internal_models.ServerError": {
+            "description": "サーバー内部でエラーが発生した場合のエラーレスポンス",
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "エラー種別の識別子",
+                    "type": "string",
+                    "example": "internal server error"
+                },
+                "message": {
+                    "description": "ユーザー向けのエラーメッセージ",
+                    "type": "string",
+                    "example": "サーバーエラーが発生しました"
+                }
+            }
+        },
         "go-shisha-backend_internal_models.Slide": {
             "type": "object",
             "required": [
@@ -943,6 +975,22 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/go-shisha-backend_internal_models.User"
                     }
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.ValidationError": {
+            "description": "入力値のバリデーションに失敗した場合のエラーレスポンス",
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "エラー種別の識別子",
+                    "type": "string",
+                    "example": "validation failed"
+                },
+                "message": {
+                    "description": "ユーザー向けのエラーメッセージ",
+                    "type": "string",
+                    "example": "入力値を確認してください"
                 }
             }
         }
