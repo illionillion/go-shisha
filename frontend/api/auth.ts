@@ -24,9 +24,12 @@ import type {
 import { apiFetch } from "../lib/api-client";
 import type {
   GoShishaBackendInternalModelsAuthResponse,
+  GoShishaBackendInternalModelsConflictError,
   GoShishaBackendInternalModelsCreateUserInput,
   GoShishaBackendInternalModelsErrorResponse,
   GoShishaBackendInternalModelsLoginInput,
+  GoShishaBackendInternalModelsServerError,
+  GoShishaBackendInternalModelsValidationError,
   PostAuthLogout200,
   PostAuthRefresh200,
 } from "./model";
@@ -478,17 +481,17 @@ export type postAuthRegisterResponse201 = {
 };
 
 export type postAuthRegisterResponse400 = {
-  data: GoShishaBackendInternalModelsErrorResponse;
+  data: GoShishaBackendInternalModelsValidationError;
   status: 400;
 };
 
 export type postAuthRegisterResponse409 = {
-  data: GoShishaBackendInternalModelsErrorResponse;
+  data: GoShishaBackendInternalModelsConflictError;
   status: 409;
 };
 
 export type postAuthRegisterResponse500 = {
-  data: GoShishaBackendInternalModelsErrorResponse;
+  data: GoShishaBackendInternalModelsServerError;
   status: 500;
 };
 
@@ -524,7 +527,10 @@ export const postAuthRegister = async (
 };
 
 export const getPostAuthRegisterMutationOptions = <
-  TError = GoShishaBackendInternalModelsErrorResponse,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsConflictError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -563,13 +569,19 @@ export type PostAuthRegisterMutationResult = NonNullable<
   Awaited<ReturnType<typeof postAuthRegister>>
 >;
 export type PostAuthRegisterMutationBody = GoShishaBackendInternalModelsCreateUserInput;
-export type PostAuthRegisterMutationError = GoShishaBackendInternalModelsErrorResponse;
+export type PostAuthRegisterMutationError =
+  | GoShishaBackendInternalModelsValidationError
+  | GoShishaBackendInternalModelsConflictError
+  | GoShishaBackendInternalModelsServerError;
 
 /**
  * @summary ユーザー登録
  */
 export const usePostAuthRegister = <
-  TError = GoShishaBackendInternalModelsErrorResponse,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsConflictError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(
   options?: {
