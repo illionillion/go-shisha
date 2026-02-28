@@ -46,8 +46,10 @@ func NewPostHandler(postService PostServiceInterface) *PostHandler {
 func (h *PostHandler) GetAllPosts(c *gin.Context) {
 	var userID *int
 	if v, exists := c.Get("user_id"); exists {
-		uid := v.(int)
-		userID = &uid
+		uid, ok := v.(int)
+		if ok {
+			userID = &uid
+		}
 	}
 
 	posts, err := h.postService.GetAllPosts(userID)
@@ -83,8 +85,10 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 
 	var userID *int
 	if v, exists := c.Get("user_id"); exists {
-		uid := v.(int)
-		userID = &uid
+		uid, ok := v.(int)
+		if ok {
+			userID = &uid
+		}
 	}
 
 	post, err := h.postService.GetPostByID(id, userID)
@@ -188,8 +192,16 @@ func (h *PostHandler) LikePost(c *gin.Context) {
 		return
 	}
 
-	userIDValue, _ := c.Get("user_id")
-	userID := userIDValue.(int)
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	userID, ok := userIDValue.(int)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id type"})
+		return
+	}
 
 	post, err := h.postService.LikePost(userID, id)
 	if err != nil {
@@ -225,8 +237,16 @@ func (h *PostHandler) UnlikePost(c *gin.Context) {
 		return
 	}
 
-	userIDValue, _ := c.Get("user_id")
-	userID := userIDValue.(int)
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	userID, ok := userIDValue.(int)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid user_id type"})
+		return
+	}
 
 	post, err := h.postService.UnlikePost(userID, id)
 	if err != nil {
