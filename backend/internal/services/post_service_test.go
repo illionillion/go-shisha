@@ -166,26 +166,27 @@ func TestCreatePost_WithInvalidFlavorID(t *testing.T) {
 
 func TestLikeUnlikePost(t *testing.T) {
 	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
-	liked, err := postSvc.LikePost(2)
+	liked, err := postSvc.LikePost(1, 2)
 	if err != nil {
 		t.Fatalf("unexpected error like: %v", err)
 	}
-	if !liked.IsLiked || liked.Likes != 1 {
-		t.Fatalf("expected liked post with Likes=1 IsLiked=true, got %+v", liked)
+	// AddLikeがnilを返すのでGetByIDで取得。mockPostRepoのGetByIDはLikes:0を返す
+	if liked.ID != 2 {
+		t.Fatalf("expected post ID=2, got %+v", liked)
 	}
 
-	unliked, err := postSvc.UnlikePost(2)
+	unliked, err := postSvc.UnlikePost(1, 2)
 	if err != nil {
 		t.Fatalf("unexpected error unlike: %v", err)
 	}
-	if unliked.IsLiked || unliked.Likes != 0 {
-		t.Fatalf("expected unliked post with Likes=0 IsLiked=false, got %+v", unliked)
+	if unliked.ID != 2 {
+		t.Fatalf("expected post ID=2, got %+v", unliked)
 	}
 }
 
 func TestGetAllPosts(t *testing.T) {
 	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
-	posts, err := postSvc.GetAllPosts()
+	posts, err := postSvc.GetAllPosts(nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -246,17 +247,17 @@ func TestCreatePost_PostCreateError(t *testing.T) {
 
 func TestLikePost_Error(t *testing.T) {
 	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
-	_, err := postSvc.LikePost(1)
+	_, err := postSvc.LikePost(1, 1)
 	if err == nil {
-		t.Fatalf("expected error when IncrementLikes fails, got nil")
+		t.Fatalf("expected error when AddLike fails, got nil")
 	}
 }
 
 func TestUnlikePost_Error(t *testing.T) {
 	postSvc := NewPostService(&mockPostRepoError{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
-	_, err := postSvc.UnlikePost(1)
+	_, err := postSvc.UnlikePost(1, 1)
 	if err == nil {
-		t.Fatalf("expected error when DecrementLikes fails, got nil")
+		t.Fatalf("expected error when RemoveLike fails, got nil")
 	}
 }
 
@@ -381,5 +382,69 @@ func TestCreatePost_ImageValidation_Deleted(t *testing.T) {
 	}
 	if !errors.Is(err, ErrImageDeleted) {
 		t.Fatalf("expected ErrImageDeleted, got %v", err)
+	}
+}
+
+// いいね重複テスト用モック
+type mockPostRepoAlreadyLiked struct {
+	mockPostRepo
+}
+
+func (m *mockPostRepoAlreadyLiked) AddLike(userID, postID int) error {
+	return repositories.ErrAlreadyLiked
+}
+
+func TestLikePost_AlreadyLiked(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepoAlreadyLiked{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	_, err := postSvc.LikePost(1, 2)
+	if err == nil {
+		t.Fatalf("expected error for already liked, got nil")
+	}
+	if !errors.Is(err, repositories.ErrAlreadyLiked) {
+		t.Fatalf("expected ErrAlreadyLiked, got %v", err)
+	}
+}
+
+// いいね未実施テスト用モック
+type mockPostRepoNotLiked struct {
+	mockPostRepo
+}
+
+func (m *mockPostRepoNotLiked) RemoveLike(userID, postID int) error {
+	return repositories.ErrNotLiked
+}
+
+func TestUnlikePost_NotLiked(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepoNotLiked{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	_, err := postSvc.UnlikePost(1, 2)
+	if err == nil {
+		t.Fatalf("expected error for not liked, got nil")
+	}
+	if !errors.Is(err, repositories.ErrNotLiked) {
+		t.Fatalf("expected ErrNotLiked, got %v", err)
+	}
+}
+
+func TestGetAllPosts_WithUserID(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	userID := 1
+	posts, err := postSvc.GetAllPosts(&userID)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(posts) == 0 {
+		t.Fatalf("expected posts, got empty")
+	}
+}
+
+func TestGetPostByID_WithUserID(t *testing.T) {
+	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	userID := 1
+	post, err := postSvc.GetPostByID(1, &userID)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if post.ID != 1 {
+		t.Fatalf("expected post ID=1, got %d", post.ID)
 	}
 }
