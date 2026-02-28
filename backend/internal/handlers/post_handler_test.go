@@ -411,6 +411,52 @@ func TestLikePost_InvalidID(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
+func TestLikePost_NotFound_404(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		likePostFunc: func(userID, postID int) (*models.Post, error) {
+			return nil, repositories.ErrPostNotFound
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.POST("/posts/:id/like", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.LikePost(c)
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/posts/99/like", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusNotFound, rec.Code)
+}
+
+func TestLikePost_InternalError_500(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		likePostFunc: func(userID, postID int) (*models.Post, error) {
+			return nil, errors.New("db connection failed")
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.POST("/posts/:id/like", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.LikePost(c)
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/posts/1/like", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+}
+
 func TestUnlikePost_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
