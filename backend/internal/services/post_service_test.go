@@ -174,6 +174,9 @@ func TestLikeUnlikePost(t *testing.T) {
 	if liked.ID != 2 {
 		t.Fatalf("expected post ID=2, got %+v", liked)
 	}
+	if liked.Likes != 0 {
+		t.Fatalf("expected Likes=0 (mock default), got %d", liked.Likes)
+	}
 
 	unliked, err := postSvc.UnlikePost(1, 2)
 	if err != nil {
@@ -181,6 +184,9 @@ func TestLikeUnlikePost(t *testing.T) {
 	}
 	if unliked.ID != 2 {
 		t.Fatalf("expected post ID=2, got %+v", unliked)
+	}
+	if unliked.Likes != 0 {
+		t.Fatalf("expected Likes=0 (mock default), got %d", unliked.Likes)
 	}
 }
 
