@@ -47,9 +47,12 @@ func (h *PostHandler) GetAllPosts(c *gin.Context) {
 	var userID *int
 	if v, exists := c.Get("user_id"); exists {
 		uid, ok := v.(int)
-		if ok {
-			userID = &uid
+		if !ok {
+			logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "GetAllPosts")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
 		}
+		userID = &uid
 	}
 
 	posts, err := h.postService.GetAllPosts(userID)
@@ -75,6 +78,7 @@ func (h *PostHandler) GetAllPosts(c *gin.Context) {
 // @Success 200 {object} models.Post "投稿情報"
 // @Failure 400 {object} map[string]interface{} "無効な投稿ID"
 // @Failure 404 {object} map[string]interface{} "投稿が見つかりません"
+// @Failure 500 {object} map[string]interface{} "サーバーエラー"
 // @Router /posts/{id} [get]
 func (h *PostHandler) GetPost(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
@@ -86,9 +90,12 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 	var userID *int
 	if v, exists := c.Get("user_id"); exists {
 		uid, ok := v.(int)
-		if ok {
-			userID = &uid
+		if !ok {
+			logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "GetPost")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
 		}
+		userID = &uid
 	}
 
 	post, err := h.postService.GetPostByID(id, userID)
@@ -187,6 +194,7 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 // @Failure 401 {object} map[string]interface{} "認証エラー"
 // @Failure 404 {object} map[string]interface{} "投稿が見つかりません"
 // @Failure 409 {object} map[string]interface{} "既にいいね済み"
+// @Failure 500 {object} map[string]interface{} "サーバーエラー"
 // @Security BearerAuth
 // @Router /posts/{id}/like [post]
 func (h *PostHandler) LikePost(c *gin.Context) {
@@ -236,6 +244,7 @@ func (h *PostHandler) LikePost(c *gin.Context) {
 // @Failure 401 {object} map[string]interface{} "認証エラー"
 // @Failure 404 {object} map[string]interface{} "投稿が見つかりません"
 // @Failure 409 {object} map[string]interface{} "いいねしていない投稿"
+// @Failure 500 {object} map[string]interface{} "サーバーエラー"
 // @Security BearerAuth
 // @Router /posts/{id}/unlike [post]
 func (h *PostHandler) UnlikePost(c *gin.Context) {

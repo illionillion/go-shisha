@@ -201,7 +201,7 @@ func (r *PostRepository) AddLike(userID, postID int) error {
 			return fmt.Errorf("failed to increment likes: %w", result.Error)
 		}
 		if result.RowsAffected == 0 {
-			return fmt.Errorf("post %d not found", postID)
+			return repositories.ErrPostNotFound
 		}
 		return nil
 	})
@@ -209,6 +209,10 @@ func (r *PostRepository) AddLike(userID, postID int) error {
 		if errors.Is(err, repositories.ErrAlreadyLiked) {
 			logging.L.Debug("user already liked post", "repository", "PostRepository", "method", "AddLike", "user_id", userID, "post_id", postID)
 			return repositories.ErrAlreadyLiked
+		}
+		if errors.Is(err, repositories.ErrPostNotFound) {
+			logging.L.Debug("post not found for like", "repository", "PostRepository", "method", "AddLike", "post_id", postID)
+			return repositories.ErrPostNotFound
 		}
 		logging.L.Error("failed to add like", "repository", "PostRepository", "method", "AddLike", "user_id", userID, "post_id", postID, "error", err)
 		return err
