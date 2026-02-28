@@ -310,7 +310,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 全ての投稿の一覧を取得します（総数付き）
+      description: 全ての投稿の一覧を取得します（総数付き）。認証済みの場合、各投稿のいいね状態（is_liked）を含みます
       produces:
       - application/json
       responses:
@@ -368,7 +368,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 指定されたIDの投稿情報を取得します
+      description: 指定されたIDの投稿情報を取得します。認証済みの場合、いいね状態（is_liked）を含みます
       parameters:
       - description: 投稿ID
         in: path
@@ -399,7 +399,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 指定された投稿にいいねを追加します
+      description: 指定された投稿にいいねを追加します（認証必須）
       parameters:
       - description: 投稿ID
         in: path
@@ -418,11 +418,23 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "401":
+          description: 認証エラー
+          schema:
+            additionalProperties: true
+            type: object
         "404":
           description: 投稿が見つかりません
           schema:
             additionalProperties: true
             type: object
+        "409":
+          description: 既にいいね済み
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
       summary: 投稿にいいね
       tags:
       - posts
@@ -430,7 +442,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 指定された投稿のいいねを取り消します
+      description: 指定された投稿のいいねを取り消します（認証必須）
       parameters:
       - description: 投稿ID
         in: path
@@ -449,11 +461,23 @@ paths:
           schema:
             additionalProperties: true
             type: object
+        "401":
+          description: 認証エラー
+          schema:
+            additionalProperties: true
+            type: object
         "404":
           description: 投稿が見つかりません
           schema:
             additionalProperties: true
             type: object
+        "409":
+          description: いいねしていない投稿
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
       summary: 投稿のいいねを取り消す
       tags:
       - posts
