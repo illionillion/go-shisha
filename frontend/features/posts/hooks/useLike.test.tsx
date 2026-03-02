@@ -214,7 +214,7 @@ describe("useLike", () => {
       expect(list?.posts[1]).toEqual(initialList[1]);
     });
 
-    it("詳細キャッシュがない状態でエラーが発生したときリストキャッシュがロールバックされる", () => {
+    it("onLike で詳細キャッシュがない状態でエラーが発生したときリストキャッシュがロールバックされる", () => {
       const postId = 1;
       const initialList = [
         { id: postId, user_id: 1, likes: 10, is_liked: false, slides: [] },
@@ -569,7 +569,7 @@ describe("useLike", () => {
       expect(list?.posts[1]).toEqual(initialList[1]);
     });
 
-    it("詳細キャッシュがない状態でエラーが発生したときリストキャッシュがロールバックされる", () => {
+    it("onUnlike で詳細キャッシュがない状態でエラーが発生したときリストキャッシュがロールバックされる", () => {
       const postId = 1;
       const initialList = [
         { id: postId, user_id: 1, likes: 10, is_liked: true, slides: [] },
