@@ -1,5 +1,5 @@
-import { cookies } from "next/headers";
 import { isSuccessResponse } from "@/lib/api-helpers";
+import { createServerRequestInit } from "@/lib/server-fetch";
 import type { Post } from "@/types/domain";
 import { getPosts } from "../api/posts";
 import { PostCreateContainer } from "../features/posts/components/PostCreateContainer";
@@ -14,13 +14,7 @@ export default async function Home() {
   // RSCでサーバーサイド取得（SSR）
   let initialPosts: Post[] | undefined;
   try {
-    const cookieStore = await cookies();
-    const response = await getPosts({
-      cache: "no-store",
-      headers: {
-        Cookie: cookieStore.toString(),
-      },
-    });
+    const response = await getPosts(await createServerRequestInit());
     // apiFetchがエラー時にthrowするためresponseは常に成功レスポンスだが、
     // TypeScriptの型推論のためにisSuccessResponseで明示的に絞り込む
     if (isSuccessResponse(response)) {
