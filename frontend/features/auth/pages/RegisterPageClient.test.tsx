@@ -103,7 +103,7 @@ describe("RegisterPageClient", () => {
       expect(mockPush).toHaveBeenCalledWith("/login");
     });
 
-    it("エラー時にエラーメッセージが表示される（既に登録済み）", async () => {
+    it("エラー時にエラーメッセージが表示される（バリデーションエラー）", async () => {
       const user = userEvent.setup();
       const { authApi } = await import("../api/authApi");
       const mockRegister = vi.fn().mockRejectedValue({
