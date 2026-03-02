@@ -196,8 +196,8 @@ func TestAuthHandler_Register_EmailAlreadyExists(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
 		t.Fatalf("failed to unmarshal response: %v", err)
 	}
-	if response.Error != "email_already_exists" {
-		t.Errorf("expected error 'email_already_exists', got '%s'", response.Error)
+	if response.Error != models.ErrCodeEmailAlreadyExists {
+		t.Errorf("expected error '%s', got '%s'", models.ErrCodeEmailAlreadyExists, response.Error)
 	}
 }
 
