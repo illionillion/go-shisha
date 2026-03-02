@@ -155,8 +155,8 @@ func TestAuthHandler_Register_InvalidJSON(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
 		t.Fatalf("failed to unmarshal response: %v", err)
 	}
-	if response.Error != "validation_failed" {
-		t.Errorf("expected error 'validation_failed', got '%s'", response.Error)
+	if response.Error != models.ErrCodeValidationFailed {
+		t.Errorf("expected error '%s', got '%s'", models.ErrCodeValidationFailed, response.Error)
 	}
 }
 
