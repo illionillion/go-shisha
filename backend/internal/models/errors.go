@@ -1,0 +1,37 @@
+package models
+
+// エラーコード定数 - ハンドラーと enums タグの単一ソース
+const (
+	ErrCodeValidationFailed   = "validation_failed"
+	ErrCodeEmailAlreadyExists = "email_already_exists"
+	ErrCodeUnauthorized       = "unauthorized"
+	ErrCodeInternalServer     = "internal_server_error"
+)
+
+// ValidationError はバリデーションエラーを表す（400 Bad Request）
+// @Description 入力値のバリデーションに失敗した場合のエラーレスポンス
+type ValidationError struct {
+	// エラー種別の識別子
+	Error string `json:"error" enums:"validation_failed" example:"validation_failed" binding:"required"`
+}
+
+// ConflictError はリソース競合エラーを表す（409 Conflict）
+// @Description リソースが既に存在する場合のエラーレスポンス
+type ConflictError struct {
+	// エラー種別の識別子
+	Error string `json:"error" enums:"email_already_exists" example:"email_already_exists" binding:"required"`
+}
+
+// UnauthorizedError は認証エラーを表す（401 Unauthorized）
+// @Description 認証に失敗した場合のエラーレスポンス
+type UnauthorizedError struct {
+	// エラー種別の識別子
+	Error string `json:"error" enums:"unauthorized" example:"unauthorized" binding:"required"`
+}
+
+// ServerError はサーバー内部エラーを表す（500 Internal Server Error）
+// @Description サーバー内部でエラーが発生した場合のエラーレスポンス
+type ServerError struct {
+	// エラー種別の識別子
+	Error string `json:"error" enums:"internal_server_error" example:"internal_server_error" binding:"required"`
+}

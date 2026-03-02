@@ -37,9 +37,9 @@ func NewAuthHandler(authService *services.AuthService) *AuthHandler {
 // @Produce json
 // @Param input body models.CreateUserInput true "ユーザー登録情報"
 // @Success 201 {object} models.AuthResponse "登録成功"
-// @Failure 400 {object} models.ErrorResponse "バリデーションエラー"
-// @Failure 409 {object} models.ErrorResponse "メールアドレス重複"
-// @Failure 500 {object} models.ErrorResponse "サーバーエラー"
+// @Failure 400 {object} models.ValidationError "バリデーションエラー"
+// @Failure 409 {object} models.ConflictError "メールアドレス重複"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Router /auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var input models.CreateUserInput
@@ -48,7 +48,9 @@ func (h *AuthHandler) Register(c *gin.Context) {
 			"handler", "AuthHandler",
 			"method", "Register",
 			"error", err)
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusBadRequest, models.ValidationError{
+			Error: models.ErrCodeValidationFailed,
+		})
 		return
 	}
 
@@ -60,7 +62,9 @@ func (h *AuthHandler) Register(c *gin.Context) {
 				"handler", "AuthHandler",
 				"method", "Register",
 				"email", input.Email)
-			c.JSON(http.StatusConflict, models.ErrorResponse{Error: "email already exists"})
+			c.JSON(http.StatusConflict, models.ConflictError{
+				Error: models.ErrCodeEmailAlreadyExists,
+			})
 			return
 		}
 		logging.L.Error("failed to register user",
@@ -68,7 +72,9 @@ func (h *AuthHandler) Register(c *gin.Context) {
 			"method", "Register",
 			"email", input.Email,
 			"error", err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{
+			Error: models.ErrCodeInternalServer,
+		})
 		return
 	}
 

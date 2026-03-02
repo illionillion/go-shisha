@@ -103,12 +103,12 @@ describe("RegisterPageClient", () => {
       expect(mockPush).toHaveBeenCalledWith("/login");
     });
 
-    it("エラー時にエラーメッセージが表示される（既に登録済み）", async () => {
+    it("エラー時にエラーメッセージが表示される（バリデーションエラー）", async () => {
       const user = userEvent.setup();
       const { authApi } = await import("../api/authApi");
       const mockRegister = vi.fn().mockRejectedValue({
         status: 400,
-        error: "このメールアドレスは既に登録されています",
+        bodyJson: { error: "validation_failed" },
       });
       vi.mocked(authApi.register).mockImplementation(mockRegister);
 
@@ -325,7 +325,7 @@ describe("RegisterPageClient", () => {
       const { authApi } = await import("../api/authApi");
       vi.mocked(authApi.register).mockRejectedValue({
         status: 409,
-        error: "Conflict",
+        bodyJson: { error: "email_already_exists" },
       });
 
       render(<RegisterPageClient />, { wrapper: createWrapper() });

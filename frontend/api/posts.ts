@@ -26,6 +26,7 @@ import type {
   GetPosts500,
   GetPostsId400,
   GetPostsId404,
+  GetPostsId500,
   GoShishaBackendInternalModelsCreatePostInput,
   GoShishaBackendInternalModelsPost,
   GoShishaBackendInternalModelsPostsResponse,
@@ -33,15 +34,21 @@ import type {
   PostPosts401,
   PostPosts500,
   PostPostsIdLike400,
+  PostPostsIdLike401,
   PostPostsIdLike404,
+  PostPostsIdLike409,
+  PostPostsIdLike500,
   PostPostsIdUnlike400,
+  PostPostsIdUnlike401,
   PostPostsIdUnlike404,
+  PostPostsIdUnlike409,
+  PostPostsIdUnlike500,
 } from "./model";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
- * 全ての投稿の一覧を取得します（総数付き）
+ * 全ての投稿の一覧を取得します（総数付き）。認証済みの場合、各投稿のいいね状態（is_liked）を含みます
  * @summary 投稿一覧取得
  */
 export type getPostsResponse200 = {
@@ -278,7 +285,7 @@ export const usePostPosts = <
   return useMutation(getPostPostsMutationOptions(options), queryClient);
 };
 /**
- * 指定されたIDの投稿情報を取得します
+ * 指定されたIDの投稿情報を取得します。認証済みの場合、いいね状態（is_liked）を含みます
  * @summary 投稿詳細取得
  */
 export type getPostsIdResponse200 = {
@@ -296,10 +303,19 @@ export type getPostsIdResponse404 = {
   status: 404;
 };
 
+export type getPostsIdResponse500 = {
+  data: GetPostsId500;
+  status: 500;
+};
+
 export type getPostsIdResponseSuccess = getPostsIdResponse200 & {
   headers: Headers;
 };
-export type getPostsIdResponseError = (getPostsIdResponse400 | getPostsIdResponse404) & {
+export type getPostsIdResponseError = (
+  | getPostsIdResponse400
+  | getPostsIdResponse404
+  | getPostsIdResponse500
+) & {
   headers: Headers;
 };
 
@@ -325,7 +341,7 @@ export const getGetPostsIdQueryKey = (id: number) => {
 
 export const getGetPostsIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = GetPostsId400 | GetPostsId404,
+  TError = GetPostsId400 | GetPostsId404 | GetPostsId500,
 >(
   id: number,
   options?: {
@@ -348,11 +364,11 @@ export const getGetPostsIdQueryOptions = <
 };
 
 export type GetPostsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getPostsId>>>;
-export type GetPostsIdQueryError = GetPostsId400 | GetPostsId404;
+export type GetPostsIdQueryError = GetPostsId400 | GetPostsId404 | GetPostsId500;
 
 export function useGetPostsId<
   TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = GetPostsId400 | GetPostsId404,
+  TError = GetPostsId400 | GetPostsId404 | GetPostsId500,
 >(
   id: number,
   options: {
@@ -371,7 +387,7 @@ export function useGetPostsId<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetPostsId<
   TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = GetPostsId400 | GetPostsId404,
+  TError = GetPostsId400 | GetPostsId404 | GetPostsId500,
 >(
   id: number,
   options?: {
@@ -390,7 +406,7 @@ export function useGetPostsId<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetPostsId<
   TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = GetPostsId400 | GetPostsId404,
+  TError = GetPostsId400 | GetPostsId404 | GetPostsId500,
 >(
   id: number,
   options?: {
@@ -405,7 +421,7 @@ export function useGetPostsId<
 
 export function useGetPostsId<
   TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = GetPostsId400 | GetPostsId404,
+  TError = GetPostsId400 | GetPostsId404 | GetPostsId500,
 >(
   id: number,
   options?: {
@@ -424,7 +440,7 @@ export function useGetPostsId<
 }
 
 /**
- * 指定された投稿にいいねを追加します
+ * 指定された投稿にいいねを追加します（認証必須）
  * @summary 投稿にいいね
  */
 export type postPostsIdLikeResponse200 = {
@@ -437,9 +453,24 @@ export type postPostsIdLikeResponse400 = {
   status: 400;
 };
 
+export type postPostsIdLikeResponse401 = {
+  data: PostPostsIdLike401;
+  status: 401;
+};
+
 export type postPostsIdLikeResponse404 = {
   data: PostPostsIdLike404;
   status: 404;
+};
+
+export type postPostsIdLikeResponse409 = {
+  data: PostPostsIdLike409;
+  status: 409;
+};
+
+export type postPostsIdLikeResponse500 = {
+  data: PostPostsIdLike500;
+  status: 500;
 };
 
 export type postPostsIdLikeResponseSuccess = postPostsIdLikeResponse200 & {
@@ -447,7 +478,10 @@ export type postPostsIdLikeResponseSuccess = postPostsIdLikeResponse200 & {
 };
 export type postPostsIdLikeResponseError = (
   | postPostsIdLikeResponse400
+  | postPostsIdLikeResponse401
   | postPostsIdLikeResponse404
+  | postPostsIdLikeResponse409
+  | postPostsIdLikeResponse500
 ) & {
   headers: Headers;
 };
@@ -469,7 +503,12 @@ export const postPostsIdLike = async (
 };
 
 export const getPostPostsIdLikeMutationOptions = <
-  TError = PostPostsIdLike400 | PostPostsIdLike404,
+  TError =
+    | PostPostsIdLike400
+    | PostPostsIdLike401
+    | PostPostsIdLike404
+    | PostPostsIdLike409
+    | PostPostsIdLike500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -508,13 +547,23 @@ export type PostPostsIdLikeMutationResult = NonNullable<
   Awaited<ReturnType<typeof postPostsIdLike>>
 >;
 
-export type PostPostsIdLikeMutationError = PostPostsIdLike400 | PostPostsIdLike404;
+export type PostPostsIdLikeMutationError =
+  | PostPostsIdLike400
+  | PostPostsIdLike401
+  | PostPostsIdLike404
+  | PostPostsIdLike409
+  | PostPostsIdLike500;
 
 /**
  * @summary 投稿にいいね
  */
 export const usePostPostsIdLike = <
-  TError = PostPostsIdLike400 | PostPostsIdLike404,
+  TError =
+    | PostPostsIdLike400
+    | PostPostsIdLike401
+    | PostPostsIdLike404
+    | PostPostsIdLike409
+    | PostPostsIdLike500,
   TContext = unknown,
 >(
   options?: {
@@ -536,7 +585,7 @@ export const usePostPostsIdLike = <
   return useMutation(getPostPostsIdLikeMutationOptions(options), queryClient);
 };
 /**
- * 指定された投稿のいいねを取り消します
+ * 指定された投稿のいいねを取り消します（認証必須）
  * @summary 投稿のいいねを取り消す
  */
 export type postPostsIdUnlikeResponse200 = {
@@ -549,9 +598,24 @@ export type postPostsIdUnlikeResponse400 = {
   status: 400;
 };
 
+export type postPostsIdUnlikeResponse401 = {
+  data: PostPostsIdUnlike401;
+  status: 401;
+};
+
 export type postPostsIdUnlikeResponse404 = {
   data: PostPostsIdUnlike404;
   status: 404;
+};
+
+export type postPostsIdUnlikeResponse409 = {
+  data: PostPostsIdUnlike409;
+  status: 409;
+};
+
+export type postPostsIdUnlikeResponse500 = {
+  data: PostPostsIdUnlike500;
+  status: 500;
 };
 
 export type postPostsIdUnlikeResponseSuccess = postPostsIdUnlikeResponse200 & {
@@ -559,7 +623,10 @@ export type postPostsIdUnlikeResponseSuccess = postPostsIdUnlikeResponse200 & {
 };
 export type postPostsIdUnlikeResponseError = (
   | postPostsIdUnlikeResponse400
+  | postPostsIdUnlikeResponse401
   | postPostsIdUnlikeResponse404
+  | postPostsIdUnlikeResponse409
+  | postPostsIdUnlikeResponse500
 ) & {
   headers: Headers;
 };
@@ -583,7 +650,12 @@ export const postPostsIdUnlike = async (
 };
 
 export const getPostPostsIdUnlikeMutationOptions = <
-  TError = PostPostsIdUnlike400 | PostPostsIdUnlike404,
+  TError =
+    | PostPostsIdUnlike400
+    | PostPostsIdUnlike401
+    | PostPostsIdUnlike404
+    | PostPostsIdUnlike409
+    | PostPostsIdUnlike500,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -622,13 +694,23 @@ export type PostPostsIdUnlikeMutationResult = NonNullable<
   Awaited<ReturnType<typeof postPostsIdUnlike>>
 >;
 
-export type PostPostsIdUnlikeMutationError = PostPostsIdUnlike400 | PostPostsIdUnlike404;
+export type PostPostsIdUnlikeMutationError =
+  | PostPostsIdUnlike400
+  | PostPostsIdUnlike401
+  | PostPostsIdUnlike404
+  | PostPostsIdUnlike409
+  | PostPostsIdUnlike500;
 
 /**
  * @summary 投稿のいいねを取り消す
  */
 export const usePostPostsIdUnlike = <
-  TError = PostPostsIdUnlike400 | PostPostsIdUnlike404,
+  TError =
+    | PostPostsIdUnlike400
+    | PostPostsIdUnlike401
+    | PostPostsIdUnlike404
+    | PostPostsIdUnlike409
+    | PostPostsIdUnlike500,
   TContext = unknown,
 >(
   options?: {
