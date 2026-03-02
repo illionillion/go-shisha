@@ -9,7 +9,7 @@ interface Props {
 
 export default async function Page({ params }: Props) {
   const id = Number((await params).id);
-  const response = await getPostsId(id);
+  const response = await getPostsId(id, { cache: "no-store" });
   const initialPost = isSuccessResponse(response) ? response.data : undefined;
 
   return (
