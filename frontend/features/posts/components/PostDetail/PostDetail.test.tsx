@@ -370,6 +370,8 @@ describe("PostDetail", () => {
     });
 
     expect(screen.getByText("4")).toBeInTheDocument();
+    const likeButton = screen.getByRole("button", { pressed: true });
+    expect(likeButton).toBeInTheDocument();
   });
 
   test("post.id が undefined のときいいね操作は何もしない", async () => {

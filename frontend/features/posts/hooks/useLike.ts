@@ -108,18 +108,18 @@ export function useLike() {
           if (prev) {
             // 詳細画面のキャッシュをロールバック
             queryClient.setQueryData(detailKey, prev);
-            // リスト内のキャッシュも個別にロールバック
-            listPrev.forEach(({ key, prev: p }) => {
-              if (!p) return;
-              queryClient.setQueryData(key, (data: { posts: Post[] } | undefined) => {
-                if (!data?.posts) return data;
-                return {
-                  ...data,
-                  posts: data.posts.map((post: Post) => (post.id === postId ? p : post)),
-                };
-              });
-            });
           }
+          // リスト内のキャッシュも個別にロールバック（詳細キャッシュの有無に関わらず）
+          listPrev.forEach(({ key, prev: p }) => {
+            if (!p) return;
+            queryClient.setQueryData(key, (data: { posts: Post[] } | undefined) => {
+              if (!data?.posts) return data;
+              return {
+                ...data,
+                posts: data.posts.map((post: Post) => (post.id === postId ? p : post)),
+              };
+            });
+          });
         },
       }
     );
@@ -149,18 +149,18 @@ export function useLike() {
           if (prev) {
             // 詳細画面のキャッシュをロールバック
             queryClient.setQueryData(detailKey, prev);
-            // リスト内のキャッシュも個別にロールバック
-            listPrev.forEach(({ key, prev: p }) => {
-              if (!p) return;
-              queryClient.setQueryData(key, (data: { posts: Post[] } | undefined) => {
-                if (!data?.posts) return data;
-                return {
-                  ...data,
-                  posts: data.posts.map((post: Post) => (post.id === postId ? p : post)),
-                };
-              });
-            });
           }
+          // リスト内のキャッシュも個別にロールバック（詳細キャッシュの有無に関わらず）
+          listPrev.forEach(({ key, prev: p }) => {
+            if (!p) return;
+            queryClient.setQueryData(key, (data: { posts: Post[] } | undefined) => {
+              if (!data?.posts) return data;
+              return {
+                ...data,
+                posts: data.posts.map((post: Post) => (post.id === postId ? p : post)),
+              };
+            });
+          });
         },
       }
     );
