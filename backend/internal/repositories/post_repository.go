@@ -25,8 +25,8 @@ type PostRepository interface {
 	// GetByID returns a post by ID with optional like status for the given user (nil = not logged in)
 	GetByID(id int, userID *int) (*models.Post, error)
 
-	// GetByUserID returns all posts by a specific user
-	GetByUserID(userID int) ([]models.Post, error)
+	// GetByUserID returns all posts by a specific user with optional like status for the given currentUser (nil = not logged in)
+	GetByUserID(userID int, currentUserID *int) ([]models.Post, error)
 
 	// Create creates a new post
 	Create(post *models.Post) error

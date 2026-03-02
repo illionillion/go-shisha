@@ -121,7 +121,7 @@ func TestGetAllAndGetByUserIDOrdering(t *testing.T) {
 		t.Fatalf("expected newest post first: got %d want %d", all[0].ID, p2.ID)
 	}
 
-	userPosts, err := repo.GetByUserID(1)
+	userPosts, err := repo.GetByUserID(1, nil)
 	if err != nil {
 		t.Fatalf("GetByUserID failed: %v", err)
 	}

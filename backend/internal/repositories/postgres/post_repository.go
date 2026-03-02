@@ -268,7 +268,7 @@ func (r *PostRepository) RemoveLike(userID, postID int) error {
 	return nil
 }
 
-func (r *PostRepository) GetByUserID(userID int) ([]models.Post, error) {
+func (r *PostRepository) GetByUserID(userID int, currentUserID *int) ([]models.Post, error) {
 	logging.L.Debug("querying posts by user ID", "repository", "PostRepository", "method", "GetByUserID", "user_id", userID)
 	var pms []postModel
 	if err := r.db.Preload("User").Preload("Slides", func(db *gorm.DB) *gorm.DB {
@@ -280,7 +280,14 @@ func (r *PostRepository) GetByUserID(userID int) ([]models.Post, error) {
 	logging.L.Debug("fetched posts for user", "repository", "PostRepository", "method", "GetByUserID", "user_id", userID, "count", len(pms))
 	var posts []models.Post
 	for i := range pms {
-		posts = append(posts, r.toDomain(&pms[i]))
+		post := r.toDomain(&pms[i])
+		if currentUserID != nil {
+			liked, err := r.HasLiked(*currentUserID, post.ID)
+			if err == nil {
+				post.IsLiked = liked
+			}
+		}
+		posts = append(posts, post)
 	}
 	return posts, nil
 }

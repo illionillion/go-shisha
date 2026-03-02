@@ -40,13 +40,13 @@ func (s *UserService) GetUserByID(id int) (*models.User, error) {
 /**
  * GetUserPosts returns all posts by a specific user
  */
-func (s *UserService) GetUserPosts(userID int) ([]models.Post, error) {
+func (s *UserService) GetUserPosts(userID int, currentUserID *int) ([]models.Post, error) {
 	// Verify user exists
 	_, err := s.userRepo.GetByID(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Get posts by user ID
-	return s.postRepo.GetByUserID(userID)
+	// Get posts by user ID with optional like status for the current user
+	return s.postRepo.GetByUserID(userID, currentUserID)
 }
