@@ -2,7 +2,7 @@
 
 import { clsx } from "clsx";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetPostsId } from "@/api/posts";
 import { useLike } from "@/features/posts/hooks/useLike";
 import { isSuccessResponse } from "@/lib/api-helpers";
@@ -44,6 +44,19 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
   const [isLiked, setIsLiked] = useState<boolean>(initialPost?.is_liked ?? post?.is_liked ?? false);
 
   const { onLike, onUnlike } = useLike();
+
+  // サーバーから新しいデータが届いたときにローカル状態を同期する（PostCardと同様）
+  useEffect(() => {
+    if (post?.is_liked !== undefined) {
+      setIsLiked(post.is_liked);
+    }
+  }, [post?.is_liked]);
+
+  useEffect(() => {
+    if (post?.likes !== undefined) {
+      setOptimisticLikes(post.likes);
+    }
+  }, [post?.likes]);
 
   if (isLoading) {
     return (
