@@ -121,7 +121,10 @@ export function useLike() {
             });
           }
         },
-        // onSettledでinvalidateしない（楽観的更新のみで対応）
+        onSettled: () => {
+          queryClient.invalidateQueries({ queryKey: getGetPostsQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getGetPostsIdQueryKey(postId) });
+        },
       }
     );
   };
@@ -163,7 +166,10 @@ export function useLike() {
             });
           }
         },
-        // onSettledでinvalidateしない（楽観的更新のみで対応）
+        onSettled: () => {
+          queryClient.invalidateQueries({ queryKey: getGetPostsQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getGetPostsIdQueryKey(postId) });
+        },
       }
     );
   };
