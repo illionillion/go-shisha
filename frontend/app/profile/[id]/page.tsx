@@ -1,4 +1,5 @@
 import { clsx } from "clsx";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { getUsersId, getUsersIdPosts } from "@/api/users";
 import { BackButton } from "@/components/BackButton";
@@ -21,12 +22,18 @@ export default async function Page({ params }: Props) {
     );
   }
 
+  const cookieStore = await cookies();
+  const cookieHeader = {
+    cache: "no-store" as const,
+    headers: { Cookie: cookieStore.toString() },
+  };
+
   // Fetch user first; only fetch posts if user exists to avoid unnecessary requests.
   // Let unexpected errors bubble to `app/error.tsx`.
   // apiFetchがエラー時にthrowするためresponseは常に成功レスポンスだが、
   // TypeScriptの型推論のためにisSuccessResponseで明示的に絞り込む
-  const userResponse = await getUsersId(id);
-  const postsResponse = await getUsersIdPosts(id);
+  const userResponse = await getUsersId(id, cookieHeader);
+  const postsResponse = await getUsersIdPosts(id, cookieHeader);
 
   if (!isSuccessResponse(userResponse) || !userResponse.data.id) {
     notFound();
