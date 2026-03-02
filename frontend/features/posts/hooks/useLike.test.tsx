@@ -92,6 +92,11 @@ describe("useLike", () => {
         { id: 5 },
         expect.objectContaining({
           onError: expect.any(Function),
+        })
+      );
+      expect(mockMutate).toHaveBeenCalledWith(
+        { id: 5 },
+        expect.not.objectContaining({
           onSettled: expect.any(Function),
         })
       );
@@ -327,33 +332,6 @@ describe("useLike", () => {
       // mutateは呼ばれる
       expect(mockMutate).toHaveBeenCalled();
     });
-
-    it("onSettledでキャッシュが無効化される", () => {
-      const postId = 1;
-
-      const mockMutate = vi.fn((params, options) => {
-        if (options?.onSettled) {
-          options.onSettled(undefined, null, params, undefined);
-        }
-      });
-
-      vi.mocked(postsApi.usePostPostsIdLike).mockReturnValue({
-        mutate: mockMutate,
-      } as unknown as ReturnType<typeof postsApi.usePostPostsIdLike>);
-
-      vi.mocked(postsApi.usePostPostsIdUnlike).mockReturnValue({
-        mutate: vi.fn(),
-      } as unknown as ReturnType<typeof postsApi.usePostPostsIdUnlike>);
-
-      const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
-
-      const { result } = renderHook(() => useLike(), { wrapper });
-
-      result.current.onLike(postId);
-
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["posts"] });
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["posts", postId] });
-    });
   });
 
   describe("onUnlike", () => {
@@ -466,6 +444,11 @@ describe("useLike", () => {
         { id: 7 },
         expect.objectContaining({
           onError: expect.any(Function),
+        })
+      );
+      expect(mockMutate).toHaveBeenCalledWith(
+        { id: 7 },
+        expect.not.objectContaining({
           onSettled: expect.any(Function),
         })
       );
@@ -666,33 +649,6 @@ describe("useLike", () => {
 
       // mutateは呼ばれる
       expect(mockMutate).toHaveBeenCalled();
-    });
-
-    it("onSettledでキャッシュが無効化される", () => {
-      const postId = 1;
-
-      const mockMutate = vi.fn((params, options) => {
-        if (options?.onSettled) {
-          options.onSettled(undefined, null, params, undefined);
-        }
-      });
-
-      vi.mocked(postsApi.usePostPostsIdUnlike).mockReturnValue({
-        mutate: mockMutate,
-      } as unknown as ReturnType<typeof postsApi.usePostPostsIdUnlike>);
-
-      vi.mocked(postsApi.usePostPostsIdLike).mockReturnValue({
-        mutate: vi.fn(),
-      } as unknown as ReturnType<typeof postsApi.usePostPostsIdLike>);
-
-      const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
-
-      const { result } = renderHook(() => useLike(), { wrapper });
-
-      result.current.onUnlike(postId);
-
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["posts"] });
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["posts", postId] });
     });
   });
 

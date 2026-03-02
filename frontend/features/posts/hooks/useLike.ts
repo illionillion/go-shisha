@@ -121,10 +121,6 @@ export function useLike() {
             });
           }
         },
-        onSettled: () => {
-          queryClient.invalidateQueries({ queryKey: getGetPostsQueryKey() });
-          queryClient.invalidateQueries({ queryKey: getGetPostsIdQueryKey(postId) });
-        },
       }
     );
   };
@@ -165,10 +161,6 @@ export function useLike() {
               });
             });
           }
-        },
-        onSettled: () => {
-          queryClient.invalidateQueries({ queryKey: getGetPostsQueryKey() });
-          queryClient.invalidateQueries({ queryKey: getGetPostsIdQueryKey(postId) });
         },
       }
     );
