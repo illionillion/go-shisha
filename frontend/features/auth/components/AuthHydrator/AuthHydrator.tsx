@@ -56,7 +56,7 @@ export const AuthHydrator = () => {
 
     // エラーが発生した場合の処理
     if (isError) {
-      const apiError = error as ApiError | undefined;
+      const apiError = error as unknown as ApiError | undefined;
       if (!apiError) {
         setIsLoading(false);
         return;

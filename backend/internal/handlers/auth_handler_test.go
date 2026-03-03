@@ -292,6 +292,15 @@ func TestAuthHandler_Login_InvalidPassword(t *testing.T) {
 	if w.Code != http.StatusUnauthorized {
 		t.Errorf("expected status 401, got %d", w.Code)
 	}
+
+	// レスポンスボディがUnauthorizedError型であることを確認する
+	var response models.UnauthorizedError
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+	if response.Error != models.ErrCodeUnauthorized {
+		t.Errorf("expected error '%s', got '%s'", models.ErrCodeUnauthorized, response.Error)
+	}
 }
 
 func TestAuthHandler_Login_UserNotFound(t *testing.T) {
@@ -317,6 +326,15 @@ func TestAuthHandler_Login_UserNotFound(t *testing.T) {
 
 	if w.Code != http.StatusUnauthorized {
 		t.Errorf("expected status 401, got %d", w.Code)
+	}
+
+	// レスポンスボディがUnauthorizedError型であることを確認する
+	var response models.UnauthorizedError
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+	if response.Error != models.ErrCodeUnauthorized {
+		t.Errorf("expected error '%s', got '%s'", models.ErrCodeUnauthorized, response.Error)
 	}
 }
 
@@ -350,6 +368,15 @@ func TestAuthHandler_Login_ValidationError(t *testing.T) {
 
 			if w.Code != http.StatusBadRequest {
 				t.Errorf("%s: expected status 400, got %d", tc.name, w.Code)
+			}
+
+			// レスポンスボディがValidationError型であることを確認する
+			var response models.ValidationError
+			if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+				t.Fatalf("%s: failed to unmarshal response: %v", tc.name, err)
+			}
+			if response.Error != models.ErrCodeValidationFailed {
+				t.Errorf("%s: expected error '%s', got '%s'", tc.name, models.ErrCodeValidationFailed, response.Error)
 			}
 		})
 	}

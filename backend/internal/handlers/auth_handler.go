@@ -89,9 +89,9 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Produce json
 // @Param input body models.LoginInput true "ログイン情報"
 // @Success 200 {object} models.AuthResponse "ログイン成功"
-// @Failure 400 {object} models.ErrorResponse "バリデーションエラー"
-// @Failure 401 {object} models.ErrorResponse "認証失敗"
-// @Failure 500 {object} models.ErrorResponse "サーバーエラー"
+// @Failure 400 {object} models.ValidationError "バリデーションエラー"
+// @Failure 401 {object} models.UnauthorizedError "認証失敗"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Router /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var input models.LoginInput
@@ -100,7 +100,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 			"handler", "AuthHandler",
 			"method", "Login",
 			"error", err)
-		c.JSON(http.StatusBadRequest, models.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusBadRequest, models.ValidationError{
+			Error: models.ErrCodeValidationFailed,
+		})
 		return
 	}
 
@@ -111,7 +113,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 			"method", "Login",
 			"email", input.Email,
 			"error", err)
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{
+			Error: models.ErrCodeUnauthorized,
+		})
 		return
 	}
 
@@ -151,8 +155,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Tags auth
 // @Produce json
 // @Success 200 {object} map[string]string "リフレッシュ成功"
-// @Failure 401 {object} models.ErrorResponse "認証失敗"
-// @Failure 500 {object} models.ErrorResponse "サーバーエラー"
+// @Failure 401 {object} models.UnauthorizedError "認証失敗"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Router /auth/refresh [post]
 func (h *AuthHandler) Refresh(c *gin.Context) {
 	// Cookieから Refresh Token を取得
@@ -161,7 +165,7 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 		logging.L.Warn("no refresh token",
 			"handler", "AuthHandler",
 			"method", "Refresh")
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Error: "refresh token required"})
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
 		return
 	}
 
@@ -171,7 +175,7 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 			"handler", "AuthHandler",
 			"method", "Refresh",
 			"error", err)
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Error: err.Error()})
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
 		return
 	}
 
@@ -199,8 +203,8 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 // @Tags auth
 // @Produce json
 // @Success 200 {object} map[string]string "ログアウト成功"
-// @Failure 401 {object} models.ErrorResponse "認証失敗"
-// @Failure 500 {object} models.ErrorResponse "サーバーエラー"
+// @Failure 401 {object} models.UnauthorizedError "認証失敗"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Security BearerAuth
 // @Router /auth/logout [post]
 func (h *AuthHandler) Logout(c *gin.Context) {
@@ -210,14 +214,14 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		logging.L.Warn("user_id not found in context",
 			"handler", "AuthHandler",
 			"method", "Logout")
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Error: "unauthorized"})
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
 		return
 	}
 
 	uid, ok := userID.(int)
 	if !ok {
 		logging.L.Error("invalid user_id type in context", "handler", "AuthHandler", "method", "Logout")
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 	if err := h.authService.Logout(int64(uid)); err != nil {
@@ -226,7 +230,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 			"method", "Logout",
 			"user_id", uid,
 			"error", err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 
@@ -264,8 +268,8 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 // @Tags auth
 // @Produce json
 // @Success 200 {object} models.AuthResponse "ユーザー情報"
-// @Failure 401 {object} models.ErrorResponse "認証失敗"
-// @Failure 500 {object} models.ErrorResponse "サーバーエラー"
+// @Failure 401 {object} models.UnauthorizedError "認証失敗"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Security BearerAuth
 // @Router /auth/me [get]
 func (h *AuthHandler) Me(c *gin.Context) {
@@ -275,14 +279,14 @@ func (h *AuthHandler) Me(c *gin.Context) {
 		logging.L.Warn("user_id not found in context",
 			"handler", "AuthHandler",
 			"method", "Me")
-		c.JSON(http.StatusUnauthorized, models.ErrorResponse{Error: "unauthorized"})
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
 		return
 	}
 
 	uid, ok := userID.(int)
 	if !ok {
 		logging.L.Error("invalid user_id type in context", "handler", "AuthHandler", "method", "Me")
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 	user, err := h.authService.GetCurrentUser(int64(uid))
@@ -292,7 +296,7 @@ func (h *AuthHandler) Me(c *gin.Context) {
 			"method", "Me",
 			"user_id", uid,
 			"error", err)
-		c.JSON(http.StatusInternalServerError, models.ErrorResponse{Error: "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 

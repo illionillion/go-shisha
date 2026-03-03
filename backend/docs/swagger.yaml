@@ -41,11 +41,6 @@ definitions:
     - email
     - password
     type: object
-  go-shisha-backend_internal_models.ErrorResponse:
-    properties:
-      error:
-        type: string
-    type: object
   go-shisha-backend_internal_models.Flavor:
     properties:
       color:
@@ -127,6 +122,18 @@ definitions:
     required:
     - image_url
     type: object
+  go-shisha-backend_internal_models.UnauthorizedError:
+    description: 認証に失敗した場合のエラーレスポンス
+    properties:
+      error:
+        description: エラー種別の識別子
+        enum:
+        - unauthorized
+        example: unauthorized
+        type: string
+    required:
+    - error
+    type: object
   go-shisha-backend_internal_models.UploadImagesResponse:
     properties:
       urls:
@@ -203,15 +210,15 @@ paths:
         "400":
           description: バリデーションエラー
           schema:
-            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+            $ref: '#/definitions/go-shisha-backend_internal_models.ValidationError'
         "401":
           description: 認証失敗
           schema:
-            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+            $ref: '#/definitions/go-shisha-backend_internal_models.UnauthorizedError'
         "500":
           description: サーバーエラー
           schema:
-            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
       summary: ログイン
       tags:
       - auth
@@ -230,11 +237,11 @@ paths:
         "401":
           description: 認証失敗
           schema:
-            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+            $ref: '#/definitions/go-shisha-backend_internal_models.UnauthorizedError'
         "500":
           description: サーバーエラー
           schema:
-            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
       security:
       - BearerAuth: []
       summary: ログアウト
@@ -253,11 +260,11 @@ paths:
         "401":
           description: 認証失敗
           schema:
-            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+            $ref: '#/definitions/go-shisha-backend_internal_models.UnauthorizedError'
         "500":
           description: サーバーエラー
           schema:
-            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
       security:
       - BearerAuth: []
       summary: 現在のユーザー情報取得
@@ -278,11 +285,11 @@ paths:
         "401":
           description: 認証失敗
           schema:
-            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+            $ref: '#/definitions/go-shisha-backend_internal_models.UnauthorizedError'
         "500":
           description: サーバーエラー
           schema:
-            $ref: '#/definitions/go-shisha-backend_internal_models.ErrorResponse'
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
       summary: アクセストークンのリフレッシュ
       tags:
       - auth
