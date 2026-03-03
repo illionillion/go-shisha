@@ -19,7 +19,7 @@ func (m *mockPostRepo) GetByID(id int, userID *int) (*models.Post, error) {
 	p := &models.Post{ID: id, Likes: 0}
 	return p, nil
 }
-func (m *mockPostRepo) GetByUserID(userID int) ([]models.Post, error) {
+func (m *mockPostRepo) GetByUserID(userID int, currentUserID *int) ([]models.Post, error) {
 	return []models.Post{{ID: 1, UserID: userID}}, nil
 }
 func (m *mockPostRepo) Create(post *models.Post) error {
@@ -268,7 +268,7 @@ func (m *mockPostRepoError) GetAll(userID *int) ([]models.Post, error) {
 func (m *mockPostRepoError) GetByID(id int, userID *int) (*models.Post, error) {
 	return nil, errors.New("db error")
 }
-func (m *mockPostRepoError) GetByUserID(userID int) ([]models.Post, error) {
+func (m *mockPostRepoError) GetByUserID(userID int, currentUserID *int) ([]models.Post, error) {
 	return nil, errors.New("db error")
 }
 func (m *mockPostRepoError) Create(post *models.Post) error { return errors.New("db error") }

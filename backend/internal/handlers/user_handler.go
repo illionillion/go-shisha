@@ -109,7 +109,18 @@ func (h *UserHandler) GetUserPosts(c *gin.Context) {
 		return
 	}
 
-	posts, err := h.userService.GetUserPosts(id)
+	var currentUserID *int
+	if v, exists := c.Get("user_id"); exists {
+		uid, ok := v.(int)
+		if !ok {
+			logging.L.Error("invalid user_id type in context", "handler", "UserHandler", "method", "GetUserPosts")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
+		}
+		currentUserID = &uid
+	}
+
+	posts, err := h.userService.GetUserPosts(id, currentUserID)
 	if err != nil {
 		if errors.Is(err, repositories.ErrUserNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})

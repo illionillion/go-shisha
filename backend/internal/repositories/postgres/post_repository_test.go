@@ -121,7 +121,7 @@ func TestGetAllAndGetByUserIDOrdering(t *testing.T) {
 		t.Fatalf("expected newest post first: got %d want %d", all[0].ID, p2.ID)
 	}
 
-	userPosts, err := repo.GetByUserID(1)
+	userPosts, err := repo.GetByUserID(1, nil)
 	if err != nil {
 		t.Fatalf("GetByUserID failed: %v", err)
 	}
@@ -385,5 +385,54 @@ func TestGetByID_IsLiked(t *testing.T) {
 	}
 	if postNoUser.IsLiked {
 		t.Fatalf("expected is_liked=false when userID=nil")
+	}
+}
+
+func TestGetByUserID_IsLiked(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewPostRepository(db)
+	userID, postID := setupPostAndUser(t, db)
+
+	// (1) いいね前は is_liked=false
+	postsBeforeLike, err := repo.GetByUserID(userID, &userID)
+	if err != nil {
+		t.Fatalf("GetByUserID failed: %v", err)
+	}
+	var found bool
+	for _, p := range postsBeforeLike {
+		if p.ID == postID {
+			found = true
+			if p.IsLiked {
+				t.Fatalf("expected is_liked=false before like")
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("post %d not found in GetByUserID", postID)
+	}
+
+	// (2) いいね後は is_liked=true
+	if err := repo.AddLike(userID, postID); err != nil {
+		t.Fatalf("AddLike failed: %v", err)
+	}
+	postsAfterLike, err := repo.GetByUserID(userID, &userID)
+	if err != nil {
+		t.Fatalf("GetByUserID after like failed: %v", err)
+	}
+	for _, p := range postsAfterLike {
+		if p.ID == postID && !p.IsLiked {
+			t.Fatalf("expected is_liked=true after AddLike in GetByUserID")
+		}
+	}
+
+	// (3) currentUserID=nil のとき is_liked=false
+	postsNoUser, err := repo.GetByUserID(userID, nil)
+	if err != nil {
+		t.Fatalf("GetByUserID(nil) failed: %v", err)
+	}
+	for _, p := range postsNoUser {
+		if p.ID == postID && p.IsLiked {
+			t.Fatalf("expected is_liked=false when currentUserID=nil")
+		}
 	}
 }
