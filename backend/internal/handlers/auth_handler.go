@@ -108,13 +108,24 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	user, accessToken, refreshToken, err := h.authService.Login(&input)
 	if err != nil {
-		logging.L.Warn("login failed",
+		if errors.Is(err, services.ErrInvalidCredentials) {
+			logging.L.Warn("login failed",
+				"handler", "AuthHandler",
+				"method", "Login",
+				"email", input.Email,
+				"error", err)
+			c.JSON(http.StatusUnauthorized, models.UnauthorizedError{
+				Error: models.ErrCodeUnauthorized,
+			})
+			return
+		}
+		logging.L.Error("login internal error",
 			"handler", "AuthHandler",
 			"method", "Login",
 			"email", input.Email,
 			"error", err)
-		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{
-			Error: models.ErrCodeUnauthorized,
+		c.JSON(http.StatusInternalServerError, models.ServerError{
+			Error: models.ErrCodeInternalServer,
 		})
 		return
 	}
@@ -171,11 +182,19 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 
 	newAccessToken, err := h.authService.Refresh(refreshToken)
 	if err != nil {
-		logging.L.Warn("refresh failed",
+		if errors.Is(err, services.ErrInvalidRefreshToken) {
+			logging.L.Warn("refresh failed",
+				"handler", "AuthHandler",
+				"method", "Refresh",
+				"error", err)
+			c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
+			return
+		}
+		logging.L.Error("refresh internal error",
 			"handler", "AuthHandler",
 			"method", "Refresh",
 			"error", err)
-		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 

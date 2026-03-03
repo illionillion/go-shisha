@@ -14,6 +14,14 @@ import (
 	"gorm.io/gorm"
 )
 
+// 認証サービスのセンチネルエラー
+var (
+	// ErrInvalidCredentials はメールアドレスまたはパスワードが不正な場合のエラー
+	ErrInvalidCredentials = errors.New("invalid email or password")
+	// ErrInvalidRefreshToken はRefresh Tokenが無効または期限切れの場合のエラー
+	ErrInvalidRefreshToken = errors.New("invalid or expired refresh token")
+)
+
 // AuthService は認証サービスのインターフェース
 type AuthService struct {
 	userRepo         repositories.AuthUserRepository
@@ -91,7 +99,7 @@ func (s *AuthService) Login(input *models.LoginInput) (*models.User, string, str
 			"service", "AuthService",
 			"method", "Login",
 			"email", input.Email)
-		return nil, "", "", errors.New("invalid email or password")
+		return nil, "", "", ErrInvalidCredentials
 	}
 
 	// パスワードを検証
@@ -100,7 +108,7 @@ func (s *AuthService) Login(input *models.LoginInput) (*models.User, string, str
 			"service", "AuthService",
 			"method", "Login",
 			"user_id", user.ID)
-		return nil, "", "", errors.New("invalid email or password")
+		return nil, "", "", ErrInvalidCredentials
 	}
 
 	// Access Tokenを生成
@@ -160,7 +168,7 @@ func (s *AuthService) Refresh(refreshToken string) (string, error) {
 			"service", "AuthService",
 			"method", "Refresh",
 			"error", err)
-		return "", errors.New("invalid refresh token")
+		return "", ErrInvalidRefreshToken
 	}
 
 	// DBからRefresh Tokenを検索
@@ -170,7 +178,7 @@ func (s *AuthService) Refresh(refreshToken string) (string, error) {
 			logging.L.Warn("refresh token not found in database",
 				"service", "AuthService",
 				"method", "Refresh")
-			return "", errors.New("invalid refresh token")
+			return "", ErrInvalidRefreshToken
 		}
 		logging.L.Error("failed to query refresh token",
 			"service", "AuthService",
@@ -185,7 +193,7 @@ func (s *AuthService) Refresh(refreshToken string) (string, error) {
 			"service", "AuthService",
 			"method", "Refresh",
 			"token_id", tokenModel.ID)
-		return "", errors.New("refresh token expired")
+		return "", ErrInvalidRefreshToken
 	}
 
 	// 新しいAccess Tokenを生成
