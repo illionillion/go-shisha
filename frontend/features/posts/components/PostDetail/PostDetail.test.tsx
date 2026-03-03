@@ -1,7 +1,7 @@
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, cleanup } from "@/test/utils";
+import { render, screen, cleanup, act } from "@/test/utils";
 import type { Post } from "@/types/domain";
 import { useGetPostsId } from "../../../../api/posts";
 import { PostDetail } from "./PostDetail";
@@ -333,6 +333,45 @@ describe("PostDetail", () => {
 
     // optimisticLikes が initialPost の likes を使っている
     expect(screen.getByText(String(initialPost.likes))).toBeInTheDocument();
+  });
+
+  test("サーバーから新しいデータが届いたとき is_liked と likes が同期される", async () => {
+    const mockUseGetPostsId = useGetPostsId as unknown as ReturnType<typeof vi.fn>;
+
+    // 初回: is_liked: false, likes: 3
+    mockUseGetPostsId.mockReturnValue({
+      data: {
+        data: { id: 11, likes: 3, is_liked: false, slides: [], user_id: 1 } as Post,
+        status: 200,
+        headers: new Headers(),
+      },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    const { rerender } = render(<PostDetail postId={11} />);
+    expect(screen.getByText("3")).toBeInTheDocument();
+
+    // サーバーから更新データ: is_liked: true, likes: 4
+    mockUseGetPostsId.mockReturnValue({
+      data: {
+        data: { id: 11, likes: 4, is_liked: true, slides: [], user_id: 1 } as Post,
+        status: 200,
+        headers: new Headers(),
+      },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    await act(async () => {
+      rerender(<PostDetail postId={11} />);
+    });
+
+    expect(screen.getByText("4")).toBeInTheDocument();
+    const likeButton = screen.getByRole("button", { pressed: true });
+    expect(likeButton).toBeInTheDocument();
   });
 
   test("post.id が undefined のときいいね操作は何もしない", async () => {
