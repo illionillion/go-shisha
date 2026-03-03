@@ -278,15 +278,26 @@ func (r *PostRepository) GetByUserID(userID int, currentUserID *int) ([]models.P
 		return nil, fmt.Errorf("failed to query posts by user_id=%d: %w", userID, err)
 	}
 	logging.L.Debug("fetched posts for user", "repository", "PostRepository", "method", "GetByUserID", "user_id", userID, "count", len(pms))
+
+	// N+1を避けるため、対象投稿のいいね状態を1クエリでまとめて取得する
+	likedSet := map[int]bool{}
+	if currentUserID != nil && len(pms) > 0 {
+		postIDs := make([]int, 0, len(pms))
+		for i := range pms {
+			postIDs = append(postIDs, int(pms[i].ID))
+		}
+		var likes []postLikeModel
+		if err := r.db.Where("user_id = ? AND post_id IN ?", *currentUserID, postIDs).Find(&likes).Error; err == nil {
+			for _, l := range likes {
+				likedSet[int(l.PostID)] = true
+			}
+		}
+	}
+
 	var posts []models.Post
 	for i := range pms {
 		post := r.toDomain(&pms[i])
-		if currentUserID != nil {
-			liked, err := r.HasLiked(*currentUserID, post.ID)
-			if err == nil {
-				post.IsLiked = liked
-			}
-		}
+		post.IsLiked = likedSet[post.ID]
 		posts = append(posts, post)
 	}
 	return posts, nil
