@@ -78,7 +78,9 @@ func (r *PostRepository) GetAll(userID *int) ([]models.Post, error) {
 		post := r.toDomain(&pms[i])
 		if userID != nil {
 			liked, err := r.HasLiked(*userID, post.ID)
-			if err == nil {
+			if err != nil {
+				logging.L.Error("failed to check like status in GetAll", "repository", "PostRepository", "method", "GetAll", "user_id", *userID, "post_id", post.ID, "error", err)
+			} else {
 				post.IsLiked = liked
 			}
 		}
@@ -287,7 +289,9 @@ func (r *PostRepository) GetByUserID(userID int, currentUserID *int) ([]models.P
 			postIDs = append(postIDs, int(pms[i].ID))
 		}
 		var likes []postLikeModel
-		if err := r.db.Where("user_id = ? AND post_id IN ?", *currentUserID, postIDs).Find(&likes).Error; err == nil {
+		if err := r.db.Where("user_id = ? AND post_id IN ?", *currentUserID, postIDs).Find(&likes).Error; err != nil {
+			logging.L.Error("failed to fetch like statuses in GetByUserID", "repository", "PostRepository", "method", "GetByUserID", "user_id", *currentUserID, "error", err)
+		} else {
 			for _, l := range likes {
 				likedSet[int(l.PostID)] = true
 			}
