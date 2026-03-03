@@ -19,5 +19,16 @@ export function isSuccessResponse<T extends { status: number; data: unknown; hea
  * @returns ApiErrorの場合true
  */
 export function isApiError(error: unknown): error is ApiError {
-  return error instanceof Error && "status" in error;
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const maybeApiError = error as ApiError & {
+    status?: unknown;
+    bodyJson?: unknown;
+  };
+  const hasNumericStatus = typeof maybeApiError.status === "number";
+  const hasBodyJsonProperty = "bodyJson" in maybeApiError;
+
+  return hasNumericStatus && hasBodyJsonProperty;
 }

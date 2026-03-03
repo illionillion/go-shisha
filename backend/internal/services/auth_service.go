@@ -95,11 +95,19 @@ func (s *AuthService) Login(input *models.LoginInput) (*models.User, string, str
 	// ユーザーを検索
 	user, err := s.userRepo.GetByEmail(input.Email)
 	if err != nil {
-		logging.L.Warn("user not found",
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			logging.L.Warn("user not found",
+				"service", "AuthService",
+				"method", "Login",
+				"email", input.Email)
+			return nil, "", "", ErrInvalidCredentials
+		}
+		logging.L.Error("failed to query user",
 			"service", "AuthService",
 			"method", "Login",
-			"email", input.Email)
-		return nil, "", "", ErrInvalidCredentials
+			"email", input.Email,
+			"error", err)
+		return nil, "", "", fmt.Errorf("failed to get user: %w", err)
 	}
 
 	// パスワードを検証

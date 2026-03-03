@@ -33,7 +33,7 @@ func (m *mockAuthUserRepo) GetByEmail(email string) (*models.User, error) {
 	if user, exists := m.users[email]; exists {
 		return user, nil
 	}
-	return nil, errors.New("user not found")
+	return nil, repositories.ErrUserNotFound
 }
 
 func (m *mockAuthUserRepo) Create(user *models.User) error {
