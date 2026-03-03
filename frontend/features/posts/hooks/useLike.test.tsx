@@ -214,6 +214,40 @@ describe("useLike", () => {
       expect(list?.posts[1]).toEqual(initialList[1]);
     });
 
+    it("onLike で詳細キャッシュがない状態でエラーが発生したときリストキャッシュがロールバックされる", () => {
+      const postId = 1;
+      const initialList = [
+        { id: postId, user_id: 1, likes: 10, is_liked: false, slides: [] },
+        { id: 2, user_id: 2, likes: 5, is_liked: false, slides: [] },
+      ];
+
+      // 詳細キャッシュは設定しない（リストのみ）
+      queryClient.setQueryData(["posts"], { posts: initialList });
+
+      const mockMutate = vi.fn((params, options) => {
+        if (options?.onError) {
+          options.onError(new Error("Network error"), params, undefined);
+        }
+      });
+
+      vi.mocked(postsApi.usePostPostsIdLike).mockReturnValue({
+        mutate: mockMutate,
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdLike>);
+
+      vi.mocked(postsApi.usePostPostsIdUnlike).mockReturnValue({
+        mutate: vi.fn(),
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdUnlike>);
+
+      const { result } = renderHook(() => useLike(), { wrapper });
+
+      result.current.onLike(postId);
+
+      // 詳細キャッシュがなくてもリストキャッシュがロールバックされる
+      const updatedList = queryClient.getQueryData<{ posts: Post[] }>(["posts"]);
+      expect(updatedList?.posts[0]).toEqual(initialList[0]);
+      expect(updatedList?.posts[1]).toEqual(initialList[1]);
+    });
+
     it("エラー時にキャッシュがクリアされていた場合もロールバックがクラッシュしない", () => {
       const postId = 1;
       const initialPost: Post = {
@@ -533,6 +567,40 @@ describe("useLike", () => {
       const list = queryClient.getQueryData<{ posts: Post[] }>(["/users/1/posts"]);
       expect(list?.posts[0]).toEqual(initialList[0]);
       expect(list?.posts[1]).toEqual(initialList[1]);
+    });
+
+    it("onUnlike で詳細キャッシュがない状態でエラーが発生したときリストキャッシュがロールバックされる", () => {
+      const postId = 1;
+      const initialList = [
+        { id: postId, user_id: 1, likes: 10, is_liked: true, slides: [] },
+        { id: 2, user_id: 2, likes: 5, is_liked: false, slides: [] },
+      ];
+
+      // 詳細キャッシュは設定しない（リストのみ）
+      queryClient.setQueryData(["posts"], { posts: initialList });
+
+      const mockMutate = vi.fn((params, options) => {
+        if (options?.onError) {
+          options.onError(new Error("Network error"), params, undefined);
+        }
+      });
+
+      vi.mocked(postsApi.usePostPostsIdUnlike).mockReturnValue({
+        mutate: mockMutate,
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdUnlike>);
+
+      vi.mocked(postsApi.usePostPostsIdLike).mockReturnValue({
+        mutate: vi.fn(),
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdLike>);
+
+      const { result } = renderHook(() => useLike(), { wrapper });
+
+      result.current.onUnlike(postId);
+
+      // 詳細キャッシュがなくてもリストキャッシュがロールバックされる
+      const updatedList = queryClient.getQueryData<{ posts: Post[] }>(["posts"]);
+      expect(updatedList?.posts[0]).toEqual(initialList[0]);
+      expect(updatedList?.posts[1]).toEqual(initialList[1]);
     });
 
     it("エラー時にキャッシュがクリアされていた場合もロールバックがクラッシュしない", () => {
