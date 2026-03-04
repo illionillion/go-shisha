@@ -60,8 +60,8 @@ func (m *mockAuthUserRepoForHandler) GetByID(id int) (*models.User, error) {
 }
 
 type mockRefreshTokenRepoForHandler struct {
-	tokens       map[int64]string
-	findErr      error // FindByTokenHash に注入するエラー
+	tokens  map[int64]string
+	findErr error // FindByTokenHash に注入するエラー
 }
 
 func newMockRefreshTokenRepoForHandler() *mockRefreshTokenRepoForHandler {
@@ -389,89 +389,89 @@ func TestAuthHandler_Login_ValidationError(t *testing.T) {
 }
 
 func TestAuthHandler_Refresh_NoCookie(t *testing.T) {
-userRepo := newMockAuthUserRepoForHandler()
-tokenRepo := newMockRefreshTokenRepoForHandler()
-authService := services.NewAuthService(userRepo, tokenRepo)
-handler := NewAuthHandler(authService)
+	userRepo := newMockAuthUserRepoForHandler()
+	tokenRepo := newMockRefreshTokenRepoForHandler()
+	authService := services.NewAuthService(userRepo, tokenRepo)
+	handler := NewAuthHandler(authService)
 
-r := gin.New()
-r.POST("/refresh", handler.Refresh)
+	r := gin.New()
+	r.POST("/refresh", handler.Refresh)
 
-req := httptest.NewRequest(http.MethodPost, "/refresh", nil)
-w := httptest.NewRecorder()
-r.ServeHTTP(w, req)
+	req := httptest.NewRequest(http.MethodPost, "/refresh", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-if w.Code != http.StatusUnauthorized {
-t.Errorf("expected status 401, got %d", w.Code)
-}
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("expected status 401, got %d", w.Code)
+	}
 
-var response models.UnauthorizedError
-if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
-t.Fatalf("failed to unmarshal response: %v", err)
-}
-if response.Error != models.ErrCodeUnauthorized {
-t.Errorf("expected error '%s', got '%s'", models.ErrCodeUnauthorized, response.Error)
-}
+	var response models.UnauthorizedError
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+	if response.Error != models.ErrCodeUnauthorized {
+		t.Errorf("expected error '%s', got '%s'", models.ErrCodeUnauthorized, response.Error)
+	}
 }
 
 func TestAuthHandler_Refresh_InvalidToken(t *testing.T) {
-userRepo := newMockAuthUserRepoForHandler()
-tokenRepo := newMockRefreshTokenRepoForHandler()
-authService := services.NewAuthService(userRepo, tokenRepo)
-handler := NewAuthHandler(authService)
+	userRepo := newMockAuthUserRepoForHandler()
+	tokenRepo := newMockRefreshTokenRepoForHandler()
+	authService := services.NewAuthService(userRepo, tokenRepo)
+	handler := NewAuthHandler(authService)
 
-r := gin.New()
-r.POST("/refresh", handler.Refresh)
+	r := gin.New()
+	r.POST("/refresh", handler.Refresh)
 
-req := httptest.NewRequest(http.MethodPost, "/refresh", nil)
-req.AddCookie(&http.Cookie{Name: "refresh_token", Value: "invalid-token-string"})
-w := httptest.NewRecorder()
-r.ServeHTTP(w, req)
+	req := httptest.NewRequest(http.MethodPost, "/refresh", nil)
+	req.AddCookie(&http.Cookie{Name: "refresh_token", Value: "invalid-token-string"})
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-if w.Code != http.StatusUnauthorized {
-t.Errorf("expected status 401, got %d", w.Code)
-}
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("expected status 401, got %d", w.Code)
+	}
 
-var response models.UnauthorizedError
-if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
-t.Fatalf("failed to unmarshal response: %v", err)
-}
-if response.Error != models.ErrCodeUnauthorized {
-t.Errorf("expected error '%s', got '%s'", models.ErrCodeUnauthorized, response.Error)
-}
+	var response models.UnauthorizedError
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+	if response.Error != models.ErrCodeUnauthorized {
+		t.Errorf("expected error '%s', got '%s'", models.ErrCodeUnauthorized, response.Error)
+	}
 }
 
 func TestAuthHandler_Refresh_InternalError(t *testing.T) {
-userRepo := newMockAuthUserRepoForHandler()
-tokenRepo := newMockRefreshTokenRepoForHandler()
-// FindByTokenHash が内部エラーを返すよう設定
-tokenRepo.findErr = errors.New("db connection error")
-authService := services.NewAuthService(userRepo, tokenRepo)
-handler := NewAuthHandler(authService)
+	userRepo := newMockAuthUserRepoForHandler()
+	tokenRepo := newMockRefreshTokenRepoForHandler()
+	// FindByTokenHash が内部エラーを返すよう設定
+	tokenRepo.findErr = errors.New("db connection error")
+	authService := services.NewAuthService(userRepo, tokenRepo)
+	handler := NewAuthHandler(authService)
 
-r := gin.New()
-r.POST("/refresh", handler.Refresh)
+	r := gin.New()
+	r.POST("/refresh", handler.Refresh)
 
-// 有効なJWTトークンを生成（DBクエリまで到達させるため）
-validToken, genErr := auth.GenerateRefreshToken(1)
-if genErr != nil {
-t.Fatalf("failed to generate token: %v", genErr)
-}
+	// 有効なJWTトークンを生成（DBクエリまで到達させるため）
+	validToken, genErr := auth.GenerateRefreshToken(1)
+	if genErr != nil {
+		t.Fatalf("failed to generate token: %v", genErr)
+	}
 
-req := httptest.NewRequest(http.MethodPost, "/refresh", nil)
-req.AddCookie(&http.Cookie{Name: "refresh_token", Value: validToken})
-w := httptest.NewRecorder()
-r.ServeHTTP(w, req)
+	req := httptest.NewRequest(http.MethodPost, "/refresh", nil)
+	req.AddCookie(&http.Cookie{Name: "refresh_token", Value: validToken})
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
 
-if w.Code != http.StatusInternalServerError {
-t.Errorf("expected status 500, got %d", w.Code)
-}
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("expected status 500, got %d", w.Code)
+	}
 
-var response models.ServerError
-if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
-t.Fatalf("failed to unmarshal response: %v", err)
-}
-if response.Error != models.ErrCodeInternalServer {
-t.Errorf("expected error '%s', got '%s'", models.ErrCodeInternalServer, response.Error)
-}
+	var response models.ServerError
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+	if response.Error != models.ErrCodeInternalServer {
+		t.Errorf("expected error '%s', got '%s'", models.ErrCodeInternalServer, response.Error)
+	}
 }
