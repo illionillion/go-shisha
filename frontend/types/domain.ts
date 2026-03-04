@@ -8,11 +8,15 @@ import type { GoShishaBackendInternalModelsCreatePostInput } from "@/api/model/g
 import type { GoShishaBackendInternalModelsCreateUserInput } from "@/api/model/goShishaBackendInternalModelsCreateUserInput";
 import type { GoShishaBackendInternalModelsFlavor } from "@/api/model/goShishaBackendInternalModelsFlavor";
 import type { GoShishaBackendInternalModelsLoginInput } from "@/api/model/goShishaBackendInternalModelsLoginInput";
+import type { GoShishaBackendInternalModelsNotFoundError } from "@/api/model/goShishaBackendInternalModelsNotFoundError";
+import { GoShishaBackendInternalModelsNotFoundErrorError } from "@/api/model/goShishaBackendInternalModelsNotFoundErrorError";
 import type { GoShishaBackendInternalModelsPost } from "@/api/model/goShishaBackendInternalModelsPost";
 import type { GoShishaBackendInternalModelsServerError } from "@/api/model/goShishaBackendInternalModelsServerError";
 import { GoShishaBackendInternalModelsServerErrorError } from "@/api/model/goShishaBackendInternalModelsServerErrorError";
 import type { GoShishaBackendInternalModelsSlide } from "@/api/model/goShishaBackendInternalModelsSlide";
 import type { GoShishaBackendInternalModelsSlideInput } from "@/api/model/goShishaBackendInternalModelsSlideInput";
+import type { GoShishaBackendInternalModelsUnauthorizedError } from "@/api/model/goShishaBackendInternalModelsUnauthorizedError";
+import { GoShishaBackendInternalModelsUnauthorizedErrorError } from "@/api/model/goShishaBackendInternalModelsUnauthorizedErrorError";
 import type { GoShishaBackendInternalModelsUploadImagesResponse } from "@/api/model/goShishaBackendInternalModelsUploadImagesResponse";
 import type { GoShishaBackendInternalModelsUser } from "@/api/model/goShishaBackendInternalModelsUser";
 import type { GoShishaBackendInternalModelsValidationError } from "@/api/model/goShishaBackendInternalModelsValidationError";
@@ -63,6 +67,22 @@ export const ConflictErrorCode = GoShishaBackendInternalModelsConflictErrorError
 export type ServerError = GoShishaBackendInternalModelsServerError;
 /** ServerError.error のエラーコード定数 */
 export const ServerErrorCode = GoShishaBackendInternalModelsServerErrorError;
+
+/**
+ * 認証エラーレスポンス（401 Unauthorized）
+ * - error: "unauthorized"（エラーコード）
+ */
+export type UnauthorizedError = GoShishaBackendInternalModelsUnauthorizedError;
+/** UnauthorizedError.error のエラーコード定数 */
+export const UnauthorizedErrorCode = GoShishaBackendInternalModelsUnauthorizedErrorError;
+
+/**
+ * リソース未発見エラーレスポンス（404 Not Found）
+ * - error: "not_found"（エラーコード）
+ */
+export type NotFoundError = GoShishaBackendInternalModelsNotFoundError;
+/** NotFoundError.error のエラーコード定数 */
+export const NotFoundErrorCode = GoShishaBackendInternalModelsNotFoundErrorError;
 
 // ========================================
 // ユーザー関連

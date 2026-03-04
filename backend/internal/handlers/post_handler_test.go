@@ -96,6 +96,10 @@ func TestCreatePost_NoAuth(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	var response models.UnauthorizedError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeUnauthorized, response.Error)
 }
 
 func TestCreatePost_Success(t *testing.T) {
@@ -177,6 +181,10 @@ func TestCreatePost_InvalidBody(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	errUnmarshal := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, errUnmarshal)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
 }
 
 func TestCreatePost_ImageURLValidation(t *testing.T) {
@@ -304,6 +312,10 @@ func TestCreatePost_UserNotFound(t *testing.T) {
 
 	// ユーザーが見つからない場合は401を返す
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	var response models.UnauthorizedError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeUnauthorized, response.Error)
 }
 
 func TestCreatePost_InvalidUserIDType(t *testing.T) {
@@ -336,6 +348,10 @@ func TestCreatePost_InvalidUserIDType(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	var serverResponse models.ServerError
+	errUnmarshal := json.Unmarshal(rec.Body.Bytes(), &serverResponse)
+	assert.NoError(t, errUnmarshal)
+	assert.Equal(t, models.ErrCodeInternalServer, serverResponse.Error)
 }
 
 func TestLikePost_Success(t *testing.T) {
@@ -716,6 +732,10 @@ func TestGetPost_NotFound_404(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusNotFound, rec.Code)
+	var response models.NotFoundError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeNotFound, response.Error)
 }
 
 func TestGetPost_InternalError_500(t *testing.T) {
@@ -736,4 +756,8 @@ func TestGetPost_InternalError_500(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	var response models.ServerError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeInternalServer, response.Error)
 }

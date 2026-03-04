@@ -65,6 +65,18 @@ definitions:
     - email
     - password
     type: object
+  go-shisha-backend_internal_models.NotFoundError:
+    description: リソースが見つからない場合のエラーレスポンス
+    properties:
+      error:
+        description: エラー種別の識別子
+        enum:
+        - not_found
+        example: not_found
+        type: string
+    required:
+    - error
+    type: object
   go-shisha-backend_internal_models.Post:
     properties:
       created_at:
@@ -126,6 +138,18 @@ definitions:
         type: string
     required:
     - image_url
+    type: object
+  go-shisha-backend_internal_models.UnauthorizedError:
+    description: 認証に失敗した場合のエラーレスポンス
+    properties:
+      error:
+        description: エラー種別の識別子
+        enum:
+        - unauthorized
+        example: unauthorized
+        type: string
+    required:
+    - error
     type: object
   go-shisha-backend_internal_models.UploadImagesResponse:
     properties:
@@ -357,8 +381,7 @@ paths:
         "500":
           description: サーバーエラー
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
       summary: 投稿一覧取得
       tags:
       - posts
@@ -383,18 +406,15 @@ paths:
         "400":
           description: バリデーションエラー
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ValidationError'
         "401":
           description: 認証エラー
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.UnauthorizedError'
         "500":
           description: サーバーエラー
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
       security:
       - BearerAuth: []
       summary: 投稿作成
@@ -421,18 +441,15 @@ paths:
         "400":
           description: 無効な投稿ID
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ValidationError'
         "404":
           description: 投稿が見つかりません
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.NotFoundError'
         "500":
           description: サーバーエラー
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
       summary: 投稿詳細取得
       tags:
       - posts
