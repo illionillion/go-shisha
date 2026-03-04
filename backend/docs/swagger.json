@@ -339,6 +339,19 @@
                             "$ref": "#/definitions/go-shisha-backend_internal_models.UnauthorizedError"
                         }
                     },
+                    "403": {
+                        "description": "権限エラー",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "リソースが見つからない",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.NotFoundError"
+                        }
+                    },
                     "500": {
                         "description": "サーバーエラー",
                         "schema": {

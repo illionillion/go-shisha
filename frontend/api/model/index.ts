@@ -44,6 +44,7 @@ export * from "./postAuthLogout200";
 export * from "./postAuthRefresh200";
 export * from "./postPosts400";
 export * from "./postPosts401";
+export * from "./postPosts403";
 export * from "./postPosts500";
 export * from "./postPosts501";
 export * from "./postPostsIdLike400";

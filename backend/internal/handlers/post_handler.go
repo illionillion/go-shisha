@@ -123,6 +123,8 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 // @Success 201 {object} models.Post "作成された投稿"
 // @Failure 400 {object} models.ValidationError "バリデーションエラー"
 // @Failure 401 {object} models.UnauthorizedError "認証エラー"
+// @Failure 403 {object} map[string]interface{} "権限エラー"
+// @Failure 404 {object} models.NotFoundError "リソースが見つからない"
 // @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Security BearerAuth
 // @Router /posts [post]

@@ -11,6 +11,7 @@ import (
 
 	"go-shisha-backend/internal/models"
 	"go-shisha-backend/internal/repositories"
+	"go-shisha-backend/internal/services"
 	"go-shisha-backend/pkg/validation"
 
 	"github.com/gin-gonic/gin"
@@ -760,4 +761,87 @@ func TestGetPost_InternalError_500(t *testing.T) {
 	err := json.Unmarshal(rec.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.Equal(t, models.ErrCodeInternalServer, response.Error)
+}
+
+func TestGetPost_InvalidID_400(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.GET("/posts/:id", handler.GetPost)
+
+	req := httptest.NewRequest(http.MethodGet, "/posts/abc", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
+func TestGetAllPosts_InternalError_500(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		getAllPostsFunc: func(userID *int) ([]models.Post, error) {
+			return nil, errors.New("db connection failed")
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.GET("/posts", handler.GetAllPosts)
+
+	req := httptest.NewRequest(http.MethodGet, "/posts", nil)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	var response models.ServerError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeInternalServer, response.Error)
+}
+
+func TestCreatePost_ImageNotFound_404(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		createPostFunc: func(userID int, input *models.CreatePostInput) (*models.Post, error) {
+			return nil, services.ErrImageNotFound
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.POST("/posts", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.CreatePost(c)
+	})
+
+	reqBody := map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{
+				"image_url": "/images/test.jpg",
+				"text":      "test",
+			},
+		},
+	}
+	body, _ := json.Marshal(reqBody)
+
+	req := httptest.NewRequest(http.MethodPost, "/posts", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusNotFound, rec.Code)
+	var response models.NotFoundError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeNotFound, response.Error)
 }

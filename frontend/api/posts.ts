@@ -30,6 +30,7 @@ import type {
   GoShishaBackendInternalModelsServerError,
   GoShishaBackendInternalModelsUnauthorizedError,
   GoShishaBackendInternalModelsValidationError,
+  PostPosts403,
   PostPostsIdLike400,
   PostPostsIdLike401,
   PostPostsIdLike404,
@@ -194,6 +195,16 @@ export type postPostsResponse401 = {
   status: 401;
 };
 
+export type postPostsResponse403 = {
+  data: PostPosts403;
+  status: 403;
+};
+
+export type postPostsResponse404 = {
+  data: GoShishaBackendInternalModelsNotFoundError;
+  status: 404;
+};
+
 export type postPostsResponse500 = {
   data: GoShishaBackendInternalModelsServerError;
   status: 500;
@@ -205,6 +216,8 @@ export type postPostsResponseSuccess = postPostsResponse201 & {
 export type postPostsResponseError = (
   | postPostsResponse400
   | postPostsResponse401
+  | postPostsResponse403
+  | postPostsResponse404
   | postPostsResponse500
 ) & {
   headers: Headers;
@@ -232,6 +245,8 @@ export const getPostPostsMutationOptions = <
   TError =
     | GoShishaBackendInternalModelsValidationError
     | GoShishaBackendInternalModelsUnauthorizedError
+    | PostPosts403
+    | GoShishaBackendInternalModelsNotFoundError
     | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(options?: {
@@ -272,6 +287,8 @@ export type PostPostsMutationBody = GoShishaBackendInternalModelsCreatePostInput
 export type PostPostsMutationError =
   | GoShishaBackendInternalModelsValidationError
   | GoShishaBackendInternalModelsUnauthorizedError
+  | PostPosts403
+  | GoShishaBackendInternalModelsNotFoundError
   | GoShishaBackendInternalModelsServerError;
 
 /**
@@ -281,6 +298,8 @@ export const usePostPosts = <
   TError =
     | GoShishaBackendInternalModelsValidationError
     | GoShishaBackendInternalModelsUnauthorizedError
+    | PostPosts403
+    | GoShishaBackendInternalModelsNotFoundError
     | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(
