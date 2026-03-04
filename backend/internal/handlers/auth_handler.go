@@ -176,7 +176,9 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 		logging.L.Warn("no refresh token",
 			"handler", "AuthHandler",
 			"method", "Refresh")
-		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{
+			Error: models.ErrCodeUnauthorized,
+		})
 		return
 	}
 
@@ -187,14 +189,18 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 				"handler", "AuthHandler",
 				"method", "Refresh",
 				"error", err)
-			c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
+			c.JSON(http.StatusUnauthorized, models.UnauthorizedError{
+				Error: models.ErrCodeUnauthorized,
+			})
 			return
 		}
 		logging.L.Error("refresh internal error",
 			"handler", "AuthHandler",
 			"method", "Refresh",
 			"error", err)
-		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
+		c.JSON(http.StatusInternalServerError, models.ServerError{
+			Error: models.ErrCodeInternalServer,
+		})
 		return
 	}
 
@@ -233,14 +239,18 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		logging.L.Warn("user_id not found in context",
 			"handler", "AuthHandler",
 			"method", "Logout")
-		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{
+			Error: models.ErrCodeUnauthorized,
+		})
 		return
 	}
 
 	uid, ok := userID.(int)
 	if !ok {
 		logging.L.Error("invalid user_id type in context", "handler", "AuthHandler", "method", "Logout")
-		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
+		c.JSON(http.StatusInternalServerError, models.ServerError{
+			Error: models.ErrCodeInternalServer,
+		})
 		return
 	}
 	if err := h.authService.Logout(int64(uid)); err != nil {
@@ -249,7 +259,9 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 			"method", "Logout",
 			"user_id", uid,
 			"error", err)
-		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
+		c.JSON(http.StatusInternalServerError, models.ServerError{
+			Error: models.ErrCodeInternalServer,
+		})
 		return
 	}
 
@@ -298,14 +310,18 @@ func (h *AuthHandler) Me(c *gin.Context) {
 		logging.L.Warn("user_id not found in context",
 			"handler", "AuthHandler",
 			"method", "Me")
-		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{
+			Error: models.ErrCodeUnauthorized,
+		})
 		return
 	}
 
 	uid, ok := userID.(int)
 	if !ok {
 		logging.L.Error("invalid user_id type in context", "handler", "AuthHandler", "method", "Me")
-		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
+		c.JSON(http.StatusInternalServerError, models.ServerError{
+			Error: models.ErrCodeInternalServer,
+		})
 		return
 	}
 	user, err := h.authService.GetCurrentUser(int64(uid))
@@ -315,7 +331,9 @@ func (h *AuthHandler) Me(c *gin.Context) {
 			"method", "Me",
 			"user_id", uid,
 			"error", err)
-		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
+		c.JSON(http.StatusInternalServerError, models.ServerError{
+			Error: models.ErrCodeInternalServer,
+		})
 		return
 	}
 
