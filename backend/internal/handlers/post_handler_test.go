@@ -406,6 +406,10 @@ func TestLikePost_AlreadyLiked_409(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusConflict, rec.Code)
+	var response models.ConflictError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeAlreadyLiked, response.Error)
 }
 
 func TestLikePost_InvalidID(t *testing.T) {
@@ -426,6 +430,10 @@ func TestLikePost_InvalidID(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
 }
 
 func TestLikePost_NotFound_404(t *testing.T) {
@@ -449,6 +457,10 @@ func TestLikePost_NotFound_404(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusNotFound, rec.Code)
+	var response models.NotFoundError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeNotFound, response.Error)
 }
 
 func TestLikePost_InternalError_500(t *testing.T) {
@@ -472,6 +484,10 @@ func TestLikePost_InternalError_500(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	var response models.ServerError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeInternalServer, response.Error)
 }
 
 func TestLikePost_UserNotFound_401(t *testing.T) {
@@ -495,6 +511,10 @@ func TestLikePost_UserNotFound_401(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	var response models.UnauthorizedError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeUnauthorized, response.Error)
 }
 
 func TestUnlikePost_Success(t *testing.T) {
@@ -547,6 +567,10 @@ func TestUnlikePost_NotLiked_409(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusConflict, rec.Code)
+	var response models.ConflictError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeNotLiked, response.Error)
 }
 
 func TestUnlikePost_InvalidID(t *testing.T) {
@@ -567,6 +591,10 @@ func TestUnlikePost_InvalidID(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
 }
 
 func TestUnlikePost_NotFound_404(t *testing.T) {
@@ -590,6 +618,10 @@ func TestUnlikePost_NotFound_404(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusNotFound, rec.Code)
+	var response models.NotFoundError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeNotFound, response.Error)
 }
 
 func TestUnlikePost_UserNotFound_401(t *testing.T) {
@@ -613,6 +645,10 @@ func TestUnlikePost_UserNotFound_401(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	var response models.UnauthorizedError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeUnauthorized, response.Error)
 }
 
 func TestGetAllPosts_WithOptionalAuth(t *testing.T) {

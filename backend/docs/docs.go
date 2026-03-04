@@ -451,36 +451,31 @@ const docTemplate = `{
                     "400": {
                         "description": "無効な投稿ID",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ValidationError"
                         }
                     },
                     "401": {
                         "description": "認証エラー",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UnauthorizedError"
                         }
                     },
                     "404": {
                         "description": "投稿が見つかりません",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.NotFoundError"
                         }
                     },
                     "409": {
                         "description": "既にいいね済み",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ConflictError"
                         }
                     },
                     "500": {
                         "description": "サーバーエラー",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
                         }
                     }
                 }
@@ -523,36 +518,31 @@ const docTemplate = `{
                     "400": {
                         "description": "無効な投稿ID",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ValidationError"
                         }
                     },
                     "401": {
                         "description": "認証エラー",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UnauthorizedError"
                         }
                     },
                     "404": {
                         "description": "投稿が見つかりません",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.NotFoundError"
                         }
                     },
                     "409": {
                         "description": "いいねしていない投稿",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ConflictError"
                         }
                     },
                     "500": {
                         "description": "サーバーエラー",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
                         }
                     }
                 }
@@ -766,7 +756,9 @@ const docTemplate = `{
                     "description": "エラー種別の識別子",
                     "type": "string",
                     "enum": [
-                        "email_already_exists"
+                        "email_already_exists",
+                        "already_liked",
+                        "not_liked"
                     ],
                     "example": "email_already_exists"
                 }

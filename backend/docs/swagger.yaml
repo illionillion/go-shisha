@@ -12,6 +12,8 @@ definitions:
         description: エラー種別の識別子
         enum:
         - email_already_exists
+        - already_liked
+        - not_liked
         example: email_already_exists
         type: string
     required:
@@ -478,28 +480,23 @@ paths:
         "400":
           description: 無効な投稿ID
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ValidationError'
         "401":
           description: 認証エラー
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.UnauthorizedError'
         "404":
           description: 投稿が見つかりません
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.NotFoundError'
         "409":
           description: 既にいいね済み
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ConflictError'
         "500":
           description: サーバーエラー
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
       security:
       - BearerAuth: []
       summary: 投稿にいいね
@@ -526,28 +523,23 @@ paths:
         "400":
           description: 無効な投稿ID
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ValidationError'
         "401":
           description: 認証エラー
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.UnauthorizedError'
         "404":
           description: 投稿が見つかりません
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.NotFoundError'
         "409":
           description: いいねしていない投稿
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ConflictError'
         "500":
           description: サーバーエラー
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
       security:
       - BearerAuth: []
       summary: 投稿のいいねを取り消す

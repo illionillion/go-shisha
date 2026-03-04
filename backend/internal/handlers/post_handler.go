@@ -194,48 +194,48 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 // @Produce json
 // @Param id path int true "投稿ID"
 // @Success 200 {object} models.Post "いいねが追加された投稿"
-// @Failure 400 {object} map[string]interface{} "無効な投稿ID"
-// @Failure 401 {object} map[string]interface{} "認証エラー"
-// @Failure 404 {object} map[string]interface{} "投稿が見つかりません"
-// @Failure 409 {object} map[string]interface{} "既にいいね済み"
-// @Failure 500 {object} map[string]interface{} "サーバーエラー"
+// @Failure 400 {object} models.ValidationError "無効な投稿ID"
+// @Failure 401 {object} models.UnauthorizedError "認証エラー"
+// @Failure 404 {object} models.NotFoundError "投稿が見つかりません"
+// @Failure 409 {object} models.ConflictError "既にいいね済み"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Security BearerAuth
 // @Router /posts/{id}/like [post]
 func (h *PostHandler) LikePost(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID"})
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 		return
 	}
 
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
 		return
 	}
 	userID, ok := userIDValue.(int)
 	if !ok {
 		logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "LikePost")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 
 	post, err := h.postService.LikePost(userID, id)
 	if err != nil {
 		if errors.Is(err, repositories.ErrAlreadyLiked) {
-			c.JSON(http.StatusConflict, gin.H{"error": "already liked"})
+			c.JSON(http.StatusConflict, models.ConflictError{Error: models.ErrCodeAlreadyLiked})
 			return
 		}
 		if errors.Is(err, repositories.ErrPostNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			c.JSON(http.StatusNotFound, models.NotFoundError{Error: models.ErrCodeNotFound})
 			return
 		}
 		if errors.Is(err, repositories.ErrUserNotFound) {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
 			return
 		}
 		logging.L.Error("failed to like post", "handler", "PostHandler", "method", "LikePost", "user_id", userID, "post_id", id, "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 
@@ -250,48 +250,48 @@ func (h *PostHandler) LikePost(c *gin.Context) {
 // @Produce json
 // @Param id path int true "投稿ID"
 // @Success 200 {object} models.Post "いいねが取り消された投稿"
-// @Failure 400 {object} map[string]interface{} "無効な投稿ID"
-// @Failure 401 {object} map[string]interface{} "認証エラー"
-// @Failure 404 {object} map[string]interface{} "投稿が見つかりません"
-// @Failure 409 {object} map[string]interface{} "いいねしていない投稿"
-// @Failure 500 {object} map[string]interface{} "サーバーエラー"
+// @Failure 400 {object} models.ValidationError "無効な投稿ID"
+// @Failure 401 {object} models.UnauthorizedError "認証エラー"
+// @Failure 404 {object} models.NotFoundError "投稿が見つかりません"
+// @Failure 409 {object} models.ConflictError "いいねしていない投稿"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Security BearerAuth
 // @Router /posts/{id}/unlike [post]
 func (h *PostHandler) UnlikePost(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID"})
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 		return
 	}
 
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
 		return
 	}
 	userID, ok := userIDValue.(int)
 	if !ok {
 		logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "UnlikePost")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 
 	post, err := h.postService.UnlikePost(userID, id)
 	if err != nil {
 		if errors.Is(err, repositories.ErrNotLiked) {
-			c.JSON(http.StatusConflict, gin.H{"error": "not liked"})
+			c.JSON(http.StatusConflict, models.ConflictError{Error: models.ErrCodeNotLiked})
 			return
 		}
 		if errors.Is(err, repositories.ErrPostNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			c.JSON(http.StatusNotFound, models.NotFoundError{Error: models.ErrCodeNotFound})
 			return
 		}
 		if errors.Is(err, repositories.ErrUserNotFound) {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
 			return
 		}
 		logging.L.Error("failed to unlike post", "handler", "PostHandler", "method", "UnlikePost", "user_id", userID, "post_id", id, "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 

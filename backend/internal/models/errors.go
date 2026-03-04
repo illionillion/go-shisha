@@ -4,6 +4,8 @@ package models
 const (
 	ErrCodeValidationFailed   = "validation_failed"
 	ErrCodeEmailAlreadyExists = "email_already_exists"
+	ErrCodeAlreadyLiked       = "already_liked"
+	ErrCodeNotLiked           = "not_liked"
 	ErrCodeUnauthorized       = "unauthorized"
 	ErrCodeNotFound           = "not_found"
 	ErrCodeInternalServer     = "internal_server_error"
@@ -20,7 +22,7 @@ type ValidationError struct {
 // @Description リソースが既に存在する場合のエラーレスポンス
 type ConflictError struct {
 	// エラー種別の識別子
-	Error string `json:"error" enums:"email_already_exists" example:"email_already_exists" binding:"required"`
+	Error string `json:"error" enums:"email_already_exists,already_liked,not_liked" example:"email_already_exists" binding:"required"`
 }
 
 // UnauthorizedError は認証エラーを表す（401 Unauthorized）
