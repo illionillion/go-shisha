@@ -52,19 +52,19 @@ const docTemplate = `{
                     "400": {
                         "description": "バリデーションエラー",
                         "schema": {
-                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ValidationError"
                         }
                     },
                     "401": {
                         "description": "認証失敗",
                         "schema": {
-                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UnauthorizedError"
                         }
                     },
                     "500": {
                         "description": "サーバーエラー",
                         "schema": {
-                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
                         }
                     }
                 }
@@ -98,13 +98,13 @@ const docTemplate = `{
                     "401": {
                         "description": "認証失敗",
                         "schema": {
-                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UnauthorizedError"
                         }
                     },
                     "500": {
                         "description": "サーバーエラー",
                         "schema": {
-                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
                         }
                     }
                 }
@@ -135,13 +135,13 @@ const docTemplate = `{
                     "401": {
                         "description": "認証失敗",
                         "schema": {
-                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UnauthorizedError"
                         }
                     },
                     "500": {
                         "description": "サーバーエラー",
                         "schema": {
-                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
                         }
                     }
                 }
@@ -170,13 +170,13 @@ const docTemplate = `{
                     "401": {
                         "description": "認証失敗",
                         "schema": {
-                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UnauthorizedError"
                         }
                     },
                     "500": {
                         "description": "サーバーエラー",
                         "schema": {
-                            "$ref": "#/definitions/go-shisha-backend_internal_models.ErrorResponse"
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
                         }
                     }
                 }
@@ -801,14 +801,6 @@ const docTemplate = `{
                 }
             }
         },
-        "go-shisha-backend_internal_models.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
-                }
-            }
-        },
         "go-shisha-backend_internal_models.Flavor": {
             "type": "object",
             "properties": {
@@ -929,6 +921,23 @@ const docTemplate = `{
                 },
                 "text": {
                     "type": "string"
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.UnauthorizedError": {
+            "description": "認証に失敗した場合のエラーレスポンス",
+            "type": "object",
+            "required": [
+                "error"
+            ],
+            "properties": {
+                "error": {
+                    "description": "エラー種別の識別子",
+                    "type": "string",
+                    "enum": [
+                        "unauthorized"
+                    ],
+                    "example": "unauthorized"
                 }
             }
         },
