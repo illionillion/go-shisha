@@ -5,6 +5,7 @@ const (
 	ErrCodeValidationFailed   = "validation_failed"
 	ErrCodeEmailAlreadyExists = "email_already_exists"
 	ErrCodeUnauthorized       = "unauthorized"
+	ErrCodeNotFound           = "not_found"
 	ErrCodeInternalServer     = "internal_server_error"
 )
 
@@ -27,6 +28,13 @@ type ConflictError struct {
 type UnauthorizedError struct {
 	// エラー種別の識別子
 	Error string `json:"error" enums:"unauthorized" example:"unauthorized" binding:"required"`
+}
+
+// NotFoundError はリソースが見つからないエラーを表す（404 Not Found）
+// @Description リソースが見つからない場合のエラーレスポンス
+type NotFoundError struct {
+	// エラー種別の識別子
+	Error string `json:"error" enums:"not_found" example:"not_found" binding:"required"`
 }
 
 // ServerError はサーバー内部エラーを表す（500 Internal Server Error）

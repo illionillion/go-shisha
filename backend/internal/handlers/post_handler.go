@@ -41,7 +41,7 @@ func NewPostHandler(postService PostServiceInterface) *PostHandler {
 // @Accept json
 // @Produce json
 // @Success 200 {object} models.PostsResponse "投稿一覧と総数"
-// @Failure 500 {object} map[string]interface{} "サーバーエラー"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Router /posts [get]
 func (h *PostHandler) GetAllPosts(c *gin.Context) {
 	var userID *int
@@ -49,7 +49,7 @@ func (h *PostHandler) GetAllPosts(c *gin.Context) {
 		uid, ok := v.(int)
 		if !ok {
 			logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "GetAllPosts")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 			return
 		}
 		userID = &uid
@@ -58,7 +58,7 @@ func (h *PostHandler) GetAllPosts(c *gin.Context) {
 	posts, err := h.postService.GetAllPosts(userID)
 	if err != nil {
 		logging.L.Error("failed to get all posts", "handler", "PostHandler", "method", "GetAllPosts", "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 
@@ -77,14 +77,14 @@ func (h *PostHandler) GetAllPosts(c *gin.Context) {
 // @Produce json
 // @Param id path int true "投稿ID"
 // @Success 200 {object} models.Post "投稿情報"
-// @Failure 400 {object} map[string]interface{} "無効な投稿ID"
-// @Failure 404 {object} map[string]interface{} "投稿が見つかりません"
-// @Failure 500 {object} map[string]interface{} "サーバーエラー"
+// @Failure 400 {object} models.ValidationError "無効な投稿ID"
+// @Failure 404 {object} models.NotFoundError "投稿が見つかりません"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Router /posts/{id} [get]
 func (h *PostHandler) GetPost(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID"})
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 		return
 	}
 
@@ -93,7 +93,7 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 		uid, ok := v.(int)
 		if !ok {
 			logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "GetPost")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 			return
 		}
 		userID = &uid
@@ -102,11 +102,11 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 	post, err := h.postService.GetPostByID(id, userID)
 	if err != nil {
 		if errors.Is(err, repositories.ErrPostNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			c.JSON(http.StatusNotFound, models.NotFoundError{Error: models.ErrCodeNotFound})
 			return
 		}
 		logging.L.Error("failed to get post", "handler", "PostHandler", "method", "GetPost", "post_id", id, "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 
@@ -121,9 +121,11 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 // @Produce json
 // @Param post body models.CreatePostInput true "投稿情報"
 // @Success 201 {object} models.Post "作成された投稿"
-// @Failure 400 {object} map[string]interface{} "バリデーションエラー"
-// @Failure 401 {object} map[string]interface{} "認証エラー"
-// @Failure 500 {object} map[string]interface{} "サーバーエラー"
+// @Failure 400 {object} models.ValidationError "バリデーションエラー"
+// @Failure 401 {object} models.UnauthorizedError "認証エラー"
+// @Failure 403 {object} map[string]interface{} "権限エラー"
+// @Failure 404 {object} models.NotFoundError "リソースが見つからない"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Security BearerAuth
 // @Router /posts [post]
 func (h *PostHandler) CreatePost(c *gin.Context) {
@@ -131,21 +133,21 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	userIDValue, exists := c.Get("user_id")
 	if !exists {
 		logging.L.Warn("user_id not found in context", "handler", "PostHandler", "method", "CreatePost")
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
 		return
 	}
 
 	userID, ok := userIDValue.(int)
 	if !ok {
 		logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "CreatePost")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 
 	var input models.CreatePostInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		logging.L.Warn("invalid request body", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 		return
 	}
 
@@ -155,14 +157,14 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 		// ユーザーが見つからない場合は認証エラーとして扱う
 		if errors.Is(err, repositories.ErrUserNotFound) {
 			logging.L.Warn("user not found for post creation", "handler", "PostHandler", "method", "CreatePost", "user_id", userID)
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+			c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
 			return
 		}
 		// 画像関連エラーのハンドリング
 		if errors.Is(err, services.ErrInvalidImagePath) || errors.Is(err, services.ErrImageNotAllowed) ||
 			errors.Is(err, services.ErrImageDeleted) {
 			logging.L.Warn("invalid image URL", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 			return
 		}
 		if errors.Is(err, services.ErrImagePermissionDenied) {
@@ -172,11 +174,11 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 		}
 		if errors.Is(err, services.ErrImageNotFound) {
 			logging.L.Warn("image not found", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			c.JSON(http.StatusNotFound, models.NotFoundError{Error: models.ErrCodeNotFound})
 			return
 		}
 		logging.L.Error("failed to create post", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 

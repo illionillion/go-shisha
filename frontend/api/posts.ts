@@ -23,16 +23,14 @@ import type {
 } from "@tanstack/react-query";
 import { apiFetch } from "../lib/api-client";
 import type {
-  GetPosts500,
-  GetPostsId400,
-  GetPostsId404,
-  GetPostsId500,
   GoShishaBackendInternalModelsCreatePostInput,
+  GoShishaBackendInternalModelsNotFoundError,
   GoShishaBackendInternalModelsPost,
   GoShishaBackendInternalModelsPostsResponse,
-  PostPosts400,
-  PostPosts401,
-  PostPosts500,
+  GoShishaBackendInternalModelsServerError,
+  GoShishaBackendInternalModelsUnauthorizedError,
+  GoShishaBackendInternalModelsValidationError,
+  PostPosts403,
   PostPostsIdLike400,
   PostPostsIdLike401,
   PostPostsIdLike404,
@@ -57,7 +55,7 @@ export type getPostsResponse200 = {
 };
 
 export type getPostsResponse500 = {
-  data: GetPosts500;
+  data: GoShishaBackendInternalModelsServerError;
   status: 500;
 };
 
@@ -87,7 +85,7 @@ export const getGetPostsQueryKey = () => {
 
 export const getGetPostsQueryOptions = <
   TData = Awaited<ReturnType<typeof getPosts>>,
-  TError = GetPosts500,
+  TError = GoShishaBackendInternalModelsServerError,
 >(options?: {
   query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>>;
   request?: SecondParameter<typeof apiFetch>;
@@ -107,9 +105,12 @@ export const getGetPostsQueryOptions = <
 };
 
 export type GetPostsQueryResult = NonNullable<Awaited<ReturnType<typeof getPosts>>>;
-export type GetPostsQueryError = GetPosts500;
+export type GetPostsQueryError = GoShishaBackendInternalModelsServerError;
 
-export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError = GetPosts500>(
+export function useGetPosts<
+  TData = Awaited<ReturnType<typeof getPosts>>,
+  TError = GoShishaBackendInternalModelsServerError,
+>(
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>> &
       Pick<
@@ -124,7 +125,10 @@ export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError
   },
   queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError = GetPosts500>(
+export function useGetPosts<
+  TData = Awaited<ReturnType<typeof getPosts>>,
+  TError = GoShishaBackendInternalModelsServerError,
+>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>> &
       Pick<
@@ -139,7 +143,10 @@ export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError = GetPosts500>(
+export function useGetPosts<
+  TData = Awaited<ReturnType<typeof getPosts>>,
+  TError = GoShishaBackendInternalModelsServerError,
+>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>>;
     request?: SecondParameter<typeof apiFetch>;
@@ -150,7 +157,10 @@ export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError
  * @summary 投稿一覧取得
  */
 
-export function useGetPosts<TData = Awaited<ReturnType<typeof getPosts>>, TError = GetPosts500>(
+export function useGetPosts<
+  TData = Awaited<ReturnType<typeof getPosts>>,
+  TError = GoShishaBackendInternalModelsServerError,
+>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPosts>>, TError, TData>>;
     request?: SecondParameter<typeof apiFetch>;
@@ -176,17 +186,27 @@ export type postPostsResponse201 = {
 };
 
 export type postPostsResponse400 = {
-  data: PostPosts400;
+  data: GoShishaBackendInternalModelsValidationError;
   status: 400;
 };
 
 export type postPostsResponse401 = {
-  data: PostPosts401;
+  data: GoShishaBackendInternalModelsUnauthorizedError;
   status: 401;
 };
 
+export type postPostsResponse403 = {
+  data: PostPosts403;
+  status: 403;
+};
+
+export type postPostsResponse404 = {
+  data: GoShishaBackendInternalModelsNotFoundError;
+  status: 404;
+};
+
 export type postPostsResponse500 = {
-  data: PostPosts500;
+  data: GoShishaBackendInternalModelsServerError;
   status: 500;
 };
 
@@ -196,6 +216,8 @@ export type postPostsResponseSuccess = postPostsResponse201 & {
 export type postPostsResponseError = (
   | postPostsResponse400
   | postPostsResponse401
+  | postPostsResponse403
+  | postPostsResponse404
   | postPostsResponse500
 ) & {
   headers: Headers;
@@ -220,7 +242,12 @@ export const postPosts = async (
 };
 
 export const getPostPostsMutationOptions = <
-  TError = PostPosts400 | PostPosts401 | PostPosts500,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | PostPosts403
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -257,13 +284,23 @@ export const getPostPostsMutationOptions = <
 
 export type PostPostsMutationResult = NonNullable<Awaited<ReturnType<typeof postPosts>>>;
 export type PostPostsMutationBody = GoShishaBackendInternalModelsCreatePostInput;
-export type PostPostsMutationError = PostPosts400 | PostPosts401 | PostPosts500;
+export type PostPostsMutationError =
+  | GoShishaBackendInternalModelsValidationError
+  | GoShishaBackendInternalModelsUnauthorizedError
+  | PostPosts403
+  | GoShishaBackendInternalModelsNotFoundError
+  | GoShishaBackendInternalModelsServerError;
 
 /**
  * @summary 投稿作成
  */
 export const usePostPosts = <
-  TError = PostPosts400 | PostPosts401 | PostPosts500,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | PostPosts403
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(
   options?: {
@@ -294,17 +331,17 @@ export type getPostsIdResponse200 = {
 };
 
 export type getPostsIdResponse400 = {
-  data: GetPostsId400;
+  data: GoShishaBackendInternalModelsValidationError;
   status: 400;
 };
 
 export type getPostsIdResponse404 = {
-  data: GetPostsId404;
+  data: GoShishaBackendInternalModelsNotFoundError;
   status: 404;
 };
 
 export type getPostsIdResponse500 = {
-  data: GetPostsId500;
+  data: GoShishaBackendInternalModelsServerError;
   status: 500;
 };
 
@@ -341,7 +378,10 @@ export const getGetPostsIdQueryKey = (id: number) => {
 
 export const getGetPostsIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = GetPostsId400 | GetPostsId404 | GetPostsId500,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options?: {
@@ -364,11 +404,17 @@ export const getGetPostsIdQueryOptions = <
 };
 
 export type GetPostsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getPostsId>>>;
-export type GetPostsIdQueryError = GetPostsId400 | GetPostsId404 | GetPostsId500;
+export type GetPostsIdQueryError =
+  | GoShishaBackendInternalModelsValidationError
+  | GoShishaBackendInternalModelsNotFoundError
+  | GoShishaBackendInternalModelsServerError;
 
 export function useGetPostsId<
   TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = GetPostsId400 | GetPostsId404 | GetPostsId500,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options: {
@@ -387,7 +433,10 @@ export function useGetPostsId<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetPostsId<
   TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = GetPostsId400 | GetPostsId404 | GetPostsId500,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options?: {
@@ -406,7 +455,10 @@ export function useGetPostsId<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetPostsId<
   TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = GetPostsId400 | GetPostsId404 | GetPostsId500,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options?: {
@@ -421,7 +473,10 @@ export function useGetPostsId<
 
 export function useGetPostsId<
   TData = Awaited<ReturnType<typeof getPostsId>>,
-  TError = GetPostsId400 | GetPostsId404 | GetPostsId500,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options?: {

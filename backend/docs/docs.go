@@ -290,8 +290,7 @@ const docTemplate = `{
                     "500": {
                         "description": "サーバーエラー",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
                         }
                     }
                 }
@@ -334,22 +333,32 @@ const docTemplate = `{
                     "400": {
                         "description": "バリデーションエラー",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ValidationError"
                         }
                     },
                     "401": {
                         "description": "認証エラー",
                         "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UnauthorizedError"
+                        }
+                    },
+                    "403": {
+                        "description": "権限エラー",
+                        "schema": {
                             "type": "object",
                             "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "リソースが見つからない",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.NotFoundError"
                         }
                     },
                     "500": {
                         "description": "サーバーエラー",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
                         }
                     }
                 }
@@ -387,22 +396,19 @@ const docTemplate = `{
                     "400": {
                         "description": "無効な投稿ID",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ValidationError"
                         }
                     },
                     "404": {
                         "description": "投稿が見つかりません",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.NotFoundError"
                         }
                     },
                     "500": {
                         "description": "サーバーエラー",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
                         }
                     }
                 }
@@ -827,6 +833,23 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string"
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.NotFoundError": {
+            "description": "リソースが見つからない場合のエラーレスポンス",
+            "type": "object",
+            "required": [
+                "error"
+            ],
+            "properties": {
+                "error": {
+                    "description": "エラー種別の識別子",
+                    "type": "string",
+                    "enum": [
+                        "not_found"
+                    ],
+                    "example": "not_found"
                 }
             }
         },
