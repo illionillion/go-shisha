@@ -5,8 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { getGetAuthMeQueryOptions } from "@/api/auth";
 import { useAuthStore } from "@/features/auth/stores/authStore";
-import type { ApiError } from "@/lib/api-client";
-import { isSuccessResponse } from "@/lib/api-helpers";
+import { isApiError, isSuccessResponse } from "@/lib/api-helpers";
 
 // ログイン・新規登録ページなど、/auth/me の認証チェックをスキップするパス
 // NOTE:
@@ -56,15 +55,14 @@ export const AuthHydrator = () => {
 
     // エラーが発生した場合の処理
     if (isError) {
-      const apiError = error as ApiError | undefined;
-      if (!apiError) {
+      if (!isApiError(error)) {
         setIsLoading(false);
         return;
       }
 
       // 401の場合のみ明示的にサインアウト扱いにする
       // 500系エラーは一時的な障害の可能性があるためストアは維持
-      if (apiError.status === 401) {
+      if (error.status === 401) {
         clearUser();
       }
 

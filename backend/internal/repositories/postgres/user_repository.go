@@ -71,7 +71,7 @@ func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
 	if err := r.db.First(&um, "email = ?", email).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			logging.L.Debug("user not found", "repository", "UserRepository", "method", "GetByEmail", "email", email)
-			return nil, fmt.Errorf("user not found: email=%s", email)
+			return nil, repositories.ErrUserNotFound
 		}
 		logging.L.Error("failed to query user", "repository", "UserRepository", "method", "GetByEmail", "email", email, "error", err)
 		return nil, fmt.Errorf("failed to query user by email=%s: %w", email, err)

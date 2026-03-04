@@ -26,9 +26,9 @@ import type {
   GoShishaBackendInternalModelsAuthResponse,
   GoShishaBackendInternalModelsConflictError,
   GoShishaBackendInternalModelsCreateUserInput,
-  GoShishaBackendInternalModelsErrorResponse,
   GoShishaBackendInternalModelsLoginInput,
   GoShishaBackendInternalModelsServerError,
+  GoShishaBackendInternalModelsUnauthorizedError,
   GoShishaBackendInternalModelsValidationError,
   PostAuthLogout200,
   PostAuthRefresh200,
@@ -46,17 +46,17 @@ export type postAuthLoginResponse200 = {
 };
 
 export type postAuthLoginResponse400 = {
-  data: GoShishaBackendInternalModelsErrorResponse;
+  data: GoShishaBackendInternalModelsValidationError;
   status: 400;
 };
 
 export type postAuthLoginResponse401 = {
-  data: GoShishaBackendInternalModelsErrorResponse;
+  data: GoShishaBackendInternalModelsUnauthorizedError;
   status: 401;
 };
 
 export type postAuthLoginResponse500 = {
-  data: GoShishaBackendInternalModelsErrorResponse;
+  data: GoShishaBackendInternalModelsServerError;
   status: 500;
 };
 
@@ -90,7 +90,10 @@ export const postAuthLogin = async (
 };
 
 export const getPostAuthLoginMutationOptions = <
-  TError = GoShishaBackendInternalModelsErrorResponse,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -127,13 +130,19 @@ export const getPostAuthLoginMutationOptions = <
 
 export type PostAuthLoginMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthLogin>>>;
 export type PostAuthLoginMutationBody = GoShishaBackendInternalModelsLoginInput;
-export type PostAuthLoginMutationError = GoShishaBackendInternalModelsErrorResponse;
+export type PostAuthLoginMutationError =
+  | GoShishaBackendInternalModelsValidationError
+  | GoShishaBackendInternalModelsUnauthorizedError
+  | GoShishaBackendInternalModelsServerError;
 
 /**
  * @summary ログイン
  */
 export const usePostAuthLogin = <
-  TError = GoShishaBackendInternalModelsErrorResponse,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(
   options?: {
@@ -164,12 +173,12 @@ export type postAuthLogoutResponse200 = {
 };
 
 export type postAuthLogoutResponse401 = {
-  data: GoShishaBackendInternalModelsErrorResponse;
+  data: GoShishaBackendInternalModelsUnauthorizedError;
   status: 401;
 };
 
 export type postAuthLogoutResponse500 = {
-  data: GoShishaBackendInternalModelsErrorResponse;
+  data: GoShishaBackendInternalModelsServerError;
   status: 500;
 };
 
@@ -197,7 +206,9 @@ export const postAuthLogout = async (options?: RequestInit): Promise<postAuthLog
 };
 
 export const getPostAuthLogoutMutationOptions = <
-  TError = GoShishaBackendInternalModelsErrorResponse,
+  TError =
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<Awaited<ReturnType<typeof postAuthLogout>>, TError, void, TContext>;
@@ -219,13 +230,17 @@ export const getPostAuthLogoutMutationOptions = <
 
 export type PostAuthLogoutMutationResult = NonNullable<Awaited<ReturnType<typeof postAuthLogout>>>;
 
-export type PostAuthLogoutMutationError = GoShishaBackendInternalModelsErrorResponse;
+export type PostAuthLogoutMutationError =
+  | GoShishaBackendInternalModelsUnauthorizedError
+  | GoShishaBackendInternalModelsServerError;
 
 /**
  * @summary ログアウト
  */
 export const usePostAuthLogout = <
-  TError = GoShishaBackendInternalModelsErrorResponse,
+  TError =
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(
   options?: {
@@ -251,12 +266,12 @@ export type getAuthMeResponse200 = {
 };
 
 export type getAuthMeResponse401 = {
-  data: GoShishaBackendInternalModelsErrorResponse;
+  data: GoShishaBackendInternalModelsUnauthorizedError;
   status: 401;
 };
 
 export type getAuthMeResponse500 = {
-  data: GoShishaBackendInternalModelsErrorResponse;
+  data: GoShishaBackendInternalModelsServerError;
   status: 500;
 };
 
@@ -286,7 +301,9 @@ export const getGetAuthMeQueryKey = () => {
 
 export const getGetAuthMeQueryOptions = <
   TData = Awaited<ReturnType<typeof getAuthMe>>,
-  TError = GoShishaBackendInternalModelsErrorResponse,
+  TError =
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsServerError,
 >(options?: {
   query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>;
   request?: SecondParameter<typeof apiFetch>;
@@ -306,11 +323,15 @@ export const getGetAuthMeQueryOptions = <
 };
 
 export type GetAuthMeQueryResult = NonNullable<Awaited<ReturnType<typeof getAuthMe>>>;
-export type GetAuthMeQueryError = GoShishaBackendInternalModelsErrorResponse;
+export type GetAuthMeQueryError =
+  | GoShishaBackendInternalModelsUnauthorizedError
+  | GoShishaBackendInternalModelsServerError;
 
 export function useGetAuthMe<
   TData = Awaited<ReturnType<typeof getAuthMe>>,
-  TError = GoShishaBackendInternalModelsErrorResponse,
+  TError =
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsServerError,
 >(
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>> &
@@ -328,7 +349,9 @@ export function useGetAuthMe<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAuthMe<
   TData = Awaited<ReturnType<typeof getAuthMe>>,
-  TError = GoShishaBackendInternalModelsErrorResponse,
+  TError =
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsServerError,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>> &
@@ -346,7 +369,9 @@ export function useGetAuthMe<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAuthMe<
   TData = Awaited<ReturnType<typeof getAuthMe>>,
-  TError = GoShishaBackendInternalModelsErrorResponse,
+  TError =
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsServerError,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>;
@@ -360,7 +385,9 @@ export function useGetAuthMe<
 
 export function useGetAuthMe<
   TData = Awaited<ReturnType<typeof getAuthMe>>,
-  TError = GoShishaBackendInternalModelsErrorResponse,
+  TError =
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsServerError,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getAuthMe>>, TError, TData>>;
@@ -387,12 +414,12 @@ export type postAuthRefreshResponse200 = {
 };
 
 export type postAuthRefreshResponse401 = {
-  data: GoShishaBackendInternalModelsErrorResponse;
+  data: GoShishaBackendInternalModelsUnauthorizedError;
   status: 401;
 };
 
 export type postAuthRefreshResponse500 = {
-  data: GoShishaBackendInternalModelsErrorResponse;
+  data: GoShishaBackendInternalModelsServerError;
   status: 500;
 };
 
@@ -420,7 +447,9 @@ export const postAuthRefresh = async (options?: RequestInit): Promise<postAuthRe
 };
 
 export const getPostAuthRefreshMutationOptions = <
-  TError = GoShishaBackendInternalModelsErrorResponse,
+  TError =
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -449,13 +478,17 @@ export type PostAuthRefreshMutationResult = NonNullable<
   Awaited<ReturnType<typeof postAuthRefresh>>
 >;
 
-export type PostAuthRefreshMutationError = GoShishaBackendInternalModelsErrorResponse;
+export type PostAuthRefreshMutationError =
+  | GoShishaBackendInternalModelsUnauthorizedError
+  | GoShishaBackendInternalModelsServerError;
 
 /**
  * @summary アクセストークンのリフレッシュ
  */
 export const usePostAuthRefresh = <
-  TError = GoShishaBackendInternalModelsErrorResponse,
+  TError =
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(
   options?: {
