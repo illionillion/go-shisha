@@ -24,6 +24,8 @@ export * from "./goShishaBackendInternalModelsCreatePostInput";
 export * from "./goShishaBackendInternalModelsCreateUserInput";
 export * from "./goShishaBackendInternalModelsErrorResponse";
 export * from "./goShishaBackendInternalModelsFlavor";
+export * from "./goShishaBackendInternalModelsForbiddenError";
+export * from "./goShishaBackendInternalModelsForbiddenErrorError";
 export * from "./goShishaBackendInternalModelsLoginInput";
 export * from "./goShishaBackendInternalModelsNotFoundError";
 export * from "./goShishaBackendInternalModelsNotFoundErrorError";

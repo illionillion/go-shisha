@@ -4,6 +4,9 @@ package models
 const (
 	ErrCodeValidationFailed   = "validation_failed"
 	ErrCodeEmailAlreadyExists = "email_already_exists"
+	ErrCodeAlreadyLiked       = "already_liked"
+	ErrCodeNotLiked           = "not_liked"
+	ErrCodeForbidden          = "forbidden"
 	ErrCodeUnauthorized       = "unauthorized"
 	ErrCodeNotFound           = "not_found"
 	ErrCodeInternalServer     = "internal_server_error"
@@ -17,10 +20,10 @@ type ValidationError struct {
 }
 
 // ConflictError はリソース競合エラーを表す（409 Conflict）
-// @Description リソースが既に存在する場合のエラーレスポンス
+// @Description リソース競合エラーレスポンス（メール重複・いいね重複・いいね未実施など）
 type ConflictError struct {
 	// エラー種別の識別子
-	Error string `json:"error" enums:"email_already_exists" example:"email_already_exists" binding:"required"`
+	Error string `json:"error" enums:"email_already_exists,already_liked,not_liked" example:"already_liked" binding:"required"`
 }
 
 // UnauthorizedError は認証エラーを表す（401 Unauthorized）
@@ -28,6 +31,13 @@ type ConflictError struct {
 type UnauthorizedError struct {
 	// エラー種別の識別子
 	Error string `json:"error" enums:"unauthorized" example:"unauthorized" binding:"required"`
+}
+
+// ForbiddenError は権限エラーを表す（403 Forbidden）
+// @Description 権限がない操作を実行した場合のエラーレスポンス
+type ForbiddenError struct {
+	// エラー種別の識別子
+	Error string `json:"error" enums:"forbidden" example:"forbidden" binding:"required"`
 }
 
 // NotFoundError はリソースが見つからないエラーを表す（404 Not Found）

@@ -9,7 +9,7 @@
 import type { GoShishaBackendInternalModelsConflictErrorError } from "./goShishaBackendInternalModelsConflictErrorError";
 
 /**
- * リソースが既に存在する場合のエラーレスポンス
+ * リソース競合エラーレスポンス（メール重複・いいね重複・いいね未実施など）
  */
 export interface GoShishaBackendInternalModelsConflictError {
   /** エラー種別の識別子 */

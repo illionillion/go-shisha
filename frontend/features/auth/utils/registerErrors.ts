@@ -4,7 +4,7 @@ import { ConflictErrorCode, ServerErrorCode, ValidationErrorCode } from "@/types
 
 /** Registerエンドポイントで返り得る全エラーコードのユニオン型 */
 type RegisterErrorCode =
-  | (typeof ConflictErrorCode)[keyof typeof ConflictErrorCode]
+  | (typeof ConflictErrorCode)["email_already_exists"]
   | (typeof ValidationErrorCode)[keyof typeof ValidationErrorCode]
   | (typeof ServerErrorCode)[keyof typeof ServerErrorCode];
 

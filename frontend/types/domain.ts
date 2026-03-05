@@ -7,6 +7,8 @@ import { GoShishaBackendInternalModelsConflictErrorError } from "@/api/model/goS
 import type { GoShishaBackendInternalModelsCreatePostInput } from "@/api/model/goShishaBackendInternalModelsCreatePostInput";
 import type { GoShishaBackendInternalModelsCreateUserInput } from "@/api/model/goShishaBackendInternalModelsCreateUserInput";
 import type { GoShishaBackendInternalModelsFlavor } from "@/api/model/goShishaBackendInternalModelsFlavor";
+import type { GoShishaBackendInternalModelsForbiddenError } from "@/api/model/goShishaBackendInternalModelsForbiddenError";
+import { GoShishaBackendInternalModelsForbiddenErrorError } from "@/api/model/goShishaBackendInternalModelsForbiddenErrorError";
 import type { GoShishaBackendInternalModelsLoginInput } from "@/api/model/goShishaBackendInternalModelsLoginInput";
 import type { GoShishaBackendInternalModelsNotFoundError } from "@/api/model/goShishaBackendInternalModelsNotFoundError";
 import { GoShishaBackendInternalModelsNotFoundErrorError } from "@/api/model/goShishaBackendInternalModelsNotFoundErrorError";
@@ -53,8 +55,9 @@ export const ValidationErrorCode = GoShishaBackendInternalModelsValidationErrorE
 
 /**
  * リソース競合エラーレスポンス（409 Conflict）
- * - POST /api/v1/auth/register のメールアドレス重複時に返る
- * - error: "email_already_exists"（エラーコード）
+ * - POST /api/v1/auth/register のメールアドレス重複時: error: "email_already_exists"
+ * - POST /api/v1/posts/:id/like のいいね済み時: error: "already_liked"
+ * - POST /api/v1/posts/:id/unlike のいいね未実施時: error: "not_liked"
  */
 export type ConflictError = GoShishaBackendInternalModelsConflictError;
 /** ConflictError.error のエラーコード定数 */
@@ -75,6 +78,14 @@ export const ServerErrorCode = GoShishaBackendInternalModelsServerErrorError;
 export type UnauthorizedError = GoShishaBackendInternalModelsUnauthorizedError;
 /** UnauthorizedError.error のエラーコード定数 */
 export const UnauthorizedErrorCode = GoShishaBackendInternalModelsUnauthorizedErrorError;
+
+/**
+ * 権限エラーレスポンス（403 Forbidden）
+ * - POST /api/v1/posts の画像権限エラー時: error: "forbidden"
+ */
+export type ForbiddenError = GoShishaBackendInternalModelsForbiddenError;
+/** ForbiddenError.error のエラーコード定数 */
+export const ForbiddenErrorCode = GoShishaBackendInternalModelsForbiddenErrorError;
 
 /**
  * リソース未発見エラーレスポンス（404 Not Found）

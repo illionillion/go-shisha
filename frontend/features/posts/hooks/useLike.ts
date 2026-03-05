@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import type { QueryKey } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   usePostPostsIdLike,
   usePostPostsIdUnlike,
@@ -8,6 +9,7 @@ import {
 } from "@/api/posts";
 import { getGetUsersIdPostsQueryKey } from "@/api/users";
 import type { Post } from "@/types/domain";
+import { getLikeErrorMessage, getUnlikeErrorMessage } from "../utils/likeErrors";
 
 /**
  * リスト内の該当投稿のいいね数を楽観的に更新
@@ -104,7 +106,7 @@ export function useLike() {
     likeMut.mutate(
       { id: postId },
       {
-        onError: () => {
+        onError: (error) => {
           if (prev) {
             // 詳細画面のキャッシュをロールバック
             queryClient.setQueryData(detailKey, prev);
@@ -120,6 +122,7 @@ export function useLike() {
               };
             });
           });
+          toast.error(getLikeErrorMessage(error));
         },
       }
     );
@@ -145,7 +148,7 @@ export function useLike() {
     unlikeMut.mutate(
       { id: postId },
       {
-        onError: () => {
+        onError: (error) => {
           if (prev) {
             // 詳細画面のキャッシュをロールバック
             queryClient.setQueryData(detailKey, prev);
@@ -161,6 +164,7 @@ export function useLike() {
               };
             });
           });
+          toast.error(getUnlikeErrorMessage(error));
         },
       }
     );
