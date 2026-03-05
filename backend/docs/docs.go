@@ -746,7 +746,7 @@ const docTemplate = `{
             }
         },
         "go-shisha-backend_internal_models.ConflictError": {
-            "description": "リソースが既に存在する場合のエラーレスポンス",
+            "description": "リソース競合エラーレスポンス（メール重複・いいね重複・いいね未実施など）",
             "type": "object",
             "required": [
                 "error"
@@ -760,7 +760,7 @@ const docTemplate = `{
                         "already_liked",
                         "not_liked"
                     ],
-                    "example": "email_already_exists"
+                    "example": "already_liked"
                 }
             }
         },

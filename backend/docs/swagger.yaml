@@ -6,7 +6,7 @@ definitions:
         $ref: '#/definitions/go-shisha-backend_internal_models.User'
     type: object
   go-shisha-backend_internal_models.ConflictError:
-    description: リソースが既に存在する場合のエラーレスポンス
+    description: リソース競合エラーレスポンス（メール重複・いいね重複・いいね未実施など）
     properties:
       error:
         description: エラー種別の識別子
@@ -14,7 +14,7 @@ definitions:
         - email_already_exists
         - already_liked
         - not_liked
-        example: email_already_exists
+        example: already_liked
         type: string
     required:
     - error

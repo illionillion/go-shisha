@@ -19,10 +19,10 @@ type ValidationError struct {
 }
 
 // ConflictError はリソース競合エラーを表す（409 Conflict）
-// @Description リソースが既に存在する場合のエラーレスポンス
+// @Description リソース競合エラーレスポンス（メール重複・いいね重複・いいね未実施など）
 type ConflictError struct {
 	// エラー種別の識別子
-	Error string `json:"error" enums:"email_already_exists,already_liked,not_liked" example:"email_already_exists" binding:"required"`
+	Error string `json:"error" enums:"email_already_exists,already_liked,not_liked" example:"already_liked" binding:"required"`
 }
 
 // UnauthorizedError は認証エラーを表す（401 Unauthorized）

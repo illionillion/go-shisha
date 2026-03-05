@@ -53,8 +53,9 @@ export const ValidationErrorCode = GoShishaBackendInternalModelsValidationErrorE
 
 /**
  * リソース競合エラーレスポンス（409 Conflict）
- * - POST /api/v1/auth/register のメールアドレス重複時に返る
- * - error: "email_already_exists"（エラーコード）
+ * - POST /api/v1/auth/register のメールアドレス重複時: error: "email_already_exists"
+ * - POST /api/v1/posts/:id/like のいいね済み時: error: "already_liked"
+ * - POST /api/v1/posts/:id/unlike のいいね未実施時: error: "not_liked"
  */
 export type ConflictError = GoShishaBackendInternalModelsConflictError;
 /** ConflictError.error のエラーコード定数 */

@@ -23,6 +23,7 @@ import type {
 } from "@tanstack/react-query";
 import { apiFetch } from "../lib/api-client";
 import type {
+  GoShishaBackendInternalModelsConflictError,
   GoShishaBackendInternalModelsCreatePostInput,
   GoShishaBackendInternalModelsNotFoundError,
   GoShishaBackendInternalModelsPost,
@@ -31,16 +32,6 @@ import type {
   GoShishaBackendInternalModelsUnauthorizedError,
   GoShishaBackendInternalModelsValidationError,
   PostPosts403,
-  PostPostsIdLike400,
-  PostPostsIdLike401,
-  PostPostsIdLike404,
-  PostPostsIdLike409,
-  PostPostsIdLike500,
-  PostPostsIdUnlike400,
-  PostPostsIdUnlike401,
-  PostPostsIdUnlike404,
-  PostPostsIdUnlike409,
-  PostPostsIdUnlike500,
 } from "./model";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -504,27 +495,27 @@ export type postPostsIdLikeResponse200 = {
 };
 
 export type postPostsIdLikeResponse400 = {
-  data: PostPostsIdLike400;
+  data: GoShishaBackendInternalModelsValidationError;
   status: 400;
 };
 
 export type postPostsIdLikeResponse401 = {
-  data: PostPostsIdLike401;
+  data: GoShishaBackendInternalModelsUnauthorizedError;
   status: 401;
 };
 
 export type postPostsIdLikeResponse404 = {
-  data: PostPostsIdLike404;
+  data: GoShishaBackendInternalModelsNotFoundError;
   status: 404;
 };
 
 export type postPostsIdLikeResponse409 = {
-  data: PostPostsIdLike409;
+  data: GoShishaBackendInternalModelsConflictError;
   status: 409;
 };
 
 export type postPostsIdLikeResponse500 = {
-  data: PostPostsIdLike500;
+  data: GoShishaBackendInternalModelsServerError;
   status: 500;
 };
 
@@ -559,11 +550,11 @@ export const postPostsIdLike = async (
 
 export const getPostPostsIdLikeMutationOptions = <
   TError =
-    | PostPostsIdLike400
-    | PostPostsIdLike401
-    | PostPostsIdLike404
-    | PostPostsIdLike409
-    | PostPostsIdLike500,
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsConflictError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -603,22 +594,22 @@ export type PostPostsIdLikeMutationResult = NonNullable<
 >;
 
 export type PostPostsIdLikeMutationError =
-  | PostPostsIdLike400
-  | PostPostsIdLike401
-  | PostPostsIdLike404
-  | PostPostsIdLike409
-  | PostPostsIdLike500;
+  | GoShishaBackendInternalModelsValidationError
+  | GoShishaBackendInternalModelsUnauthorizedError
+  | GoShishaBackendInternalModelsNotFoundError
+  | GoShishaBackendInternalModelsConflictError
+  | GoShishaBackendInternalModelsServerError;
 
 /**
  * @summary 投稿にいいね
  */
 export const usePostPostsIdLike = <
   TError =
-    | PostPostsIdLike400
-    | PostPostsIdLike401
-    | PostPostsIdLike404
-    | PostPostsIdLike409
-    | PostPostsIdLike500,
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsConflictError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(
   options?: {
@@ -649,27 +640,27 @@ export type postPostsIdUnlikeResponse200 = {
 };
 
 export type postPostsIdUnlikeResponse400 = {
-  data: PostPostsIdUnlike400;
+  data: GoShishaBackendInternalModelsValidationError;
   status: 400;
 };
 
 export type postPostsIdUnlikeResponse401 = {
-  data: PostPostsIdUnlike401;
+  data: GoShishaBackendInternalModelsUnauthorizedError;
   status: 401;
 };
 
 export type postPostsIdUnlikeResponse404 = {
-  data: PostPostsIdUnlike404;
+  data: GoShishaBackendInternalModelsNotFoundError;
   status: 404;
 };
 
 export type postPostsIdUnlikeResponse409 = {
-  data: PostPostsIdUnlike409;
+  data: GoShishaBackendInternalModelsConflictError;
   status: 409;
 };
 
 export type postPostsIdUnlikeResponse500 = {
-  data: PostPostsIdUnlike500;
+  data: GoShishaBackendInternalModelsServerError;
   status: 500;
 };
 
@@ -706,11 +697,11 @@ export const postPostsIdUnlike = async (
 
 export const getPostPostsIdUnlikeMutationOptions = <
   TError =
-    | PostPostsIdUnlike400
-    | PostPostsIdUnlike401
-    | PostPostsIdUnlike404
-    | PostPostsIdUnlike409
-    | PostPostsIdUnlike500,
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsConflictError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -750,22 +741,22 @@ export type PostPostsIdUnlikeMutationResult = NonNullable<
 >;
 
 export type PostPostsIdUnlikeMutationError =
-  | PostPostsIdUnlike400
-  | PostPostsIdUnlike401
-  | PostPostsIdUnlike404
-  | PostPostsIdUnlike409
-  | PostPostsIdUnlike500;
+  | GoShishaBackendInternalModelsValidationError
+  | GoShishaBackendInternalModelsUnauthorizedError
+  | GoShishaBackendInternalModelsNotFoundError
+  | GoShishaBackendInternalModelsConflictError
+  | GoShishaBackendInternalModelsServerError;
 
 /**
  * @summary 投稿のいいねを取り消す
  */
 export const usePostPostsIdUnlike = <
   TError =
-    | PostPostsIdUnlike400
-    | PostPostsIdUnlike401
-    | PostPostsIdUnlike404
-    | PostPostsIdUnlike409
-    | PostPostsIdUnlike500,
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsConflictError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(
   options?: {

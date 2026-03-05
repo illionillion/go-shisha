@@ -6,6 +6,14 @@ import * as postsApi from "@/api/posts";
 import type { Post } from "@/types/domain";
 import { useLike } from "./useLike";
 
+// sonnerのモック
+vi.mock("sonner", () => ({
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
+}));
+
 // APIモジュールのモック
 vi.mock("@/api/posts", () => ({
   usePostPostsIdLike: vi.fn(),
@@ -763,6 +771,64 @@ describe("useLike", () => {
       post = queryClient.getQueryData<Post>(["posts", postId]);
       expect(post?.likes).toBe(11);
       expect(post?.is_liked).toBe(true);
+    });
+  });
+
+  describe("エラー時のtoast通知", () => {
+    it("onLikeのエラー時にtoast.errorが呼ばれる", async () => {
+      const { toast } = await import("sonner");
+
+      const mockMutate = vi.fn((params, options) => {
+        if (options?.onError) {
+          const apiError = Object.assign(new Error("API Error: 409"), {
+            status: 409,
+            bodyJson: { error: "already_liked" },
+          });
+          options.onError(apiError, params, undefined);
+        }
+      });
+
+      vi.mocked(postsApi.usePostPostsIdLike).mockReturnValue({
+        mutate: mockMutate,
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdLike>);
+
+      vi.mocked(postsApi.usePostPostsIdUnlike).mockReturnValue({
+        mutate: vi.fn(),
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdUnlike>);
+
+      const { result } = renderHook(() => useLike(), { wrapper });
+
+      result.current.onLike(1);
+
+      expect(toast.error).toHaveBeenCalledWith("この投稿にはすでにいいねしています");
+    });
+
+    it("onUnlikeのエラー時にtoast.errorが呼ばれる", async () => {
+      const { toast } = await import("sonner");
+
+      const mockMutate = vi.fn((params, options) => {
+        if (options?.onError) {
+          const apiError = Object.assign(new Error("API Error: 409"), {
+            status: 409,
+            bodyJson: { error: "not_liked" },
+          });
+          options.onError(apiError, params, undefined);
+        }
+      });
+
+      vi.mocked(postsApi.usePostPostsIdUnlike).mockReturnValue({
+        mutate: mockMutate,
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdUnlike>);
+
+      vi.mocked(postsApi.usePostPostsIdLike).mockReturnValue({
+        mutate: vi.fn(),
+      } as unknown as ReturnType<typeof postsApi.usePostPostsIdLike>);
+
+      const { result } = renderHook(() => useLike(), { wrapper });
+
+      result.current.onUnlike(1);
+
+      expect(toast.error).toHaveBeenCalledWith("この投稿にはいいねしていません");
     });
   });
 });

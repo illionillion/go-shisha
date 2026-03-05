@@ -15,4 +15,6 @@ export type GoShishaBackendInternalModelsConflictErrorError =
 
 export const GoShishaBackendInternalModelsConflictErrorError = {
   email_already_exists: "email_already_exists",
+  already_liked: "already_liked",
+  not_liked: "not_liked",
 } as const;
