@@ -355,6 +355,45 @@ func TestCreatePost_InvalidUserIDType(t *testing.T) {
 	assert.Equal(t, models.ErrCodeInternalServer, serverResponse.Error)
 }
 
+func TestCreatePost_ImagePermissionDenied_403(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		createPostFunc: func(userID int, input *models.CreatePostInput) (*models.Post, error) {
+			return nil, services.ErrImagePermissionDenied
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.POST("/posts", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.CreatePost(c)
+	})
+
+	reqBody := map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{
+				"image_url": "/images/test.jpg",
+				"text":      "test",
+			},
+		},
+	}
+	body, _ := json.Marshal(reqBody)
+
+	req := httptest.NewRequest(http.MethodPost, "/posts", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusForbidden, rec.Code)
+	var response models.ForbiddenError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeForbidden, response.Error)
+}
+
 func TestLikePost_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

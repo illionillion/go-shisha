@@ -123,7 +123,7 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 // @Success 201 {object} models.Post "作成された投稿"
 // @Failure 400 {object} models.ValidationError "バリデーションエラー"
 // @Failure 401 {object} models.UnauthorizedError "認証エラー"
-// @Failure 403 {object} map[string]interface{} "権限エラー"
+// @Failure 403 {object} models.ForbiddenError "権限エラー"
 // @Failure 404 {object} models.NotFoundError "リソースが見つからない"
 // @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Security BearerAuth
@@ -169,7 +169,7 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 		}
 		if errors.Is(err, services.ErrImagePermissionDenied) {
 			logging.L.Warn("image permission denied", "handler", "PostHandler", "method", "CreatePost", "user_id", userID, "error", err)
-			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+			c.JSON(http.StatusForbidden, models.ForbiddenError{Error: models.ErrCodeForbidden})
 			return
 		}
 		if errors.Is(err, services.ErrImageNotFound) {

@@ -137,7 +137,7 @@ describe("useCreatePost", () => {
       const onError = vi.fn();
       const mockError = {
         bodyJson: {
-          error: "投稿の作成に失敗しました",
+          error: "forbidden",
         },
       };
 
@@ -151,7 +151,7 @@ describe("useCreatePost", () => {
       result.current.createPost(input);
 
       await waitFor(() => {
-        expect(onError).toHaveBeenCalledWith("投稿の作成に失敗しました");
+        expect(onError).toHaveBeenCalledWith("この画像を使用する権限がありません");
       });
     });
   });
@@ -281,7 +281,7 @@ describe("useCreatePost", () => {
 
       const mockError = {
         bodyJson: {
-          error: "投稿の作成に失敗しました",
+          error: "internal_server_error",
         },
       };
 
@@ -320,6 +320,16 @@ describe("useCreatePost", () => {
   });
 
   describe("translateErrorMessage", () => {
+    it("forbiddenコードを日本語メッセージに変換する", () => {
+      const error: ApiError = {
+        bodyJson: { error: "forbidden" },
+      } as ApiError;
+
+      const result = translateErrorMessage(error);
+
+      expect(result).toBe("この画像を使用する権限がありません");
+    });
+
     it("バックエンドの日本語エラーメッセージをそのまま返す", () => {
       const error: ApiError = {
         bodyJson: { error: "投稿の作成に失敗しました" },
@@ -338,6 +348,16 @@ describe("useCreatePost", () => {
       const result = translateErrorMessage(error);
 
       expect(result).toBe("スライドが1枚以上必要です");
+    });
+
+    it("未知のエラーコードはフォールバックメッセージを返す", () => {
+      const error: ApiError = {
+        bodyJson: { error: "unknown_code" },
+      } as ApiError;
+
+      const result = translateErrorMessage(error);
+
+      expect(result).toBe("投稿の作成に失敗しました");
     });
 
     it("bodyJsonがない場合はデフォルトメッセージを返す", () => {

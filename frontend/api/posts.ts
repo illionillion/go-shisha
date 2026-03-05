@@ -25,13 +25,13 @@ import { apiFetch } from "../lib/api-client";
 import type {
   GoShishaBackendInternalModelsConflictError,
   GoShishaBackendInternalModelsCreatePostInput,
+  GoShishaBackendInternalModelsForbiddenError,
   GoShishaBackendInternalModelsNotFoundError,
   GoShishaBackendInternalModelsPost,
   GoShishaBackendInternalModelsPostsResponse,
   GoShishaBackendInternalModelsServerError,
   GoShishaBackendInternalModelsUnauthorizedError,
   GoShishaBackendInternalModelsValidationError,
-  PostPosts403,
 } from "./model";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -187,7 +187,7 @@ export type postPostsResponse401 = {
 };
 
 export type postPostsResponse403 = {
-  data: PostPosts403;
+  data: GoShishaBackendInternalModelsForbiddenError;
   status: 403;
 };
 
@@ -236,7 +236,7 @@ export const getPostPostsMutationOptions = <
   TError =
     | GoShishaBackendInternalModelsValidationError
     | GoShishaBackendInternalModelsUnauthorizedError
-    | PostPosts403
+    | GoShishaBackendInternalModelsForbiddenError
     | GoShishaBackendInternalModelsNotFoundError
     | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
@@ -278,7 +278,7 @@ export type PostPostsMutationBody = GoShishaBackendInternalModelsCreatePostInput
 export type PostPostsMutationError =
   | GoShishaBackendInternalModelsValidationError
   | GoShishaBackendInternalModelsUnauthorizedError
-  | PostPosts403
+  | GoShishaBackendInternalModelsForbiddenError
   | GoShishaBackendInternalModelsNotFoundError
   | GoShishaBackendInternalModelsServerError;
 
@@ -289,7 +289,7 @@ export const usePostPosts = <
   TError =
     | GoShishaBackendInternalModelsValidationError
     | GoShishaBackendInternalModelsUnauthorizedError
-    | PostPosts403
+    | GoShishaBackendInternalModelsForbiddenError
     | GoShishaBackendInternalModelsNotFoundError
     | GoShishaBackendInternalModelsServerError,
   TContext = unknown,

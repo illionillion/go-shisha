@@ -6,6 +6,7 @@ const (
 	ErrCodeEmailAlreadyExists = "email_already_exists"
 	ErrCodeAlreadyLiked       = "already_liked"
 	ErrCodeNotLiked           = "not_liked"
+	ErrCodeForbidden          = "forbidden"
 	ErrCodeUnauthorized       = "unauthorized"
 	ErrCodeNotFound           = "not_found"
 	ErrCodeInternalServer     = "internal_server_error"
@@ -30,6 +31,13 @@ type ConflictError struct {
 type UnauthorizedError struct {
 	// エラー種別の識別子
 	Error string `json:"error" enums:"unauthorized" example:"unauthorized" binding:"required"`
+}
+
+// ForbiddenError は権限エラーを表す（403 Forbidden）
+// @Description 権限がない操作を実行した場合のエラーレスポンス
+type ForbiddenError struct {
+	// エラー種別の識別子
+	Error string `json:"error" enums:"forbidden" example:"forbidden" binding:"required"`
 }
 
 // NotFoundError はリソースが見つからないエラーを表す（404 Not Found）

@@ -345,8 +345,7 @@ const docTemplate = `{
                     "403": {
                         "description": "権限エラー",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ForbiddenError"
                         }
                     },
                     "404": {
@@ -810,6 +809,23 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.ForbiddenError": {
+            "description": "権限がない操作を実行した場合のエラーレスポンス",
+            "type": "object",
+            "required": [
+                "error"
+            ],
+            "properties": {
+                "error": {
+                    "description": "エラー種別の識別子",
+                    "type": "string",
+                    "enum": [
+                        "forbidden"
+                    ],
+                    "example": "forbidden"
                 }
             }
         },

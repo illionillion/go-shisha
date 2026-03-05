@@ -52,6 +52,18 @@ definitions:
       name:
         type: string
     type: object
+  go-shisha-backend_internal_models.ForbiddenError:
+    description: 権限がない操作を実行した場合のエラーレスポンス
+    properties:
+      error:
+        description: エラー種別の識別子
+        enum:
+        - forbidden
+        example: forbidden
+        type: string
+    required:
+    - error
+    type: object
   go-shisha-backend_internal_models.LoginInput:
     properties:
       email:
@@ -411,8 +423,7 @@ paths:
         "403":
           description: 権限エラー
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ForbiddenError'
         "404":
           description: リソースが見つからない
           schema:
