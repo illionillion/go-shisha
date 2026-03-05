@@ -15,6 +15,7 @@
   "scripts": {
     "dev": "concurrently \"pnpm watch:openapi\" \"pnpm -F frontend dev\"",
     "watch:openapi": "tsx scripts/watch-openapi.ts",
+    "gen:api:md": "pnpm dlx widdershins backend/docs/swagger.yaml -o backend/docs/swagger.md",
     "build": "pnpm -F frontend build",
     "lint": "pnpm -F frontend lint",
     "lint:fix": "pnpm -F frontend lint:fix",
