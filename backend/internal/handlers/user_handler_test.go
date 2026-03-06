@@ -16,7 +16,7 @@ import (
 // mockUserService はテスト用の UserService モック
 type mockUserService struct {
 	getAllUsersFunc  func() ([]models.User, error)
-	getUserByIDFunc func(id int) (*models.User, error)
+	getUserByIDFunc  func(id int) (*models.User, error)
 	getUserPostsFunc func(userID int, currentUserID *int) ([]models.Post, error)
 }
 

@@ -10,6 +10,8 @@ export interface TimelineProps {
   posts: Post[];
   isLoading?: boolean;
   error?: unknown;
+  /** エラー時に表示するメッセージ。省略時は汎用メッセージを表示 */
+  errorMessage?: string;
   availableFlavors?: Flavor[];
   selectedFlavorIds?: number[];
   onFlavorToggle?: (flavorId: number) => void;
@@ -28,6 +30,7 @@ export function Timeline({
   posts,
   isLoading = false,
   error = null,
+  errorMessage,
   availableFlavors = [],
   selectedFlavorIds = [],
   onFlavorToggle,
@@ -51,7 +54,7 @@ export function Timeline({
   if (error) {
     return (
       <div className={clsx(["flex", "items-center", "justify-center", "min-h-screen"])}>
-        <div className={clsx(["text-red-600"])}>エラーが発生しました</div>
+        <div className={clsx(["text-red-600"])}>{errorMessage ?? "エラーが発生しました"}</div>
       </div>
     );
   }
