@@ -4,9 +4,9 @@ import { useMemo, useState } from "react";
 import { useGetPosts } from "@/api/posts";
 import { useGetUsersIdPosts } from "@/api/users";
 import { useLike } from "@/features/posts/hooks/useLike";
+import { getUserPostsErrorMessage } from "@/features/posts/utils/userPostsErrors";
 import { isSuccessResponse } from "@/lib/api-helpers";
 import type { Flavor, Post } from "@/types/domain";
-import { getUserPostsErrorMessage } from "@/features/posts/utils/userPostsErrors";
 import { Timeline } from "./Timeline";
 
 interface TimelineContainerProps {
