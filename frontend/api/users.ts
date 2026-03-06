@@ -20,14 +20,12 @@ import type {
 } from "@tanstack/react-query";
 import { apiFetch } from "../lib/api-client";
 import type {
-  GetUsers500,
-  GetUsersId400,
-  GetUsersId404,
-  GetUsersIdPosts400,
-  GetUsersIdPosts404,
+  GoShishaBackendInternalModelsNotFoundError,
   GoShishaBackendInternalModelsPostsResponse,
+  GoShishaBackendInternalModelsServerError,
   GoShishaBackendInternalModelsUser,
   GoShishaBackendInternalModelsUsersResponse,
+  GoShishaBackendInternalModelsValidationError,
 } from "./model";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -42,7 +40,7 @@ export type getUsersResponse200 = {
 };
 
 export type getUsersResponse500 = {
-  data: GetUsers500;
+  data: GoShishaBackendInternalModelsServerError;
   status: 500;
 };
 
@@ -72,7 +70,7 @@ export const getGetUsersQueryKey = () => {
 
 export const getGetUsersQueryOptions = <
   TData = Awaited<ReturnType<typeof getUsers>>,
-  TError = GetUsers500,
+  TError = GoShishaBackendInternalModelsServerError,
 >(options?: {
   query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>>;
   request?: SecondParameter<typeof apiFetch>;
@@ -92,9 +90,12 @@ export const getGetUsersQueryOptions = <
 };
 
 export type GetUsersQueryResult = NonNullable<Awaited<ReturnType<typeof getUsers>>>;
-export type GetUsersQueryError = GetUsers500;
+export type GetUsersQueryError = GoShishaBackendInternalModelsServerError;
 
-export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError = GetUsers500>(
+export function useGetUsers<
+  TData = Awaited<ReturnType<typeof getUsers>>,
+  TError = GoShishaBackendInternalModelsServerError,
+>(
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>> &
       Pick<
@@ -109,7 +110,10 @@ export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError
   },
   queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError = GetUsers500>(
+export function useGetUsers<
+  TData = Awaited<ReturnType<typeof getUsers>>,
+  TError = GoShishaBackendInternalModelsServerError,
+>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>> &
       Pick<
@@ -124,7 +128,10 @@ export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError
   },
   queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError = GetUsers500>(
+export function useGetUsers<
+  TData = Awaited<ReturnType<typeof getUsers>>,
+  TError = GoShishaBackendInternalModelsServerError,
+>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>>;
     request?: SecondParameter<typeof apiFetch>;
@@ -135,7 +142,10 @@ export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError
  * @summary ユーザー一覧取得
  */
 
-export function useGetUsers<TData = Awaited<ReturnType<typeof getUsers>>, TError = GetUsers500>(
+export function useGetUsers<
+  TData = Awaited<ReturnType<typeof getUsers>>,
+  TError = GoShishaBackendInternalModelsServerError,
+>(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getUsers>>, TError, TData>>;
     request?: SecondParameter<typeof apiFetch>;
@@ -161,19 +171,28 @@ export type getUsersIdResponse200 = {
 };
 
 export type getUsersIdResponse400 = {
-  data: GetUsersId400;
+  data: GoShishaBackendInternalModelsValidationError;
   status: 400;
 };
 
 export type getUsersIdResponse404 = {
-  data: GetUsersId404;
+  data: GoShishaBackendInternalModelsNotFoundError;
   status: 404;
+};
+
+export type getUsersIdResponse500 = {
+  data: GoShishaBackendInternalModelsServerError;
+  status: 500;
 };
 
 export type getUsersIdResponseSuccess = getUsersIdResponse200 & {
   headers: Headers;
 };
-export type getUsersIdResponseError = (getUsersIdResponse400 | getUsersIdResponse404) & {
+export type getUsersIdResponseError = (
+  | getUsersIdResponse400
+  | getUsersIdResponse404
+  | getUsersIdResponse500
+) & {
   headers: Headers;
 };
 
@@ -199,7 +218,10 @@ export const getGetUsersIdQueryKey = (id: number) => {
 
 export const getGetUsersIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = GetUsersId400 | GetUsersId404,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options?: {
@@ -222,11 +244,17 @@ export const getGetUsersIdQueryOptions = <
 };
 
 export type GetUsersIdQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersId>>>;
-export type GetUsersIdQueryError = GetUsersId400 | GetUsersId404;
+export type GetUsersIdQueryError =
+  | GoShishaBackendInternalModelsValidationError
+  | GoShishaBackendInternalModelsNotFoundError
+  | GoShishaBackendInternalModelsServerError;
 
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = GetUsersId400 | GetUsersId404,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options: {
@@ -245,7 +273,10 @@ export function useGetUsersId<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = GetUsersId400 | GetUsersId404,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options?: {
@@ -264,7 +295,10 @@ export function useGetUsersId<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = GetUsersId400 | GetUsersId404,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options?: {
@@ -279,7 +313,10 @@ export function useGetUsersId<
 
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = GetUsersId400 | GetUsersId404,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options?: {
@@ -307,13 +344,18 @@ export type getUsersIdPostsResponse200 = {
 };
 
 export type getUsersIdPostsResponse400 = {
-  data: GetUsersIdPosts400;
+  data: GoShishaBackendInternalModelsValidationError;
   status: 400;
 };
 
 export type getUsersIdPostsResponse404 = {
-  data: GetUsersIdPosts404;
+  data: GoShishaBackendInternalModelsNotFoundError;
   status: 404;
+};
+
+export type getUsersIdPostsResponse500 = {
+  data: GoShishaBackendInternalModelsServerError;
+  status: 500;
 };
 
 export type getUsersIdPostsResponseSuccess = getUsersIdPostsResponse200 & {
@@ -322,6 +364,7 @@ export type getUsersIdPostsResponseSuccess = getUsersIdPostsResponse200 & {
 export type getUsersIdPostsResponseError = (
   | getUsersIdPostsResponse400
   | getUsersIdPostsResponse404
+  | getUsersIdPostsResponse500
 ) & {
   headers: Headers;
 };
@@ -348,7 +391,10 @@ export const getGetUsersIdPostsQueryKey = (id: number) => {
 
 export const getGetUsersIdPostsQueryOptions = <
   TData = Awaited<ReturnType<typeof getUsersIdPosts>>,
-  TError = GetUsersIdPosts400 | GetUsersIdPosts404,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options?: {
@@ -371,11 +417,17 @@ export const getGetUsersIdPostsQueryOptions = <
 };
 
 export type GetUsersIdPostsQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersIdPosts>>>;
-export type GetUsersIdPostsQueryError = GetUsersIdPosts400 | GetUsersIdPosts404;
+export type GetUsersIdPostsQueryError =
+  | GoShishaBackendInternalModelsValidationError
+  | GoShishaBackendInternalModelsNotFoundError
+  | GoShishaBackendInternalModelsServerError;
 
 export function useGetUsersIdPosts<
   TData = Awaited<ReturnType<typeof getUsersIdPosts>>,
-  TError = GetUsersIdPosts400 | GetUsersIdPosts404,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options: {
@@ -394,7 +446,10 @@ export function useGetUsersIdPosts<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUsersIdPosts<
   TData = Awaited<ReturnType<typeof getUsersIdPosts>>,
-  TError = GetUsersIdPosts400 | GetUsersIdPosts404,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options?: {
@@ -413,7 +468,10 @@ export function useGetUsersIdPosts<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetUsersIdPosts<
   TData = Awaited<ReturnType<typeof getUsersIdPosts>>,
-  TError = GetUsersIdPosts400 | GetUsersIdPosts404,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options?: {
@@ -428,7 +486,10 @@ export function useGetUsersIdPosts<
 
 export function useGetUsersIdPosts<
   TData = Awaited<ReturnType<typeof getUsersIdPosts>>,
-  TError = GetUsersIdPosts400 | GetUsersIdPosts404,
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
 >(
   id: number,
   options?: {
