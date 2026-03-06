@@ -6,7 +6,7 @@ import { useGetUsersIdPosts } from "@/api/users";
 import { useLike } from "@/features/posts/hooks/useLike";
 import { isSuccessResponse } from "@/lib/api-helpers";
 import type { Flavor, Post } from "@/types/domain";
-import { getUserPostsErrorMessage } from "../../utils/userPostsErrors";
+import { getUserPostsErrorMessage } from "@/features/posts/utils/userPostsErrors";
 import { Timeline } from "./Timeline";
 
 interface TimelineContainerProps {
