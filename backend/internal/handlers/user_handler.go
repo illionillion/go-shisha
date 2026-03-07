@@ -7,44 +7,44 @@ import (
 
 	"go-shisha-backend/internal/models"
 	"go-shisha-backend/internal/repositories"
-	"go-shisha-backend/internal/services"
 	"go-shisha-backend/pkg/logging"
 
 	"github.com/gin-gonic/gin"
 )
 
-/**
- * UserHandler handles user-related HTTP requests
- */
-type UserHandler struct {
-	userService *services.UserService
+// UserServiceInterface は UserService のインターフェース（テスト用）
+type UserServiceInterface interface {
+	GetAllUsers() ([]models.User, error)
+	GetUserByID(id int) (*models.User, error)
+	GetUserPosts(userID int, currentUserID *int) ([]models.Post, error)
 }
 
-/**
- * NewUserHandler creates a new user handler
- */
-func NewUserHandler(userService *services.UserService) *UserHandler {
+// UserHandler はユーザー関連のHTTPリクエストを処理する
+type UserHandler struct {
+	userService UserServiceInterface
+}
+
+// NewUserHandler は新しい UserHandler を作成する
+func NewUserHandler(userService UserServiceInterface) *UserHandler {
 	return &UserHandler{
 		userService: userService,
 	}
 }
 
-/**
- * GetAllUsers handles GET /api/v1/users
- */
+// GetAllUsers は GET /api/v1/users を処理する
 // @Summary ユーザー一覧取得
 // @Description 全てのユーザーの一覧を取得します（総数付き）
 // @Tags users
 // @Accept json
 // @Produce json
 // @Success 200 {object} models.UsersResponse "ユーザー一覧と総数"
-// @Failure 500 {object} map[string]interface{} "サーバーエラー"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Router /users [get]
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	users, err := h.userService.GetAllUsers()
 	if err != nil {
 		logging.L.Error("failed to get all users", "handler", "UserHandler", "method", "GetAllUsers", "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 
@@ -55,9 +55,7 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-/**
- * GetUser handles GET /api/v1/users/:id
- */
+// GetUser は GET /api/v1/users/:id を処理する
 // @Summary ユーザー詳細取得
 // @Description 指定されたIDのユーザー情報を取得します
 // @Tags users
@@ -65,33 +63,32 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 // @Produce json
 // @Param id path int true "ユーザーID"
 // @Success 200 {object} models.User "ユーザー情報"
-// @Failure 400 {object} map[string]interface{} "無効なユーザーID"
-// @Failure 404 {object} map[string]interface{} "ユーザーが見つかりません"
+// @Failure 400 {object} models.ValidationError "無効なユーザーID"
+// @Failure 404 {object} models.NotFoundError "ユーザーが見つかりません"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Router /users/{id} [get]
 func (h *UserHandler) GetUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 		return
 	}
 
 	user, err := h.userService.GetUserByID(id)
 	if err != nil {
 		if errors.Is(err, repositories.ErrUserNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			c.JSON(http.StatusNotFound, models.NotFoundError{Error: models.ErrCodeNotFound})
 			return
 		}
 		logging.L.Error("failed to get user", "handler", "UserHandler", "method", "GetUser", "user_id", id, "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 
 	c.JSON(http.StatusOK, user)
 }
 
-/**
- * GetUserPosts handles GET /api/v1/users/:id/posts
- */
+// GetUserPosts は GET /api/v1/users/:id/posts を処理する
 // @Summary ユーザーの投稿一覧取得
 // @Description 指定されたユーザーの全ての投稿を取得します（総数付き）
 // @Tags users
@@ -99,13 +96,14 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 // @Produce json
 // @Param id path int true "ユーザーID"
 // @Success 200 {object} models.PostsResponse "投稿一覧と総数"
-// @Failure 400 {object} map[string]interface{} "無効なユーザーID"
-// @Failure 404 {object} map[string]interface{} "ユーザーが見つかりません"
+// @Failure 400 {object} models.ValidationError "無効なユーザーID"
+// @Failure 404 {object} models.NotFoundError "ユーザーが見つかりません"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Router /users/{id}/posts [get]
 func (h *UserHandler) GetUserPosts(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 		return
 	}
 
@@ -114,7 +112,7 @@ func (h *UserHandler) GetUserPosts(c *gin.Context) {
 		uid, ok := v.(int)
 		if !ok {
 			logging.L.Error("invalid user_id type in context", "handler", "UserHandler", "method", "GetUserPosts")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 			return
 		}
 		currentUserID = &uid
@@ -123,11 +121,11 @@ func (h *UserHandler) GetUserPosts(c *gin.Context) {
 	posts, err := h.userService.GetUserPosts(id, currentUserID)
 	if err != nil {
 		if errors.Is(err, repositories.ErrUserNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			c.JSON(http.StatusNotFound, models.NotFoundError{Error: models.ErrCodeNotFound})
 			return
 		}
 		logging.L.Error("failed to get user posts", "handler", "UserHandler", "method", "GetUserPosts", "user_id", id, "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 

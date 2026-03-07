@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useGetPosts } from "@/api/posts";
 import { useGetUsersIdPosts } from "@/api/users";
 import { useLike } from "@/features/posts/hooks/useLike";
+import { getUserPostsErrorMessage } from "@/features/posts/utils/userPostsErrors";
 import { isSuccessResponse } from "@/lib/api-helpers";
 import type { Flavor, Post } from "@/types/domain";
 import { Timeline } from "./Timeline";
@@ -42,6 +43,7 @@ export function TimelineContainer({ initialPosts, userId }: TimelineContainerPro
   const response = userId != null ? usersHook.data : postsHook.data;
   const isLoading = userId != null ? usersHook.isLoading : postsHook.isLoading;
   const error = userId != null ? usersHook.error : postsHook.error;
+  const errorMessage = userId != null && error ? getUserPostsErrorMessage(error) : undefined;
 
   const posts = useMemo(() => {
     // Orval 8.x: レスポンスから成功時のデータを取り出す
@@ -92,6 +94,7 @@ export function TimelineContainer({ initialPosts, userId }: TimelineContainerPro
       posts={filteredPosts}
       isLoading={!initialPosts && isLoading}
       error={error}
+      errorMessage={errorMessage}
       availableFlavors={availableFlavors}
       selectedFlavorIds={selectedFlavorIds}
       onFlavorToggle={handleFlavorToggle}
