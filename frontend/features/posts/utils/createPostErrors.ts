@@ -35,7 +35,7 @@ const isCreatePostErrorCode = (code: unknown): code is CreatePostErrorCode => {
  * @param error - API エラーオブジェクト
  * @returns 日本語エラーメッセージ
  */
-export const translateErrorMessage = (error: ApiError): string => {
+export const getCreatePostErrorMessage = (error: ApiError): string => {
   // ApiError.bodyJsonからエラーコードを取得して表示文言へ変換
   if (
     error.bodyJson &&

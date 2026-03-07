@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGetPostsQueryKey } from "@/api/posts";
-import { translateErrorMessage } from "@/features/posts/utils/createPostErrors";
+import { getCreatePostErrorMessage } from "@/features/posts/utils/createPostErrors";
 import type { ApiError } from "@/lib/api-client";
 import { apiFetch } from "@/lib/api-client";
 import type { CreatePostInput, Post } from "@/types/domain";
@@ -126,7 +126,7 @@ export function useCreatePost(options?: {
         queryClient.setQueryData(getGetPostsQueryKey(), typedContext.previousPosts);
       }
 
-      const message = translateErrorMessage(error);
+      const message = getCreatePostErrorMessage(error);
       options?.onError?.(message);
     },
   });
