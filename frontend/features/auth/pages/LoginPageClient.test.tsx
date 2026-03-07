@@ -105,7 +105,7 @@ describe("LoginPageClient", () => {
       const { authApi } = await import("../api/authApi");
       const mockLogin = vi.fn().mockRejectedValue({
         status: 401,
-        error: "メールアドレスまたはパスワードが正しくありません",
+        bodyJson: { error: "unauthorized" },
       });
       vi.mocked(authApi.login).mockImplementation(mockLogin);
 
@@ -357,7 +357,7 @@ describe("LoginPageClient", () => {
       const { authApi } = await import("../api/authApi");
       vi.mocked(authApi.login).mockRejectedValue({
         status: 400,
-        error: "Bad Request",
+        bodyJson: { error: "validation_failed" },
       });
 
       render(<LoginPageClient />, { wrapper: createWrapper() });
