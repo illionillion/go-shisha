@@ -4,7 +4,8 @@ import type { ReactNode } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { ApiError } from "@/lib/api-client";
 import * as apiClient from "@/lib/api-client";
-import { useUploadImages, translateErrorMessage } from "./useUploadImages";
+import { getUploadImageErrorMessage } from "../utils/uploadErrors";
+import { useUploadImages } from "./useUploadImages";
 
 vi.mock("@/lib/api-client", () => ({
   apiFetch: vi.fn(),
@@ -111,11 +112,11 @@ describe("useUploadImages", () => {
       });
     });
 
-    it("APIエラー時にonErrorがサーバーの日本語エラーメッセージで呼ばれる", async () => {
+    it("APIエラー時にonErrorが型付きエラーコードの日本語メッセージで呼ばれる（payload_too_large）", async () => {
       const onError = vi.fn();
       const mockError = {
         bodyJson: {
-          error: "サポートされていないファイル形式です",
+          error: "payload_too_large",
         },
       };
 
@@ -127,7 +128,67 @@ describe("useUploadImages", () => {
       result.current.uploadImages(files);
 
       await waitFor(() => {
-        expect(onError).toHaveBeenCalledWith("サポートされていないファイル形式です");
+        expect(onError).toHaveBeenCalledWith("ファイルサイズが大きすぎます");
+      });
+    });
+
+    it("APIエラー時にonErrorが型付きエラーコードの日本語メッセージで呼ばれる（validation_failed）", async () => {
+      const onError = vi.fn();
+      const mockError = {
+        bodyJson: {
+          error: "validation_failed",
+        },
+      };
+
+      vi.mocked(apiClient.apiFetch).mockRejectedValue(mockError);
+
+      const { result } = renderHook(() => useUploadImages({ onError }), { wrapper });
+
+      const files = [new File(["test"], "test.jpg", { type: "image/jpeg" })];
+      result.current.uploadImages(files);
+
+      await waitFor(() => {
+        expect(onError).toHaveBeenCalledWith("ファイル形式またはサイズが不正です");
+      });
+    });
+
+    it("APIエラー時にonErrorが型付きエラーコードの日本語メッセージで呼ばれる（unauthorized）", async () => {
+      const onError = vi.fn();
+      const mockError = {
+        bodyJson: {
+          error: "unauthorized",
+        },
+      };
+
+      vi.mocked(apiClient.apiFetch).mockRejectedValue(mockError);
+
+      const { result } = renderHook(() => useUploadImages({ onError }), { wrapper });
+
+      const files = [new File(["test"], "test.jpg", { type: "image/jpeg" })];
+      result.current.uploadImages(files);
+
+      await waitFor(() => {
+        expect(onError).toHaveBeenCalledWith("ログインが必要です");
+      });
+    });
+
+    it("APIエラー時にonErrorが型付きエラーコードの日本語メッセージで呼ばれる（internal_server_error）", async () => {
+      const onError = vi.fn();
+      const mockError = {
+        bodyJson: {
+          error: "internal_server_error",
+        },
+      };
+
+      vi.mocked(apiClient.apiFetch).mockRejectedValue(mockError);
+
+      const { result } = renderHook(() => useUploadImages({ onError }), { wrapper });
+
+      const files = [new File(["test"], "test.jpg", { type: "image/jpeg" })];
+      result.current.uploadImages(files);
+
+      await waitFor(() => {
+        expect(onError).toHaveBeenCalledWith("サーバーエラーが発生しました");
       });
     });
   });
@@ -145,61 +206,61 @@ describe("useUploadImages", () => {
     });
   });
 
-  describe("translateErrorMessage", () => {
-    it("バックエンドの日本語エラーメッセージをそのまま返す（ファイルサイズ）", () => {
+  describe("getUploadImageErrorMessage", () => {
+    it("payload_too_large → 日本語メッセージを返す", () => {
       const error: ApiError = {
-        bodyJson: { error: "ファイルサイズが10MBを超えています" },
+        bodyJson: { error: "payload_too_large" },
       } as ApiError;
 
-      const result = translateErrorMessage(error);
+      const result = getUploadImageErrorMessage(error);
 
-      expect(result).toBe("ファイルサイズが10MBを超えています");
+      expect(result).toBe("ファイルサイズが大きすぎます");
     });
 
-    it("バックエンドの日本語エラーメッセージをそのまま返す（ファイル数）", () => {
+    it("validation_failed → 日本語メッセージを返す", () => {
       const error: ApiError = {
-        bodyJson: { error: "一度に10枚までアップロード可能です" },
+        bodyJson: { error: "validation_failed" },
       } as ApiError;
 
-      const result = translateErrorMessage(error);
+      const result = getUploadImageErrorMessage(error);
 
-      expect(result).toBe("一度に10枚までアップロード可能です");
+      expect(result).toBe("ファイル形式またはサイズが不正です");
     });
 
-    it("バックエンドの日本語エラーメッセージをそのまま返す（ファイル形式）", () => {
+    it("unauthorized → 日本語メッセージを返す", () => {
       const error: ApiError = {
-        bodyJson: { error: "サポートされていないファイル形式です" },
+        bodyJson: { error: "unauthorized" },
       } as ApiError;
 
-      const result = translateErrorMessage(error);
+      const result = getUploadImageErrorMessage(error);
 
-      expect(result).toBe("サポートされていないファイル形式です");
+      expect(result).toBe("ログインが必要です");
     });
 
-    it("バックエンドのその他のエラーメッセージもそのまま返す", () => {
+    it("internal_server_error → 日本語メッセージを返す", () => {
       const error: ApiError = {
-        bodyJson: { error: "予期しないエラーが発生しました" },
+        bodyJson: { error: "internal_server_error" },
       } as ApiError;
 
-      const result = translateErrorMessage(error);
+      const result = getUploadImageErrorMessage(error);
 
-      expect(result).toBe("予期しないエラーが発生しました");
+      expect(result).toBe("サーバーエラーが発生しました");
     });
 
     it("bodyJsonがない場合はデフォルトメッセージを返す", () => {
       const error: ApiError = {} as ApiError;
 
-      const result = translateErrorMessage(error);
+      const result = getUploadImageErrorMessage(error);
 
       expect(result).toBe("画像のアップロードに失敗しました");
     });
 
-    it("bodyJson.errorが文字列でない場合はデフォルトメッセージを返す", () => {
+    it("未知のエラーコードの場合はデフォルトメッセージを返す", () => {
       const error: ApiError = {
-        bodyJson: { error: 123 },
+        bodyJson: { error: "unknown_error_code" },
       } as unknown as ApiError;
 
-      const result = translateErrorMessage(error);
+      const result = getUploadImageErrorMessage(error);
 
       expect(result).toBe("画像のアップロードに失敗しました");
     });
