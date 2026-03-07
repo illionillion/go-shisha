@@ -47,8 +47,6 @@ export const getCreatePostErrorMessage = (error: ApiError): string => {
     if (isCreatePostErrorCode(errorCode)) {
       return CREATE_POST_ERROR_MESSAGES[errorCode];
     }
-
-    return "投稿の作成に失敗しました";
   }
   return "投稿の作成に失敗しました";
 };
