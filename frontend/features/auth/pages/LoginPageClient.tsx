@@ -6,7 +6,7 @@ import { useState } from "react";
 import { authApi } from "@/features/auth/api/authApi";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 import { useAuthStore } from "@/features/auth/stores/authStore";
-import type { ApiError } from "@/lib/api-client";
+import { getLoginErrorMessage } from "@/features/auth/utils/loginErrors";
 import { isSafeRedirectPath } from "@/lib/validateRedirect";
 import type { LoginInput } from "@/types/auth";
 
@@ -66,16 +66,4 @@ export const LoginPageClient = () => {
       registerHref={registerHref}
     />
   );
-};
-
-const getLoginErrorMessage = (error: unknown) => {
-  const apiError = error as ApiError | undefined;
-  switch (apiError?.status) {
-    case 401:
-      return "メールアドレスまたはパスワードが正しくありません";
-    case 400:
-      return "入力値を確認してください";
-    default:
-      return "通信エラーが発生しました";
-  }
 };
