@@ -260,8 +260,7 @@ const docTemplate = `{
                     "500": {
                         "description": "サーバーエラー",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
                         }
                     }
                 }
@@ -584,29 +583,25 @@ const docTemplate = `{
                     "400": {
                         "description": "バリデーションエラー",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ValidationError"
                         }
                     },
                     "401": {
                         "description": "認証エラー",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UnauthorizedError"
                         }
                     },
                     "413": {
                         "description": "ファイルサイズ超過",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.PayloadTooLargeError"
                         }
                     },
                     "500": {
                         "description": "サーバーエラー",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
                         }
                     }
                 }
@@ -865,6 +860,23 @@ const docTemplate = `{
                         "not_found"
                     ],
                     "example": "not_found"
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.PayloadTooLargeError": {
+            "description": "ファイルサイズが上限を超えた場合のエラーレスポンス",
+            "type": "object",
+            "required": [
+                "error"
+            ],
+            "properties": {
+                "error": {
+                    "description": "エラー種別の識別子",
+                    "type": "string",
+                    "enum": [
+                        "payload_too_large"
+                    ],
+                    "example": "payload_too_large"
                 }
             }
         },

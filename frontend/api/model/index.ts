@@ -29,6 +29,8 @@ export * from "./goShishaBackendInternalModelsForbiddenErrorError";
 export * from "./goShishaBackendInternalModelsLoginInput";
 export * from "./goShishaBackendInternalModelsNotFoundError";
 export * from "./goShishaBackendInternalModelsNotFoundErrorError";
+export * from "./goShishaBackendInternalModelsPayloadTooLargeError";
+export * from "./goShishaBackendInternalModelsPayloadTooLargeErrorError";
 export * from "./goShishaBackendInternalModelsPost";
 export * from "./goShishaBackendInternalModelsPostsResponse";
 export * from "./goShishaBackendInternalModelsServerError";

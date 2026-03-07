@@ -15,11 +15,11 @@ import type {
 } from "@tanstack/react-query";
 import { apiFetch } from "../lib/api-client";
 import type {
+  GoShishaBackendInternalModelsPayloadTooLargeError,
+  GoShishaBackendInternalModelsServerError,
+  GoShishaBackendInternalModelsUnauthorizedError,
   GoShishaBackendInternalModelsUploadImagesResponse,
-  PostUploadsImages400,
-  PostUploadsImages401,
-  PostUploadsImages413,
-  PostUploadsImages500,
+  GoShishaBackendInternalModelsValidationError,
   PostUploadsImagesBody,
 } from "./model";
 
@@ -35,22 +35,22 @@ export type postUploadsImagesResponse200 = {
 };
 
 export type postUploadsImagesResponse400 = {
-  data: PostUploadsImages400;
+  data: GoShishaBackendInternalModelsValidationError;
   status: 400;
 };
 
 export type postUploadsImagesResponse401 = {
-  data: PostUploadsImages401;
+  data: GoShishaBackendInternalModelsUnauthorizedError;
   status: 401;
 };
 
 export type postUploadsImagesResponse413 = {
-  data: PostUploadsImages413;
+  data: GoShishaBackendInternalModelsPayloadTooLargeError;
   status: 413;
 };
 
 export type postUploadsImagesResponse500 = {
-  data: PostUploadsImages500;
+  data: GoShishaBackendInternalModelsServerError;
   status: 500;
 };
 
@@ -90,10 +90,10 @@ export const postUploadsImages = async (
 
 export const getPostUploadsImagesMutationOptions = <
   TError =
-    | PostUploadsImages400
-    | PostUploadsImages401
-    | PostUploadsImages413
-    | PostUploadsImages500,
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsPayloadTooLargeError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -133,20 +133,20 @@ export type PostUploadsImagesMutationResult = NonNullable<
 >;
 export type PostUploadsImagesMutationBody = PostUploadsImagesBody;
 export type PostUploadsImagesMutationError =
-  | PostUploadsImages400
-  | PostUploadsImages401
-  | PostUploadsImages413
-  | PostUploadsImages500;
+  | GoShishaBackendInternalModelsValidationError
+  | GoShishaBackendInternalModelsUnauthorizedError
+  | GoShishaBackendInternalModelsPayloadTooLargeError
+  | GoShishaBackendInternalModelsServerError;
 
 /**
  * @summary 画像アップロード
  */
 export const usePostUploadsImages = <
   TError =
-    | PostUploadsImages400
-    | PostUploadsImages401
-    | PostUploadsImages413
-    | PostUploadsImages500,
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsPayloadTooLargeError
+    | GoShishaBackendInternalModelsServerError,
   TContext = unknown,
 >(
   options?: {

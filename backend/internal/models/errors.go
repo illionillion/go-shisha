@@ -9,6 +9,7 @@ const (
 	ErrCodeForbidden          = "forbidden"
 	ErrCodeUnauthorized       = "unauthorized"
 	ErrCodeNotFound           = "not_found"
+	ErrCodePayloadTooLarge    = "payload_too_large"
 	ErrCodeInternalServer     = "internal_server_error"
 )
 
@@ -45,6 +46,13 @@ type ForbiddenError struct {
 type NotFoundError struct {
 	// エラー種別の識別子
 	Error string `json:"error" enums:"not_found" example:"not_found" binding:"required"`
+}
+
+// PayloadTooLargeError はファイルサイズ超過エラーを表す（413 Request Entity Too Large）
+// @Description ファイルサイズが上限を超えた場合のエラーレスポンス
+type PayloadTooLargeError struct {
+	// エラー種別の識別子
+	Error string `json:"error" enums:"payload_too_large" example:"payload_too_large" binding:"required"`
 }
 
 // ServerError はサーバー内部エラーを表す（500 Internal Server Error）

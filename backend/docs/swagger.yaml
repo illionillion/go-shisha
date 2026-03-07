@@ -86,6 +86,18 @@ definitions:
     required:
     - error
     type: object
+  go-shisha-backend_internal_models.PayloadTooLargeError:
+    description: ファイルサイズが上限を超えた場合のエラーレスポンス
+    properties:
+      error:
+        description: エラー種別の識別子
+        enum:
+        - payload_too_large
+        example: payload_too_large
+        type: string
+    required:
+    - error
+    type: object
   go-shisha-backend_internal_models.Post:
     properties:
       created_at:
@@ -370,8 +382,7 @@ paths:
         "500":
           description: サーバーエラー
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
       summary: フレーバー一覧取得
       tags:
       - flavors
@@ -577,23 +588,19 @@ paths:
         "400":
           description: バリデーションエラー
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ValidationError'
         "401":
           description: 認証エラー
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.UnauthorizedError'
         "413":
           description: ファイルサイズ超過
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.PayloadTooLargeError'
         "500":
           description: サーバーエラー
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
       security:
       - BearerAuth: []
       summary: 画像アップロード
