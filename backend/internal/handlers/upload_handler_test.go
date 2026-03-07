@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"testing"
 
+	"go-shisha-backend/internal/models"
 	"go-shisha-backend/internal/services"
 	"go-shisha-backend/pkg/logging"
 
@@ -49,7 +51,11 @@ func TestUploadHandler_UploadImages_Unauthorized(t *testing.T) {
 
 	// アサーション
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	assert.Contains(t, w.Body.String(), "unauthorized")
+
+	var response models.UnauthorizedError
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeUnauthorized, response.Error)
 }
 
 func TestUploadHandler_UploadImages_NoFiles(t *testing.T) {
@@ -78,7 +84,11 @@ func TestUploadHandler_UploadImages_NoFiles(t *testing.T) {
 
 	// アサーション
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Contains(t, w.Body.String(), "ファイルが指定されていません")
+
+	var response models.ValidationError
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
 }
 
 func TestUploadHandler_UploadImages_Success(t *testing.T) {
@@ -153,6 +163,48 @@ func TestUploadHandler_UploadImages_FileTooLarge(t *testing.T) {
 
 	// アサーション
 	assert.Equal(t, http.StatusRequestEntityTooLarge, w.Code)
+
+	var response models.PayloadTooLargeError
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodePayloadTooLarge, response.Error)
+}
+
+func TestUploadHandler_UploadImages_InvalidUserIDType(t *testing.T) {
+	mockService := &mockUploadService{}
+	handler := &UploadHandler{
+		uploadService: mockService,
+		logger:        logging.L,
+	}
+
+	// リクエストボディ作成
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, _ := writer.CreateFormFile("images", "test.jpg")
+	_, _ = part.Write([]byte{0xFF, 0xD8, 0xFF, 0xE0})
+	_ = writer.Close()
+
+	// リクエスト作成
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/images", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	w := httptest.NewRecorder()
+	router := setupTestRouter()
+	router.POST("/api/v1/uploads/images", func(c *gin.Context) {
+		// user_idをstring型でセット（不正な型）
+		c.Set("user_id", "not-an-int")
+		handler.UploadImages(c)
+	})
+
+	router.ServeHTTP(w, req)
+
+	// アサーション
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	var response models.ServerError
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeInternalServer, response.Error)
 }
 
 // モック実装

@@ -12,6 +12,8 @@ import { GoShishaBackendInternalModelsForbiddenErrorError } from "@/api/model/go
 import type { GoShishaBackendInternalModelsLoginInput } from "@/api/model/goShishaBackendInternalModelsLoginInput";
 import type { GoShishaBackendInternalModelsNotFoundError } from "@/api/model/goShishaBackendInternalModelsNotFoundError";
 import { GoShishaBackendInternalModelsNotFoundErrorError } from "@/api/model/goShishaBackendInternalModelsNotFoundErrorError";
+import type { GoShishaBackendInternalModelsPayloadTooLargeError } from "@/api/model/goShishaBackendInternalModelsPayloadTooLargeError";
+import { GoShishaBackendInternalModelsPayloadTooLargeErrorError } from "@/api/model/goShishaBackendInternalModelsPayloadTooLargeErrorError";
 import type { GoShishaBackendInternalModelsPost } from "@/api/model/goShishaBackendInternalModelsPost";
 import type { GoShishaBackendInternalModelsServerError } from "@/api/model/goShishaBackendInternalModelsServerError";
 import { GoShishaBackendInternalModelsServerErrorError } from "@/api/model/goShishaBackendInternalModelsServerErrorError";
@@ -94,6 +96,14 @@ export const ForbiddenErrorCode = GoShishaBackendInternalModelsForbiddenErrorErr
 export type NotFoundError = GoShishaBackendInternalModelsNotFoundError;
 /** NotFoundError.error のエラーコード定数 */
 export const NotFoundErrorCode = GoShishaBackendInternalModelsNotFoundErrorError;
+
+/**
+ * ファイルサイズ超過エラーレスポンス（413 Request Entity Too Large）
+ * - POST /api/v1/uploads/images のファイルサイズ超過時: error: "payload_too_large"
+ */
+export type PayloadTooLargeError = GoShishaBackendInternalModelsPayloadTooLargeError;
+/** PayloadTooLargeError.error のエラーコード定数 */
+export const PayloadTooLargeErrorCode = GoShishaBackendInternalModelsPayloadTooLargeErrorError;
 
 // ========================================
 // ユーザー関連

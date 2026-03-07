@@ -39,10 +39,10 @@ func NewUploadHandler(uploadService UploadServiceInterface, logger *slog.Logger)
 // @Produce json
 // @Param images formData file true "アップロードする画像（複数可）"
 // @Success 200 {object} go-shisha-backend_internal_models.UploadImagesResponse
-// @Failure 400 {object} map[string]interface{} "バリデーションエラー"
-// @Failure 401 {object} map[string]interface{} "認証エラー"
-// @Failure 413 {object} map[string]interface{} "ファイルサイズ超過"
-// @Failure 500 {object} map[string]interface{} "サーバーエラー"
+// @Failure 400 {object} models.ValidationError "バリデーションエラー"
+// @Failure 401 {object} models.UnauthorizedError "認証エラー"
+// @Failure 413 {object} models.PayloadTooLargeError "ファイルサイズ超過"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
 // @Security BearerAuth
 // @Router /uploads/images [post]
 func (h *UploadHandler) UploadImages(c *gin.Context) {
@@ -50,7 +50,7 @@ func (h *UploadHandler) UploadImages(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
 		h.logger.Warn("未認証のアップロードリクエスト")
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
 		return
 	}
 
@@ -60,14 +60,14 @@ func (h *UploadHandler) UploadImages(c *gin.Context) {
 	form, err := c.MultipartForm()
 	if err != nil {
 		h.logger.Error("フォーム取得失敗", "error", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "フォームデータの取得に失敗しました"})
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 		return
 	}
 
 	files := form.File["images"]
 	if len(files) == 0 {
 		h.logger.Warn("ファイルが指定されていない")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ファイルが指定されていません"})
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 		return
 	}
 
@@ -75,7 +75,7 @@ func (h *UploadHandler) UploadImages(c *gin.Context) {
 	uid, ok := userID.(int)
 	if !ok {
 		h.logger.Error("user_idの型が不正", "user_id", userID)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 
@@ -86,18 +86,18 @@ func (h *UploadHandler) UploadImages(c *gin.Context) {
 			"error", err,
 			"user_id", userID,
 			"file_count", len(files))
-		// クライアント起因のエラーはメッセージをそのまま返す
+		// クライアント起因のエラーはバリデーションエラーとして返す
 		if errors.Is(err, services.ErrNoFiles) || errors.Is(err, services.ErrTooManyFiles) ||
 			errors.Is(err, services.ErrInvalidFileType) || errors.Is(err, services.ErrInvalidExtension) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 			return
 		}
 		if errors.Is(err, services.ErrFileTooLarge) {
-			c.JSON(http.StatusRequestEntityTooLarge, gin.H{"error": err.Error()})
+			c.JSON(http.StatusRequestEntityTooLarge, models.PayloadTooLargeError{Error: models.ErrCodePayloadTooLarge})
 			return
 		}
 		// サーバー起因のエラーは詳細を隠す
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
 	}
 

@@ -2,35 +2,13 @@ import { useMutation } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-client";
 import type { ApiError } from "@/lib/api-client";
 import type { UploadImagesResponse } from "@/types/domain";
-
-/**
- * APIエラーメッセージを処理
- *
- * バックエンドが日本語エラーメッセージを返すため、基本的にはそのまま返す。
- * エラー情報が取得できない場合のみデフォルトメッセージを返す。
- *
- * @param error - API エラーオブジェクト
- * @returns 日本語エラーメッセージ
- */
-export const translateErrorMessage = (error: ApiError): string => {
-  // ApiError.bodyJsonからエラーメッセージを取得
-  if (
-    error.bodyJson &&
-    typeof error.bodyJson === "object" &&
-    "error" in error.bodyJson &&
-    typeof error.bodyJson.error === "string"
-  ) {
-    // バックエンドが日本語メッセージを返すのでそのまま使用
-    return error.bodyJson.error;
-  }
-  return "画像のアップロードに失敗しました";
-};
+import { getUploadImageErrorMessage } from "../utils/uploadErrors";
 
 /**
  * 画像アップロード用カスタムフック
  *
  * 画像ファイルをバックエンドにアップロードし、URLを取得します。
- * バリデーションはサーバー側で行われ、エラーメッセージはそのまま日本語で返されます。
+ * エラーコードは `uploadErrors.ts` の `getUploadImageErrorMessage` で日本語に変換されます。
  *
  * @example
  * ```tsx
@@ -84,7 +62,7 @@ export function useUploadImages(options?: {
       options?.onSuccess?.(response.data.urls ?? []);
     },
     onError: (error) => {
-      const message = translateErrorMessage(error);
+      const message = getUploadImageErrorMessage(error);
       options?.onError?.(message);
     },
   });

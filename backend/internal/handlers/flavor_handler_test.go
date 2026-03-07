@@ -86,8 +86,8 @@ func TestFlavorHandler_GetAllFlavors_DBError(t *testing.T) {
 	// Assert
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
-	var response map[string]interface{}
+	var response models.ServerError
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
-	assert.Equal(t, "Failed to fetch flavors", response["error"])
+	assert.Equal(t, models.ErrCodeInternalServer, response.Error)
 }

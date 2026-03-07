@@ -19,7 +19,10 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { apiFetch } from "../lib/api-client";
-import type { GetFlavors500, GoShishaBackendInternalModelsFlavor } from "./model";
+import type {
+  GoShishaBackendInternalModelsFlavor,
+  GoShishaBackendInternalModelsServerError,
+} from "./model";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
@@ -33,7 +36,7 @@ export type getFlavorsResponse200 = {
 };
 
 export type getFlavorsResponse500 = {
-  data: GetFlavors500;
+  data: GoShishaBackendInternalModelsServerError;
   status: 500;
 };
 
@@ -63,7 +66,7 @@ export const getGetFlavorsQueryKey = () => {
 
 export const getGetFlavorsQueryOptions = <
   TData = Awaited<ReturnType<typeof getFlavors>>,
-  TError = GetFlavors500,
+  TError = GoShishaBackendInternalModelsServerError,
 >(options?: {
   query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getFlavors>>, TError, TData>>;
   request?: SecondParameter<typeof apiFetch>;
@@ -83,11 +86,11 @@ export const getGetFlavorsQueryOptions = <
 };
 
 export type GetFlavorsQueryResult = NonNullable<Awaited<ReturnType<typeof getFlavors>>>;
-export type GetFlavorsQueryError = GetFlavors500;
+export type GetFlavorsQueryError = GoShishaBackendInternalModelsServerError;
 
 export function useGetFlavors<
   TData = Awaited<ReturnType<typeof getFlavors>>,
-  TError = GetFlavors500,
+  TError = GoShishaBackendInternalModelsServerError,
 >(
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getFlavors>>, TError, TData>> &
@@ -105,7 +108,7 @@ export function useGetFlavors<
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetFlavors<
   TData = Awaited<ReturnType<typeof getFlavors>>,
-  TError = GetFlavors500,
+  TError = GoShishaBackendInternalModelsServerError,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getFlavors>>, TError, TData>> &
@@ -123,7 +126,7 @@ export function useGetFlavors<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetFlavors<
   TData = Awaited<ReturnType<typeof getFlavors>>,
-  TError = GetFlavors500,
+  TError = GoShishaBackendInternalModelsServerError,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getFlavors>>, TError, TData>>;
@@ -137,7 +140,7 @@ export function useGetFlavors<
 
 export function useGetFlavors<
   TData = Awaited<ReturnType<typeof getFlavors>>,
-  TError = GetFlavors500,
+  TError = GoShishaBackendInternalModelsServerError,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getFlavors>>, TError, TData>>;
