@@ -3,10 +3,11 @@ import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { getGetPostsQueryKey } from "@/api/posts";
+import { translateErrorMessage } from "@/features/posts/utils/createPostErrors";
 import type { ApiError } from "@/lib/api-client";
 import * as apiClient from "@/lib/api-client";
 import type { CreatePostInput, Post } from "@/types/domain";
-import { useCreatePost, translateErrorMessage } from "./useCreatePost";
+import { useCreatePost } from "./useCreatePost";
 
 vi.mock("@/lib/api-client", () => ({
   apiFetch: vi.fn(),
