@@ -48,11 +48,6 @@ export const translateErrorMessage = (error: ApiError): string => {
       return CREATE_POST_ERROR_MESSAGES[errorCode];
     }
 
-    // 互換性のため、エラーコード形式でなければ既存の日本語メッセージをそのまま表示する
-    if (!/^[a-z0-9_]+$/.test(errorCode)) {
-      return errorCode;
-    }
-
     return "投稿の作成に失敗しました";
   }
   return "投稿の作成に失敗しました";

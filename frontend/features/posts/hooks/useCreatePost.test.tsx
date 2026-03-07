@@ -341,14 +341,14 @@ describe("useCreatePost", () => {
       expect(result).toBe("投稿の作成に失敗しました");
     });
 
-    it("バリデーションエラーメッセージを返す", () => {
+    it("未知の文字列が来た場合はフォールバックメッセージを返す", () => {
       const error: ApiError = {
         bodyJson: { error: "スライドが1枚以上必要です" },
       } as ApiError;
 
       const result = translateErrorMessage(error);
 
-      expect(result).toBe("スライドが1枚以上必要です");
+      expect(result).toBe("投稿の作成に失敗しました");
     });
 
     it("未知のエラーコードはフォールバックメッセージを返す", () => {
