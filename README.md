@@ -77,7 +77,8 @@ pnpm dev
 起動後、以下のURLにアクセス:
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8080
-- **Swagger UI**: http://localhost:8080/swagger/index.html
+- **Swagger UI (ローカル)**: http://localhost:8080/swagger/index.html
+- **API ドキュメント (公開)**: https://illionillion.github.io/go-shisha/
 
 ### セットアップ
 
@@ -152,7 +153,8 @@ pnpm dev
 ブラウザで以下のURLにアクセス:
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8080
-- **Swagger UI**: http://localhost:8080/swagger/index.html
+- **Swagger UI (ローカル)**: http://localhost:8080/swagger/index.html
+- **API ドキュメント (公開)**: https://illionillion.github.io/go-shisha/
 
 #### トラブルシューティング
 
@@ -174,6 +176,7 @@ pnpm lint             # Frontendリント
 pnpm format           # Frontendフォーマット
 pnpm test             # Frontendテスト
 pnpm storybook        # Storybook起動
+pnpm gen:api:docs     # Redocを使ってdocs/index.htmlを生成（GitHub Pages用）
 pnpm vrt:build        # VRT Docker環境ビルド
 pnpm vrt:up           # VRT Docker環境起動
 pnpm vrt:run          # VRT実行
@@ -194,6 +197,27 @@ make swagger          # Swagger定義再生成
 2. OpenAPI自動コピー（`scripts/watch-openapi.ts`が自動実行）
 3. Orval自動生成（nodemonが自動実行）
 4. FrontendでAPI型定義が更新される
+
+### APIドキュメント更新手順
+
+`main`ブランチへのpush時に GitHub Actions が自動で以下を実行し、GitHub Pages を更新します。
+
+1. `pnpm gen:api:docs` で `backend/docs/swagger.yaml` を読み込み `docs/index.html` を生成
+2. `docs/` 配下を GitHub Pages へデプロイ
+
+**公開URL**: https://illionillion.github.io/go-shisha/
+
+ローカルで確認したい場合:
+```bash
+# Swagger定義を最新化（backend/ディレクトリで実行）
+make swagger
+
+# APIドキュメントHTMLを生成
+pnpm gen:api:docs
+
+# docs/index.html をブラウザで開く
+open docs/index.html
+```
 
 ### Git Hooks（lefthook）
 

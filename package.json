@@ -15,7 +15,7 @@
   "scripts": {
     "dev": "concurrently \"pnpm watch:openapi\" \"pnpm -F frontend dev\"",
     "watch:openapi": "tsx scripts/watch-openapi.ts",
-    "gen:api:md": "pnpm dlx widdershins backend/docs/swagger.yaml -o backend/docs/swagger.md",
+    "gen:api:docs": "redocly build-docs backend/docs/swagger.yaml -o docs/index.html",
     "build": "pnpm -F frontend build",
     "lint": "pnpm -F frontend lint",
     "lint:fix": "pnpm -F frontend lint:fix",
@@ -41,6 +41,7 @@
   "devDependencies": {
     "@commitlint/cli": "^20.3.1",
     "@commitlint/config-conventional": "^20.3.1",
+    "@redocly/cli": "^2.20.4",
     "@types/node": "^25.0.10",
     "chokidar": "^5.0.0",
     "concurrently": "^9.2.1",
@@ -51,7 +52,7 @@
   },
   "packageManager": "pnpm@9.15.0",
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=20.19.0 <21.0.0 || >=22.12.0",
     "pnpm": ">=9.0.0"
   },
   "lint-staged": {
