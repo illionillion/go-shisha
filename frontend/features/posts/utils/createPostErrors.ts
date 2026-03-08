@@ -1,4 +1,11 @@
 import type { ApiError } from "@/lib/api-client";
+import type {
+  ForbiddenError,
+  NotFoundError,
+  ServerError,
+  UnauthorizedError,
+  ValidationError,
+} from "@/types/domain";
 import {
   ForbiddenErrorCode,
   NotFoundErrorCode,
@@ -32,21 +39,23 @@ const isCreatePostErrorCode = (code: unknown): code is CreatePostErrorCode => {
 /**
  * APIエラーメッセージを日本語で返す
  *
- * @param error - API エラーオブジェクト
+ * @param error - API エラーオブジェクト（unknown型で受け取り内部で判定）
  * @returns 日本語エラーメッセージ
  */
-export const getCreatePostErrorMessage = (error: ApiError): string => {
-  // ApiError.bodyJsonからエラーコードを取得して表示文言へ変換
-  if (
-    error.bodyJson &&
-    typeof error.bodyJson === "object" &&
-    "error" in error.bodyJson &&
-    typeof error.bodyJson.error === "string"
-  ) {
-    const errorCode = error.bodyJson.error;
-    if (isCreatePostErrorCode(errorCode)) {
-      return CREATE_POST_ERROR_MESSAGES[errorCode];
-    }
+export const getCreatePostErrorMessage = (error: unknown): string => {
+  const apiError = error as ApiError | undefined;
+  const bodyJson = apiError?.bodyJson as
+    | ValidationError
+    | UnauthorizedError
+    | ForbiddenError
+    | NotFoundError
+    | ServerError
+    | undefined;
+  const code = bodyJson?.error;
+
+  if (isCreatePostErrorCode(code)) {
+    return CREATE_POST_ERROR_MESSAGES[code];
   }
+
   return "投稿の作成に失敗しました";
 };
