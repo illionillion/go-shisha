@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - "backend/docs/swagger.yaml"
-      - "backend/docs/swagger.json"
       - ".github/workflows/docs-deploy.yml"
   workflow_dispatch:
 
