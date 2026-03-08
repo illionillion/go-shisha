@@ -203,8 +203,7 @@ make swagger          # Swagger定義再生成
 `main`ブランチへのpush時に GitHub Actions が自動で以下を実行し、GitHub Pages を更新します。
 
 1. `pnpm gen:api:docs` で `backend/docs/swagger.yaml` を読み込み `docs/index.html` を生成
-2. `docs/swagger.yaml` もコピー
-3. `docs/` 配下を GitHub Pages へデプロイ
+2. `docs/` 配下を GitHub Pages へデプロイ
 
 **公開URL**: https://illionillion.github.io/go-shisha/
 
