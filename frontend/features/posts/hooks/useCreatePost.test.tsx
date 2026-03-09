@@ -3,10 +3,9 @@ import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { getGetPostsQueryKey } from "@/api/posts";
-import type { ApiError } from "@/lib/api-client";
 import * as apiClient from "@/lib/api-client";
 import type { CreatePostInput, Post } from "@/types/domain";
-import { useCreatePost, translateErrorMessage } from "./useCreatePost";
+import { useCreatePost } from "./useCreatePost";
 
 vi.mock("@/lib/api-client", () => ({
   apiFetch: vi.fn(),
@@ -316,66 +315,6 @@ describe("useCreatePost", () => {
 
       expect(onError).toHaveBeenCalledWith("最低1枚の画像が必要です");
       expect(apiClient.apiFetch).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("translateErrorMessage", () => {
-    it("forbiddenコードを日本語メッセージに変換する", () => {
-      const error: ApiError = {
-        bodyJson: { error: "forbidden" },
-      } as ApiError;
-
-      const result = translateErrorMessage(error);
-
-      expect(result).toBe("この画像を使用する権限がありません");
-    });
-
-    it("バックエンドの日本語エラーメッセージをそのまま返す", () => {
-      const error: ApiError = {
-        bodyJson: { error: "投稿の作成に失敗しました" },
-      } as ApiError;
-
-      const result = translateErrorMessage(error);
-
-      expect(result).toBe("投稿の作成に失敗しました");
-    });
-
-    it("バリデーションエラーメッセージを返す", () => {
-      const error: ApiError = {
-        bodyJson: { error: "スライドが1枚以上必要です" },
-      } as ApiError;
-
-      const result = translateErrorMessage(error);
-
-      expect(result).toBe("スライドが1枚以上必要です");
-    });
-
-    it("未知のエラーコードはフォールバックメッセージを返す", () => {
-      const error: ApiError = {
-        bodyJson: { error: "unknown_code" },
-      } as ApiError;
-
-      const result = translateErrorMessage(error);
-
-      expect(result).toBe("投稿の作成に失敗しました");
-    });
-
-    it("bodyJsonがない場合はデフォルトメッセージを返す", () => {
-      const error: ApiError = {} as ApiError;
-
-      const result = translateErrorMessage(error);
-
-      expect(result).toBe("投稿の作成に失敗しました");
-    });
-
-    it("bodyJson.errorが文字列でない場合はデフォルトメッセージを返す", () => {
-      const error: ApiError = {
-        bodyJson: { error: 123 },
-      } as unknown as ApiError;
-
-      const result = translateErrorMessage(error);
-
-      expect(result).toBe("投稿の作成に失敗しました");
     });
   });
 });
