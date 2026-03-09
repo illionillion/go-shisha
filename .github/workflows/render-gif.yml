@@ -1,0 +1,110 @@
+name: Render Promo GIF
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "remotion/**"
+      - ".github/workflows/render-gif.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    name: Render Promo GIF
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+          run_install: false
+
+      - name: Get pnpm store directory
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-remotion-${{ hashFiles('remotion/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-remotion-
+
+      - name: Install Chromium system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libgbm-dev \
+            libasound2-dev \
+            libglib2.0-0 \
+            libnss3 \
+            libatk-bridge2.0-0 \
+            libdrm2 \
+            libxkbcommon0 \
+            libgtk-3-0 \
+            libxrandr2 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxfixes3
+
+      - name: Install dependencies (remotion)
+        working-directory: ./remotion
+        run: pnpm install
+
+      - name: Render Promo GIF
+        working-directory: ./remotion
+        run: |
+          pnpm exec remotion render src/index.ts ShishaPromo ../docs/demo.gif \
+            --codec=gif \
+            --fps=15 \
+            --scale=0.5 \
+            --gl=angle
+        env:
+          # Remotion で Chromium サンドボックスを無効化（CI環境に必要）
+          REMOTION_NO_SANDBOX: "1"
+
+      - name: Show rendered file info
+        run: ls -lh docs/demo.gif
+
+      - name: Update README with GIF
+        run: |
+          if ! grep -q "docs/demo.gif" README.md; then
+            # READMEにプロモGIFセクションを追加
+            cat >> README.md << 'EOF'
+
+## デモ
+
+![シーシャ行こう デモ](./docs/demo.gif)
+EOF
+            echo "README.mdにGIFを追加しました"
+          else
+            echo "README.mdにはすでにGIF参照があります（スキップ）"
+          fi
+
+      - name: Commit and push GIF
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/demo.gif README.md
+          if git diff --staged --quiet; then
+            echo "変更なし。コミットをスキップします。"
+          else
+            git commit -m "ci: プロモGIFを自動生成・更新 [skip ci]"
+            git push
+          fi
