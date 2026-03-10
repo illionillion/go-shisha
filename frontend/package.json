@@ -34,7 +34,10 @@
     "test:vrt:pc": "VRT_DEVICE=pc test-storybook --url http://localhost:6006",
     "test:vrt:sp": "VRT_DEVICE=sp test-storybook --url http://localhost:6006",
     "test:vrt:pc:update": "VRT_DEVICE=pc test-storybook --url http://localhost:6006 -u",
-    "test:vrt:sp:update": "VRT_DEVICE=sp test-storybook --url http://localhost:6006 -u"
+    "test:vrt:sp:update": "VRT_DEVICE=sp test-storybook --url http://localhost:6006 -u",
+    "remotion:studio": "remotion studio remotion/src/index.ts",
+    "remotion:render": "remotion render remotion/src/index.ts ShishaPromo ../docs/demo.gif --codec=gif",
+    "remotion:render:mp4": "remotion render remotion/src/index.ts ShishaPromo ../docs/demo.mp4"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -49,7 +52,9 @@
     "react-hook-form": "^7.71.1",
     "sonner": "^2.0.7",
     "zod": "^4.3.6",
-    "zustand": "^5.0.11"
+    "zustand": "^5.0.11",
+    "@remotion/cli": "^4.0.0",
+    "remotion": "^4.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
@@ -91,6 +96,7 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.55.0",
     "vitest": "^4.0.18",
-    "wait-on": "^9.0.4"
+    "wait-on": "^9.0.4",
+    "@remotion/renderer": "^4.0.0"
   }
 }
