@@ -2,16 +2,12 @@ import { useCurrentFrame, useVideoConfig, interpolate, Easing, spring } from "re
 import { FlavorLabel } from "../../../components/FlavorLabel/FlavorLabel";
 import { Avatar } from "../components/Avatar";
 import { PostCard } from "../components/PostCard";
-import { usePreloadImages } from "../hooks/usePreloadImages";
 import { FEATURED_POST } from "../mock-data";
-
-const DETAIL_IMAGES = FEATURED_POST.slides?.map((s) => s.image_url ?? "") ?? [];
 
 /**
  * [7-10秒] 1枚ズームして投稿詳細・いいねアニメーション
  */
 export function DetailScene() {
-  usePreloadImages(DETAIL_IMAGES);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const durationFrames = 3 * fps; // 3秒
@@ -93,7 +89,7 @@ export function DetailScene() {
           transform: `scale(${cardScale})`,
         }}
       >
-        <PostCard post={FEATURED_POST} liked={isLiked} autoPlayInterval={99999} />
+        <PostCard post={FEATURED_POST} liked={isLiked} slideFrames={99} />
       </div>
 
       {/* 詳細パネル */}
