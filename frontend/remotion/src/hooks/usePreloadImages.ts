@@ -10,15 +10,14 @@ export function usePreloadImages(srcs: string[]) {
 
   useEffect(() => {
     Promise.all(
-      srcs.map(
-        (src) =>
-          new Promise<void>((resolve) => {
-            const img = new Image();
-            img.onload = () => resolve();
-            img.onerror = () => resolve(); // エラー時もブロックしない
-            img.src = src;
-          })
-      )
+      srcs.map((src) => {
+        const img = new Image();
+        img.src = src;
+        // decode() はロード＋デコード完了まで待つ。onload だとデコード前に解決する場合がある
+        return img.decode().catch(() => {
+          // decode 非対応ブラウザや失敗時はブロックしない
+        });
+      })
     ).then(() => continueRender(handle));
   }, [handle]);
 }

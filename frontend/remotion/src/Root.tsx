@@ -1,9 +1,14 @@
 import { Composition, AbsoluteFill, Series } from "remotion";
+import { usePreloadImages } from "./hooks/usePreloadImages";
+import { MOCK_POSTS } from "./mock-data";
 import { DetailScene } from "./scenes/DetailScene";
 import { EndScene } from "./scenes/EndScene";
 import { HomeScene } from "./scenes/HomeScene";
 import { TitleScene } from "./scenes/TitleScene";
 import "./styles.css";
+
+// 全シーンで使う画像を事前収集
+const ALL_IMAGES = MOCK_POSTS.flatMap((p) => p.slides?.map((s) => s.image_url ?? "") ?? []);
 
 const FPS = 30;
 const WIDTH = 1280;
@@ -17,6 +22,9 @@ const END_FRAMES = 2 * FPS; // 10-12秒
 const TOTAL_FRAMES = TITLE_FRAMES + HOME_FRAMES + DETAIL_FRAMES + END_FRAMES;
 
 function ShishaPromoVideo() {
+  // フレーム0より前に全画像のロード+デコードを完了させる
+  usePreloadImages(ALL_IMAGES);
+
   return (
     <AbsoluteFill style={{ backgroundColor: "#0a0a0a" }}>
       <Series>
