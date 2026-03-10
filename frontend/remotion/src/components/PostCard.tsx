@@ -1,70 +1,72 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useCurrentFrame, useVideoConfig } from "remotion";
 import { FlavorLabel } from "../../../components/FlavorLabel/FlavorLabel";
 import type { Post } from "../../../types/domain";
 import { Avatar } from "./Avatar";
 
 interface PostCardProps {
   post: Post;
-  /** 自動切り替えのインターバル（ミリ秒）。デフォルト3000ms */
-  autoPlayInterval?: number;
+  /** スライド1枚あたりのフレーム数。デフォルト90（30fps×3秒） */
+  slideFrames?: number;
   /** いいね済み状態を外部から制御 */
   liked?: boolean;
-  /** ズーム倍率 */
-  scale?: number;
 }
 
-/**
- * Remotion 用 PostCard（next/imageを使わない版）
- */
-export function PostCard({
-  post,
-  autoPlayInterval = 3000,
-  liked = false,
-  scale = 1,
-}: PostCardProps) {
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+export function PostCard({ post, slideFrames = 90, liked = false }: PostCardProps) {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
   const slides = post.slides || [];
   const hasMultipleSlides = slides.length > 1;
 
-  useEffect(() => {
-    if (!hasMultipleSlides) return;
-    const slideTimer = setTimeout(() => {
-      setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
-    }, autoPlayInterval);
-    return () => clearTimeout(slideTimer);
-  }, [hasMultipleSlides, slides.length, autoPlayInterval, currentSlideIndex]);
+  // フレームからスライドインデックスと進捗を計算
+  const currentSlideIndex = hasMultipleSlides ? Math.floor(frame / slideFrames) % slides.length : 0;
+  const frameInSlide = frame % slideFrames;
+  const slideProgress = frameInSlide / slideFrames;
 
   const currentSlide = slides.length > 0 ? slides[currentSlideIndex] : undefined;
   const displayImageUrl = currentSlide?.image_url || "";
   const displayText = currentSlide?.text || "";
   const displayFlavor = currentSlide?.flavor;
 
+  const [loaded, setLoaded] = useState(false);
+
+  // カード出現フェードイン（最初の0.3秒）
+  const fadeIn = Math.min(1, frame / (fps * 0.3));
+
   return (
-    <div
-      style={{
-        position: "relative",
-        cursor: "pointer",
-        transform: `scale(${scale})`,
-        transformOrigin: "center center",
-        transition: "transform 0.3s ease",
-      }}
-    >
+    <div style={{ position: "relative", cursor: "pointer", opacity: fadeIn }}>
+      {/* aspect-ratio 2:3 */}
       <div
         style={{
           aspectRatio: "2/3",
           position: "relative",
           overflow: "hidden",
           borderRadius: 12,
+          backgroundColor: "#1a1a1a",
         }}
       >
+        {/* スケルトン: 画像ロード前に表示 */}
+        {!loaded && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 10,
+              backgroundColor: "#2d2d2d",
+            }}
+          />
+        )}
+
         <img
           src={displayImageUrl}
           alt={displayText || "シーシャ投稿"}
+          onLoad={() => setLoaded(true)}
           style={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
             display: "block",
+            opacity: loaded ? 1 : 0,
           }}
         />
 
@@ -73,12 +75,12 @@ export function PostCard({
           style={{
             position: "absolute",
             inset: 0,
-            background:
-              "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%, transparent 100%)",
+            background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%)",
+            pointerEvents: "none",
           }}
         />
 
-        {/* プログレスバー */}
+        {/* プログレスバー（フレームベースで幅を計算） */}
         {hasMultipleSlides && (
           <div
             style={{
@@ -95,7 +97,7 @@ export function PostCard({
               <div
                 key={index}
                 style={{
-                  height: 3,
+                  height: 4,
                   flex: 1,
                   borderRadius: 9999,
                   backgroundColor: "rgba(255,255,255,0.3)",
@@ -107,7 +109,12 @@ export function PostCard({
                     height: "100%",
                     borderRadius: 9999,
                     backgroundColor: "white",
-                    width: index < currentSlideIndex ? "100%" : "0%",
+                    width:
+                      index < currentSlideIndex
+                        ? "100%"
+                        : index === currentSlideIndex
+                          ? `${slideProgress * 100}%`
+                          : "0%",
                   }}
                 />
               </div>
@@ -126,8 +133,10 @@ export function PostCard({
             backgroundColor: "rgba(255,255,255,0.2)",
             border: "none",
             cursor: "pointer",
-            backdropFilter: "blur(4px)",
             zIndex: 10,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
           aria-label="いいね"
         >
@@ -160,27 +169,48 @@ export function PostCard({
             color: "white",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+          {/* アバター + ユーザー名 */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 8,
+            }}
+          >
             <Avatar
               src={post.user?.icon_url}
               alt={post.user?.display_name ?? "ユーザー"}
-              size={32}
+              size={28}
             />
-            <div style={{ fontSize: 14, fontWeight: 500 }}>{post.user?.display_name ?? "匿名"}</div>
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: "white",
+                fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+              }}
+            >
+              {post.user?.display_name ?? "匿名"}
+            </span>
           </div>
+
           <p
             style={{
-              fontSize: 13,
+              fontSize: 12,
               lineHeight: 1.4,
-              margin: 0,
+              margin: "0 0 6px",
+              color: "white",
+              fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
               display: "-webkit-box",
-              WebkitLineClamp: 3,
+              WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
             }}
           >
             {displayText}
           </p>
+
           {displayFlavor && <FlavorLabel flavor={displayFlavor} />}
         </div>
       </div>
