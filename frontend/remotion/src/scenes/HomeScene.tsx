@@ -1,12 +1,16 @@
 import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
 import { PostCard } from "../components/PostCard";
+import { usePreloadImages } from "../hooks/usePreloadImages";
 import { MOCK_POSTS } from "../mock-data";
+
+const ALL_IMAGES = MOCK_POSTS.flatMap((p) => p.slides?.map((s) => s.image_url ?? "") ?? []);
 
 /**
  * [2-7秒] ホーム画面（3列グリッド）
  * PostCardが並びスライド自動切り替えが映える
  */
 export function HomeScene() {
+  usePreloadImages(ALL_IMAGES);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const durationFrames = 5 * fps; // 5秒
@@ -55,8 +59,8 @@ export function HomeScene() {
       >
         <h2
           style={{
-            fontSize: 48,
-            fontWeight: 800,
+            fontSize: 40,
+            fontWeight: 600,
             color: "#ffffff",
             margin: 0,
             fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
