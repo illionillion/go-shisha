@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
     paths:
-      - "remotion/**"
+      - "frontend/remotion/**"
       - ".github/workflows/render-gif.yml"
 
 permissions:
@@ -42,7 +42,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-remotion-${{ hashFiles('remotion/package.json') }}
+          key: ${{ runner.os }}-pnpm-remotion-${{ hashFiles('frontend/package.json') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-remotion-
 
@@ -63,14 +63,14 @@ jobs:
             libxdamage1 \
             libxfixes3
 
-      - name: Install dependencies (remotion)
-        working-directory: ./remotion
+      - name: Install dependencies (frontend)
+        working-directory: ./frontend
         run: pnpm install
 
       - name: Render Promo GIF
-        working-directory: ./remotion
+        working-directory: ./frontend
         run: |
-          pnpm exec remotion render src/index.ts ShishaPromo ../docs/demo.gif \
+          pnpm exec remotion render remotion/src/index.ts ShishaPromo ../docs/demo.gif \
             --codec=gif \
             --fps=15 \
             --scale=0.5 \
