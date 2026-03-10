@@ -1,6 +1,6 @@
 "use client";
 import { clsx } from "clsx";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { PlusIcon, XIcon } from "@/components/icons";
 
 export type ImageUploaderProps = {
@@ -39,6 +39,7 @@ export function ImageUploader({
   const [error, setError] = useState<string | null>(null);
   const [internalFiles, setInternalFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Controlled/Uncontrolled両対応
   const files = value ?? internalFiles;
@@ -162,6 +163,20 @@ export function ImageUploader({
     [files, value, onFilesSelected]
   );
 
+  const handleOpenFileDialog = useCallback(() => {
+    inputRef.current?.click();
+  }, []);
+
+  const handleDropzoneKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleOpenFileDialog();
+      }
+    },
+    [handleOpenFileDialog]
+  );
+
   // プレビューURL生成とクリーンアップ
   useEffect(() => {
     // 新しいプレビューURLを生成
@@ -245,54 +260,91 @@ export function ImageUploader({
 
       {/* ファイル選択エリア（上限未満の場合のみ表示） */}
       {files.length < maxFiles && (
-        <div
-          onDragEnter={handleDragEnter}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          className={clsx([
-            "relative",
-            "flex",
-            "min-h-[200px]",
-            "cursor-pointer",
-            "flex-col",
-            "items-center",
-            "justify-center",
-            "rounded-lg",
-            "border-2",
-            "border-dashed",
-            "p-8",
-            "transition-all",
-            isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50",
-            disabled ? "cursor-not-allowed opacity-50" : "hover:border-blue-400 hover:bg-blue-50",
-          ])}
-        >
+        <>
+          {/* 共通ファイル入力 */}
           <input
+            ref={inputRef}
             type="file"
             multiple
             accept={acceptedFormats.join(",")}
             onChange={handleFileInputChange}
             disabled={disabled}
-            className={clsx([
-              "absolute",
-              "inset-0",
-              "h-full",
-              "w-full",
-              "cursor-pointer",
-              "opacity-0",
-            ])}
+            className={clsx(["sr-only"])}
             aria-label="画像ファイルを選択"
           />
 
-          <PlusIcon className={clsx(["mb-4", "h-12", "w-12", "text-gray-400"])} />
+          {/* デスクトップ: ドラッグ&ドロップゾーン（SPでは非表示） */}
+          <div
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={handleOpenFileDialog}
+            onKeyDown={handleDropzoneKeyDown}
+            className={clsx([
+              "relative",
+              "hidden",
+              "min-h-[200px]",
+              "cursor-pointer",
+              "flex-col",
+              "items-center",
+              "justify-center",
+              "rounded-lg",
+              "border-2",
+              "border-dashed",
+              "p-8",
+              "transition-all",
+              "md:flex",
+              isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50",
+              disabled ? "cursor-not-allowed opacity-50" : "hover:border-blue-400 hover:bg-blue-50",
+            ])}
+          >
+            <PlusIcon className={clsx(["mb-4", "h-12", "w-12", "text-gray-400"])} />
 
-          <p className={clsx(["mb-2", "text-sm", "font-medium", "text-gray-700"])}>
-            {files.length === 0 ? "クリックまたはドラッグ&ドロップで画像を選択" : "画像を追加"}
-          </p>
-          <p className={clsx(["text-xs", "text-gray-500"])}>
+            <p className={clsx(["text-sm", "font-medium", "text-gray-700"])}>
+              {files.length === 0 ? "クリックまたはドラッグ&ドロップで画像を選択" : "画像を追加"}
+            </p>
+          </div>
+
+          {/* SP: ボタン形式のファイル選択（デスクトップでは非表示） */}
+          <button
+            type="button"
+            onClick={handleOpenFileDialog}
+            disabled={disabled}
+            className={clsx([
+              "flex",
+              "w-full",
+              "items-center",
+              "justify-center",
+              "gap-2",
+              "rounded-lg",
+              "border-2",
+              "border-dashed",
+              "border-gray-300",
+              "bg-gray-50",
+              "px-6",
+              "py-4",
+              "text-sm",
+              "font-medium",
+              "text-gray-700",
+              "transition-all",
+              "md:hidden",
+              disabled
+                ? "cursor-not-allowed opacity-50"
+                : "active:border-blue-400 active:bg-blue-50",
+            ])}
+          >
+            <PlusIcon className={clsx(["h-5", "w-5", "text-gray-400"])} />
+            {files.length === 0 ? "タップして画像を選択" : "タップして追加"}
+          </button>
+
+          {/* 共通: ファイル形式・サイズ情報 */}
+          <p className={clsx(["mt-2", "text-xs", "text-gray-500"])}>
             JPG、PNG、WebP、GIF ({maxSizeMB}MB以下、あと{maxFiles - files.length}枚)
           </p>
-        </div>
+        </>
       )}
 
       {error && (
