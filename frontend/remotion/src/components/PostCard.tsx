@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { FlavorLabel } from "@/components/FlavorLabel/FlavorLabel";
-import type { Post } from "@/types/domain";
+import { FlavorLabel } from "../../../components/FlavorLabel/FlavorLabel";
+import type { Post } from "../../../types/domain";
 import { Avatar } from "./Avatar";
 
 interface PostCardProps {

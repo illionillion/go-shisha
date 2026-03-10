@@ -1,5 +1,5 @@
 import { useCurrentFrame, useVideoConfig, interpolate, Easing, spring } from "remotion";
-import { FlavorLabel } from "@/components/FlavorLabel/FlavorLabel";
+import { FlavorLabel } from "../../../components/FlavorLabel/FlavorLabel";
 import { Avatar } from "../components/Avatar";
 import { PostCard } from "../components/PostCard";
 import { FEATURED_POST } from "../mock-data";

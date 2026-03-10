@@ -1,4 +1,4 @@
-import type { Post } from "@/types/domain";
+import type { Post } from "../../types/domain";
 
 /** プロモ動画用モックデータ */
 export const MOCK_POSTS: Post[] = [

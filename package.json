@@ -36,8 +36,8 @@
     "vrt:down": "pnpm -F frontend vrt:down",
     "test:vrt": "pnpm -F frontend test:vrt",
     "test:vrt:update": "pnpm -F frontend test:vrt:update",
-    "remotion:studio": "pnpm -F remotion studio",
-    "remotion:render": "pnpm -F remotion render",
+    "remotion:studio": "pnpm -F frontend remotion:studio",
+    "remotion:render": "pnpm -F frontend remotion:render",
     "prepare": "lefthook install"
   },
   "devDependencies": {
