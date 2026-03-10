@@ -64,11 +64,11 @@ export function EndScene() {
         {/* アプリ名 */}
         <h1
           style={{
-            fontSize: 96,
-            fontWeight: 900,
+            fontSize: 72,
+            fontWeight: 600,
             color: "#ffffff",
             margin: 0,
-            letterSpacing: "-2px",
+            letterSpacing: "-1px",
             fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
           }}
         >
