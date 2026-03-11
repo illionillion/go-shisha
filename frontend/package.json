@@ -36,8 +36,8 @@
     "test:vrt:pc:update": "VRT_DEVICE=pc test-storybook --url http://localhost:6006 -u",
     "test:vrt:sp:update": "VRT_DEVICE=sp test-storybook --url http://localhost:6006 -u",
     "remotion:studio": "remotion studio remotion/src/index.ts",
-    "remotion:render": "remotion render remotion/src/index.ts ShishaPromo ../docs/demo.gif --codec=gif",
-    "remotion:render:mp4": "remotion render remotion/src/index.ts ShishaPromo ../docs/demo.mp4"
+    "remotion:render": "remotion render remotion/src/index.ts ShishaPromo ../docs/demo.gif --codec=gif --scale=0.5 --gl=angle",
+    "remotion:render:mp4": "remotion render remotion/src/index.ts ShishaPromo ../docs/demo.mp4 --scale=0.5 --gl=angle"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
