@@ -36,3 +36,4 @@ jobs:
           add: "docs"
           default_author: github_actions
           message: "docs: API ドキュメントを更新"
+          pull: "--rebase --autostash"
