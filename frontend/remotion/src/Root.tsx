@@ -7,8 +7,10 @@ import { HomeScene } from "./scenes/HomeScene";
 import { TitleScene } from "./scenes/TitleScene";
 import "./styles.css";
 
-// 全シーンで使う画像を事前収集
-const ALL_IMAGES = MOCK_POSTS.flatMap((p) => p.slides?.map((s) => s.image_url ?? "") ?? []);
+// 全シーンで使う画像を事前収集（空文字や未設定は除外）
+const ALL_IMAGES = MOCK_POSTS.flatMap((p) => p.slides?.map((s) => s.image_url) ?? []).filter(
+  (url): url is string => !!url
+);
 
 const FPS = 30;
 const WIDTH = 1280;

@@ -5,7 +5,7 @@ import type { Post } from "../../types/domain";
 export const MOCK_POSTS: Post[] = [
   {
     id: 1,
-    user: { id: 1, display_name: "テストユーザー", icon_url: "https://i.pravatar.cc/80?img=11" },
+    user: { id: 1, display_name: "テストユーザー" },
     slides: [
       {
         image_url: staticFile("images/264971_0.jpg"),
@@ -28,7 +28,7 @@ export const MOCK_POSTS: Post[] = [
   },
   {
     id: 2,
-    user: { id: 2, display_name: "シーシャマスター", icon_url: "https://i.pravatar.cc/80?img=12" },
+    user: { id: 2, display_name: "シーシャマスター" },
     slides: [
       {
         image_url: staticFile("images/264974_0.jpg"),
@@ -46,7 +46,7 @@ export const MOCK_POSTS: Post[] = [
   },
   {
     id: 3,
-    user: { id: 1, display_name: "テストユーザー", icon_url: "https://i.pravatar.cc/80?img=11" },
+    user: { id: 1, display_name: "テストユーザー" },
     slides: [
       {
         image_url: staticFile("images/264977_0.jpg"),
@@ -59,7 +59,7 @@ export const MOCK_POSTS: Post[] = [
   },
   {
     id: 4,
-    user: { id: 2, display_name: "シーシャマスター", icon_url: "https://i.pravatar.cc/80?img=12" },
+    user: { id: 2, display_name: "シーシャマスター" },
     slides: [
       {
         image_url: staticFile("images/264978_0.jpg"),
@@ -77,7 +77,7 @@ export const MOCK_POSTS: Post[] = [
   },
   {
     id: 5,
-    user: { id: 1, display_name: "テストユーザー", icon_url: "https://i.pravatar.cc/80?img=11" },
+    user: { id: 1, display_name: "テストユーザー" },
     slides: [
       {
         image_url: staticFile("images/264975_0.jpg"),
@@ -90,7 +90,7 @@ export const MOCK_POSTS: Post[] = [
   },
   {
     id: 6,
-    user: { id: 2, display_name: "シーシャマスター", icon_url: "https://i.pravatar.cc/80?img=12" },
+    user: { id: 2, display_name: "シーシャマスター" },
     slides: [
       {
         image_url: staticFile("images/264976_0.jpg"),

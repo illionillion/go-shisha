@@ -10,6 +10,7 @@ export function usePreloadImages(srcs: string[]) {
 
   useEffect(() => {
     let cancelled = false;
+    let resolved = false;
 
     Promise.all(
       srcs.map((src) => {
@@ -21,13 +22,14 @@ export function usePreloadImages(srcs: string[]) {
         });
       })
     ).then(() => {
+      resolved = true;
       if (!cancelled) continueRender(handle);
     });
 
     return () => {
       cancelled = true;
-      // アンマウント時にdelayRenderハンドルを解放する
-      continueRender(handle);
+      // Promiseが完了する前にアンマウントされた場合のみhandleを解放する
+      if (!resolved) continueRender(handle);
     };
   }, [handle, srcs]);
 }
