@@ -9,6 +9,8 @@ export function usePreloadImages(srcs: string[]) {
   const [handle] = useState(() => delayRender("Preloading images"));
 
   useEffect(() => {
+    let cancelled = false;
+
     Promise.all(
       srcs.map((src) => {
         const img = new Image();
@@ -18,6 +20,14 @@ export function usePreloadImages(srcs: string[]) {
           // decode 非対応ブラウザや失敗時はブロックしない
         });
       })
-    ).then(() => continueRender(handle));
-  }, [handle]);
+    ).then(() => {
+      if (!cancelled) continueRender(handle);
+    });
+
+    return () => {
+      cancelled = true;
+      // アンマウント時にdelayRenderハンドルを解放する
+      continueRender(handle);
+    };
+  }, [handle, srcs]);
 }
