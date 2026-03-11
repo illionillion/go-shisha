@@ -2,6 +2,10 @@
 
 NextとGoのモノレポで構築されたシーシャSNSアプリケーション
 
+## デモ
+
+![シーシャ行こう デモ](https://illionillion.github.io/go-shisha/demo.gif)
+
 ## プロジェクト構成（予定）
 
 ```
