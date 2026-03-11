@@ -15,19 +15,52 @@ body {
 }
 
 /* Tailwindが効かないRemotion環境用: FlavorLabelで使用するクラスを直接定義 */
-.bg-green-500 { background-color: #22c55e; }
-.bg-red-500 { background-color: #ef4444; }
-.bg-purple-500 { background-color: #a855f7; }
-.bg-yellow-500 { background-color: #eab308; }
-.bg-orange-500 { background-color: #f97316; }
-.bg-indigo-500 { background-color: #6366f1; }
-.bg-gray-500 { background-color: #6b7280; }
+.bg-green-500 {
+  background-color: #22c55e;
+}
+.bg-red-500 {
+  background-color: #ef4444;
+}
+.bg-purple-500 {
+  background-color: #a855f7;
+}
+.bg-yellow-500 {
+  background-color: #eab308;
+}
+.bg-orange-500 {
+  background-color: #f97316;
+}
+.bg-indigo-500 {
+  background-color: #6366f1;
+}
+.bg-gray-500 {
+  background-color: #6b7280;
+}
 
-.inline-block { display: inline-block; }
-.mt-2 { margin-top: 0.5rem; }
-.px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
-.py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-.text-xs { font-size: 0.75rem; line-height: 1rem; }
-.rounded-full { border-radius: 9999px; }
-.text-white { color: #ffffff; }
-.select-none { user-select: none; }
+.inline-block {
+  display: inline-block;
+}
+.mt-2 {
+  margin-top: 0.5rem;
+}
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+.py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+.rounded-full {
+  border-radius: 9999px;
+}
+.text-white {
+  color: #ffffff;
+}
+.select-none {
+  user-select: none;
+}
