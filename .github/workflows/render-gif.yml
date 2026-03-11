@@ -64,7 +64,8 @@ jobs:
             libxrandr2 \
             libxcomposite1 \
             libxdamage1 \
-            libxfixes3
+            libxfixes3 \
+            fonts-noto-cjk
 
       - name: Install dependencies (frontend)
         working-directory: ./frontend
