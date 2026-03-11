@@ -325,10 +325,10 @@ export function ImageUploader({
               "justify-center",
               "gap-2",
               "rounded-lg",
-              "border-2",
-              "border-dashed",
+              "border",
               "border-gray-300",
-              "bg-gray-50",
+              "bg-white",
+              "shadow-sm",
               "px-6",
               "py-4",
               "text-sm",
@@ -338,7 +338,7 @@ export function ImageUploader({
               "md:hidden",
               disabled
                 ? "cursor-not-allowed opacity-50"
-                : "active:border-blue-400 active:bg-blue-50",
+                : "hover:border-gray-400 hover:bg-gray-50 active:border-blue-400 active:bg-blue-50",
             ])}
           >
             <PlusIcon className={clsx(["h-5", "w-5", "text-gray-400"])} />
