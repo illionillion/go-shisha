@@ -72,7 +72,6 @@ jobs:
         run: |
           pnpm exec remotion render remotion/src/index.ts ShishaPromo ../docs/demo.gif \
             --codec=gif \
-            --fps=15 \
             --scale=0.5 \
             --gl=angle
         env:
