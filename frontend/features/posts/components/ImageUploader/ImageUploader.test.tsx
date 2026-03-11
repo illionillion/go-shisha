@@ -701,5 +701,56 @@ describe("ImageUploader", () => {
 
       expect(dropZone).toHaveAttribute("tabindex", "-1");
     });
+
+    it("disabled時はaria-disabledが設定される", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} disabled />);
+
+      const dropZone = screen
+        .getByText(/クリックまたはドラッグ&ドロップで画像を選択/)
+        .closest("div") as HTMLElement;
+
+      expect(dropZone).toHaveAttribute("aria-disabled", "true");
+    });
+
+    it("disabled時はクリックしてもダイアログが開かない", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} disabled />);
+
+      const dropZone = screen
+        .getByText(/クリックまたはドラッグ&ドロップで画像を選択/)
+        .closest("div") as HTMLElement;
+
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+      const clickSpy = vi.fn();
+      input.click = clickSpy;
+
+      fireEvent.click(dropZone);
+      expect(clickSpy).not.toHaveBeenCalled();
+    });
+
+    it("disabled時はEnterキーを押してもダイアログが開かない", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} disabled />);
+
+      const dropZone = screen
+        .getByText(/クリックまたはドラッグ&ドロップで画像を選択/)
+        .closest("div") as HTMLElement;
+
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+      const clickSpy = vi.fn();
+      input.click = clickSpy;
+
+      fireEvent.keyDown(dropZone, { key: "Enter" });
+      expect(clickSpy).not.toHaveBeenCalled();
+    });
+
+    it("sr-only inputのtabIndexが-1になっている", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+      expect(input).toHaveAttribute("tabindex", "-1");
+    });
   });
 });

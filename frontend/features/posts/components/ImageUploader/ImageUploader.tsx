@@ -261,7 +261,7 @@ export function ImageUploader({
       {/* ファイル選択エリア（上限未満の場合のみ表示） */}
       {files.length < maxFiles && (
         <>
-          {/* 共通ファイル入力 */}
+          {/* 共通ファイル入力（タブ順から外し、UI要素経由で開く） */}
           <input
             ref={inputRef}
             type="file"
@@ -269,6 +269,7 @@ export function ImageUploader({
             accept={acceptedFormats.join(",")}
             onChange={handleFileInputChange}
             disabled={disabled}
+            tabIndex={-1}
             className={clsx(["sr-only"])}
             aria-label="画像ファイルを選択"
           />
@@ -277,12 +278,13 @@ export function ImageUploader({
           <div
             role="button"
             tabIndex={disabled ? -1 : 0}
+            aria-disabled={disabled || undefined}
             onDragEnter={handleDragEnter}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            onClick={handleOpenFileDialog}
-            onKeyDown={handleDropzoneKeyDown}
+            onClick={disabled ? undefined : handleOpenFileDialog}
+            onKeyDown={disabled ? undefined : handleDropzoneKeyDown}
             className={clsx([
               "relative",
               "hidden",
@@ -303,8 +305,11 @@ export function ImageUploader({
           >
             <PlusIcon className={clsx(["mb-4", "h-12", "w-12", "text-gray-400"])} />
 
-            <p className={clsx(["text-sm", "font-medium", "text-gray-700"])}>
+            <p className={clsx(["mb-2", "text-sm", "font-medium", "text-gray-700"])}>
               {files.length === 0 ? "クリックまたはドラッグ&ドロップで画像を選択" : "画像を追加"}
+            </p>
+            <p className={clsx(["text-xs", "text-gray-500"])}>
+              JPG、PNG、WebP、GIF ({maxSizeMB}MB以下、あと{maxFiles - files.length}枚)
             </p>
           </div>
 
@@ -339,11 +344,6 @@ export function ImageUploader({
             <PlusIcon className={clsx(["h-5", "w-5", "text-gray-400"])} />
             {files.length === 0 ? "タップして画像を選択" : "タップして追加"}
           </button>
-
-          {/* 共通: ファイル形式・サイズ情報 */}
-          <p className={clsx(["mt-2", "text-xs", "text-gray-500"])}>
-            JPG、PNG、WebP、GIF ({maxSizeMB}MB以下、あと{maxFiles - files.length}枚)
-          </p>
         </>
       )}
 
