@@ -42,7 +42,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-remotion-${{ hashFiles('frontend/package.json') }}
+          key: ${{ runner.os }}-pnpm-remotion-${{ hashFiles('pnpm-lock.yaml', 'frontend/package.json') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-remotion-
 
@@ -65,7 +65,7 @@ jobs:
 
       - name: Install dependencies (frontend)
         working-directory: ./frontend
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Render Promo GIF
         working-directory: ./frontend
