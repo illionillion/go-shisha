@@ -10,17 +10,17 @@ export const MOCK_POSTS: Post[] = [
       {
         image_url: staticFile("images/264971_0.jpg"),
         text: "最初はミント。爽やかでスッキリ！",
-        flavor: { id: 1, name: "ミント", color: "#22c55e" },
+        flavor: { id: 1, name: "ミント", color: "bg-green-500" },
       },
       {
         image_url: staticFile("images/264972_0.jpg"),
         text: "次はダブルアップル。甘さが絶妙",
-        flavor: { id: 2, name: "アップル", color: "#ef4444" },
+        flavor: { id: 2, name: "アップル", color: "bg-red-500" },
       },
       {
         image_url: staticFile("images/264973_0.jpg"),
         text: "最後はベリー。締めにぴったり",
-        flavor: { id: 3, name: "ベリー", color: "#a855f7" },
+        flavor: { id: 3, name: "ベリー", color: "bg-purple-500" },
       },
     ],
     likes: 12,
@@ -33,12 +33,12 @@ export const MOCK_POSTS: Post[] = [
       {
         image_url: staticFile("images/264974_0.jpg"),
         text: "グレープの濃厚な香り",
-        flavor: { id: 6, name: "グレープ", color: "#6366f1" },
+        flavor: { id: 6, name: "グレープ", color: "bg-indigo-500" },
       },
       {
         image_url: staticFile("images/264975_0.jpg"),
         text: "オレンジでリフレッシュ",
-        flavor: { id: 5, name: "オレンジ", color: "#f97316" },
+        flavor: { id: 5, name: "オレンジ", color: "bg-orange-500" },
       },
     ],
     likes: 8,
@@ -51,7 +51,7 @@ export const MOCK_POSTS: Post[] = [
       {
         image_url: staticFile("images/264977_0.jpg"),
         text: "ベリー単体で味わい深い",
-        flavor: { id: 3, name: "ベリー", color: "#a855f7" },
+        flavor: { id: 3, name: "ベリー", color: "bg-purple-500" },
       },
     ],
     likes: 22,
@@ -64,12 +64,12 @@ export const MOCK_POSTS: Post[] = [
       {
         image_url: staticFile("images/264978_0.jpg"),
         text: "マンゴーで夏気分",
-        flavor: { id: 4, name: "マンゴー", color: "#eab308" },
+        flavor: { id: 4, name: "マンゴー", color: "bg-yellow-500" },
       },
       {
         image_url: staticFile("images/264979_0.jpg"),
         text: "ミントでクールダウン",
-        flavor: { id: 1, name: "ミント", color: "#22c55e" },
+        flavor: { id: 1, name: "ミント", color: "bg-green-500" },
       },
     ],
     likes: 15,
@@ -82,7 +82,7 @@ export const MOCK_POSTS: Post[] = [
       {
         image_url: staticFile("images/264975_0.jpg"),
         text: "オレンジで元気チャージ",
-        flavor: { id: 5, name: "オレンジ", color: "#f97316" },
+        flavor: { id: 5, name: "オレンジ", color: "bg-orange-500" },
       },
     ],
     likes: 18,
@@ -95,12 +95,12 @@ export const MOCK_POSTS: Post[] = [
       {
         image_url: staticFile("images/264976_0.jpg"),
         text: "グレープで濃厚な一服",
-        flavor: { id: 6, name: "グレープ", color: "#6366f1" },
+        flavor: { id: 6, name: "グレープ", color: "bg-indigo-500" },
       },
       {
         image_url: staticFile("images/264977_0.jpg"),
         text: "ベリーでさっぱり",
-        flavor: { id: 3, name: "ベリー", color: "#a855f7" },
+        flavor: { id: 3, name: "ベリー", color: "bg-purple-500" },
       },
     ],
     likes: 25,
