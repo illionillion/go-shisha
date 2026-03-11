@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { FlavorLabel } from "../../../components/FlavorLabel/FlavorLabel";
 import type { Post } from "../../../types/domain";
@@ -28,7 +28,17 @@ export function PostCard({ post, slideFrames = 90, liked = false }: PostCardProp
   const displayText = currentSlide?.text || "";
   const displayFlavor = currentSlide?.flavor;
 
+  const imgRef = useRef<HTMLImageElement>(null);
   const [loaded, setLoaded] = useState(false);
+
+  // スライド切り替え時にloaded状態をリセットしてスケルトンを再表示する
+  // キャッシュ済み画像はonLoadが再発火しないため、complete確認で即時解除する
+  useEffect(() => {
+    setLoaded(false);
+    if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
+      setLoaded(true);
+    }
+  }, [displayImageUrl]);
 
   // カード出現フェードイン（最初の0.3秒）
   const fadeIn = Math.min(1, frame / (fps * 0.3));
@@ -58,6 +68,7 @@ export function PostCard({ post, slideFrames = 90, liked = false }: PostCardProp
         )}
 
         <img
+          ref={imgRef}
           src={displayImageUrl}
           alt={displayText || "シーシャ投稿"}
           onLoad={() => setLoaded(true)}
