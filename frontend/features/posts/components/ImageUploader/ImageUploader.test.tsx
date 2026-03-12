@@ -581,4 +581,176 @@ describe("ImageUploader", () => {
       expect(mockOnFilesSelected).toHaveBeenCalledWith([]);
     });
   });
+
+  describe("SPモバイルUI", () => {
+    it("モバイル用のボタンが存在する", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      expect(screen.getByRole("button", { name: /タップして画像を選択/ })).toBeInTheDocument();
+    });
+
+    it("ファイル選択後のモバイルボタンテキストが変わる", async () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const file = createMockFile("test.jpg", 1024 * 1024, "image/jpeg");
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+      await userEvent.upload(input, file);
+
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: /タップして追加/ })).toBeInTheDocument();
+      });
+    });
+
+    it("disabled時はモバイルボタンが無効になる", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} disabled />);
+
+      const button = screen.getByRole("button", { name: /タップして画像を選択/ });
+      expect(button).toBeDisabled();
+    });
+
+    it("上限到達時はモバイルボタンが非表示になる", async () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} maxFiles={1} />);
+
+      const file = createMockFile("test.jpg", 1024 * 1024, "image/jpeg");
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+      await userEvent.upload(input, file);
+
+      await waitFor(() => {
+        expect(screen.queryByRole("button", { name: /タップして/ })).not.toBeInTheDocument();
+      });
+    });
+
+    it("モバイルボタンにmd:hiddenクラスが付与されている", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const button = screen.getByRole("button", { name: /タップして画像を選択/ });
+      expect(button).toHaveClass("md:hidden");
+    });
+  });
+
+  describe("デスクトップUI", () => {
+    it("デスクトップゾーンにhiddenとmd:flexクラスが付与されている", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const dropZone = screen
+        .getByText(/クリックまたはドラッグ&ドロップで画像を選択/)
+        .closest("div") as HTMLElement;
+
+      expect(dropZone).toHaveClass("hidden");
+      expect(dropZone).toHaveClass("md:flex");
+    });
+
+    it("デスクトップゾーンにrole=buttonとtabIndexが設定されている", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const dropZone = screen
+        .getByText(/クリックまたはドラッグ&ドロップで画像を選択/)
+        .closest("div") as HTMLElement;
+
+      expect(dropZone).toHaveAttribute("role", "button");
+      expect(dropZone).toHaveAttribute("tabindex", "0");
+    });
+
+    it("Enterキーでファイルダイアログが開ける", async () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const dropZone = screen
+        .getByText(/クリックまたはドラッグ&ドロップで画像を選択/)
+        .closest("div") as HTMLElement;
+
+      const clickSpy = vi.fn();
+      // inputRef.current.click のスパイとして input の click をモック
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+      input.click = clickSpy;
+
+      fireEvent.keyDown(dropZone, { key: "Enter" });
+      expect(clickSpy).toHaveBeenCalled();
+    });
+
+    it("Spaceキーでファイルダイアログが開ける", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const dropZone = screen
+        .getByText(/クリックまたはドラッグ&ドロップで画像を選択/)
+        .closest("div") as HTMLElement;
+
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+      const clickSpy = vi.fn();
+      input.click = clickSpy;
+
+      fireEvent.keyDown(dropZone, { key: " " });
+      expect(clickSpy).toHaveBeenCalled();
+    });
+
+    it("disabled時はtabIndexが-1になる", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} disabled />);
+
+      const dropZone = screen
+        .getByText(/クリックまたはドラッグ&ドロップで画像を選択/)
+        .closest("div") as HTMLElement;
+
+      expect(dropZone).toHaveAttribute("tabindex", "-1");
+    });
+
+    it("disabled時はaria-disabledが設定される", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} disabled />);
+
+      const dropZone = screen
+        .getByText(/クリックまたはドラッグ&ドロップで画像を選択/)
+        .closest("div") as HTMLElement;
+
+      expect(dropZone).toHaveAttribute("aria-disabled", "true");
+    });
+
+    it("disabled時はクリックしてもダイアログが開かない", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} disabled />);
+
+      const dropZone = screen
+        .getByText(/クリックまたはドラッグ&ドロップで画像を選択/)
+        .closest("div") as HTMLElement;
+
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+      const clickSpy = vi.fn();
+      input.click = clickSpy;
+
+      fireEvent.click(dropZone);
+      expect(clickSpy).not.toHaveBeenCalled();
+    });
+
+    it("disabled時はEnterキーを押してもダイアログが開かない", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} disabled />);
+
+      const dropZone = screen
+        .getByText(/クリックまたはドラッグ&ドロップで画像を選択/)
+        .closest("div") as HTMLElement;
+
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+      const clickSpy = vi.fn();
+      input.click = clickSpy;
+
+      fireEvent.keyDown(dropZone, { key: "Enter" });
+      expect(clickSpy).not.toHaveBeenCalled();
+    });
+
+    it("sr-only inputのtabIndexが-1になっている", () => {
+      const mockOnFilesSelected = vi.fn();
+      render(<ImageUploader onFilesSelected={mockOnFilesSelected} />);
+
+      const input = screen.getByLabelText("画像ファイルを選択") as HTMLInputElement;
+      expect(input).toHaveAttribute("tabindex", "-1");
+    });
+  });
 });
