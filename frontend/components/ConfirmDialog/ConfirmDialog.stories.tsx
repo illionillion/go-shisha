@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useEffect } from "react";
 import { useConfirmStore } from "@/lib/confirm-store";
 import { ConfirmDialog } from "./ConfirmDialog";

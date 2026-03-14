@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ImageUploader } from "./ImageUploader";
 
 // Base64エンコードされた小さな画像データ（1x1px カラフルなPNG）
