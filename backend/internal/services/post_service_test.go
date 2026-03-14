@@ -38,6 +38,7 @@ func (m *mockPostRepo) RemoveLike(userID, postID int) error { return nil }
 func (m *mockPostRepo) HasLiked(userID, postID int) (bool, error) {
 	return false, nil
 }
+func (m *mockPostRepo) DeletePost(userID, postID int) error { return nil }
 
 // spyPostRepo は AddLike/RemoveLike の呼び出しを記録し、状態を追跡するスパイ
 type spyPostRepo struct {
@@ -74,6 +75,7 @@ func (s *spyPostRepo) RemoveLike(userID, postID int) error {
 func (s *spyPostRepo) GetByID(id int, userID *int) (*models.Post, error) {
 	return &models.Post{ID: id, Likes: s.currentLikes, IsLiked: s.currentIsLiked}, nil
 }
+func (s *spyPostRepo) DeletePost(userID, postID int) error { return nil }
 
 type mockUserRepoForPost struct{}
 
@@ -283,6 +285,7 @@ func (m *mockPostRepoError) RemoveLike(userID, postID int) error { return errors
 func (m *mockPostRepoError) HasLiked(userID, postID int) (bool, error) {
 	return false, errors.New("db error")
 }
+func (m *mockPostRepoError) DeletePost(userID, postID int) error { return errors.New("db error") }
 
 type mockUserRepoMissing struct{}
 
@@ -510,5 +513,44 @@ func TestGetPostByID_WithUserID(t *testing.T) {
 	}
 	if post.ID != 1 {
 		t.Fatalf("expected post ID=1, got %d", post.ID)
+	}
+}
+
+// deletePostRepo はDeletePost用のモックリポジトリ
+type deletePostRepo struct {
+	mockPostRepo
+	deleteErr error
+}
+
+func (d *deletePostRepo) DeletePost(userID, postID int) error {
+	return d.deleteErr
+}
+
+func TestDeletePost_Success(t *testing.T) {
+	repo := &deletePostRepo{deleteErr: nil}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+
+	if err := postSvc.DeletePost(1, 10); err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+}
+
+func TestDeletePost_NotFound(t *testing.T) {
+	repo := &deletePostRepo{deleteErr: repositories.ErrPostNotFound}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+
+	err := postSvc.DeletePost(1, 999)
+	if !errors.Is(err, repositories.ErrPostNotFound) {
+		t.Fatalf("expected ErrPostNotFound, got %v", err)
+	}
+}
+
+func TestDeletePost_Forbidden(t *testing.T) {
+	repo := &deletePostRepo{deleteErr: repositories.ErrForbidden}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+
+	err := postSvc.DeletePost(1, 2)
+	if !errors.Is(err, repositories.ErrForbidden) {
+		t.Fatalf("expected ErrForbidden, got %v", err)
 	}
 }

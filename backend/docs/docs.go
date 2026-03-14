@@ -410,6 +410,68 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "指定された投稿を論理削除します（認証必須・投稿所有者のみ）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "投稿削除",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "投稿ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "削除成功"
+                    },
+                    "400": {
+                        "description": "無効な投稿ID",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ValidationError"
+                        }
+                    },
+                    "401": {
+                        "description": "認証エラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UnauthorizedError"
+                        }
+                    },
+                    "403": {
+                        "description": "権限エラー（投稿所有者でない）",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ForbiddenError"
+                        }
+                    },
+                    "404": {
+                        "description": "投稿が見つかりません",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.NotFoundError"
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
+                        }
+                    }
+                }
             }
         },
         "/posts/{id}/like": {

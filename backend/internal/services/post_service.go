@@ -174,3 +174,10 @@ func (s *PostService) UnlikePost(userID, postID int) (*models.Post, error) {
 	}
 	return s.postRepo.GetByID(postID, &userID)
 }
+
+// DeletePost は指定された投稿を論理削除する
+// 投稿が存在しない場合は repositories.ErrPostNotFound を返す
+// 投稿の所有者でない場合は repositories.ErrForbidden を返す
+func (s *PostService) DeletePost(userID, postID int) error {
+	return s.postRepo.DeletePost(userID, postID)
+}

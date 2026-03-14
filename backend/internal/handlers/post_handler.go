@@ -20,6 +20,7 @@ type PostServiceInterface interface {
 	CreatePost(userID int, input *models.CreatePostInput) (*models.Post, error)
 	LikePost(userID, postID int) (*models.Post, error)
 	UnlikePost(userID, postID int) (*models.Post, error)
+	DeletePost(userID, postID int) error
 }
 
 // PostHandler は投稿関連のHTTPリクエストを処理する
@@ -240,6 +241,58 @@ func (h *PostHandler) LikePost(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, post)
+}
+
+// DeletePost は DELETE /api/v1/posts/:id を処理する
+// @Summary 投稿削除
+// @Description 指定された投稿を論理削除します（認証必須・投稿所有者のみ）
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Param id path int true "投稿ID"
+// @Success 204 "削除成功"
+// @Failure 400 {object} models.ValidationError "無効な投稿ID"
+// @Failure 401 {object} models.UnauthorizedError "認証エラー"
+// @Failure 403 {object} models.ForbiddenError "権限エラー（投稿所有者でない）"
+// @Failure 404 {object} models.NotFoundError "投稿が見つかりません"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
+// @Security BearerAuth
+// @Router /posts/{id} [delete]
+func (h *PostHandler) DeletePost(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
+		return
+	}
+
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
+		return
+	}
+	userID, ok := userIDValue.(int)
+	if !ok {
+		logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "DeletePost")
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
+		return
+	}
+
+	if err := h.postService.DeletePost(userID, id); err != nil {
+		if errors.Is(err, repositories.ErrPostNotFound) {
+			c.JSON(http.StatusNotFound, models.NotFoundError{Error: models.ErrCodeNotFound})
+			return
+		}
+		if errors.Is(err, repositories.ErrForbidden) {
+			c.JSON(http.StatusForbidden, models.ForbiddenError{Error: models.ErrCodeForbidden})
+			return
+		}
+		logging.L.Error("failed to delete post", "handler", "PostHandler", "method", "DeletePost", "user_id", userID, "post_id", id, "error", err)
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
+		return
+	}
+
+	logging.L.Info("post deleted", "handler", "PostHandler", "method", "DeletePost", "user_id", userID, "post_id", id)
+	c.Status(http.StatusNoContent)
 }
 
 // UnlikePost は POST /api/v1/posts/:id/unlike を処理する

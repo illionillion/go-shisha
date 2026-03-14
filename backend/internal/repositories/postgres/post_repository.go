@@ -240,8 +240,8 @@ func (r *PostRepository) AddLike(userID, postID int) error {
 	return nil
 }
 
-// RemoveLike removes a like by userID on postID.
-// Returns ErrNotLiked if the user has not liked the post.
+// RemoveLike は userID が指定した postID に付与したいいねを削除する
+// ユーザーがその投稿にいいねしていない場合は ErrNotLiked を返す
 func (r *PostRepository) RemoveLike(userID, postID int) error {
 	logging.L.Debug("removing like", "repository", "PostRepository", "method", "RemoveLike", "user_id", userID, "post_id", postID)
 	err := r.db.Transaction(func(tx *gorm.DB) error {
@@ -267,6 +267,44 @@ func (r *PostRepository) RemoveLike(userID, postID int) error {
 		return err
 	}
 	logging.L.Info("like removed", "repository", "PostRepository", "method", "RemoveLike", "user_id", userID, "post_id", postID)
+	return nil
+}
+
+// DeletePost は postID を指定して投稿を論理削除する
+// 投稿が存在しない、またはすでに削除済みの場合は ErrPostNotFound を返す
+// 投稿が userID に紐づかない場合は ErrForbidden を返す
+func (r *PostRepository) DeletePost(userID, postID int) error {
+	logging.L.Debug("soft-deleting post", "repository", "PostRepository", "method", "DeletePost", "post_id", postID, "user_id", userID)
+
+	// まず投稿の存在を確認する
+	var pm postModel
+	if err := r.db.First(&pm, "id = ?", postID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			logging.L.Debug("post not found for deletion", "repository", "PostRepository", "method", "DeletePost", "post_id", postID)
+			return repositories.ErrPostNotFound
+		}
+		logging.L.Error("failed to find post for deletion", "repository", "PostRepository", "method", "DeletePost", "post_id", postID, "error", err)
+		return fmt.Errorf("failed to find post id=%d: %w", postID, err)
+	}
+
+	// 所有権チェック
+	if int(pm.UserID) != userID {
+		logging.L.Debug("user does not own post", "repository", "PostRepository", "method", "DeletePost", "post_id", postID, "user_id", userID, "owner_id", pm.UserID)
+		return repositories.ErrForbidden
+	}
+
+	// 論理削除
+	result := r.db.Delete(&pm)
+	if result.Error != nil {
+		logging.L.Error("failed to soft-delete post", "repository", "PostRepository", "method", "DeletePost", "post_id", postID, "error", result.Error)
+		return fmt.Errorf("failed to delete post id=%d: %w", postID, result.Error)
+	}
+	if result.RowsAffected == 0 {
+		logging.L.Debug("post already deleted or not found", "repository", "PostRepository", "method", "DeletePost", "post_id", postID)
+		return repositories.ErrPostNotFound
+	}
+
+	logging.L.Info("post soft-deleted", "repository", "PostRepository", "method", "DeletePost", "post_id", postID, "user_id", userID)
 	return nil
 }
 
