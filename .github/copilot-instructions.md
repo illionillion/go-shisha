@@ -6,61 +6,26 @@
 
 1. **応答言語**: 質問への回答は常に日本語で行ってください。
 2. **確認メッセージ**: ルールを参照したことを示すため、回答の冒頭に「ルールを参照しました！」と表示してください。
-3. **領域別ルールの必須参照**: 作業開始前に、対象領域のルールファイルを**必ず**参照する。Frontend作業→copilot-frontend.md、Backend作業→copilot-backend.md、レビュー→copilot-review.md、VRT→copilot-vrt.mdを読んでから作業開始。参照したファイル名を確認メッセージに明記する（例: "copilot-frontend.md のルールを参照しました！"）
+3. **領域別ルールの必須参照**: 作業開始前に、対象領域のルールファイルを**必ず**参照する。Frontend作業→`instructions/frontend.instructions.md`、Backend作業→`instructions/backend.instructions.md`、レビュー→`instructions/review.instructions.md`、VRT実行→`skills/vrt-run/SKILL.md`、Git/GitHub操作→`skills/github-ops/SKILL.md`。参照したファイル名を確認メッセージに明記する（例: "frontend.instructions.md のルールを参照しました！"）
 4. **推論・想像の禁止**: 推論や想像で作業しない。事実に基づいて作業する。不明な点は確認を求める。
 5. **テスト実行の効率化と検証**: 変更したファイルがある場合、まずテスト内容が修正内容を正しく検証できるかを確認してから、全体実行ではなく単体で実行して時間を省略する。必要に応じてテストケースを追加してから実行する
 6. **ルール管理**: 重要なベストプラクティスを発見した際は、基本ルールへの昇格も検討し、動的ルールセクションまたは基本ルールへの追加を提案する
 7. **設定ファイルの動作確認**: Linter設定、ビルド設定、CI設定等の設定ファイルを作成・変更した場合、必ず実行して動作確認してからコミットする。動作しない設定をコミットしてはならない
 8. **拡張可能な設計・データモデリング**: データモデルはオプションフィールドを活用し、将来的拡張を見据えた設計にする。Backendのクリーンアーキテクチャを遵守し、レイヤー間依存を最小化。Frontend/Backend間で型定義を共有し、API変更時の影響を抑える。
 
-## Copilot による Git・GitHub CLI 操作ルール
-
-Copilot が`git`・`gh` CLI を使ってコミット Issue/PR の作成・編集・コメント投稿を行う際に守る運用ルールをまとめます。自動化やスクリプトでの実行時は以下を必須チェックとして実装してください。
-
-- **ラベル確認**: PR/Issue 作成前に `gh label list` で必要なラベルが存在することを確認する。存在しない場合は `gh label create <name> --color <hex>` で作成するか、リポジトリ管理者へ追加を依頼すること。
-- **本文の扱い**: コマンドライン引数に `\n` を埋め込まず、実際の改行を含むファイルを作成して `gh pr create --body-file .github/DRAFTS/<branch>-pr.md`（または heredoc）で渡すこと。これによりシェル解釈や文字化けを防ぐ。
-- **実行手順（必須）**: 自動化/スクリプトは次の順で実行すること — (1) ラベル確認 → (2) 本文ファイル生成 → (3) `gh pr create --body-file` 実行。
-- **Issue テンプレート順守**: Issue 作成時は `.github/ISSUE_TEMPLATE` の該当テンプレートを読み込み、全項目を埋めて作成すること（CLI 経由でも必ず反映する）。
-- **Issue・PR内容のCLI確認徹底**: IssueやPRの内容・コメントを確認する際は、GitHubのWebページではなく必ずghコマンド（CLI）で確認する。作業効率・履歴管理のためWeb UIは原則使用しない。
-- **PR作成の最適化**: テンプレートに従いつつ、Copilotがレビューしやすいよう重点レビュー箇所を明記する。変更の意図・影響範囲・テスト方針を具体的に記載し、レビュー効率を向上させる
-- **PRレビューコメント確認**: PR上でCopilotのレビューを確認する際は`gh api url/comments`でコメントを確認し、GitHubのWeb UIではなくCLIで効率的に対応する
-- **GitHub投稿時の署名**: ghコマンドでIssueやPRにコメントを投稿する際は、コメント末尾に必ず「*-- by Copilot*」の署名を追加する。ユーザーとCopilotの投稿を明確に区別するため
-- **コミット前の変更確認**: コミット前に必ず`git status`で変更ファイルを確認し、漏れがないかチェックする。意図しないファイルの除外やステージング忘れを防ぐ
-- **コミット・操作前確認**: `git add`/`commit`/`push` やファイル削除、データベース操作など戻せない操作は、実行前にユーザーへ内容と影響を説明し明示的な許可を得ること。
-- **コミットメッセージ**: コミットメッセージはConventional Commitsに従い日本語で記述する。type: 日本語説明の形式を使用する（例: `feat: 投稿作成機能を追加`, `fix: API認証エラーを修正`）。
-- **コミット粒度の細分化**: 複数ファイルをまとめてaddしてコミットするのではなく、論理的に関連する変更ごとに小分けしてコミットする。1つのコミットは1つの明確な目的を持つようにし、レビューしやすい粒度に保つ。具体的には `git add 特定ファイル` → `git commit` を繰り返し、一度に複数の無関係な変更をコミットしない
-- **CLIコメント改行**: `gh` の `--body` を使う場合は `\n` ではなく実際の改行を含むファイルを使う（`--body-file` を推奨）。
-
 ## 本ドキュメントの役割と参照先
 
-このファイルは「共通基本ルール」を主要なソースとして残します。プロジェクト内の領域別ルールは以下のファイルに分割しています。各ファイルは先頭に「参照確認メッセージ」の指示を含んでいます。
+このファイルは「共通基本ルール」を唯一のソースとして管理します。領域別のルールとオンデマンドのワークフローは以下に分割しています。
 
-- `copilot-review.md` : PR / レビュー関連ルール（バッジ、レビュー方針など）
-- `copilot-frontend.md` : Frontend 固有ルール（TypeScript、Storybook、コンポーネント設計）
-- `copilot-backend.md` : Backend 固有ルール（Go、ビルド・テスト・DI 等）
-- `copilot-vrt.md` : VRT（Visual Regression Testing）運用ルール
+### `.github/instructions/`（ファイル編集時に自動ロード）
+- `backend.instructions.md` : Backend 固有ルール（Go、ビルド・テスト・DI 等） — `backend/**` に自動適用
+- `frontend.instructions.md` : Frontend 固有ルール（TypeScript、Storybook、コンポーネント設計） — `frontend/**` に自動適用
+- `review.instructions.md` : PR / レビュー関連ルール（バッジ、レビュー方針など） — 全ファイルに適用
 
-運用ルール:
-- トップの共通ルールは唯一の「共通ソース」です。領域別ファイルは補足・運用手順を持ち、重複は避けてください。
-- 各領域ファイルを参照したら、そのファイル名を明示した確認メッセージを回答冒頭に出すことをルール化します（例: `copilot-frontend.md のルールを参照しました！`）。
-
-## Copilotレビュー時の基本ルール
-
-1. **コメントの重要度バッジ**: レビューコメントには必ず以下のバッジを付ける
-   - ![must](https://img.shields.io/badge/review-MUST-red.svg) - 必ず修正が必要（バグ、セキュリティリスク、重大な設計ミス）
-   - ![should](https://img.shields.io/badge/review-SHOULD-orange.svg) - 修正を強く推奨（パフォーマンス、保守性、ベストプラクティス違反）
-   - ![imo](https://img.shields.io/badge/review-IMO-yellowgreen.svg) - 提案・意見（好み、代替案、改善の余地）
-   - ![ask](https://img.shields.io/badge/review-ASK-yellow.svg) - 選択肢の提示・方針確認（複数の実装案がある場合）
-   - ![question](https://img.shields.io/badge/review-QUESTION-blue.svg) - 質問・確認事項（意図を理解したい場合）
-   - ![nits](https://img.shields.io/badge/review-NITS-lightgrey.svg) - 些細な指摘（タイポ、フォーマット、コメント）
-   
-   参考: [Shields.io](https://shields.io/) でカスタムバッジを作成可能。状況に応じて適切なバッジを使い分けること
-
-2. **コンテキストを踏まえたレビュー**: diffだけでなく、関連ファイル全体を読み、変更の意図・影響範囲を理解してからレビューする。部分的な理解で不適切な指摘をしない
-
-3. **PR内の一貫性確保**: 同一PR内の既存レビューコメントを`gh pr view <PR番号> --comments`で確認し、矛盾や重複を避ける。修正済みの箇所に対して逆の指摘をしない
-
-4. **建設的なフィードバック**: 問題を指摘するだけでなく、具体的な修正案やコード例を提示する。「なぜそうすべきか」の理由も説明する
+### `.github/skills/`（ユーザーが明示的に指示した時のみ実行）
+- `github-ops/` : Issue作成・PR作成・コミット・ghコマンド操作の手順
+- `vrt-run/` : VRT実行・スナップショット更新手順
+- `swagger-gen/` : Swagger/OpenAPI の再生成手順
 
 ## ディレクトリ構造の理解
 
