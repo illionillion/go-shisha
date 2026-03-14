@@ -3,5 +3,7 @@
 
 ALTER TABLE posts ADD COLUMN deleted_at TIMESTAMPTZ;
 
--- 論理削除済み投稿を除外する検索の効率化のためインデックスを追加
-CREATE INDEX IF NOT EXISTS idx_posts_deleted_at ON posts(deleted_at) WHERE deleted_at IS NULL;
+-- GetAll: deleted_at IS NULL + ORDER BY created_at DESC 用インデックス
+CREATE INDEX IF NOT EXISTS idx_posts_not_deleted_created_at ON posts(created_at DESC) WHERE deleted_at IS NULL;
+-- GetByUserID: deleted_at IS NULL + WHERE user_id + ORDER BY created_at DESC 用インデックス
+CREATE INDEX IF NOT EXISTS idx_posts_not_deleted_user_id_created_at ON posts(user_id, created_at DESC) WHERE deleted_at IS NULL;
