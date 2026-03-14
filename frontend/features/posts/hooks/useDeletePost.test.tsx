@@ -53,14 +53,9 @@ describe("useDeletePost", () => {
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
 
-    mockPush = vi.fn();
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as unknown as ReturnType<
-      typeof useRouter
-    >);
-
     vi.clearAllMocks();
 
-    // clearAllMocks の後に再設定（clearAllMocks でリセットされるため）
+    // vi.clearAllMocks の後に useRouter のモックを再設定
     mockPush = vi.fn();
     vi.mocked(useRouter).mockReturnValue({ push: mockPush } as unknown as ReturnType<
       typeof useRouter

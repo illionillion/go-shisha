@@ -99,7 +99,7 @@ export function PostCard({
   const menuRef = useRef<HTMLDivElement>(null);
   const slides = post.slides || [];
   const hasMultipleSlides = slides.length > 1;
-  // onDelete が未指定のときはメニューを表示しない
+  // 自分の投稿かつ onDelete が指定された場合のみメニューを表示
   const isOwner = currentUserId != null && post.user_id === currentUserId && !!onDelete;
 
   /** 自動切り替えタイマー */
@@ -320,7 +320,7 @@ export function PostCard({
         </div>
       </div>
 
-      {/* ナビゲーション用透明オーバーレイ（z-[1]）- ボタン群（z-[2]/z-10）より背面 */}
+      {/* ナビゲーション用透明オーバーレイ（z-[1]）- ボタン群（z-[2]）より背面 */}
       {href && (
         <Link
           href={href}
