@@ -240,8 +240,8 @@ func (r *PostRepository) AddLike(userID, postID int) error {
 	return nil
 }
 
-// RemoveLike removes a like by userID on postID.
-// Returns ErrNotLiked if the user has not liked the post.
+// RemoveLike は userID が指定した postID に付与したいいねを削除する
+// ユーザーがその投稿にいいねしていない場合は ErrNotLiked を返す
 func (r *PostRepository) RemoveLike(userID, postID int) error {
 	logging.L.Debug("removing like", "repository", "PostRepository", "method", "RemoveLike", "user_id", userID, "post_id", postID)
 	err := r.db.Transaction(func(tx *gorm.DB) error {
@@ -270,9 +270,9 @@ func (r *PostRepository) RemoveLike(userID, postID int) error {
 	return nil
 }
 
-// DeletePost soft-deletes a post by postID.
-// Returns ErrPostNotFound if the post does not exist or is already deleted.
-// Returns ErrForbidden if the post does not belong to userID.
+// DeletePost は postID を指定して投稿を論理削除する
+// 投稿が存在しない、またはすでに削除済みの場合は ErrPostNotFound を返す
+// 投稿が userID に紐づかない場合は ErrForbidden を返す
 func (r *PostRepository) DeletePost(userID, postID int) error {
 	logging.L.Debug("soft-deleting post", "repository", "PostRepository", "method", "DeletePost", "post_id", postID, "user_id", userID)
 
