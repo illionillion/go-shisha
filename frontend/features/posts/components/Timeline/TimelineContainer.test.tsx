@@ -71,6 +71,21 @@ vi.mock("../../hooks/useLike", () => ({
   useLike: () => ({ onLike: vi.fn(), onUnlike: vi.fn() }),
 }));
 
+// --- useDeletePost モック ---
+vi.mock("../../hooks/useDeletePost", () => ({
+  useDeletePost: () => ({ onDelete: vi.fn(), isPending: false }),
+}));
+
+// --- useConfirm モック ---
+vi.mock("@/lib/useConfirm", () => ({
+  useConfirm: () => vi.fn().mockResolvedValue(true),
+}));
+
+// --- useAuthStore モック ---
+vi.mock("@/features/auth/stores/authStore", () => ({
+  useAuthStore: vi.fn(() => null),
+}));
+
 const mockFlavors: Flavor[] = [
   { id: 10, name: "ミント" },
   { id: 20, name: "レモン" },

@@ -3,9 +3,12 @@
 import { useMemo, useState } from "react";
 import { useGetPosts } from "@/api/posts";
 import { useGetUsersIdPosts } from "@/api/users";
+import { useAuthStore } from "@/features/auth/stores/authStore";
+import { useDeletePost } from "@/features/posts/hooks/useDeletePost";
 import { useLike } from "@/features/posts/hooks/useLike";
 import { getUserPostsErrorMessage } from "@/features/posts/utils/userPostsErrors";
 import { isSuccessResponse } from "@/lib/api-helpers";
+import { useConfirm } from "@/lib/useConfirm";
 import type { Flavor, Post } from "@/types/domain";
 import { Timeline } from "./Timeline";
 
@@ -24,6 +27,7 @@ interface TimelineContainerProps {
  */
 export function TimelineContainer({ initialPosts, userId }: TimelineContainerProps) {
   const [selectedFlavorIds, setSelectedFlavorIds] = useState<number[]>([]);
+  const currentUser = useAuthStore((state) => state.user);
 
   // ユーザーページであればそのユーザーの投稿を取得、そうでなければ全投稿を取得
   const usersHook = useGetUsersIdPosts(userId ?? 0, {
@@ -88,6 +92,17 @@ export function TimelineContainer({ initialPosts, userId }: TimelineContainerPro
   };
 
   const { onLike, onUnlike } = useLike();
+  const confirm = useConfirm();
+
+  const { onDelete } = useDeletePost();
+
+  /** 削除確認ダイアログを経由した削除ハンドラー */
+  const handleDelete = async (postId: number) => {
+    const ok = await confirm("この投稿を削除しますか？\nこの操作は取り消せません。");
+    if (ok) {
+      onDelete(postId);
+    }
+  };
 
   return (
     <Timeline
@@ -100,6 +115,8 @@ export function TimelineContainer({ initialPosts, userId }: TimelineContainerPro
       onFlavorToggle={handleFlavorToggle}
       onLike={onLike}
       onUnlike={onUnlike}
+      currentUserId={currentUser?.id ?? null}
+      onDelete={handleDelete}
     />
   );
 }

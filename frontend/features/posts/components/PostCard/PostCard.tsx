@@ -3,7 +3,7 @@
 import { cva } from "class-variance-authority";
 import { clsx } from "clsx";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/Avatar/Avatar";
 import { FlavorLabel } from "@/components/FlavorLabel";
 import { NextIcon, PrevIcon } from "@/components/icons";
@@ -16,6 +16,10 @@ interface PostCardProps {
   onUnlike?: (postId: number) => void;
   /** 自動切り替えのインターバル（ミリ秒）。デフォルト3000ms */
   autoPlayInterval?: number;
+  /** 現在ログイン中のユーザーID（自分の投稿かどうかの判定に使用） */
+  currentUserId?: number | null;
+  /** 投稿削除コールバック（自分の投稿にのみ表示） */
+  onDelete?: (postId: number) => void;
 }
 
 const cardVariants = cva(["relative", "cursor-pointer", "group"], {
@@ -50,6 +54,25 @@ const likeButtonVariants = cva(
   }
 );
 
+const menuButtonVariants = cva(
+  [
+    "absolute",
+    // いいねボタン（top-4 + h-9 相当）の直下に配置
+    "top-14",
+    "right-4",
+    "p-2",
+    "rounded-full",
+    "bg-white/20",
+    "backdrop-blur-sm",
+    "hover:bg-white/30",
+    "transition-colors",
+    "z-10",
+  ],
+  {
+    variants: {},
+  }
+);
+
 /**
  * PostCardコンポーネント
  * REQUIREMENTS.mdの仕様に基づいた投稿カード
@@ -62,11 +85,21 @@ const likeButtonVariants = cva(
  * - 自動切り替え＋手動切り替え対応
  * - 進捗バー表示
  */
-export function PostCard({ post, onLike, onUnlike, autoPlayInterval = 3000 }: PostCardProps) {
+export function PostCard({
+  post,
+  onLike,
+  onUnlike,
+  autoPlayInterval = 3000,
+  currentUserId,
+  onDelete,
+}: PostCardProps) {
   const [isLiked, setIsLiked] = useState(post.is_liked || false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const slides = post.slides || [];
   const hasMultipleSlides = slides.length > 1;
+  const isOwner = currentUserId != null && post.user_id === currentUserId;
 
   /** 自動切り替えタイマー */
   useEffect(() => {
@@ -85,6 +118,30 @@ export function PostCard({ post, onLike, onUnlike, autoPlayInterval = 3000 }: Po
   useEffect(() => {
     setIsLiked(post.is_liked || false);
   }, [post.is_liked]);
+
+  /** メニュー外クリックで閉じる */
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isMenuOpen]);
 
   /** 前のスライドへ */
   const handlePrevSlide = (e: React.MouseEvent) => {
@@ -116,6 +173,23 @@ export function PostCard({ post, onLike, onUnlike, autoPlayInterval = 3000 }: Po
         if (onUnlike) onUnlike(post.id);
         else onLike(post.id);
       }
+    }
+  };
+
+  /** 3点リーダーメニュー開閉 */
+  const handleMenuToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsMenuOpen((prev) => !prev);
+  };
+
+  /** 削除ボタンクリック */
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    if (post.id && onDelete) {
+      onDelete(post.id);
     }
   };
 
@@ -263,6 +337,61 @@ export function PostCard({ post, onLike, onUnlike, autoPlayInterval = 3000 }: Po
             />
           </svg>
         </button>
+
+        {/* 3点リーダーメニュー（自分の投稿のみ） */}
+        {isOwner && (
+          <div ref={menuRef} className={clsx(["absolute", "top-14", "right-4", "z-10"])}>
+            <button
+              type="button"
+              onClick={handleMenuToggle}
+              className={menuButtonVariants()}
+              aria-label="メニュー"
+              aria-expanded={isMenuOpen}
+            >
+              <svg
+                className={clsx(["w-5", "h-5", "text-white"])}
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="5" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="12" cy="19" r="1.5" />
+              </svg>
+            </button>
+
+            {isMenuOpen && (
+              <div
+                className={clsx([
+                  "absolute",
+                  "right-0",
+                  "mt-1",
+                  "w-28",
+                  "bg-white",
+                  "rounded-lg",
+                  "shadow-lg",
+                  "overflow-hidden",
+                ])}
+              >
+                <button
+                  type="button"
+                  onClick={handleDeleteClick}
+                  className={clsx([
+                    "w-full",
+                    "px-4",
+                    "py-2",
+                    "text-sm",
+                    "text-left",
+                    "text-red-600",
+                    "hover:bg-red-50",
+                    "transition-colors",
+                  ])}
+                >
+                  削除
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
