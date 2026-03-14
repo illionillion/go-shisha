@@ -449,6 +449,46 @@ paths:
       tags:
       - posts
   /posts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 指定された投稿を論理削除します（認証必須・投稿所有者のみ）
+      parameters:
+      - description: 投稿ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: 削除成功
+        "400":
+          description: 無効な投稿ID
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ValidationError'
+        "401":
+          description: 認証エラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.UnauthorizedError'
+        "403":
+          description: 権限エラー（投稿所有者でない）
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ForbiddenError'
+        "404":
+          description: 投稿が見つかりません
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.NotFoundError'
+        "500":
+          description: サーバーエラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
+      security:
+      - BearerAuth: []
+      summary: 投稿削除
+      tags:
+      - posts
     get:
       consumes:
       - application/json

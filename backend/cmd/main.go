@@ -187,6 +187,7 @@ func main() {
 		api.POST("/posts", middleware.AuthMiddleware(), postHandler.CreatePost)
 		api.POST("/posts/:id/like", middleware.AuthMiddleware(), postHandler.LikePost)
 		api.POST("/posts/:id/unlike", middleware.AuthMiddleware(), postHandler.UnlikePost)
+		api.DELETE("/posts/:id", middleware.AuthMiddleware(), postHandler.DeletePost)
 
 		// Users endpoints
 		api.GET("/users", userHandler.GetAllUsers)

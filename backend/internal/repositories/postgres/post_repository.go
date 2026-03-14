@@ -270,6 +270,39 @@ func (r *PostRepository) RemoveLike(userID, postID int) error {
 	return nil
 }
 
+// DeletePost soft-deletes a post by postID.
+// Returns ErrPostNotFound if the post does not exist or is already deleted.
+// Returns ErrForbidden if the post does not belong to userID.
+func (r *PostRepository) DeletePost(userID, postID int) error {
+	logging.L.Debug("soft-deleting post", "repository", "PostRepository", "method", "DeletePost", "post_id", postID, "user_id", userID)
+
+	// まず投稿の存在を確認する
+	var pm postModel
+	if err := r.db.First(&pm, "id = ?", postID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			logging.L.Debug("post not found for deletion", "repository", "PostRepository", "method", "DeletePost", "post_id", postID)
+			return repositories.ErrPostNotFound
+		}
+		logging.L.Error("failed to find post for deletion", "repository", "PostRepository", "method", "DeletePost", "post_id", postID, "error", err)
+		return fmt.Errorf("failed to find post id=%d: %w", postID, err)
+	}
+
+	// 所有権チェック
+	if int(pm.UserID) != userID {
+		logging.L.Debug("user does not own post", "repository", "PostRepository", "method", "DeletePost", "post_id", postID, "user_id", userID, "owner_id", pm.UserID)
+		return repositories.ErrForbidden
+	}
+
+	// 論理削除
+	if err := r.db.Delete(&pm).Error; err != nil {
+		logging.L.Error("failed to soft-delete post", "repository", "PostRepository", "method", "DeletePost", "post_id", postID, "error", err)
+		return fmt.Errorf("failed to delete post id=%d: %w", postID, err)
+	}
+
+	logging.L.Info("post soft-deleted", "repository", "PostRepository", "method", "DeletePost", "post_id", postID, "user_id", userID)
+	return nil
+}
+
 func (r *PostRepository) GetByUserID(userID int, currentUserID *int) ([]models.Post, error) {
 	logging.L.Debug("querying posts by user ID", "repository", "PostRepository", "method", "GetByUserID", "user_id", userID)
 	var pms []postModel

@@ -436,3 +436,83 @@ func TestGetByUserID_IsLiked(t *testing.T) {
 		}
 	}
 }
+
+func TestDeletePost_Success(t *testing.T) {
+db := setupTestDB(t)
+repo := NewPostRepository(db)
+userID, postID := setupPostAndUser(t, db)
+
+if err := repo.DeletePost(userID, postID); err != nil {
+t.Fatalf("DeletePost failed: %v", err)
+}
+
+// 論理削除後はGetByIDで取得できないこと
+_, err := repo.GetByID(postID, nil)
+if !errors.Is(err, repositories.ErrPostNotFound) {
+t.Fatalf("expected ErrPostNotFound after DeletePost, got %v", err)
+}
+}
+
+func TestDeletePost_NotFound(t *testing.T) {
+db := setupTestDB(t)
+repo := NewPostRepository(db)
+
+err := repo.DeletePost(1, 9999)
+if !errors.Is(err, repositories.ErrPostNotFound) {
+t.Fatalf("expected ErrPostNotFound for non-existent post, got %v", err)
+}
+}
+
+func TestDeletePost_Forbidden(t *testing.T) {
+db := setupTestDB(t)
+repo := NewPostRepository(db)
+_, postID := setupPostAndUser(t, db)
+
+// 別ユーザー（ID=2）で削除しようとすると ErrForbidden
+err := repo.DeletePost(2, postID)
+if !errors.Is(err, repositories.ErrForbidden) {
+t.Fatalf("expected ErrForbidden when deleting another user's post, got %v", err)
+}
+}
+
+func TestDeletePost_NotInGetAll(t *testing.T) {
+db := setupTestDB(t)
+repo := NewPostRepository(db)
+userID, postID := setupPostAndUser(t, db)
+
+if err := repo.DeletePost(userID, postID); err != nil {
+t.Fatalf("DeletePost failed: %v", err)
+}
+
+// 論理削除後はGetAllに含まれないこと
+posts, err := repo.GetAll(nil)
+if err != nil {
+t.Fatalf("GetAll failed: %v", err)
+}
+for _, p := range posts {
+if p.ID == postID {
+t.Fatalf("deleted post should not appear in GetAll")
+}
+}
+}
+
+func TestDeletePost_NotInGetByUserID(t *testing.T) {
+db := setupTestDB(t)
+repo := NewPostRepository(db)
+userID, postID := setupPostAndUser(t, db)
+
+if err := repo.DeletePost(userID, postID); err != nil {
+t.Fatalf("DeletePost failed: %v", err)
+}
+
+// 論理削除後はGetByUserIDに含まれないこと
+posts, err := repo.GetByUserID(userID, nil)
+if err != nil {
+t.Fatalf("GetByUserID failed: %v", err)
+}
+for _, p := range posts {
+if p.ID == postID {
+t.Fatalf("deleted post should not appear in GetByUserID")
+}
+}
+}

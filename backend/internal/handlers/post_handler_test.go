@@ -29,11 +29,12 @@ func init() {
 
 // mockPostService はテスト用のPostServiceモック
 type mockPostService struct {
-	getAllPostsFunc func(userID *int) ([]models.Post, error)
+	getAllPostsFunc  func(userID *int) ([]models.Post, error)
 	getPostByIDFunc func(id int, userID *int) (*models.Post, error)
 	createPostFunc  func(userID int, input *models.CreatePostInput) (*models.Post, error)
 	likePostFunc    func(userID, postID int) (*models.Post, error)
 	unlikePostFunc  func(userID, postID int) (*models.Post, error)
+	deletePostFunc  func(userID, postID int) error
 }
 
 func (m *mockPostService) GetAllPosts(userID *int) ([]models.Post, error) {
@@ -69,6 +70,13 @@ func (m *mockPostService) UnlikePost(userID, postID int) (*models.Post, error) {
 		return m.unlikePostFunc(userID, postID)
 	}
 	return nil, nil
+}
+
+func (m *mockPostService) DeletePost(userID, postID int) error {
+	if m.deletePostFunc != nil {
+		return m.deletePostFunc(userID, postID)
+	}
+	return nil
 }
 
 func TestCreatePost_NoAuth(t *testing.T) {
@@ -919,4 +927,129 @@ func TestCreatePost_ImageNotFound_404(t *testing.T) {
 	err := json.Unmarshal(rec.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.Equal(t, models.ErrCodeNotFound, response.Error)
+}
+
+func TestDeletePost_Success(t *testing.T) {
+gin.SetMode(gin.TestMode)
+
+mockService := &mockPostService{
+deletePostFunc: func(userID, postID int) error {
+return nil
+},
+}
+handler := NewPostHandler(mockService)
+
+router := gin.New()
+router.DELETE("/posts/:id", func(c *gin.Context) {
+c.Set("user_id", 1)
+handler.DeletePost(c)
+})
+
+req := httptest.NewRequest(http.MethodDelete, "/posts/1", nil)
+rec := httptest.NewRecorder()
+
+router.ServeHTTP(rec, req)
+
+assert.Equal(t, http.StatusNoContent, rec.Code)
+}
+
+func TestDeletePost_NoAuth(t *testing.T) {
+gin.SetMode(gin.TestMode)
+
+mockService := &mockPostService{}
+handler := NewPostHandler(mockService)
+
+router := gin.New()
+router.DELETE("/posts/:id", handler.DeletePost)
+
+req := httptest.NewRequest(http.MethodDelete, "/posts/1", nil)
+rec := httptest.NewRecorder()
+
+router.ServeHTTP(rec, req)
+
+assert.Equal(t, http.StatusUnauthorized, rec.Code)
+var response models.UnauthorizedError
+err := json.Unmarshal(rec.Body.Bytes(), &response)
+assert.NoError(t, err)
+assert.Equal(t, models.ErrCodeUnauthorized, response.Error)
+}
+
+func TestDeletePost_NotFound(t *testing.T) {
+gin.SetMode(gin.TestMode)
+
+mockService := &mockPostService{
+deletePostFunc: func(userID, postID int) error {
+return repositories.ErrPostNotFound
+},
+}
+handler := NewPostHandler(mockService)
+
+router := gin.New()
+router.DELETE("/posts/:id", func(c *gin.Context) {
+c.Set("user_id", 1)
+handler.DeletePost(c)
+})
+
+req := httptest.NewRequest(http.MethodDelete, "/posts/999", nil)
+rec := httptest.NewRecorder()
+
+router.ServeHTTP(rec, req)
+
+assert.Equal(t, http.StatusNotFound, rec.Code)
+var response models.NotFoundError
+err := json.Unmarshal(rec.Body.Bytes(), &response)
+assert.NoError(t, err)
+assert.Equal(t, models.ErrCodeNotFound, response.Error)
+}
+
+func TestDeletePost_Forbidden(t *testing.T) {
+gin.SetMode(gin.TestMode)
+
+mockService := &mockPostService{
+deletePostFunc: func(userID, postID int) error {
+return repositories.ErrForbidden
+},
+}
+handler := NewPostHandler(mockService)
+
+router := gin.New()
+router.DELETE("/posts/:id", func(c *gin.Context) {
+c.Set("user_id", 2)
+handler.DeletePost(c)
+})
+
+req := httptest.NewRequest(http.MethodDelete, "/posts/1", nil)
+rec := httptest.NewRecorder()
+
+router.ServeHTTP(rec, req)
+
+assert.Equal(t, http.StatusForbidden, rec.Code)
+var response models.ForbiddenError
+err := json.Unmarshal(rec.Body.Bytes(), &response)
+assert.NoError(t, err)
+assert.Equal(t, models.ErrCodeForbidden, response.Error)
+}
+
+func TestDeletePost_InvalidID(t *testing.T) {
+gin.SetMode(gin.TestMode)
+
+mockService := &mockPostService{}
+handler := NewPostHandler(mockService)
+
+router := gin.New()
+router.DELETE("/posts/:id", func(c *gin.Context) {
+c.Set("user_id", 1)
+handler.DeletePost(c)
+})
+
+req := httptest.NewRequest(http.MethodDelete, "/posts/invalid", nil)
+rec := httptest.NewRecorder()
+
+router.ServeHTTP(rec, req)
+
+assert.Equal(t, http.StatusBadRequest, rec.Code)
+var response models.ValidationError
+err := json.Unmarshal(rec.Body.Bytes(), &response)
+assert.NoError(t, err)
+assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
 }

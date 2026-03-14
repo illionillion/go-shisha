@@ -1,6 +1,10 @@
 package postgres
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 // userModel represents the users table
 type userModel struct {
@@ -20,12 +24,13 @@ func (userModel) TableName() string {
 
 // postModel represents the posts table
 type postModel struct {
-	ID        int64        `gorm:"primaryKey;column:id"`
-	UserID    int64        `gorm:"column:user_id"`
-	Likes     int          `gorm:"column:likes"`
-	CreatedAt time.Time    `gorm:"column:created_at"`
-	User      *userModel   `gorm:"foreignKey:UserID"`
-	Slides    []slideModel `gorm:"foreignKey:PostID"`
+	ID        int64          `gorm:"primaryKey;column:id"`
+	UserID    int64          `gorm:"column:user_id"`
+	Likes     int            `gorm:"column:likes"`
+	CreatedAt time.Time      `gorm:"column:created_at"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index"`
+	User      *userModel     `gorm:"foreignKey:UserID"`
+	Slides    []slideModel   `gorm:"foreignKey:PostID"`
 }
 
 // TableName ensures GORM uses the existing `posts` table

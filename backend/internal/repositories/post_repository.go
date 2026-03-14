@@ -13,6 +13,8 @@ var (
 	ErrNotLiked = errors.New("not liked")
 	// ErrPostNotFound is returned when a post is not found
 	ErrPostNotFound = errors.New("post not found")
+	// ErrForbidden is returned when a user tries to perform an action they are not allowed to
+	ErrForbidden = errors.New("forbidden")
 )
 
 /**
@@ -47,4 +49,9 @@ type PostRepository interface {
 
 	// HasLiked returns true if userID has liked postID.
 	HasLiked(userID, postID int) (bool, error)
+
+	// DeletePost soft-deletes a post by postID.
+	// Returns ErrPostNotFound if the post does not exist or is already deleted.
+	// Returns ErrForbidden if the post does not belong to userID.
+	DeletePost(userID, postID int) error
 }
