@@ -518,39 +518,39 @@ func TestGetPostByID_WithUserID(t *testing.T) {
 
 // deletePostRepo はDeletePost用のモックリポジトリ
 type deletePostRepo struct {
-mockPostRepo
-deleteErr error
+	mockPostRepo
+	deleteErr error
 }
 
 func (d *deletePostRepo) DeletePost(userID, postID int) error {
-return d.deleteErr
+	return d.deleteErr
 }
 
 func TestDeletePost_Success(t *testing.T) {
-repo := &deletePostRepo{deleteErr: nil}
-postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	repo := &deletePostRepo{deleteErr: nil}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
 
-if err := postSvc.DeletePost(1, 10); err != nil {
-t.Fatalf("expected no error, got %v", err)
-}
+	if err := postSvc.DeletePost(1, 10); err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
 }
 
 func TestDeletePost_NotFound(t *testing.T) {
-repo := &deletePostRepo{deleteErr: repositories.ErrPostNotFound}
-postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	repo := &deletePostRepo{deleteErr: repositories.ErrPostNotFound}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
 
-err := postSvc.DeletePost(1, 999)
-if !errors.Is(err, repositories.ErrPostNotFound) {
-t.Fatalf("expected ErrPostNotFound, got %v", err)
-}
+	err := postSvc.DeletePost(1, 999)
+	if !errors.Is(err, repositories.ErrPostNotFound) {
+		t.Fatalf("expected ErrPostNotFound, got %v", err)
+	}
 }
 
 func TestDeletePost_Forbidden(t *testing.T) {
-repo := &deletePostRepo{deleteErr: repositories.ErrForbidden}
-postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+	repo := &deletePostRepo{deleteErr: repositories.ErrForbidden}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
 
-err := postSvc.DeletePost(1, 2)
-if !errors.Is(err, repositories.ErrForbidden) {
-t.Fatalf("expected ErrForbidden, got %v", err)
-}
+	err := postSvc.DeletePost(1, 2)
+	if !errors.Is(err, repositories.ErrForbidden) {
+		t.Fatalf("expected ErrForbidden, got %v", err)
+	}
 }

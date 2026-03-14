@@ -294,9 +294,14 @@ func (r *PostRepository) DeletePost(userID, postID int) error {
 	}
 
 	// 論理削除
-	if err := r.db.Delete(&pm).Error; err != nil {
-		logging.L.Error("failed to soft-delete post", "repository", "PostRepository", "method", "DeletePost", "post_id", postID, "error", err)
-		return fmt.Errorf("failed to delete post id=%d: %w", postID, err)
+	result := r.db.Delete(&pm)
+	if result.Error != nil {
+		logging.L.Error("failed to soft-delete post", "repository", "PostRepository", "method", "DeletePost", "post_id", postID, "error", result.Error)
+		return fmt.Errorf("failed to delete post id=%d: %w", postID, result.Error)
+	}
+	if result.RowsAffected == 0 {
+		logging.L.Debug("post already deleted or not found", "repository", "PostRepository", "method", "DeletePost", "post_id", postID)
+		return repositories.ErrPostNotFound
 	}
 
 	logging.L.Info("post soft-deleted", "repository", "PostRepository", "method", "DeletePost", "post_id", postID, "user_id", userID)
