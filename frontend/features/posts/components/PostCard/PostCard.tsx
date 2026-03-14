@@ -3,6 +3,7 @@
 import { cva } from "class-variance-authority";
 import { clsx } from "clsx";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/Avatar/Avatar";
 import { FlavorLabel } from "@/components/FlavorLabel";
@@ -20,6 +21,8 @@ interface PostCardProps {
   currentUserId?: number | null;
   /** 投稿削除コールバック（自分の投稿にのみ表示） */
   onDelete?: (postId: number) => void;
+  /** 投稿詳細ページへのリンク */
+  href?: string;
 }
 
 const cardVariants = cva(["relative", "cursor-pointer", "group"], {
@@ -42,6 +45,8 @@ const likeButtonVariants = cva(
     "absolute",
     "top-4",
     "right-4",
+    // リンクオーバーレイ（z-[1]）より前面に表示
+    "z-[2]",
     "p-2",
     "rounded-full",
     "bg-white/20",
@@ -56,17 +61,12 @@ const likeButtonVariants = cva(
 
 const menuButtonVariants = cva(
   [
-    "absolute",
-    // いいねボタン（top-4 + h-9 相当）の直下に配置
-    "top-14",
-    "right-4",
     "p-2",
     "rounded-full",
     "bg-white/20",
     "backdrop-blur-sm",
     "hover:bg-white/30",
     "transition-colors",
-    "z-10",
   ],
   {
     variants: {},
@@ -80,7 +80,6 @@ const menuButtonVariants = cva(
  * - 画像上にテキストオーバーレイ
  * - フレーバー名の色付きラベル表示
  * - いいねボタン
- * - クリックで投稿詳細ページへ遷移（予定）
  * - 複数画像スライド対応（インスタストーリー風）
  * - 自動切り替え＋手動切り替え対応
  * - 進捗バー表示
@@ -92,6 +91,7 @@ export function PostCard({
   autoPlayInterval = 3000,
   currentUserId,
   onDelete,
+  href,
 }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(post.is_liked || false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -99,7 +99,8 @@ export function PostCard({
   const menuRef = useRef<HTMLDivElement>(null);
   const slides = post.slides || [];
   const hasMultipleSlides = slides.length > 1;
-  const isOwner = currentUserId != null && post.user_id === currentUserId;
+  // onDelete が未指定のときはメニューを表示しない
+  const isOwner = currentUserId != null && post.user_id === currentUserId && !!onDelete;
 
   /** 自動切り替えタイマー */
   useEffect(() => {
@@ -119,12 +120,12 @@ export function PostCard({
     setIsLiked(post.is_liked || false);
   }, [post.is_liked]);
 
-  /** メニュー外クリックで閉じる */
+  /** メニュー外クリックおよびESCキーで閉じる */
   useEffect(() => {
     if (!isMenuOpen) return;
 
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      if (menuRef.current && e.target instanceof Node && !menuRef.current.contains(e.target)) {
         setIsMenuOpen(false);
       }
     };
@@ -317,82 +318,97 @@ export function PostCard({
           <p className={clsx(["text-sm", "line-clamp-3"])}>{displayText}</p>
           {displayFlavor && <FlavorLabel flavor={displayFlavor} />}
         </div>
-        <button onClick={handleLike} className={likeButtonVariants()} aria-label="いいね">
-          <svg
-            className={clsx([
-              "w-5",
-              "h-5",
-              isLiked ? "text-red-500" : "text-white",
-              isLiked && "fill-current",
-            ])}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+      </div>
+
+      {/* ナビゲーション用透明オーバーレイ（z-[1]）- ボタン群（z-[2]/z-10）より背面 */}
+      {href && (
+        <Link
+          href={href}
+          className={clsx(["absolute", "inset-0", "z-[1]"])}
+          aria-label="投稿の詳細を見る"
+        />
+      )}
+
+      {/* いいねボタン（z-[2]でリンクオーバーレイより前面に表示） */}
+      <button onClick={handleLike} className={likeButtonVariants()} aria-label="いいね">
+        <svg
+          className={clsx([
+            "w-5",
+            "h-5",
+            isLiked ? "text-red-500" : "text-white",
+            isLiked && "fill-current",
+          ])}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+          />
+        </svg>
+      </button>
+
+      {/* 3点リーダーメニュー（自分の投稿かつ onDelete が指定された場合のみ表示） */}
+      {isOwner && (
+        <div
+          ref={menuRef}
+          // いいねボタン（top-4 + h-9 相当）の直下に配置、z-[2]でリンクより前面
+          className={clsx(["absolute", "top-14", "right-4", "z-[2]"])}
+        >
+          <button
+            type="button"
+            onClick={handleMenuToggle}
+            className={menuButtonVariants()}
+            aria-label="メニュー"
+            aria-expanded={isMenuOpen}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-            />
-          </svg>
-        </button>
-
-        {/* 3点リーダーメニュー（自分の投稿のみ） */}
-        {isOwner && (
-          <div ref={menuRef} className={clsx(["absolute", "top-14", "right-4", "z-10"])}>
-            <button
-              type="button"
-              onClick={handleMenuToggle}
-              className={menuButtonVariants()}
-              aria-label="メニュー"
-              aria-expanded={isMenuOpen}
+            <svg
+              className={clsx(["w-5", "h-5", "text-white"])}
+              fill="currentColor"
+              viewBox="0 0 24 24"
             >
-              <svg
-                className={clsx(["w-5", "h-5", "text-white"])}
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="12" cy="5" r="1.5" />
-                <circle cx="12" cy="12" r="1.5" />
-                <circle cx="12" cy="19" r="1.5" />
-              </svg>
-            </button>
+              <circle cx="12" cy="5" r="1.5" />
+              <circle cx="12" cy="12" r="1.5" />
+              <circle cx="12" cy="19" r="1.5" />
+            </svg>
+          </button>
 
-            {isMenuOpen && (
-              <div
+          {isMenuOpen && (
+            <div
+              className={clsx([
+                "absolute",
+                "right-0",
+                "mt-1",
+                "w-28",
+                "bg-white",
+                "rounded-lg",
+                "shadow-lg",
+                "overflow-hidden",
+              ])}
+            >
+              <button
+                type="button"
+                onClick={handleDeleteClick}
                 className={clsx([
-                  "absolute",
-                  "right-0",
-                  "mt-1",
-                  "w-28",
-                  "bg-white",
-                  "rounded-lg",
-                  "shadow-lg",
-                  "overflow-hidden",
+                  "w-full",
+                  "px-4",
+                  "py-2",
+                  "text-sm",
+                  "text-left",
+                  "text-red-600",
+                  "hover:bg-red-50",
+                  "transition-colors",
                 ])}
               >
-                <button
-                  type="button"
-                  onClick={handleDeleteClick}
-                  className={clsx([
-                    "w-full",
-                    "px-4",
-                    "py-2",
-                    "text-sm",
-                    "text-left",
-                    "text-red-600",
-                    "hover:bg-red-50",
-                    "transition-colors",
-                  ])}
-                >
-                  削除
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+                削除
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

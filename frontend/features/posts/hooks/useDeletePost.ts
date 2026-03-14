@@ -2,8 +2,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useDeletePostsId, getGetPostsQueryKey, getGetPostsIdQueryKey } from "@/api/posts";
-import { getGetUsersIdPostsQueryKey } from "@/api/users";
-import type { Post } from "@/types/domain";
 import { getDeletePostErrorMessage } from "../utils/deletePostErrors";
 
 /**
@@ -35,19 +33,13 @@ export function useDeletePost(options?: { onSuccess?: () => void; redirectOnSucc
           // 全投稿リストキャッシュを無効化
           queryClient.invalidateQueries({ queryKey: getGetPostsQueryKey() });
 
-          // ユーザー別投稿リストキャッシュも無効化
-          queryClient.getQueriesData<{ posts: Post[] }>({}).forEach(([key, data]) => {
-            if (!data?.posts) return;
-            if (!Array.isArray(key) || typeof key[0] !== "string") return;
-            const first = String(key[0]);
-            if (!first.startsWith("/users/")) return;
-            const maybe = /^\/users\/(\d+)\/posts$/.exec(first);
-            if (!maybe) return;
-            const id = Number(maybe[1]);
-            if (isNaN(id) || !Number.isInteger(id) || id <= 0) return;
-            const expected = getGetUsersIdPostsQueryKey(id);
-            if (JSON.stringify(key) !== JSON.stringify(expected)) return;
-            queryClient.invalidateQueries({ queryKey: key });
+          // ユーザー別投稿リストキャッシュも無効化（/users/\d+/posts 形式のキーを対象）
+          queryClient.invalidateQueries({
+            predicate: (query) => {
+              const key = query.queryKey;
+              if (!Array.isArray(key) || typeof key[0] !== "string") return false;
+              return /^\/users\/\d+\/posts$/.test(String(key[0]));
+            },
           });
 
           toast.success("投稿を削除しました");

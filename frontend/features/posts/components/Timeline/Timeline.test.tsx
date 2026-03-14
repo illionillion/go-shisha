@@ -80,10 +80,9 @@ describe("Timeline", () => {
     const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     render(<Timeline posts={mockPosts} />);
 
-    // PostCard は Link でラップされているため link をクリックする
-    const postLink = screen.getByRole("link", { name: /View post 1/ });
-    // clicking a Next.js Link won't trigger navigation in jsdom; assert href exists
-    expect(postLink).toHaveAttribute("href", "/posts/1");
+    // PostCard 内にリンクオーバーレイが生成されていることを確認
+    const postLinks = screen.getAllByRole("link", { name: /投稿の詳細を見る/ });
+    expect(postLinks[0]).toHaveAttribute("href", "/posts/1");
     consoleSpy.mockRestore();
   });
 

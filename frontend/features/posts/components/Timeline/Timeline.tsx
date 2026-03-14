@@ -1,7 +1,6 @@
 "use client";
 
 import { clsx } from "clsx";
-import Link from "next/link";
 import type { Flavor, Post } from "@/types/domain";
 import { FlavorFilter } from "../FlavorFilter/FlavorFilter";
 import { PostCard } from "../PostCard";
@@ -80,20 +79,15 @@ export function Timeline({
       )}
       <div className={clsx(["grid", "grid-cols-2", "gap-4", "md:grid-cols-3"])}>
         {posts.map((post) => (
-          <Link
+          <PostCard
             key={post.id}
+            post={post}
             href={`/posts/${post.id}`}
-            className={clsx(["block"])}
-            aria-label={`View post ${post.id}`}
-          >
-            <PostCard
-              post={post}
-              onLike={handleLike}
-              onUnlike={onUnlike}
-              currentUserId={currentUserId}
-              onDelete={onDelete}
-            />
-          </Link>
+            onLike={handleLike}
+            onUnlike={onUnlike}
+            currentUserId={currentUserId}
+            onDelete={onDelete}
+          />
         ))}
       </div>
     </div>
