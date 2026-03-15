@@ -244,4 +244,98 @@ describe("PostDetailHeader", () => {
       expect(timeContainer).toHaveClass("text-sm", "text-gray-500");
     });
   });
+
+  describe("削除メニュー", () => {
+    it("onDelete が渡されない場合、メニューボタンが表示されない", () => {
+      render(<PostDetailHeader user={mockUser} createdAt="2024-01-01" onBack={vi.fn()} />);
+
+      expect(screen.queryByLabelText("メニュー")).not.toBeInTheDocument();
+    });
+
+    it("onDelete が渡された場合、メニューボタンが表示される", () => {
+      render(
+        <PostDetailHeader
+          user={mockUser}
+          createdAt="2024-01-01"
+          onBack={vi.fn()}
+          onDelete={vi.fn()}
+        />
+      );
+
+      expect(screen.getByLabelText("メニュー")).toBeInTheDocument();
+    });
+
+    it("メニューボタンをクリックすると削除オプションが表示される", async () => {
+      const user = userEvent.setup();
+      render(
+        <PostDetailHeader
+          user={mockUser}
+          createdAt="2024-01-01"
+          onBack={vi.fn()}
+          onDelete={vi.fn()}
+        />
+      );
+
+      expect(screen.queryByText("削除")).not.toBeInTheDocument();
+
+      await user.click(screen.getByLabelText("メニュー"));
+
+      expect(screen.getByText("削除")).toBeInTheDocument();
+    });
+
+    it("「削除」をクリックすると onDelete が呼ばれてメニューが閉じる", async () => {
+      const user = userEvent.setup();
+      const onDelete = vi.fn();
+      render(
+        <PostDetailHeader
+          user={mockUser}
+          createdAt="2024-01-01"
+          onBack={vi.fn()}
+          onDelete={onDelete}
+        />
+      );
+
+      await user.click(screen.getByLabelText("メニュー"));
+      await user.click(screen.getByText("削除"));
+
+      expect(onDelete).toHaveBeenCalledTimes(1);
+      expect(screen.queryByText("削除")).not.toBeInTheDocument();
+    });
+
+    it("ESCキーでメニューが閉じる", async () => {
+      const user = userEvent.setup();
+      render(
+        <PostDetailHeader
+          user={mockUser}
+          createdAt="2024-01-01"
+          onBack={vi.fn()}
+          onDelete={vi.fn()}
+        />
+      );
+
+      await user.click(screen.getByLabelText("メニュー"));
+      expect(screen.getByText("削除")).toBeInTheDocument();
+
+      await user.keyboard("{Escape}");
+      expect(screen.queryByText("削除")).not.toBeInTheDocument();
+    });
+
+    it("メニュー外クリックでメニューが閉じる", async () => {
+      const user = userEvent.setup();
+      render(
+        <PostDetailHeader
+          user={mockUser}
+          createdAt="2024-01-01"
+          onBack={vi.fn()}
+          onDelete={vi.fn()}
+        />
+      );
+
+      await user.click(screen.getByLabelText("メニュー"));
+      expect(screen.getByText("削除")).toBeInTheDocument();
+
+      await user.click(document.body);
+      expect(screen.queryByText("削除")).not.toBeInTheDocument();
+    });
+  });
 });

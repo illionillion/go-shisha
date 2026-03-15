@@ -4,8 +4,11 @@ import { clsx } from "clsx";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useGetPostsId } from "@/api/posts";
+import { useAuthStore } from "@/features/auth/stores/authStore";
+import { useDeletePost } from "@/features/posts/hooks/useDeletePost";
 import { useLike } from "@/features/posts/hooks/useLike";
 import { isSuccessResponse } from "@/lib/api-helpers";
+import { useConfirm } from "@/lib/useConfirm";
 import type { Post } from "@/types/domain";
 import PostDetailCarousel from "./PostDetailCarousel";
 import PostDetailFooter from "./PostDetailFooter";
@@ -30,6 +33,9 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
     },
   });
   const router = useRouter();
+  const currentUser = useAuthStore((state) => state.user);
+  const confirm = useConfirm();
+  const { onDelete } = useDeletePost({ redirectOnSuccess: true });
 
   // Orval 8.x: レスポンスから成功時のデータを取り出す
   // apiFetchがエラー時にthrowするためresponseは常に成功レスポンスだが、
@@ -95,6 +101,15 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
     }
   };
 
+  /** 確認ダイアログを経由して投稿を削除する */
+  // 自分の投稿の場合のみ削除ハンドラを渡す
+  const isOwner = currentUser != null && post.user_id === currentUser.id;
+  const handleDelete = async () => {
+    const ok = await confirm("この投稿を削除しますか？");
+    if (!ok || !post.id) return;
+    onDelete(post.id);
+  };
+
   const handleLike = () => {
     if (!post.id) return;
     if (isLiked) {
@@ -125,7 +140,12 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
         />
 
         <div>
-          <PostDetailHeader user={post.user} createdAt={post.created_at} onBack={handleBack} />
+          <PostDetailHeader
+            user={post.user}
+            createdAt={post.created_at}
+            onBack={handleBack}
+            onDelete={isOwner ? handleDelete : undefined}
+          />
 
           <PostDetailFooter
             currentSlide={currentSlide}
