@@ -3,6 +3,7 @@
 import { clsx } from "clsx";
 import { toast } from "sonner";
 import { FlavorLabel } from "@/components/FlavorLabel";
+import { HeartIcon, ShareIcon } from "@/components/icons";
 import type { Flavor } from "@/types/domain";
 
 interface Slide {
@@ -50,31 +51,7 @@ export function PostDetailFooter({ currentSlide, optimisticLikes, isLiked, onLik
             ...(isLiked ? ["text-red-500"] : ["text-gray-700"]),
           ])}
         >
-          {isLiked ? (
-            <svg
-              className={clsx(["w-4", "h-4"])}
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden
-            >
-              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          ) : (
-            <svg
-              className={clsx(["w-4", "h-4"])}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              aria-hidden
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-              />
-            </svg>
-          )}
+          <HeartIcon className={isLiked ? "text-red-500" : "text-gray-700"} isFilled={isLiked} />
           <span className={clsx(["text-sm"])}>{optimisticLikes}</span>
         </button>
         <button
@@ -108,22 +85,7 @@ export function PostDetailFooter({ currentSlide, optimisticLikes, isLiked, onLik
             "bg-white",
           ])}
         >
-          <svg
-            className={clsx(["w-4", "h-4"])}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            aria-hidden
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"
-            />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 6l-4-4-4 4" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2v13" />
-          </svg>
+          <ShareIcon />
           <span className={clsx(["text-sm"])}>シェア</span>
         </button>
       </div>

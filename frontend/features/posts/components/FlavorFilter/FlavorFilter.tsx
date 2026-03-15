@@ -1,6 +1,7 @@
 "use client";
 
 import { clsx } from "clsx";
+import { XIcon } from "@/components/icons";
 import type { Flavor } from "@/types/domain";
 
 interface FlavorFilterProps {
@@ -116,29 +117,7 @@ export function FlavorFilter({ flavors, selectedFlavorIds, onFlavorToggle }: Fla
               ])}
               aria-hidden="true"
             >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className={clsx(["h-3", "w-3", "text-gray-700"])}
-              >
-                <path
-                  d="M6 6L18 18"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M6 18L18 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <XIcon size="w-3 h-3" className="text-gray-700" />
             </span>
             <span className="text-gray-800">クリア</span>
           </button>

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Avatar } from "@/components/Avatar/Avatar";
 import { FlavorLabel } from "@/components/FlavorLabel";
-import { NextIcon, PrevIcon } from "@/components/icons";
+import { HeartIcon, NextIcon, PrevIcon } from "@/components/icons";
 import { getImageUrl } from "@/lib/getImageUrl";
 import type { Post } from "@/types/domain";
 
@@ -244,24 +244,11 @@ export function PostCard({ post, onLike, onUnlike, autoPlayInterval = 3000 }: Po
           {displayFlavor && <FlavorLabel flavor={displayFlavor} />}
         </div>
         <button onClick={handleLike} className={likeButtonVariants()} aria-label="いいね">
-          <svg
-            className={clsx([
-              "w-5",
-              "h-5",
-              isLiked ? "text-red-500" : "text-white",
-              isLiked && "fill-current",
-            ])}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-            />
-          </svg>
+          <HeartIcon
+            className={isLiked ? "text-red-500" : "text-white"}
+            size="w-5 h-5"
+            isFilled={isLiked}
+          />
         </button>
       </div>
     </div>
