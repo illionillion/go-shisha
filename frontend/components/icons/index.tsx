@@ -81,7 +81,7 @@ export const XIcon = ({
 };
 
 export const HeartIcon = ({
-  className = "text-white",
+  className = "",
   size = "w-4 h-4",
   isFilled = false,
 }: {
