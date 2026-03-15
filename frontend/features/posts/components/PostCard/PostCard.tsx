@@ -352,11 +352,11 @@ export function PostCard({
 
             {/* 3点リーダーメニュー（自分の投稿かつ onDelete が指定された場合のみ表示） */}
             {isOwner && (
-              <div ref={menuRef} className={clsx(["relative", "ml-auto", "z-[20]"])}>
+              <div ref={menuRef} className={clsx(["relative", "ml-auto"])}>
                 <button
                   type="button"
                   onClick={handleMenuToggle}
-                  className={clsx([menuButtonVariants(), "relative", "z-[20]"])}
+                  className={menuButtonVariants()}
                   aria-label="メニュー"
                   aria-expanded={isMenuOpen}
                 >
@@ -412,18 +412,18 @@ export function PostCard({
         </div>
       </div>
 
-      {/* ナビゲーション用透明オーバーレイ（z-[10]）- 下部オーバーレイより前面、操作ボタンより背面 */}
+      {/* ナビゲーション用透明オーバーレイ（z-[1]）- 下部オーバーレイ（z-[2]）より背面 */}
       {href && (
-        <Link href={href} className={clsx(["absolute", "inset-0", "z-[10]"])}>
+        <Link href={href} className={clsx(["absolute", "inset-0", "z-[1]"])}>
           <span className="sr-only">{`投稿の詳細を見る: ${displayText}`}</span>
         </Link>
       )}
 
-      {/* いいねボタン（z-[20]でリンクオーバーレイより前面に表示） */}
+      {/* いいねボタン（z-[2]でリンクオーバーレイより前面に表示） */}
       <button
         type="button"
         onClick={handleLike}
-        className={clsx([likeButtonVariants(), "relative", "z-[20]"])}
+        className={likeButtonVariants()}
         aria-label="いいね"
       >
         <svg
