@@ -395,7 +395,12 @@ export function PostCard({
       )}
 
       {/* いいねボタン（z-[2]でリンクオーバーレイより前面に表示） */}
-      <button onClick={handleLike} className={likeButtonVariants()} aria-label="いいね">
+      <button
+        type="button"
+        onClick={handleLike}
+        className={likeButtonVariants()}
+        aria-label="いいね"
+      >
         <svg
           className={clsx([
             "w-5",
