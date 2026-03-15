@@ -7,11 +7,6 @@
  * OpenAPI spec version: 1.0
  */
 
-export * from "./deletePostsId400";
-export * from "./deletePostsId401";
-export * from "./deletePostsId403";
-export * from "./deletePostsId404";
-export * from "./deletePostsId500";
 export * from "./getFlavors500";
 export * from "./getPosts500";
 export * from "./getPostsId400";

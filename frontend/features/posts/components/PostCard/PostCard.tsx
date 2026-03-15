@@ -326,7 +326,9 @@ export function PostCard({
           href={href}
           className={clsx(["absolute", "inset-0", "z-[1]"])}
           aria-label="投稿の詳細を見る"
-        />
+        >
+          <span className="sr-only">投稿の詳細を見る</span>
+        </Link>
       )}
 
       {/* いいねボタン（z-[2]でリンクオーバーレイより前面に表示） */}
