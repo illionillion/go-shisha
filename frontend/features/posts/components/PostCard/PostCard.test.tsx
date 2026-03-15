@@ -620,4 +620,106 @@ describe("PostCard", () => {
     // 3つ目は未表示
     expect(third).toHaveClass("w-0");
   });
+
+  // ========================================
+  // 3点リーダーメニューのテスト
+  // ========================================
+
+  it("currentUserIdがpost.user_idと一致し onDelete が渡された場合、3点メニューが表示される", () => {
+    const onLike = vi.fn();
+    const onDelete = vi.fn();
+
+    render(<PostCard post={mockPost} onLike={onLike} currentUserId={1} onDelete={onDelete} />);
+
+    expect(screen.getByLabelText("メニュー")).toBeInTheDocument();
+  });
+
+  it("currentUserIdがpost.user_idと一致してもonDeleteが未指定の場合、3点メニューは表示されない", () => {
+    const onLike = vi.fn();
+
+    render(<PostCard post={mockPost} onLike={onLike} currentUserId={1} />);
+
+    expect(screen.queryByLabelText("メニュー")).not.toBeInTheDocument();
+  });
+
+  it("currentUserIdがpost.user_idと一致しない場合、3点メニューは表示されない", () => {
+    const onLike = vi.fn();
+    const onDelete = vi.fn();
+
+    render(<PostCard post={mockPost} onLike={onLike} currentUserId={99} onDelete={onDelete} />);
+
+    expect(screen.queryByLabelText("メニュー")).not.toBeInTheDocument();
+  });
+
+  it("3点メニューをクリックするとドロップダウンが開く", async () => {
+    const user = userEvent.setup();
+    const onLike = vi.fn();
+    const onDelete = vi.fn();
+
+    render(<PostCard post={mockPost} onLike={onLike} currentUserId={1} onDelete={onDelete} />);
+
+    expect(screen.queryByText("削除")).not.toBeInTheDocument();
+
+    const menuButton = screen.getByLabelText("メニュー");
+    await user.click(menuButton);
+
+    expect(screen.getByText("削除")).toBeInTheDocument();
+  });
+
+  it("削除ボタンをクリックするとonDeleteが呼ばれる", async () => {
+    const user = userEvent.setup();
+    const onLike = vi.fn();
+    const onDelete = vi.fn();
+
+    render(<PostCard post={mockPost} onLike={onLike} currentUserId={1} onDelete={onDelete} />);
+
+    // メニューを開く
+    const menuButton = screen.getByLabelText("メニュー");
+    await user.click(menuButton);
+
+    // 削除ボタンをクリック
+    const deleteButton = screen.getByText("削除");
+    await user.click(deleteButton);
+
+    expect(onDelete).toHaveBeenCalledWith(1);
+  });
+
+  it("ESCキーを押すとメニューが閉じる", async () => {
+    const user = userEvent.setup();
+    const onLike = vi.fn();
+    const onDelete = vi.fn();
+
+    render(<PostCard post={mockPost} onLike={onLike} currentUserId={1} onDelete={onDelete} />);
+
+    // メニューを開く
+    const menuButton = screen.getByLabelText("メニュー");
+    await user.click(menuButton);
+    expect(screen.getByText("削除")).toBeInTheDocument();
+
+    // ESCキーで閉じる
+    await user.keyboard("{Escape}");
+    expect(screen.queryByText("削除")).not.toBeInTheDocument();
+  });
+
+  it("メニュー外をクリックするとメニューが閉じる", async () => {
+    const user = userEvent.setup();
+    const onLike = vi.fn();
+    const onDelete = vi.fn();
+
+    render(
+      <div>
+        <PostCard post={mockPost} onLike={onLike} currentUserId={1} onDelete={onDelete} />
+        <div data-testid="outside">外部要素</div>
+      </div>
+    );
+
+    // メニューを開く
+    const menuButton = screen.getByLabelText("メニュー");
+    await user.click(menuButton);
+    expect(screen.getByText("削除")).toBeInTheDocument();
+
+    // メニュー外をクリック
+    await user.click(screen.getByTestId("outside"));
+    expect(screen.queryByText("削除")).not.toBeInTheDocument();
+  });
 });

@@ -1,7 +1,6 @@
 "use client";
 
 import { clsx } from "clsx";
-import Link from "next/link";
 import type { Flavor, Post } from "@/types/domain";
 import { FlavorFilter } from "../FlavorFilter/FlavorFilter";
 import { PostCard } from "../PostCard";
@@ -17,6 +16,10 @@ export interface TimelineProps {
   onFlavorToggle?: (flavorId: number) => void;
   onLike?: (postId: number) => void;
   onUnlike?: (postId: number) => void;
+  /** 現在ログイン中のユーザーID（自分の投稿かどうかの判定に使用） */
+  currentUserId?: number | null;
+  /** 投稿削除コールバック */
+  onDelete?: (postId: number) => void;
 }
 
 /**
@@ -36,6 +39,8 @@ export function Timeline({
   onFlavorToggle,
   onLike,
   onUnlike,
+  currentUserId,
+  onDelete,
 }: TimelineProps) {
   const handleLike = (postId: number) => {
     if (onLike) return onLike(postId);
@@ -74,14 +79,15 @@ export function Timeline({
       )}
       <div className={clsx(["grid", "grid-cols-2", "gap-4", "md:grid-cols-3"])}>
         {posts.map((post) => (
-          <Link
+          <PostCard
             key={post.id}
+            post={post}
             href={`/posts/${post.id}`}
-            className={clsx(["block"])}
-            aria-label={`View post ${post.id}`}
-          >
-            <PostCard post={post} onLike={handleLike} onUnlike={onUnlike} />
-          </Link>
+            onLike={handleLike}
+            onUnlike={onUnlike}
+            currentUserId={currentUserId}
+            onDelete={onDelete}
+          />
         ))}
       </div>
     </div>

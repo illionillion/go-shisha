@@ -25,6 +25,22 @@ vi.mock("../../hooks/useLike", () => ({
   useLike: () => ({ onLike: onLikeSpy, onUnlike: onUnlikeSpy }),
 }));
 
+let onDeleteSpy = vi.fn();
+vi.mock("../../hooks/useDeletePost", () => ({
+  useDeletePost: () => ({ onDelete: onDeleteSpy, isPending: false }),
+}));
+
+let confirmSpy = vi.fn();
+vi.mock("@/lib/useConfirm", () => ({
+  useConfirm: () => confirmSpy,
+}));
+
+let currentUserMock: { id: number } | null = null;
+vi.mock("@/features/auth/stores/authStore", () => ({
+  useAuthStore: (selector: (state: { user: { id: number } | null }) => unknown) =>
+    selector({ user: currentUserMock }),
+}));
+
 // next/image を簡易モックして jsdom 環境で <img> として扱う
 vi.mock("next/image", () => {
   return {
@@ -62,6 +78,9 @@ describe("PostDetail", () => {
     vi.clearAllMocks();
     onLikeSpy = vi.fn();
     onUnlikeSpy = vi.fn();
+    onDeleteSpy = vi.fn();
+    confirmSpy = vi.fn().mockResolvedValue(false);
+    currentUserMock = null;
     user = userEvent.setup();
   });
 
@@ -523,5 +542,71 @@ describe("PostDetail", () => {
     // restore
     Object.defineProperty(window, "history", { value: origHistory, configurable: true });
     Object.defineProperty(window, "location", { value: origLocation, configurable: true });
+  });
+
+  describe("削除機能", () => {
+    const setupSuccessResponse = () => {
+      (useGetPostsId as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+        data: { data: mockPost, status: 200, headers: new Headers() },
+        isLoading: false,
+        isError: false,
+        refetch: vi.fn(),
+      });
+    };
+
+    test("自分の投稿の場合、メニューボタンが表示される", () => {
+      currentUserMock = { id: mockPost.user_id! };
+      setupSuccessResponse();
+
+      render(<PostDetail postId={mockPost.id!} />);
+
+      expect(screen.getByLabelText("メニュー")).toBeInTheDocument();
+    });
+
+    test("他人の投稿の場合、メニューボタンが表示されない", () => {
+      currentUserMock = { id: 999 };
+      setupSuccessResponse();
+
+      render(<PostDetail postId={mockPost.id!} />);
+
+      expect(screen.queryByLabelText("メニュー")).not.toBeInTheDocument();
+    });
+
+    test("未ログイン時、メニューボタンが表示されない", () => {
+      currentUserMock = null;
+      setupSuccessResponse();
+
+      render(<PostDetail postId={mockPost.id!} />);
+
+      expect(screen.queryByLabelText("メニュー")).not.toBeInTheDocument();
+    });
+
+    test("確認ダイアログでキャンセルすると onDelete が呼ばれない", async () => {
+      currentUserMock = { id: mockPost.user_id! };
+      confirmSpy = vi.fn().mockResolvedValue(false);
+      setupSuccessResponse();
+
+      render(<PostDetail postId={mockPost.id!} />);
+
+      await user.click(screen.getByLabelText("メニュー"));
+      await user.click(screen.getByText("削除"));
+
+      expect(confirmSpy).toHaveBeenCalledWith("この投稿を削除しますか？");
+      expect(onDeleteSpy).not.toHaveBeenCalled();
+    });
+
+    test("確認ダイアログで確定すると onDelete が postId で呼ばれる", async () => {
+      currentUserMock = { id: mockPost.user_id! };
+      confirmSpy = vi.fn().mockResolvedValue(true);
+      setupSuccessResponse();
+
+      render(<PostDetail postId={mockPost.id!} />);
+
+      await user.click(screen.getByLabelText("メニュー"));
+      await user.click(screen.getByText("削除"));
+
+      expect(confirmSpy).toHaveBeenCalledWith("この投稿を削除しますか？");
+      expect(onDeleteSpy).toHaveBeenCalledWith(mockPost.id);
+    });
   });
 });
