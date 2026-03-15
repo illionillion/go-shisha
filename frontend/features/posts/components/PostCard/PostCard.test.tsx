@@ -95,7 +95,7 @@ describe("PostCard", () => {
     expect(svg?.querySelector("path")?.getAttribute("fill")).toBe("currentColor");
   });
 
-  it("初期 is_liked=true のとき SVG に fill が付与される", () => {
+  it("初期 is_liked=true のとき path に fill が付与される", () => {
     const postLiked = { ...mockPost, is_liked: true } as Post;
     const onLike = vi.fn();
 

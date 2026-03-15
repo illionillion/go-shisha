@@ -51,7 +51,7 @@ export function PostDetailFooter({ currentSlide, optimisticLikes, isLiked, onLik
             ...(isLiked ? ["text-red-500"] : ["text-gray-700"]),
           ])}
         >
-          <HeartIcon className={isLiked ? "text-red-500" : "text-gray-700"} isFilled={isLiked} />
+          <HeartIcon isFilled={isLiked} />
           <span className={clsx(["text-sm"])}>{optimisticLikes}</span>
         </button>
         <button
