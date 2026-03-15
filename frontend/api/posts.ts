@@ -313,6 +313,148 @@ export const usePostPosts = <
   return useMutation(getPostPostsMutationOptions(options), queryClient);
 };
 /**
+ * 指定された投稿を論理削除します（認証必須・投稿所有者のみ）
+ * @summary 投稿削除
+ */
+export type deletePostsIdResponse204 = {
+  data: void;
+  status: 204;
+};
+
+export type deletePostsIdResponse400 = {
+  data: GoShishaBackendInternalModelsValidationError;
+  status: 400;
+};
+
+export type deletePostsIdResponse401 = {
+  data: GoShishaBackendInternalModelsUnauthorizedError;
+  status: 401;
+};
+
+export type deletePostsIdResponse403 = {
+  data: GoShishaBackendInternalModelsForbiddenError;
+  status: 403;
+};
+
+export type deletePostsIdResponse404 = {
+  data: GoShishaBackendInternalModelsNotFoundError;
+  status: 404;
+};
+
+export type deletePostsIdResponse500 = {
+  data: GoShishaBackendInternalModelsServerError;
+  status: 500;
+};
+
+export type deletePostsIdResponseSuccess = deletePostsIdResponse204 & {
+  headers: Headers;
+};
+export type deletePostsIdResponseError = (
+  | deletePostsIdResponse400
+  | deletePostsIdResponse401
+  | deletePostsIdResponse403
+  | deletePostsIdResponse404
+  | deletePostsIdResponse500
+) & {
+  headers: Headers;
+};
+
+export type deletePostsIdResponse = deletePostsIdResponseSuccess | deletePostsIdResponseError;
+
+export const getDeletePostsIdUrl = (id: number) => {
+  return `/posts/${id}`;
+};
+
+export const deletePostsId = async (
+  id: number,
+  options?: RequestInit
+): Promise<deletePostsIdResponse> => {
+  return apiFetch<deletePostsIdResponse>(getDeletePostsIdUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeletePostsIdMutationOptions = <
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsForbiddenError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deletePostsId>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deletePostsId>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["deletePostsId"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePostsId>>, { id: number }> = (
+    props
+  ) => {
+    const { id } = props ?? {};
+
+    return deletePostsId(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeletePostsIdMutationResult = NonNullable<Awaited<ReturnType<typeof deletePostsId>>>;
+
+export type DeletePostsIdMutationError =
+  | GoShishaBackendInternalModelsValidationError
+  | GoShishaBackendInternalModelsUnauthorizedError
+  | GoShishaBackendInternalModelsForbiddenError
+  | GoShishaBackendInternalModelsNotFoundError
+  | GoShishaBackendInternalModelsServerError;
+
+/**
+ * @summary 投稿削除
+ */
+export const useDeletePostsId = <
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsForbiddenError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deletePostsId>>,
+      TError,
+      { id: number },
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof deletePostsId>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getDeletePostsIdMutationOptions(options), queryClient);
+};
+/**
  * 指定されたIDの投稿情報を取得します。認証済みの場合、いいね状態（is_liked）を含みます
  * @summary 投稿詳細取得
  */
@@ -776,147 +918,4 @@ export const usePostPostsIdUnlike = <
   TContext
 > => {
   return useMutation(getPostPostsIdUnlikeMutationOptions(options), queryClient);
-};
-
-/**
- * 指定された投稿を論理削除します（認証必須・投稿所有者のみ）
- * @summary 投稿削除
- */
-export type deletePostsIdResponse204 = {
-  data: undefined;
-  status: 204;
-};
-
-export type deletePostsIdResponse400 = {
-  data: GoShishaBackendInternalModelsValidationError;
-  status: 400;
-};
-
-export type deletePostsIdResponse401 = {
-  data: GoShishaBackendInternalModelsUnauthorizedError;
-  status: 401;
-};
-
-export type deletePostsIdResponse403 = {
-  data: GoShishaBackendInternalModelsForbiddenError;
-  status: 403;
-};
-
-export type deletePostsIdResponse404 = {
-  data: GoShishaBackendInternalModelsNotFoundError;
-  status: 404;
-};
-
-export type deletePostsIdResponse500 = {
-  data: GoShishaBackendInternalModelsServerError;
-  status: 500;
-};
-
-export type deletePostsIdResponseSuccess = deletePostsIdResponse204 & {
-  headers: Headers;
-};
-export type deletePostsIdResponseError = (
-  | deletePostsIdResponse400
-  | deletePostsIdResponse401
-  | deletePostsIdResponse403
-  | deletePostsIdResponse404
-  | deletePostsIdResponse500
-) & {
-  headers: Headers;
-};
-
-export type deletePostsIdResponse = deletePostsIdResponseSuccess | deletePostsIdResponseError;
-
-export const getDeletePostsIdUrl = (id: number) => {
-  return `/posts/${id}`;
-};
-
-export const deletePostsId = async (
-  id: number,
-  options?: RequestInit
-): Promise<deletePostsIdResponse> => {
-  return apiFetch<deletePostsIdResponse>(getDeletePostsIdUrl(id), {
-    ...options,
-    method: "DELETE",
-  });
-};
-
-export const getDeletePostsIdMutationOptions = <
-  TError =
-    | GoShishaBackendInternalModelsValidationError
-    | GoShishaBackendInternalModelsUnauthorizedError
-    | GoShishaBackendInternalModelsForbiddenError
-    | GoShishaBackendInternalModelsNotFoundError
-    | GoShishaBackendInternalModelsServerError,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof deletePostsId>>,
-    TError,
-    { id: number },
-    TContext
-  >;
-  request?: SecondParameter<typeof apiFetch>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof deletePostsId>>,
-  TError,
-  { id: number },
-  TContext
-> => {
-  const mutationKey = ["deletePostsId"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePostsId>>, { id: number }> = (
-    props
-  ) => {
-    const { id } = props ?? {};
-
-    return deletePostsId(id, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type DeletePostsIdMutationResult = NonNullable<Awaited<ReturnType<typeof deletePostsId>>>;
-
-export type DeletePostsIdMutationError =
-  | GoShishaBackendInternalModelsValidationError
-  | GoShishaBackendInternalModelsUnauthorizedError
-  | GoShishaBackendInternalModelsForbiddenError
-  | GoShishaBackendInternalModelsNotFoundError
-  | GoShishaBackendInternalModelsServerError;
-
-/**
- * @summary 投稿削除
- */
-export const useDeletePostsId = <
-  TError =
-    | GoShishaBackendInternalModelsValidationError
-    | GoShishaBackendInternalModelsUnauthorizedError
-    | GoShishaBackendInternalModelsForbiddenError
-    | GoShishaBackendInternalModelsNotFoundError
-    | GoShishaBackendInternalModelsServerError,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof deletePostsId>>,
-      TError,
-      { id: number },
-      TContext
-    >;
-    request?: SecondParameter<typeof apiFetch>;
-  },
-  queryClient?: QueryClient
-): UseMutationResult<
-  Awaited<ReturnType<typeof deletePostsId>>,
-  TError,
-  { id: number },
-  TContext
-> => {
-  return useMutation(getDeletePostsIdMutationOptions(options), queryClient);
 };

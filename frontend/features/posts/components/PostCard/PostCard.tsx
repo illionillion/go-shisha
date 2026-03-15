@@ -26,7 +26,7 @@ interface PostCardProps {
 }
 
 interface OutsideClickAndEscOptions {
-  ref: React.RefObject<HTMLElement>;
+  ref: React.RefObject<HTMLDivElement | null>;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -352,10 +352,7 @@ export function PostCard({
 
             {/* 3点リーダーメニュー（自分の投稿かつ onDelete が指定された場合のみ表示） */}
             {isOwner && (
-              <div
-                ref={menuRef}
-                className={clsx(["relative", "ml-auto", "z-[20]"])}
-              >
+              <div ref={menuRef} className={clsx(["relative", "ml-auto", "z-[20]"])}>
                 <button
                   type="button"
                   onClick={handleMenuToggle}
