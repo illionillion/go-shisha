@@ -3,7 +3,7 @@
 import { clsx } from "clsx";
 import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/Avatar/Avatar";
-import { PrevIcon } from "@/components/icons/";
+import { DotsVerticalIcon, PrevIcon } from "@/components/icons/";
 import { formatDate } from "@/lib/formatDate";
 import type { User } from "@/types/domain";
 
@@ -95,16 +95,7 @@ export function PostDetailHeader({ user, createdAt, onBack, onDelete }: Props) {
                 "focus:outline-none",
               ])}
             >
-              <svg
-                className={clsx(["w-5", "h-5"])}
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="5" r="1.5" />
-                <circle cx="12" cy="12" r="1.5" />
-                <circle cx="12" cy="19" r="1.5" />
-              </svg>
+              <DotsVerticalIcon />
             </button>
 
             {isMenuOpen && (

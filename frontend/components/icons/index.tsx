@@ -79,3 +79,101 @@ export const XIcon = ({
     </svg>
   );
 };
+
+export const HeartIcon = ({
+  className = "",
+  size = "w-4 h-4",
+  isFilled = false,
+}: {
+  className?: string;
+  size?: string;
+  isFilled?: boolean;
+}) => {
+  const d =
+    "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z";
+  return (
+    <svg className={clsx([size, className])} viewBox="0 0 24 24" aria-hidden="true">
+      {isFilled ? (
+        <path fill="currentColor" d={d} />
+      ) : (
+        <path
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d={d}
+        />
+      )}
+    </svg>
+  );
+};
+
+export const ShareIcon = ({
+  className = "text-gray-700",
+  size = "w-4 h-4",
+}: {
+  className?: string;
+  size?: string;
+}) => {
+  return (
+    <svg
+      className={clsx([size, className])}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7"
+      />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 6l-4-4-4 4" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2v13" />
+    </svg>
+  );
+};
+
+export const DotsHorizontalIcon = ({
+  className = "text-white",
+  size = "w-5 h-5",
+}: {
+  className?: string;
+  size?: string;
+}) => {
+  return (
+    <svg
+      className={clsx([size, className])}
+      fill="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <circle cx="5" cy="12" r="1.5" />
+      <circle cx="12" cy="12" r="1.5" />
+      <circle cx="19" cy="12" r="1.5" />
+    </svg>
+  );
+};
+
+export const DotsVerticalIcon = ({
+  className = "text-gray-500",
+  size = "w-5 h-5",
+}: {
+  className?: string;
+  size?: string;
+}) => {
+  return (
+    <svg
+      className={clsx([size, className])}
+      fill="currentColor"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="5" r="1.5" />
+      <circle cx="12" cy="12" r="1.5" />
+      <circle cx="12" cy="19" r="1.5" />
+    </svg>
+  );
+};

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/Avatar/Avatar";
 import { FlavorLabel } from "@/components/FlavorLabel";
-import { NextIcon, PrevIcon } from "@/components/icons";
+import { DotsHorizontalIcon, HeartIcon, NextIcon, PrevIcon } from "@/components/icons";
 import { getImageUrl } from "@/lib/getImageUrl";
 import type { Post } from "@/types/domain";
 
@@ -360,15 +360,7 @@ export function PostCard({
                   aria-label="メニュー"
                   aria-expanded={isMenuOpen}
                 >
-                  <svg
-                    className={clsx(["w-5", "h-5", "text-white"])}
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle cx="5" cy="12" r="1.5" />
-                    <circle cx="12" cy="12" r="1.5" />
-                    <circle cx="19" cy="12" r="1.5" />
-                  </svg>
+                  <DotsHorizontalIcon />
                 </button>
 
                 {isMenuOpen && (
@@ -426,24 +418,11 @@ export function PostCard({
         className={likeButtonVariants()}
         aria-label="いいね"
       >
-        <svg
-          className={clsx([
-            "w-5",
-            "h-5",
-            isLiked ? "text-red-500" : "text-white",
-            isLiked && "fill-current",
-          ])}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-          />
-        </svg>
+        <HeartIcon
+          className={isLiked ? "text-red-500" : "text-white"}
+          size="w-5 h-5"
+          isFilled={isLiked}
+        />
       </button>
     </div>
   );
