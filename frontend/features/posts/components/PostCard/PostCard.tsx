@@ -201,7 +201,7 @@ export function PostCard({
   const displayFlavor = currentSlide?.flavor;
 
   return (
-    <div className={cardVariants()} role="button" tabIndex={0}>
+    <div className={cardVariants()}>
       <div className={imageContainerVariants()}>
         <Image
           src={displayImageUrl}
