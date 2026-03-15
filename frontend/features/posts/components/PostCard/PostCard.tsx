@@ -25,6 +25,48 @@ interface PostCardProps {
   href?: string;
 }
 
+interface OutsideClickAndEscOptions {
+  ref: React.RefObject<HTMLElement>;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+/**
+ * メニューなどのポップアップを、メニュー外クリックおよび ESC キー押下で閉じるための共通フック
+ *
+ * @example
+ * const menuRef = useRef<HTMLDivElement>(null);
+ * const [isOpen, setIsOpen] = useState(false);
+ * useOutsideClickAndEsc({ ref: menuRef, isOpen, onClose: () => setIsOpen(false) });
+ */
+const useOutsideClickAndEsc = ({ ref, isOpen, onClose }: OutsideClickAndEscOptions): void => {
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const handleClickOutside = (e: MouseEvent): void => {
+      if (ref.current && e.target instanceof Node && !ref.current.contains(e.target)) {
+        onClose();
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose, ref]);
+};
+
 const cardVariants = cva(["relative", "cursor-pointer", "group"], {
   variants: {},
 });
@@ -121,28 +163,11 @@ export function PostCard({
   }, [post.is_liked]);
 
   /** メニュー外クリックおよびESCキーで閉じる */
-  useEffect(() => {
-    if (!isMenuOpen) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && e.target instanceof Node && !menuRef.current.contains(e.target)) {
-        setIsMenuOpen(false);
-      }
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isMenuOpen]);
+  useOutsideClickAndEsc({
+    ref: menuRef,
+    isOpen: isMenuOpen,
+    onClose: () => setIsMenuOpen(false),
+  });
 
   /** 前のスライドへ */
   const handlePrevSlide = (e: React.MouseEvent) => {
