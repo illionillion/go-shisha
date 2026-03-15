@@ -390,7 +390,7 @@ export function PostCard({
       {/* ナビゲーション用透明オーバーレイ（z-[1]）- 下部オーバーレイ（z-[2]）より背面 */}
       {href && (
         <Link href={href} className={clsx(["absolute", "inset-0", "z-[1]"])}>
-          <span className="sr-only">投稿の詳細を見る</span>
+          <span className="sr-only">{`投稿の詳細を見る: ${displayText}`}</span>
         </Link>
       )}
 
