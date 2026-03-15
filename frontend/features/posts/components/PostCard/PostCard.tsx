@@ -301,7 +301,18 @@ export function PostCard({
           </>
         )}
 
-        <div className={clsx(["absolute", "bottom-0", "left-0", "right-0", "p-4", "text-white"])}>
+        {/* 下部テキストオーバーレイ - z-[2]でリンクオーバーレイ（z-[1]）より前面に表示 */}
+        <div
+          className={clsx([
+            "absolute",
+            "bottom-0",
+            "left-0",
+            "right-0",
+            "p-4",
+            "text-white",
+            "z-[2]",
+          ])}
+        >
           <div className={clsx(["flex", "items-center", "gap-3", "mb-2"])}>
             <Avatar
               src={post.user?.icon_url ?? null}
@@ -313,6 +324,62 @@ export function PostCard({
             <div className={clsx(["text-sm", "font-medium"])}>
               {post.user?.display_name ?? "匿名"}
             </div>
+
+            {/* 3点リーダーメニュー（自分の投稿かつ onDelete が指定された場合のみ表示） */}
+            {isOwner && (
+              <div ref={menuRef} className={clsx(["relative", "ml-auto"])}>
+                <button
+                  type="button"
+                  onClick={handleMenuToggle}
+                  className={menuButtonVariants()}
+                  aria-label="メニュー"
+                  aria-expanded={isMenuOpen}
+                >
+                  <svg
+                    className={clsx(["w-5", "h-5", "text-white"])}
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle cx="5" cy="12" r="1.5" />
+                    <circle cx="12" cy="12" r="1.5" />
+                    <circle cx="19" cy="12" r="1.5" />
+                  </svg>
+                </button>
+
+                {isMenuOpen && (
+                  <div
+                    className={clsx([
+                      "absolute",
+                      "right-0",
+                      "bottom-full",
+                      "mb-1",
+                      "w-28",
+                      "bg-white",
+                      "rounded-lg",
+                      "shadow-lg",
+                      "overflow-hidden",
+                    ])}
+                  >
+                    <button
+                      type="button"
+                      onClick={handleDeleteClick}
+                      className={clsx([
+                        "w-full",
+                        "px-4",
+                        "py-2",
+                        "text-sm",
+                        "text-left",
+                        "text-red-600",
+                        "hover:bg-red-50",
+                        "transition-colors",
+                      ])}
+                    >
+                      削除
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <p className={clsx(["text-sm", "line-clamp-3"])}>{displayText}</p>
@@ -320,7 +387,7 @@ export function PostCard({
         </div>
       </div>
 
-      {/* ナビゲーション用透明オーバーレイ（z-[1]）- ボタン群（z-[2]）より背面 */}
+      {/* ナビゲーション用透明オーバーレイ（z-[1]）- 下部オーバーレイ（z-[2]）より背面 */}
       {href && (
         <Link href={href} className={clsx(["absolute", "inset-0", "z-[1]"])}>
           <span className="sr-only">投稿の詳細を見る</span>
@@ -348,66 +415,6 @@ export function PostCard({
           />
         </svg>
       </button>
-
-      {/* 3点リーダーメニュー（自分の投稿かつ onDelete が指定された場合のみ表示） */}
-      {isOwner && (
-        <div
-          ref={menuRef}
-          // カード左下に配置、z-[2]でリンクより前面
-          className={clsx(["absolute", "bottom-4", "left-4", "z-[2]"])}
-        >
-          <button
-            type="button"
-            onClick={handleMenuToggle}
-            className={menuButtonVariants()}
-            aria-label="メニュー"
-            aria-expanded={isMenuOpen}
-          >
-            <svg
-              className={clsx(["w-5", "h-5", "text-white"])}
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <circle cx="5" cy="12" r="1.5" />
-              <circle cx="12" cy="12" r="1.5" />
-              <circle cx="19" cy="12" r="1.5" />
-            </svg>
-          </button>
-
-          {isMenuOpen && (
-            <div
-              className={clsx([
-                "absolute",
-                "left-0",
-                "bottom-full",
-                "mb-1",
-                "w-28",
-                "bg-white",
-                "rounded-lg",
-                "shadow-lg",
-                "overflow-hidden",
-              ])}
-            >
-              <button
-                type="button"
-                onClick={handleDeleteClick}
-                className={clsx([
-                  "w-full",
-                  "px-4",
-                  "py-2",
-                  "text-sm",
-                  "text-left",
-                  "text-red-600",
-                  "hover:bg-red-50",
-                  "transition-colors",
-                ])}
-              >
-                削除
-              </button>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
