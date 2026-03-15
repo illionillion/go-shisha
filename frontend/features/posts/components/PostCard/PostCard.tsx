@@ -353,8 +353,8 @@ export function PostCard({
       {isOwner && (
         <div
           ref={menuRef}
-          // いいねボタン（top-4 + h-9 相当）の直下に配置、z-[2]でリンクより前面
-          className={clsx(["absolute", "top-14", "right-4", "z-[2]"])}
+          // カード左下に配置、z-[2]でリンクより前面
+          className={clsx(["absolute", "bottom-4", "left-4", "z-[2]"])}
         >
           <button
             type="button"
@@ -368,9 +368,9 @@ export function PostCard({
               fill="currentColor"
               viewBox="0 0 24 24"
             >
-              <circle cx="12" cy="5" r="1.5" />
+              <circle cx="5" cy="12" r="1.5" />
               <circle cx="12" cy="12" r="1.5" />
-              <circle cx="12" cy="19" r="1.5" />
+              <circle cx="19" cy="12" r="1.5" />
             </svg>
           </button>
 
@@ -378,8 +378,9 @@ export function PostCard({
             <div
               className={clsx([
                 "absolute",
-                "right-0",
-                "mt-1",
+                "left-0",
+                "bottom-full",
+                "mb-1",
                 "w-28",
                 "bg-white",
                 "rounded-lg",
