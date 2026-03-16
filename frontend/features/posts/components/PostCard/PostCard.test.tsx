@@ -104,6 +104,7 @@ describe("PostCard", () => {
     const likeButton = screen.getByLabelText("いいね");
     const svg = likeButton.querySelector("svg");
     expect(svg?.querySelector("path")?.getAttribute("fill")).toBe("currentColor");
+    expect(svg?.querySelector("path")?.getAttribute("stroke")).toBe("currentColor");
   });
 
   it("onUnlike が渡されているとき、解除クリックで onUnlike が呼ばれる", async () => {

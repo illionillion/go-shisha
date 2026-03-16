@@ -422,6 +422,7 @@ export function PostCard({
           className={isLiked ? "text-red-500" : "text-white"}
           size="w-5 h-5"
           isFilled={isLiked}
+          showStrokeWhenFilled
         />
       </button>
     </div>

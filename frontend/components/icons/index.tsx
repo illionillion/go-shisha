@@ -78,17 +78,26 @@ export const HeartIcon = ({
   className,
   size = "w-4 h-4",
   isFilled = false,
+  showStrokeWhenFilled = false,
 }: {
   className?: string;
   size?: string;
   isFilled?: boolean;
+  showStrokeWhenFilled?: boolean;
 }) => {
   const d =
     "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z";
   return (
     <svg className={clsx([size, className])} viewBox="0 0 24 24" aria-hidden="true">
       {isFilled ? (
-        <path fill="currentColor" d={d} />
+        <path
+          fill="currentColor"
+          stroke={showStrokeWhenFilled ? "currentColor" : undefined}
+          strokeLinecap={showStrokeWhenFilled ? "round" : undefined}
+          strokeLinejoin={showStrokeWhenFilled ? "round" : undefined}
+          strokeWidth={showStrokeWhenFilled ? 2 : undefined}
+          d={d}
+        />
       ) : (
         <path
           fill="none"
