@@ -301,7 +301,7 @@ export function PostCard({
               ])}
               aria-label="前のスライド"
             >
-              <PrevIcon />
+              <PrevIcon className="text-white" />
             </button>
             <button
               type="button"
@@ -321,7 +321,7 @@ export function PostCard({
               ])}
               aria-label="次のスライド"
             >
-              <NextIcon />
+              <NextIcon className="text-white" />
             </button>
           </>
         )}

@@ -1,7 +1,7 @@
 import clsx from "clsx";
 
 export const PrevIcon = ({
-  className = "text-white",
+  className,
   size = "w-4 h-4",
 }: {
   className?: string;
@@ -21,7 +21,7 @@ export const PrevIcon = ({
 };
 
 export const NextIcon = ({
-  className = "text-white",
+  className,
   size = "w-4 h-4",
 }: {
   className?: string;
@@ -41,7 +41,7 @@ export const NextIcon = ({
 };
 
 export const PlusIcon = ({
-  className = "text-white",
+  className,
   size = "w-6 h-6",
 }: {
   className?: string;
@@ -60,13 +60,7 @@ export const PlusIcon = ({
   );
 };
 
-export const XIcon = ({
-  className = "text-white",
-  size = "w-4 h-4",
-}: {
-  className?: string;
-  size?: string;
-}) => {
+export const XIcon = ({ className, size = "w-4 h-4" }: { className?: string; size?: string }) => {
   return (
     <svg
       className={clsx([size, className])}
@@ -81,7 +75,7 @@ export const XIcon = ({
 };
 
 export const HeartIcon = ({
-  className = "",
+  className,
   size = "w-4 h-4",
   isFilled = false,
 }: {
@@ -110,7 +104,7 @@ export const HeartIcon = ({
 };
 
 export const ShareIcon = ({
-  className = "",
+  className,
   size = "w-4 h-4",
 }: {
   className?: string;
@@ -137,7 +131,7 @@ export const ShareIcon = ({
 };
 
 export const DotsHorizontalIcon = ({
-  className = "text-white",
+  className,
   size = "w-5 h-5",
 }: {
   className?: string;
@@ -158,7 +152,7 @@ export const DotsHorizontalIcon = ({
 };
 
 export const DotsVerticalIcon = ({
-  className = "",
+  className,
   size = "w-5 h-5",
 }: {
   className?: string;
