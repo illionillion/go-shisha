@@ -202,6 +202,7 @@ describe("PostDetailFooter", () => {
       const svg = likeButton.querySelector("svg");
 
       expect(svg?.querySelector("path")).toHaveAttribute("fill", "currentColor");
+      expect(svg?.querySelector("path")).not.toHaveAttribute("stroke");
     });
 
     it("isLiked=trueの場合、テキスト色が赤になる", () => {

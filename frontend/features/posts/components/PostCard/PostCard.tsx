@@ -220,7 +220,7 @@ export function PostCard({
               ])}
               aria-label="前のスライド"
             >
-              <PrevIcon />
+              <PrevIcon className="text-white" />
             </button>
             <button
               type="button"
@@ -240,7 +240,7 @@ export function PostCard({
               ])}
               aria-label="次のスライド"
             >
-              <NextIcon />
+              <NextIcon className="text-white" />
             </button>
           </>
         )}
@@ -306,6 +306,7 @@ export function PostCard({
           className={isLiked ? "text-red-500" : "text-white"}
           size="w-5 h-5"
           isFilled={isLiked}
+          showStrokeWhenFilled
         />
       </button>
     </div>
