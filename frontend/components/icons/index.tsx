@@ -110,7 +110,7 @@ export const HeartIcon = ({
 };
 
 export const ShareIcon = ({
-  className = "text-gray-700",
+  className = "",
   size = "w-4 h-4",
 }: {
   className?: string;
@@ -158,7 +158,7 @@ export const DotsHorizontalIcon = ({
 };
 
 export const DotsVerticalIcon = ({
-  className = "text-gray-500",
+  className = "",
   size = "w-5 h-5",
 }: {
   className?: string;
