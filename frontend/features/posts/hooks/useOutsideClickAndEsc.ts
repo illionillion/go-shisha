@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface UseOutsideClickAndEscOptions {
   ref: React.RefObject<HTMLElement | null>;
@@ -19,6 +19,9 @@ export function useOutsideClickAndEsc({
   isOpen,
   onClose,
 }: UseOutsideClickAndEscOptions): void {
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
     if (!isOpen) {
       return;
@@ -26,13 +29,13 @@ export function useOutsideClickAndEsc({
 
     const handleClickOutside = (e: MouseEvent): void => {
       if (ref.current && e.target instanceof Node && !ref.current.contains(e.target)) {
-        onClose();
+        onCloseRef.current();
       }
     };
 
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === "Escape") {
-        onClose();
+        onCloseRef.current();
       }
     };
 
@@ -43,5 +46,5 @@ export function useOutsideClickAndEsc({
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, onClose, ref]);
+  }, [isOpen, ref]);
 }

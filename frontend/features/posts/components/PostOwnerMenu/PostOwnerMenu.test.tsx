@@ -134,20 +134,20 @@ describe("PostOwnerMenu", () => {
   });
 
   describe("variant", () => {
-    it("variant='detail'のとき、DotsVerticalIconが表示される", () => {
+    it("variant='detail'のとき、ボタンにdetailバリアントのクラスが適用される", () => {
       render(<PostOwnerMenu onDelete={vi.fn()} variant="detail" />);
 
       const button = screen.getByLabelText("メニュー");
-      const svg = button.querySelector("svg");
-      expect(svg).toBeInTheDocument();
+      expect(button).toHaveClass("text-gray-500");
+      expect(button).not.toHaveClass("bg-white/20");
     });
 
-    it("variant='card'のとき、DotsHorizontalIconが表示される", () => {
+    it("variant='card'のとき、ボタンにcardバリアントのクラスが適用される", () => {
       render(<PostOwnerMenu onDelete={vi.fn()} variant="card" />);
 
       const button = screen.getByLabelText("メニュー");
-      const svg = button.querySelector("svg");
-      expect(svg).toBeInTheDocument();
+      expect(button).toHaveClass("bg-white/20");
+      expect(button).not.toHaveClass("text-gray-500");
     });
   });
 
