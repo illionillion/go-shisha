@@ -26,9 +26,33 @@ describe("PostOwnerMenu", () => {
 
       expect(screen.getByLabelText("メニュー")).toHaveAttribute("aria-expanded", "false");
     });
+
+    it("メニューボタンにaria-haspopupが設定されている", () => {
+      render(<PostOwnerMenu onDelete={vi.fn()} />);
+
+      expect(screen.getByLabelText("メニュー")).toHaveAttribute("aria-haspopup", "true");
+    });
   });
 
   describe("メニュー開閉", () => {
+    it("メニューボタンをクリックするとrole='menu'のコンテナが表示される", async () => {
+      const user = userEvent.setup();
+      render(<PostOwnerMenu onDelete={vi.fn()} />);
+
+      await user.click(screen.getByLabelText("メニュー"));
+
+      expect(screen.getByRole("menu")).toBeInTheDocument();
+    });
+
+    it("メニューを開くとrole='menuitem'の削除ボタンが表示される", async () => {
+      const user = userEvent.setup();
+      render(<PostOwnerMenu onDelete={vi.fn()} />);
+
+      await user.click(screen.getByLabelText("メニュー"));
+
+      expect(screen.getByRole("menuitem")).toBeInTheDocument();
+    });
+
     it("メニューボタンをクリックすると削除ボタンが表示される", async () => {
       const user = userEvent.setup();
       render(<PostOwnerMenu onDelete={vi.fn()} />);

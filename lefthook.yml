@@ -24,16 +24,16 @@ post-checkout:
   commands:
     pnpm:
       glob: "{package.json,pnpm-lock.yaml,frontend/package.json}"
-      run: command -v pnpm >/dev/null 2>&1 && pnpm install || echo "⚠️  pnpm not found, skipping install"
+      run: pnpm install
 
 post-merge:
   commands:
     pnpm:
       glob: "{package.json,pnpm-lock.yaml,frontend/package.json}"
-      run: command -v pnpm >/dev/null 2>&1 && pnpm install || echo "⚠️  pnpm not found, skipping install"
+      run: pnpm install
 
 post-rewrite:
   commands:
     pnpm:
       glob: "{package.json,pnpm-lock.yaml,frontend/package.json}"
-      run: command -v pnpm >/dev/null 2>&1 && pnpm install || echo "⚠️  pnpm not found, skipping install"
+      run: pnpm install

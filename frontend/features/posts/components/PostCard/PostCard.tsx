@@ -273,7 +273,7 @@ export function PostCard({
             {isOwner && (
               <PostOwnerMenu
                 onDelete={() => {
-                  if (post.id) onDelete(post.id);
+                  if (post.id) onDelete?.(post.id);
                 }}
                 variant="card"
                 menuPosition="top"

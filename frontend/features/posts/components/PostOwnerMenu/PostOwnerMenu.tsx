@@ -85,6 +85,7 @@ export function PostOwnerMenu({
         type="button"
         onClick={handleMenuToggle}
         aria-label="メニュー"
+        aria-haspopup="true"
         aria-expanded={isMenuOpen}
         className={buttonVariants({ variant })}
       >
@@ -105,10 +106,13 @@ export function PostOwnerMenu({
             "overflow-hidden",
             "z-10",
           ])}
+          role="menu"
+          aria-orientation="vertical"
         >
           <button
             type="button"
             onClick={handleDeleteClick}
+            role="menuitem"
             className={clsx([
               "w-full",
               "px-4",
