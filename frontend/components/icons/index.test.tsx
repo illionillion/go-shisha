@@ -13,11 +13,11 @@ describe("Icons", () => {
       expect(svg).toBeTruthy();
     });
 
-    it("デフォルトで text-white クラスを適用する", () => {
+    it("デフォルトでは色クラスを持たない", () => {
       const { container } = render(<Icon />);
       const svg = container.querySelector("svg");
       const classList = svg?.getAttribute("class");
-      expect(classList).toContain("text-white");
+      expect(classList).not.toContain("text-white");
     });
 
     it("w-4 と h-4 クラスを適用する", () => {

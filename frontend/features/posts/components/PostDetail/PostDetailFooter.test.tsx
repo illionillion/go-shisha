@@ -185,7 +185,7 @@ describe("PostDetailFooter", () => {
       const likeButton = screen.getByRole("button", { pressed: false });
       const svg = likeButton.querySelector("svg");
 
-      expect(svg).toHaveAttribute("fill", "none");
+      expect(svg?.querySelector("path")).toHaveAttribute("fill", "none");
     });
 
     it("isLiked=trueの場合、ハートアイコンが塗りつぶされている", () => {
@@ -201,7 +201,8 @@ describe("PostDetailFooter", () => {
       const likeButton = screen.getByRole("button", { pressed: true });
       const svg = likeButton.querySelector("svg");
 
-      expect(svg).toHaveAttribute("fill", "currentColor");
+      expect(svg?.querySelector("path")).toHaveAttribute("fill", "currentColor");
+      expect(svg?.querySelector("path")).not.toHaveAttribute("stroke");
     });
 
     it("isLiked=trueの場合、テキスト色が赤になる", () => {

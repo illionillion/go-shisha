@@ -86,16 +86,16 @@ describe("PostCard", () => {
     const likeButton = screen.getByLabelText("いいね");
     const svg = likeButton.querySelector("svg");
 
-    // 初期状態: fillなし
-    expect(svg).not.toHaveClass("fill-current");
+    // 初期状態: fillなし（outline）
+    expect(svg?.querySelector("path")?.getAttribute("fill")).toBe("none");
 
     await user.click(likeButton);
 
-    // クリック後: fillあり
-    expect(svg).toHaveClass("fill-current");
+    // クリック後: fillあり（filled）
+    expect(svg?.querySelector("path")?.getAttribute("fill")).toBe("currentColor");
   });
 
-  it("初期 is_liked=true のとき SVG に fill-current が付与される", () => {
+  it("初期 is_liked=true のとき path に fill が付与される", () => {
     const postLiked = { ...mockPost, is_liked: true } as Post;
     const onLike = vi.fn();
 
@@ -103,7 +103,8 @@ describe("PostCard", () => {
 
     const likeButton = screen.getByLabelText("いいね");
     const svg = likeButton.querySelector("svg");
-    expect(svg).toHaveClass("fill-current");
+    expect(svg?.querySelector("path")?.getAttribute("fill")).toBe("currentColor");
+    expect(svg?.querySelector("path")?.getAttribute("stroke")).toBe("currentColor");
   });
 
   it("onUnlike が渡されているとき、解除クリックで onUnlike が呼ばれる", async () => {

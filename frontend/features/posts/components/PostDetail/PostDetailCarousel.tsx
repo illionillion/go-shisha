@@ -118,7 +118,7 @@ export function PostDetailCarousel({
                 "rounded-full",
               ])}
             >
-              <PrevIcon />
+              <PrevIcon className="text-white" />
             </button>
             <button
               aria-label="次のスライド"
@@ -133,7 +133,7 @@ export function PostDetailCarousel({
                 "rounded-full",
               ])}
             >
-              <NextIcon />
+              <NextIcon className="text-white" />
             </button>
             <div
               className={clsx([
