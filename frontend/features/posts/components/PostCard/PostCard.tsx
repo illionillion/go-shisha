@@ -4,12 +4,13 @@ import { cva } from "class-variance-authority";
 import { clsx } from "clsx";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar } from "@/components/Avatar/Avatar";
 import { FlavorLabel } from "@/components/FlavorLabel";
-import { DotsHorizontalIcon, HeartIcon, NextIcon, PrevIcon } from "@/components/icons";
+import { HeartIcon, NextIcon, PrevIcon } from "@/components/icons";
 import { getImageUrl } from "@/lib/getImageUrl";
 import type { Post } from "@/types/domain";
+import { PostOwnerMenu } from "../PostOwnerMenu";
 
 interface PostCardProps {
   post: Post;
@@ -24,48 +25,6 @@ interface PostCardProps {
   /** 投稿詳細ページへのリンク */
   href?: string;
 }
-
-interface OutsideClickAndEscOptions {
-  ref: React.RefObject<HTMLDivElement | null>;
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-/**
- * メニューなどのポップアップを、メニュー外クリックおよび ESC キー押下で閉じるための共通フック
- *
- * @example
- * const menuRef = useRef<HTMLDivElement>(null);
- * const [isOpen, setIsOpen] = useState(false);
- * useOutsideClickAndEsc({ ref: menuRef, isOpen, onClose: () => setIsOpen(false) });
- */
-const useOutsideClickAndEsc = ({ ref, isOpen, onClose }: OutsideClickAndEscOptions): void => {
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handleClickOutside = (e: MouseEvent): void => {
-      if (ref.current && e.target instanceof Node && !ref.current.contains(e.target)) {
-        onClose();
-      }
-    };
-
-    const handleKeyDown = (e: KeyboardEvent): void => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, onClose, ref]);
-};
 
 const cardVariants = cva(["relative", "cursor-pointer", "group"], {
   variants: {},
@@ -101,20 +60,6 @@ const likeButtonVariants = cva(
   }
 );
 
-const menuButtonVariants = cva(
-  [
-    "p-2",
-    "rounded-full",
-    "bg-white/20",
-    "backdrop-blur-sm",
-    "hover:bg-white/30",
-    "transition-colors",
-  ],
-  {
-    variants: {},
-  }
-);
-
 /**
  * PostCardコンポーネント
  * REQUIREMENTS.mdの仕様に基づいた投稿カード
@@ -137,8 +82,6 @@ export function PostCard({
 }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(post.is_liked || false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const slides = post.slides || [];
   const hasMultipleSlides = slides.length > 1;
   // 自分の投稿かつ onDelete が指定された場合のみメニューを表示
@@ -161,13 +104,6 @@ export function PostCard({
   useEffect(() => {
     setIsLiked(post.is_liked || false);
   }, [post.is_liked]);
-
-  /** メニュー外クリックおよびESCキーで閉じる */
-  useOutsideClickAndEsc({
-    ref: menuRef,
-    isOpen: isMenuOpen,
-    onClose: () => setIsMenuOpen(false),
-  });
 
   /** 前のスライドへ */
   const handlePrevSlide = (e: React.MouseEvent) => {
@@ -199,23 +135,6 @@ export function PostCard({
         if (onUnlike) onUnlike(post.id);
         else onLike(post.id);
       }
-    }
-  };
-
-  /** 3点リーダーメニュー開閉 */
-  const handleMenuToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsMenuOpen((prev) => !prev);
-  };
-
-  /** 削除ボタンクリック */
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsMenuOpen(false);
-    if (post.id && onDelete) {
-      onDelete(post.id);
     }
   };
 
@@ -352,50 +271,15 @@ export function PostCard({
 
             {/* 3点リーダーメニュー（自分の投稿かつ onDelete が指定された場合のみ表示） */}
             {isOwner && (
-              <div ref={menuRef} className={clsx(["relative", "ml-auto"])}>
-                <button
-                  type="button"
-                  onClick={handleMenuToggle}
-                  className={menuButtonVariants()}
-                  aria-label="メニュー"
-                  aria-expanded={isMenuOpen}
-                >
-                  <DotsHorizontalIcon />
-                </button>
-
-                {isMenuOpen && (
-                  <div
-                    className={clsx([
-                      "absolute",
-                      "right-0",
-                      "bottom-full",
-                      "mb-1",
-                      "w-28",
-                      "bg-white",
-                      "rounded-lg",
-                      "shadow-lg",
-                      "overflow-hidden",
-                    ])}
-                  >
-                    <button
-                      type="button"
-                      onClick={handleDeleteClick}
-                      className={clsx([
-                        "w-full",
-                        "px-4",
-                        "py-2",
-                        "text-sm",
-                        "text-left",
-                        "text-red-600",
-                        "hover:bg-red-50",
-                        "transition-colors",
-                      ])}
-                    >
-                      削除
-                    </button>
-                  </div>
-                )}
-              </div>
+              <PostOwnerMenu
+                onDelete={() => {
+                  if (post.id) onDelete(post.id);
+                }}
+                variant="card"
+                menuPosition="top"
+                stopPropagation
+                className="ml-auto"
+              />
             )}
           </div>
 
