@@ -42,7 +42,7 @@ export function TitleScene() {
       style={{
         width: "100%",
         height: "100%",
-        backgroundColor: "#0a0a0a",
+        backgroundColor: "#ffffff",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -73,7 +73,7 @@ export function TitleScene() {
           style={{
             fontSize: 72,
             fontWeight: 600,
-            color: "#ffffff",
+            color: "#171717",
             margin: 0,
             letterSpacing: "-1px",
             opacity: titleOpacity,
@@ -88,7 +88,7 @@ export function TitleScene() {
         <p
           style={{
             fontSize: 36,
-            color: "rgba(255,255,255,0.7)",
+            color: "rgba(0,0,0,0.5)",
             margin: "24px 0 0",
             letterSpacing: "2px",
             opacity: subtitleOpacity,
