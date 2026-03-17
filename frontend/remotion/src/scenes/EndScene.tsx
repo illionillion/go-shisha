@@ -33,7 +33,7 @@ export function EndScene() {
       style={{
         width: "100%",
         height: "100%",
-        backgroundColor: "#0a0a0a",
+        backgroundColor: "#ffffff",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -47,7 +47,7 @@ export function EndScene() {
           position: "absolute",
           inset: 0,
           background:
-            "radial-gradient(ellipse at 50% 50%, rgba(99,102,241,0.2) 0%, transparent 70%)",
+            "radial-gradient(ellipse at 50% 50%, rgba(99,102,241,0.08) 0%, transparent 70%)",
           opacity,
         }}
       />
@@ -66,7 +66,7 @@ export function EndScene() {
           style={{
             fontSize: 72,
             fontWeight: 600,
-            color: "#ffffff",
+            color: "#171717",
             margin: 0,
             letterSpacing: "-1px",
             fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
@@ -79,7 +79,7 @@ export function EndScene() {
         <p
           style={{
             fontSize: 36,
-            color: "rgba(255,255,255,0.7)",
+            color: "rgba(0,0,0,0.5)",
             margin: "24px 0 0",
             letterSpacing: "2px",
             fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",

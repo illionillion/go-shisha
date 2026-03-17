@@ -4,6 +4,7 @@ import { MOCK_POSTS } from "./mock-data";
 import { DetailScene } from "./scenes/DetailScene";
 import { EndScene } from "./scenes/EndScene";
 import { HomeScene } from "./scenes/HomeScene";
+import { ShareScene } from "./scenes/ShareScene";
 import { TitleScene } from "./scenes/TitleScene";
 import "./styles.css";
 
@@ -19,16 +20,17 @@ const HEIGHT = 720;
 // 各シーンのフレーム数
 const TITLE_FRAMES = 2 * FPS; // 0-2秒
 const HOME_FRAMES = 5 * FPS; // 2-7秒
-const DETAIL_FRAMES = 3 * FPS; // 7-10秒
-const END_FRAMES = 2 * FPS; // 10-12秒
-const TOTAL_FRAMES = TITLE_FRAMES + HOME_FRAMES + DETAIL_FRAMES + END_FRAMES;
+const DETAIL_FRAMES = 4 * FPS; // 7-11秒
+const SHARE_FRAMES = 4 * FPS; // 11-15秒
+const END_FRAMES = 2 * FPS; // 15-17秒
+const TOTAL_FRAMES = TITLE_FRAMES + HOME_FRAMES + DETAIL_FRAMES + SHARE_FRAMES + END_FRAMES;
 
 function ShishaPromoVideo() {
   // フレーム0より前に全画像のロード+デコードを完了させる
   usePreloadImages(ALL_IMAGES);
 
   return (
-    <AbsoluteFill style={{ backgroundColor: "#0a0a0a" }}>
+    <AbsoluteFill style={{ backgroundColor: "#f9fafb" }}>
       <Series>
         <Series.Sequence durationInFrames={TITLE_FRAMES}>
           <TitleScene />
@@ -38,6 +40,9 @@ function ShishaPromoVideo() {
         </Series.Sequence>
         <Series.Sequence durationInFrames={DETAIL_FRAMES}>
           <DetailScene />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={SHARE_FRAMES}>
+          <ShareScene />
         </Series.Sequence>
         <Series.Sequence durationInFrames={END_FRAMES}>
           <EndScene />

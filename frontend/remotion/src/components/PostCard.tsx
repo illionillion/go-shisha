@@ -52,7 +52,7 @@ export function PostCard({ post, slideFrames = 90, liked = false }: PostCardProp
           position: "relative",
           overflow: "hidden",
           borderRadius: 12,
-          backgroundColor: "#1a1a1a",
+          backgroundColor: "#f3f4f6",
         }}
       >
         {/* スケルトン: 画像ロード前に表示 */}
@@ -62,7 +62,7 @@ export function PostCard({ post, slideFrames = 90, liked = false }: PostCardProp
               position: "absolute",
               inset: 0,
               zIndex: 10,
-              backgroundColor: "#2d2d2d",
+              backgroundColor: "#e5e7eb",
             }}
           />
         )}
