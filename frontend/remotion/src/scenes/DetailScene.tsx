@@ -6,12 +6,12 @@ import { SceneBadge } from "../components/SceneBadge";
 import { FEATURED_POST } from "../mock-data";
 
 /**
- * [7-10秒] 1枚ズームして投稿詳細・いいねアニメーション
+ * [7-11秒] 1枚ズームして投稿詳細・いいねアニメーション
  */
 export function DetailScene() {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const durationFrames = 3 * fps; // 3秒
+  const durationFrames = 4 * fps; // 4秒
 
   // カードのズームイン
   const cardScale = spring({
