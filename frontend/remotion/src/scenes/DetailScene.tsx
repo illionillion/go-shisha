@@ -2,15 +2,16 @@ import { useCurrentFrame, useVideoConfig, interpolate, Easing, spring } from "re
 import { FlavorLabel } from "../../../components/FlavorLabel/FlavorLabel";
 import { Avatar } from "../components/Avatar";
 import { PostCard } from "../components/PostCard";
+import { SceneBadge } from "../components/SceneBadge";
 import { FEATURED_POST } from "../mock-data";
 
 /**
- * [7-10秒] 1枚ズームして投稿詳細・いいねアニメーション
+ * [7-11秒] 1枚ズームして投稿詳細・いいねアニメーション
  */
 export function DetailScene() {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const durationFrames = 3 * fps; // 3秒
+  const durationFrames = 4 * fps; // 4秒
 
   // カードのズームイン
   const cardScale = spring({
@@ -71,7 +72,7 @@ export function DetailScene() {
       style={{
         width: "100%",
         height: "100%",
-        backgroundColor: "#0d0d0d",
+        backgroundColor: "#f9fafb",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -79,8 +80,12 @@ export function DetailScene() {
         padding: 60,
         opacity: sceneOpacity * opacity,
         overflow: "hidden",
+        position: "relative",
       }}
     >
+      {/* シーンラベル */}
+      <SceneBadge label="知る" frame={frame} fps={fps} />
+
       {/* カード（ズームイン） */}
       <div
         style={{
@@ -96,7 +101,7 @@ export function DetailScene() {
       <div
         style={{
           flex: 1,
-          color: "white",
+          color: "#171717",
           opacity: panelOpacity,
           transform: `translateX(${panelX}px)`,
         }}
@@ -126,7 +131,7 @@ export function DetailScene() {
           style={{
             fontSize: 32,
             lineHeight: 1.6,
-            color: "rgba(255,255,255,0.9)",
+            color: "rgba(0,0,0,0.75)",
             margin: "0 0 24px",
             fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
           }}
@@ -156,7 +161,7 @@ export function DetailScene() {
                 width: 48,
                 height: 48,
                 fill: isLiked ? "#ef4444" : "none",
-                stroke: isLiked ? "#ef4444" : "rgba(255,255,255,0.7)",
+                stroke: isLiked ? "#ef4444" : "rgba(0,0,0,0.3)",
                 strokeWidth: 2,
                 transition: "all 0.2s",
               }}
@@ -172,7 +177,7 @@ export function DetailScene() {
               style={{
                 fontSize: 40,
                 fontWeight: 700,
-                color: isLiked ? "#ef4444" : "rgba(255,255,255,0.7)",
+                color: isLiked ? "#ef4444" : "rgba(0,0,0,0.4)",
                 fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
               }}
             >
