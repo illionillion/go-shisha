@@ -95,7 +95,7 @@ export function HomeScene() {
               fontWeight: 700,
               color: "#171717",
               margin: 0,
-              fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+              fontFamily: "'Noto Sans JP', sans-serif",
             }}
           >
             シーシャ行こう
@@ -139,7 +139,7 @@ export function HomeScene() {
                 color: isSelected ? "#ffffff" : "#6b7280",
                 border: isSelected ? `2px solid ${chip.bg}` : "2px solid #e5e7eb",
                 transform: isSelected ? `scale(${1 + mintSelectProgress * 0.06})` : "scale(1)",
-                fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+                fontFamily: "'Noto Sans JP', sans-serif",
               }}
             >
               {chip.name}

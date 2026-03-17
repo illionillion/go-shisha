@@ -118,7 +118,7 @@ export function DetailScene() {
               style={{
                 fontSize: 28,
                 fontWeight: 700,
-                fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+                fontFamily: "'Noto Sans JP', sans-serif",
               }}
             >
               {FEATURED_POST.user?.display_name}
@@ -133,7 +133,7 @@ export function DetailScene() {
             lineHeight: 1.6,
             color: "rgba(0,0,0,0.75)",
             margin: "0 0 24px",
-            fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+            fontFamily: "'Noto Sans JP', sans-serif",
           }}
         >
           {slide?.text}
@@ -178,7 +178,7 @@ export function DetailScene() {
                 fontSize: 40,
                 fontWeight: 700,
                 color: isLiked ? "#ef4444" : "rgba(0,0,0,0.4)",
-                fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+                fontFamily: "'Noto Sans JP', sans-serif",
               }}
             >
               {likeCount}

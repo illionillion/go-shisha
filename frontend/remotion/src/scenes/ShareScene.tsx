@@ -127,7 +127,7 @@ export function ShareScene() {
               fontSize: 18,
               fontWeight: 700,
               color: "#171717",
-              fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+              fontFamily: "'Noto Sans JP', sans-serif",
             }}
           >
             投稿を作成
@@ -174,7 +174,7 @@ export function ShareScene() {
                 fontSize: 14,
                 fontWeight: 600,
                 color: "#171717",
-                fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+                fontFamily: "'Noto Sans JP', sans-serif",
               }}
             >
               画像 1 / 1
@@ -189,7 +189,7 @@ export function ShareScene() {
                     backgroundColor: "#e5e7eb",
                     fontSize: 12,
                     color: "#9ca3af",
-                    fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+                    fontFamily: "'Noto Sans JP', sans-serif",
                   }}
                 >
                   {label}
@@ -230,7 +230,7 @@ export function ShareScene() {
                 fontSize: 12,
                 color: "#6b7280",
                 margin: "1px 0",
-                fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+                fontFamily: "'Noto Sans JP', sans-serif",
               }}
             >
               ファイル名: double_apple.jpg
@@ -240,7 +240,7 @@ export function ShareScene() {
                 fontSize: 12,
                 color: "#6b7280",
                 margin: "1px 0",
-                fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+                fontFamily: "'Noto Sans JP', sans-serif",
               }}
             >
               サイズ: 1.24 MB
@@ -256,7 +256,7 @@ export function ShareScene() {
                 fontWeight: 500,
                 color: "#374151",
                 marginBottom: 4,
-                fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+                fontFamily: "'Noto Sans JP', sans-serif",
               }}
             >
               フレーバー（任意）
@@ -275,7 +275,7 @@ export function ShareScene() {
                 boxShadow: flavorSelected
                   ? `0 0 0 ${flavorHighlight * 3}px rgba(59,130,246,0.15)`
                   : "none",
-                fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+                fontFamily: "'Noto Sans JP', sans-serif",
               }}
             >
               {flavorSelected && flavor ? (
@@ -308,7 +308,7 @@ export function ShareScene() {
                 fontWeight: 500,
                 color: "#374151",
                 marginBottom: 4,
-                fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+                fontFamily: "'Noto Sans JP', sans-serif",
               }}
             >
               説明（オプション、100文字まで）
@@ -324,7 +324,7 @@ export function ShareScene() {
                 height: 64,
                 lineHeight: 1.6,
                 overflow: "hidden",
-                fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+                fontFamily: "'Noto Sans JP', sans-serif",
               }}
             >
               {displayText}
@@ -347,7 +347,7 @@ export function ShareScene() {
                 fontSize: 11,
                 color: "#6b7280",
                 marginTop: 3,
-                fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+                fontFamily: "'Noto Sans JP', sans-serif",
               }}
             >
               {displayText.length} / 100文字
@@ -374,7 +374,7 @@ export function ShareScene() {
               fontSize: 14,
               fontWeight: 500,
               color: "#374151",
-              fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+              fontFamily: "'Noto Sans JP', sans-serif",
             }}
           >
             戻る
@@ -388,7 +388,7 @@ export function ShareScene() {
               fontWeight: 500,
               color: "#ffffff",
               transform: `scale(${buttonScale})`,
-              fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+              fontFamily: "'Noto Sans JP', sans-serif",
             }}
           >
             投稿する

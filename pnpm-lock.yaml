@@ -59,6 +59,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.71.1(react@19.2.3))
+      '@remotion/google-fonts':
+        specifier: ^4.0.436
+        version: 4.0.436(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@tanstack/react-query':
         specifier: ^5.90.21
         version: 5.90.21(react@19.2.3)
@@ -1736,6 +1739,9 @@ packages:
     resolution: {integrity: sha512-3PmLo03LBYf123FvjlUNphbtnTJnvToHMDgBQYdrlQBGbAQpJGLsX7IViQwWSNFGZVzonwliNtC9568Nbts8lw==}
     cpu: [x64]
     os: [win32]
+
+  '@remotion/google-fonts@4.0.436':
+    resolution: {integrity: sha512-IyAs17JiER1YZDseKSZuGKhRaLwGTZm9luzUAIN39dDmgDGDwBso146ujdF60JqkONNVlOWsPLtPhHMwdxq4hg==}
 
   '@remotion/licensing@4.0.434':
     resolution: {integrity: sha512-Jp9pHUlQBOX7ZjDuG9OVIEDGU5JiN2eSjvHEDS8zwyIIGUaRwDhZRzvGULEiZpu1IJ6UMDpHqIylJ18Inl1PMg==}
@@ -5733,6 +5739,12 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
 
+  remotion@4.0.436:
+    resolution: {integrity: sha512-VCENxMQLXNqK0bh/2tm2avOeWM1s2nNXOU5XG/d5oC0vBmaKna27x8NP1+0t7zjjr5v9olqD3G9qYdpjy/o/WQ==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
     engines: {node: '>=0.10.0'}
@@ -8378,6 +8390,13 @@ snapshots:
 
   '@remotion/compositor-win32-x64-msvc@4.0.434':
     optional: true
+
+  '@remotion/google-fonts@4.0.436(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      remotion: 4.0.436(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+    transitivePeerDependencies:
+      - react
+      - react-dom
 
   '@remotion/licensing@4.0.434': {}
 
@@ -13011,6 +13030,11 @@ snapshots:
   remeda@2.33.6: {}
 
   remotion@4.0.434(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+    dependencies:
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+
+  remotion@4.0.436(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)

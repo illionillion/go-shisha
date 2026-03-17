@@ -78,7 +78,7 @@ export function TitleScene() {
             letterSpacing: "-1px",
             opacity: titleOpacity,
             transform: `translateY(${titleY}px)`,
-            fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+            fontFamily: "'Noto Sans JP', sans-serif",
           }}
         >
           シーシャ行こう
@@ -93,7 +93,7 @@ export function TitleScene() {
             letterSpacing: "2px",
             opacity: subtitleOpacity,
             transform: `translateY(${subtitleY}px)`,
-            fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+            fontFamily: "'Noto Sans JP', sans-serif",
           }}
         >
           あなたのシーシャをシェアしよう。

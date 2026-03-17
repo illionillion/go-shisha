@@ -1,3 +1,4 @@
+import { loadFont } from "@remotion/google-fonts/NotoSansJP";
 import { Composition, AbsoluteFill, Series } from "remotion";
 import { usePreloadImages } from "./hooks/usePreloadImages";
 import { MOCK_POSTS } from "./mock-data";
@@ -7,6 +8,9 @@ import { HomeScene } from "./scenes/HomeScene";
 import { ShareScene } from "./scenes/ShareScene";
 import { TitleScene } from "./scenes/TitleScene";
 import "./styles.css";
+
+// Noto Sans JP を Google Fonts から読み込む（豆腐対策）
+loadFont();
 
 // 全シーンで使う画像を事前収集（空文字や未設定は除外）
 const ALL_IMAGES = MOCK_POSTS.flatMap((p) => p.slides?.map((s) => s.image_url) ?? []).filter(

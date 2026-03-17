@@ -69,7 +69,7 @@ export function EndScene() {
             color: "#171717",
             margin: 0,
             letterSpacing: "-1px",
-            fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+            fontFamily: "'Noto Sans JP', sans-serif",
           }}
         >
           シーシャ行こう
@@ -82,7 +82,7 @@ export function EndScene() {
             color: "rgba(0,0,0,0.5)",
             margin: "24px 0 0",
             letterSpacing: "2px",
-            fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+            fontFamily: "'Noto Sans JP', sans-serif",
           }}
         >
           あなたのシーシャをシェアしよう。

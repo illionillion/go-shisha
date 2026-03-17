@@ -54,7 +54,7 @@ export function SceneBadge({ label, frame, fps }: SceneBadgeProps) {
           fontSize: 28,
           fontWeight: 800,
           letterSpacing: "2px",
-          fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+          fontFamily: "'Noto Sans JP', sans-serif",
           lineHeight: 1,
         }}
       >

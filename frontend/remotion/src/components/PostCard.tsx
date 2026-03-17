@@ -199,7 +199,7 @@ export function PostCard({ post, slideFrames = 90, liked = false }: PostCardProp
                 fontSize: 13,
                 fontWeight: 500,
                 color: "white",
-                fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+                fontFamily: "'Noto Sans JP', sans-serif",
               }}
             >
               {post.user?.display_name ?? "匿名"}
@@ -212,7 +212,7 @@ export function PostCard({ post, slideFrames = 90, liked = false }: PostCardProp
               lineHeight: 1.4,
               margin: "0 0 6px",
               color: "white",
-              fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+              fontFamily: "'Noto Sans JP', sans-serif",
               display: "-webkit-box",
               WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
