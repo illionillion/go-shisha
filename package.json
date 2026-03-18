@@ -80,7 +80,8 @@
       "bn.js": ">=5.2.3",
       "ajv@<6.14.0": "6.14.0",
       "ajv@>=7.0.0-alpha.0 <8.18.0": "8.18.0",
-      "serialize-javascript": ">=7.0.3"
+      "serialize-javascript": ">=7.0.3",
+      "fast-xml-parser": ">=5.5.6"
     }
   }
 }
