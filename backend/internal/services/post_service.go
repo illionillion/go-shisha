@@ -187,7 +187,9 @@ func (s *PostService) DeletePost(userID, postID int) error {
 // 投稿の所有者でない場合は repositories.ErrForbidden を返す
 // スライド枚数が既存と一致しない場合は repositories.ErrSlideCountMismatch を返す
 func (s *PostService) UpdatePost(userID, postID int, input *models.UpdatePostInput) (*models.Post, error) {
-	// CreatePost と同様に、存在しない flavor_id によるFK違反を防ぐため事前に検証する
+	// 存在しない flavor_id によるFK違反を防ぐため事前に検証する
+	// ErrFlavorNotFound の場合は警告ログを出して nil に落として続行する
+	// DB障害等の予期しないエラーは更新処理自体を失敗させる
 	for i := range input.Slides {
 		slide := &input.Slides[i]
 		if slide.FlavorID == nil {
@@ -195,8 +197,8 @@ func (s *PostService) UpdatePost(userID, postID int, input *models.UpdatePostInp
 		}
 		if _, err := s.flavorRepo.GetByID(*slide.FlavorID); err != nil {
 			if errors.Is(err, repositories.ErrFlavorNotFound) {
-				// フレーバーが見つからない場合でも更新全体は失敗させない
-				// CreatePost と同様に警告ログを出して flavor_id を nil に落とす
+				// フレーバーが存在しない場合でも更新全体は失敗させない
+				// 警告ログを出して flavor_id を nil に落として続行する
 				logging.L.Warn("存在しないフレーバーIDが指定されたため無視します",
 					"service", "PostService",
 					"method", "UpdatePost",
