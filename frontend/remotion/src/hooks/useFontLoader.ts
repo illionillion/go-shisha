@@ -16,8 +16,8 @@ export function useFontLoader() {
     const { waitUntilDone } = loadFont();
 
     waitUntilDone()
-      .catch(() => {
-        // フォント読み込み失敗時もレンダーをブロックしない
+      .catch((e) => {
+        console.warn("[useFontLoader] Noto Sans JP の読み込みに失敗しました:", e);
       })
       .then(() => {
         resolved = true;

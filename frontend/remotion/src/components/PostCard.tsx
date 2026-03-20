@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { FlavorLabel } from "../../../components/FlavorLabel/FlavorLabel";
 import type { Post } from "../../../types/domain";
+import { FONT_FAMILY } from "../constants/fonts";
 import { Avatar } from "./Avatar";
 
 interface PostCardProps {
@@ -199,7 +200,7 @@ export function PostCard({ post, slideFrames = 90, liked = false }: PostCardProp
                 fontSize: 13,
                 fontWeight: 500,
                 color: "white",
-                fontFamily: "'Noto Sans JP', sans-serif",
+                fontFamily: FONT_FAMILY,
               }}
             >
               {post.user?.display_name ?? "匿名"}
@@ -212,7 +213,7 @@ export function PostCard({ post, slideFrames = 90, liked = false }: PostCardProp
               lineHeight: 1.4,
               margin: "0 0 6px",
               color: "white",
-              fontFamily: "'Noto Sans JP', sans-serif",
+              fontFamily: FONT_FAMILY,
               display: "-webkit-box",
               WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",

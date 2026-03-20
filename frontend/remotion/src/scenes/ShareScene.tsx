@@ -7,6 +7,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { SceneBadge } from "../components/SceneBadge";
+import { FONT_FAMILY } from "../constants/fonts";
 import { MOCK_POSTS } from "../mock-data";
 
 /**
@@ -127,7 +128,7 @@ export function ShareScene() {
               fontSize: 18,
               fontWeight: 700,
               color: "#171717",
-              fontFamily: "'Noto Sans JP', sans-serif",
+              fontFamily: FONT_FAMILY,
             }}
           >
             投稿を作成
@@ -174,7 +175,7 @@ export function ShareScene() {
                 fontSize: 14,
                 fontWeight: 600,
                 color: "#171717",
-                fontFamily: "'Noto Sans JP', sans-serif",
+                fontFamily: FONT_FAMILY,
               }}
             >
               画像 1 / 1
@@ -189,7 +190,7 @@ export function ShareScene() {
                     backgroundColor: "#e5e7eb",
                     fontSize: 12,
                     color: "#9ca3af",
-                    fontFamily: "'Noto Sans JP', sans-serif",
+                    fontFamily: FONT_FAMILY,
                   }}
                 >
                   {label}
@@ -230,7 +231,7 @@ export function ShareScene() {
                 fontSize: 12,
                 color: "#6b7280",
                 margin: "1px 0",
-                fontFamily: "'Noto Sans JP', sans-serif",
+                fontFamily: FONT_FAMILY,
               }}
             >
               ファイル名: double_apple.jpg
@@ -240,7 +241,7 @@ export function ShareScene() {
                 fontSize: 12,
                 color: "#6b7280",
                 margin: "1px 0",
-                fontFamily: "'Noto Sans JP', sans-serif",
+                fontFamily: FONT_FAMILY,
               }}
             >
               サイズ: 1.24 MB
@@ -256,7 +257,7 @@ export function ShareScene() {
                 fontWeight: 500,
                 color: "#374151",
                 marginBottom: 4,
-                fontFamily: "'Noto Sans JP', sans-serif",
+                fontFamily: FONT_FAMILY,
               }}
             >
               フレーバー（任意）
@@ -275,7 +276,7 @@ export function ShareScene() {
                 boxShadow: flavorSelected
                   ? `0 0 0 ${flavorHighlight * 3}px rgba(59,130,246,0.15)`
                   : "none",
-                fontFamily: "'Noto Sans JP', sans-serif",
+                fontFamily: FONT_FAMILY,
               }}
             >
               {flavorSelected && flavor ? (
@@ -308,7 +309,7 @@ export function ShareScene() {
                 fontWeight: 500,
                 color: "#374151",
                 marginBottom: 4,
-                fontFamily: "'Noto Sans JP', sans-serif",
+                fontFamily: FONT_FAMILY,
               }}
             >
               説明（オプション、100文字まで）
@@ -324,7 +325,7 @@ export function ShareScene() {
                 height: 64,
                 lineHeight: 1.6,
                 overflow: "hidden",
-                fontFamily: "'Noto Sans JP', sans-serif",
+                fontFamily: FONT_FAMILY,
               }}
             >
               {displayText}
@@ -347,7 +348,7 @@ export function ShareScene() {
                 fontSize: 11,
                 color: "#6b7280",
                 marginTop: 3,
-                fontFamily: "'Noto Sans JP', sans-serif",
+                fontFamily: FONT_FAMILY,
               }}
             >
               {displayText.length} / 100文字
@@ -374,7 +375,7 @@ export function ShareScene() {
               fontSize: 14,
               fontWeight: 500,
               color: "#374151",
-              fontFamily: "'Noto Sans JP', sans-serif",
+              fontFamily: FONT_FAMILY,
             }}
           >
             戻る
@@ -388,7 +389,7 @@ export function ShareScene() {
               fontWeight: 500,
               color: "#ffffff",
               transform: `scale(${buttonScale})`,
-              fontFamily: "'Noto Sans JP', sans-serif",
+              fontFamily: FONT_FAMILY,
             }}
           >
             投稿する

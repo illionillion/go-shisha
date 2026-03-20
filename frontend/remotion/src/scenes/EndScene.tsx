@@ -1,4 +1,5 @@
 import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
+import { FONT_FAMILY } from "../constants/fonts";
 
 /**
  * [10-12秒] アプリ名＋キャッチコピーでフェードアウト
@@ -69,7 +70,7 @@ export function EndScene() {
             color: "#171717",
             margin: 0,
             letterSpacing: "-1px",
-            fontFamily: "'Noto Sans JP', sans-serif",
+            fontFamily: FONT_FAMILY,
           }}
         >
           シーシャ行こう
@@ -82,7 +83,7 @@ export function EndScene() {
             color: "rgba(0,0,0,0.5)",
             margin: "24px 0 0",
             letterSpacing: "2px",
-            fontFamily: "'Noto Sans JP', sans-serif",
+            fontFamily: FONT_FAMILY,
           }}
         >
           あなたのシーシャをシェアしよう。

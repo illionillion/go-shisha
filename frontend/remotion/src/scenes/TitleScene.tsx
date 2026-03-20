@@ -1,4 +1,5 @@
 import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
+import { FONT_FAMILY } from "../constants/fonts";
 
 /**
  * [0-2秒] タイトル画面
@@ -78,7 +79,7 @@ export function TitleScene() {
             letterSpacing: "-1px",
             opacity: titleOpacity,
             transform: `translateY(${titleY}px)`,
-            fontFamily: "'Noto Sans JP', sans-serif",
+            fontFamily: FONT_FAMILY,
           }}
         >
           シーシャ行こう
@@ -93,7 +94,7 @@ export function TitleScene() {
             letterSpacing: "2px",
             opacity: subtitleOpacity,
             transform: `translateY(${subtitleY}px)`,
-            fontFamily: "'Noto Sans JP', sans-serif",
+            fontFamily: FONT_FAMILY,
           }}
         >
           あなたのシーシャをシェアしよう。
