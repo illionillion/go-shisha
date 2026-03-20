@@ -1,4 +1,5 @@
 import { Easing, interpolate } from "remotion";
+import { FONT_FAMILY } from "../constants/fonts";
 
 interface SceneBadgeProps {
   label: string;
@@ -54,7 +55,7 @@ export function SceneBadge({ label, frame, fps }: SceneBadgeProps) {
           fontSize: 28,
           fontWeight: 800,
           letterSpacing: "2px",
-          fontFamily: "'Hiragino Sans', 'Noto Sans JP', sans-serif",
+          fontFamily: FONT_FAMILY,
           lineHeight: 1,
         }}
       >

@@ -1,4 +1,5 @@
 import { Composition, AbsoluteFill, Series } from "remotion";
+import { useFontLoader } from "./hooks/useFontLoader";
 import { usePreloadImages } from "./hooks/usePreloadImages";
 import { MOCK_POSTS } from "./mock-data";
 import { DetailScene } from "./scenes/DetailScene";
@@ -26,6 +27,8 @@ const END_FRAMES = 2 * FPS; // 15-17秒
 const TOTAL_FRAMES = TITLE_FRAMES + HOME_FRAMES + DETAIL_FRAMES + SHARE_FRAMES + END_FRAMES;
 
 function ShishaPromoVideo() {
+  // フォントをロードしてからフレームを描画する（豆腐対策）
+  useFontLoader();
   // フレーム0より前に全画像のロード+デコードを完了させる
   usePreloadImages(ALL_IMAGES);
 
