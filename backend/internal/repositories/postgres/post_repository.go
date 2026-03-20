@@ -347,9 +347,15 @@ func (r *PostRepository) UpdatePost(userID, postID int, slides []models.UpdateSl
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		for i, slide := range slides {
 			sm := existingSlides[i]
+			// slides.flavor_id は BIGINT のため *int64 に変換して渡す
+			var flavorID *int64
+			if slide.FlavorID != nil {
+				v := int64(*slide.FlavorID)
+				flavorID = &v
+			}
 			updates := map[string]interface{}{
 				"text":      slide.Text,
-				"flavor_id": slide.FlavorID,
+				"flavor_id": flavorID,
 			}
 			if err := tx.Model(&slideModel{}).Where("id = ?", sm.ID).Updates(updates).Error; err != nil {
 				return fmt.Errorf("failed to update slide id=%d: %w", sm.ID, err)

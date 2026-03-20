@@ -187,5 +187,24 @@ func (s *PostService) DeletePost(userID, postID int) error {
 // 投稿の所有者でない場合は repositories.ErrForbidden を返す
 // スライド枚数が既存と一致しない場合は repositories.ErrSlideCountMismatch を返す
 func (s *PostService) UpdatePost(userID, postID int, input *models.UpdatePostInput) (*models.Post, error) {
+	// CreatePost と同様に、存在しない flavor_id によるFK違反を防ぐため事前に検証する
+	for i := range input.Slides {
+		slide := &input.Slides[i]
+		if slide.FlavorID == nil {
+			continue
+		}
+		if _, err := s.flavorRepo.GetByID(*slide.FlavorID); err != nil {
+			// フレーバーが見つからない場合でも更新全体は失敗させない
+			// CreatePost と同様に警告ログを出して flavor_id を nil に落とす
+			logging.L.Warn("存在しないフレーバーIDが指定されたため無視します",
+				"service", "PostService",
+				"method", "UpdatePost",
+				"post_id", postID,
+				"user_id", userID,
+				"flavor_id", *slide.FlavorID,
+				"error", err)
+			slide.FlavorID = nil
+		}
+	}
 	return s.postRepo.UpdatePost(userID, postID, input.Slides)
 }

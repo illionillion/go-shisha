@@ -63,8 +63,10 @@ type CreatePostInput struct {
 
 // UpdateSlideInput はスライド更新時の入力
 type UpdateSlideInput struct {
-	Text     string `json:"text"`
-	FlavorID *int   `json:"flavor_id"`
+	// スライドのテキスト
+	Text string `json:"text"`
+	// フレーバーID。null を指定するとフレーバーを解除する
+	FlavorID *int `json:"flavor_id" example:"1"`
 }
 
 // UpdatePostInput は投稿更新時の入力

@@ -186,8 +186,11 @@ definitions:
   go-shisha-backend_internal_models.UpdateSlideInput:
     properties:
       flavor_id:
+        description: フレーバーID。null を指定するとフレーバーを解除する
+        example: 1
         type: integer
       text:
+        description: スライドのテキスト
         type: string
     type: object
   go-shisha-backend_internal_models.UploadImagesResponse:

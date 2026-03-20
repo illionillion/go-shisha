@@ -1147,9 +1147,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "flavor_id": {
-                    "type": "integer"
+                    "description": "フレーバーID。null を指定するとフレーバーを解除する",
+                    "type": "integer",
+                    "example": 1
                 },
                 "text": {
+                    "description": "スライドのテキスト",
                     "type": "string"
                 }
             }
