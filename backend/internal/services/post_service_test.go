@@ -101,7 +101,7 @@ func (m *mockFlavorRepo) GetByID(id int) (*models.Flavor, error) {
 	if flavor, ok := flavors[id]; ok {
 		return &flavor, nil
 	}
-	return nil, errors.New("flavor not found")
+	return nil, repositories.ErrFlavorNotFound
 }
 
 func (m *mockFlavorRepo) GetAll() ([]models.Flavor, error) {
@@ -567,11 +567,13 @@ func TestDeletePost_Forbidden(t *testing.T) {
 // updatePostRepo はUpdatePost用のモックリポジトリ
 type updatePostRepo struct {
 	mockPostRepo
-	updateResult *models.Post
-	updateErr    error
+	updateResult  *models.Post
+	updateErr     error
+	capturedSlides []models.UpdateSlideInput
 }
 
 func (u *updatePostRepo) UpdatePost(userID, postID int, slides []models.UpdateSlideInput) (*models.Post, error) {
+	u.capturedSlides = slides
 	return u.updateResult, u.updateErr
 }
 
@@ -628,5 +630,63 @@ func TestUpdatePost_SlideCountMismatch(t *testing.T) {
 	_, err := postSvc.UpdatePost(1, 10, input)
 	if !errors.Is(err, repositories.ErrSlideCountMismatch) {
 		t.Fatalf("expected ErrSlideCountMismatch, got %v", err)
+	}
+}
+
+// mockFlavorRepoDBError は GetByID でDB障害エラーを返すモック
+type mockFlavorRepoDBError struct{}
+
+// GetByID はDB障害エラーを返すモックメソッド
+func (m *mockFlavorRepoDBError) GetByID(id int) (*models.Flavor, error) {
+	return nil, errors.New("DB接続エラー")
+}
+
+// GetAll はnilを返すモックメソッド
+func (m *mockFlavorRepoDBError) GetAll() ([]models.Flavor, error) {
+	return nil, nil
+}
+
+func TestUpdatePost_WithInvalidFlavorID(t *testing.T) {
+	// 無効なflavor_idが指定された場合、UpdatePostはエラーにならず
+	// 該当スライドのFlavorIDがnilに落とされてrepoに渡ることを確認する
+	invalidFlavorID := 999
+	repo := &updatePostRepo{updateResult: &models.Post{ID: 10, UserID: 1}}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+
+	input := &models.UpdatePostInput{
+		Slides: []models.UpdateSlideInput{
+			{Text: "テスト", FlavorID: &invalidFlavorID},
+		},
+	}
+	post, err := postSvc.UpdatePost(1, 10, input)
+	if err != nil {
+		t.Fatalf("expected no error for invalid flavor_id, got %v", err)
+	}
+	if post.ID != 10 {
+		t.Fatalf("expected post ID=10, got %d", post.ID)
+	}
+	// 無効なFlavorIDはnilに落とされてrepoへ渡ることを確認
+	if len(repo.capturedSlides) != 1 {
+		t.Fatalf("expected 1 captured slide, got %d", len(repo.capturedSlides))
+	}
+	if repo.capturedSlides[0].FlavorID != nil {
+		t.Fatalf("expected FlavorID to be nil after invalid flavor_id, got %v", repo.capturedSlides[0].FlavorID)
+	}
+}
+
+func TestUpdatePost_FlavorRepoDBError(t *testing.T) {
+	// flavorRepoがDB障害等の予期しないエラーを返した場合、UpdatePost自体も失敗することを確認する
+	flavorID := 1
+	repo := &updatePostRepo{updateResult: &models.Post{ID: 10}}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepoDBError{}, &mockUploadRepo{})
+
+	input := &models.UpdatePostInput{
+		Slides: []models.UpdateSlideInput{
+			{Text: "テスト", FlavorID: &flavorID},
+		},
+	}
+	_, err := postSvc.UpdatePost(1, 10, input)
+	if err == nil {
+		t.Fatal("expected error for flavor repo DB error, got nil")
 	}
 }

@@ -194,16 +194,28 @@ func (s *PostService) UpdatePost(userID, postID int, input *models.UpdatePostInp
 			continue
 		}
 		if _, err := s.flavorRepo.GetByID(*slide.FlavorID); err != nil {
-			// フレーバーが見つからない場合でも更新全体は失敗させない
-			// CreatePost と同様に警告ログを出して flavor_id を nil に落とす
-			logging.L.Warn("存在しないフレーバーIDが指定されたため無視します",
+			if errors.Is(err, repositories.ErrFlavorNotFound) {
+				// フレーバーが見つからない場合でも更新全体は失敗させない
+				// CreatePost と同様に警告ログを出して flavor_id を nil に落とす
+				logging.L.Warn("存在しないフレーバーIDが指定されたため無視します",
+					"service", "PostService",
+					"method", "UpdatePost",
+					"post_id", postID,
+					"user_id", userID,
+					"flavor_id", *slide.FlavorID,
+					"error", err)
+				slide.FlavorID = nil
+				continue
+			}
+			// DB障害等の予期しないエラーは更新処理自体を失敗させる
+			logging.L.Error("フレーバー情報の取得に失敗しました",
 				"service", "PostService",
 				"method", "UpdatePost",
 				"post_id", postID,
 				"user_id", userID,
 				"flavor_id", *slide.FlavorID,
 				"error", err)
-			slide.FlavorID = nil
+			return nil, err
 		}
 	}
 	return s.postRepo.UpdatePost(userID, postID, input.Slides)
