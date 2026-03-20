@@ -181,3 +181,11 @@ func (s *PostService) UnlikePost(userID, postID int) (*models.Post, error) {
 func (s *PostService) DeletePost(userID, postID int) error {
 	return s.postRepo.DeletePost(userID, postID)
 }
+
+// UpdatePost は指定された投稿のスライドの text/flavor_id を更新する
+// 投稿が存在しない場合は repositories.ErrPostNotFound を返す
+// 投稿の所有者でない場合は repositories.ErrForbidden を返す
+// スライド枚数が既存と一致しない場合は repositories.ErrSlideCountMismatch を返す
+func (s *PostService) UpdatePost(userID, postID int, input *models.UpdatePostInput) (*models.Post, error) {
+	return s.postRepo.UpdatePost(userID, postID, input.Slides)
+}

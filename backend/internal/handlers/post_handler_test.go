@@ -35,6 +35,7 @@ type mockPostService struct {
 	likePostFunc    func(userID, postID int) (*models.Post, error)
 	unlikePostFunc  func(userID, postID int) (*models.Post, error)
 	deletePostFunc  func(userID, postID int) error
+	updatePostFunc  func(userID, postID int, input *models.UpdatePostInput) (*models.Post, error)
 }
 
 func (m *mockPostService) GetAllPosts(userID *int) ([]models.Post, error) {
@@ -77,6 +78,13 @@ func (m *mockPostService) DeletePost(userID, postID int) error {
 		return m.deletePostFunc(userID, postID)
 	}
 	return nil
+}
+
+func (m *mockPostService) UpdatePost(userID, postID int, input *models.UpdatePostInput) (*models.Post, error) {
+	if m.updatePostFunc != nil {
+		return m.updatePostFunc(userID, postID, input)
+	}
+	return nil, nil
 }
 
 func TestCreatePost_NoAuth(t *testing.T) {
@@ -1052,4 +1060,192 @@ func TestDeletePost_InvalidID(t *testing.T) {
 	err := json.Unmarshal(rec.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
+func TestUpdatePost_Success(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		updatePostFunc: func(userID, postID int, input *models.UpdatePostInput) (*models.Post, error) {
+			return &models.Post{ID: postID, UserID: userID}, nil
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdatePost(c)
+	})
+
+	reqBody := map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{"text": "updated text"},
+		},
+	}
+	body, _ := json.Marshal(reqBody)
+	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+}
+
+func TestUpdatePost_NoAuth(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", handler.UpdatePost)
+
+	reqBody := map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{"text": "updated text"},
+		},
+	}
+	body, _ := json.Marshal(reqBody)
+	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
+func TestUpdatePost_NotFound(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		updatePostFunc: func(userID, postID int, input *models.UpdatePostInput) (*models.Post, error) {
+			return nil, repositories.ErrPostNotFound
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdatePost(c)
+	})
+
+	reqBody := map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{"text": "updated"},
+		},
+	}
+	body, _ := json.Marshal(reqBody)
+	req := httptest.NewRequest(http.MethodPatch, "/posts/999", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusNotFound, rec.Code)
+	var response models.NotFoundError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeNotFound, response.Error)
+}
+
+func TestUpdatePost_Forbidden(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		updatePostFunc: func(userID, postID int, input *models.UpdatePostInput) (*models.Post, error) {
+			return nil, repositories.ErrForbidden
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", func(c *gin.Context) {
+		c.Set("user_id", 2)
+		handler.UpdatePost(c)
+	})
+
+	reqBody := map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{"text": "updated"},
+		},
+	}
+	body, _ := json.Marshal(reqBody)
+	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusForbidden, rec.Code)
+	var response models.ForbiddenError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeForbidden, response.Error)
+}
+
+func TestUpdatePost_SlideCountMismatch(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		updatePostFunc: func(userID, postID int, input *models.UpdatePostInput) (*models.Post, error) {
+			return nil, repositories.ErrSlideCountMismatch
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdatePost(c)
+	})
+
+	reqBody := map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{"text": "a"},
+			{"text": "b"},
+		},
+	}
+	body, _ := json.Marshal(reqBody)
+	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
+func TestUpdatePost_InvalidID(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdatePost(c)
+	})
+
+	reqBody := map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{"text": "updated"},
+		},
+	}
+	body, _ := json.Marshal(reqBody)
+	req := httptest.NewRequest(http.MethodPatch, "/posts/invalid", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }

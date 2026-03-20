@@ -172,6 +172,24 @@ definitions:
     required:
     - error
     type: object
+  go-shisha-backend_internal_models.UpdatePostInput:
+    properties:
+      slides:
+        items:
+          $ref: '#/definitions/go-shisha-backend_internal_models.UpdateSlideInput'
+        maxItems: 10
+        minItems: 1
+        type: array
+    required:
+    - slides
+    type: object
+  go-shisha-backend_internal_models.UpdateSlideInput:
+    properties:
+      flavor_id:
+        type: integer
+      text:
+        type: string
+    type: object
   go-shisha-backend_internal_models.UploadImagesResponse:
     properties:
       urls:
@@ -519,6 +537,54 @@ paths:
           schema:
             $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
       summary: 投稿詳細取得
+      tags:
+      - posts
+    patch:
+      consumes:
+      - application/json
+      description: 指定された投稿のスライドのテキスト・フレーバーを更新します（認証必須・投稿所有者のみ）
+      parameters:
+      - description: 投稿ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 更新内容
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/go-shisha-backend_internal_models.UpdatePostInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新された投稿
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.Post'
+        "400":
+          description: バリデーションエラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ValidationError'
+        "401":
+          description: 認証エラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.UnauthorizedError'
+        "403":
+          description: 権限エラー（投稿所有者でない）
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ForbiddenError'
+        "404":
+          description: 投稿が見つかりません
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.NotFoundError'
+        "500":
+          description: サーバーエラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
+      security:
+      - BearerAuth: []
+      summary: 投稿編集
       tags:
       - posts
   /posts/{id}/like:

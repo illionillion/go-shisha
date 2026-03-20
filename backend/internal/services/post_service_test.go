@@ -39,6 +39,9 @@ func (m *mockPostRepo) HasLiked(userID, postID int) (bool, error) {
 	return false, nil
 }
 func (m *mockPostRepo) DeletePost(userID, postID int) error { return nil }
+func (m *mockPostRepo) UpdatePost(userID, postID int, slides []models.UpdateSlideInput) (*models.Post, error) {
+	return &models.Post{ID: postID}, nil
+}
 
 // spyPostRepo は AddLike/RemoveLike の呼び出しを記録し、状態を追跡するスパイ
 type spyPostRepo struct {
@@ -76,6 +79,9 @@ func (s *spyPostRepo) GetByID(id int, userID *int) (*models.Post, error) {
 	return &models.Post{ID: id, Likes: s.currentLikes, IsLiked: s.currentIsLiked}, nil
 }
 func (s *spyPostRepo) DeletePost(userID, postID int) error { return nil }
+func (s *spyPostRepo) UpdatePost(userID, postID int, slides []models.UpdateSlideInput) (*models.Post, error) {
+	return &models.Post{ID: postID}, nil
+}
 
 type mockUserRepoForPost struct{}
 
@@ -286,6 +292,9 @@ func (m *mockPostRepoError) HasLiked(userID, postID int) (bool, error) {
 	return false, errors.New("db error")
 }
 func (m *mockPostRepoError) DeletePost(userID, postID int) error { return errors.New("db error") }
+func (m *mockPostRepoError) UpdatePost(userID, postID int, slides []models.UpdateSlideInput) (*models.Post, error) {
+	return nil, errors.New("db error")
+}
 
 type mockUserRepoMissing struct{}
 
@@ -552,5 +561,72 @@ func TestDeletePost_Forbidden(t *testing.T) {
 	err := postSvc.DeletePost(1, 2)
 	if !errors.Is(err, repositories.ErrForbidden) {
 		t.Fatalf("expected ErrForbidden, got %v", err)
+	}
+}
+
+// updatePostRepo はUpdatePost用のモックリポジトリ
+type updatePostRepo struct {
+	mockPostRepo
+	updateResult *models.Post
+	updateErr    error
+}
+
+func (u *updatePostRepo) UpdatePost(userID, postID int, slides []models.UpdateSlideInput) (*models.Post, error) {
+	return u.updateResult, u.updateErr
+}
+
+func TestUpdatePost_Success(t *testing.T) {
+	expected := &models.Post{ID: 10, UserID: 1}
+	repo := &updatePostRepo{updateResult: expected}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+
+	input := &models.UpdatePostInput{
+		Slides: []models.UpdateSlideInput{{Text: "updated"}},
+	}
+	post, err := postSvc.UpdatePost(1, 10, input)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if post.ID != 10 {
+		t.Fatalf("expected post ID=10, got %d", post.ID)
+	}
+}
+
+func TestUpdatePost_NotFound(t *testing.T) {
+	repo := &updatePostRepo{updateErr: repositories.ErrPostNotFound}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+
+	input := &models.UpdatePostInput{
+		Slides: []models.UpdateSlideInput{{Text: "updated"}},
+	}
+	_, err := postSvc.UpdatePost(1, 999, input)
+	if !errors.Is(err, repositories.ErrPostNotFound) {
+		t.Fatalf("expected ErrPostNotFound, got %v", err)
+	}
+}
+
+func TestUpdatePost_Forbidden(t *testing.T) {
+	repo := &updatePostRepo{updateErr: repositories.ErrForbidden}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+
+	input := &models.UpdatePostInput{
+		Slides: []models.UpdateSlideInput{{Text: "updated"}},
+	}
+	_, err := postSvc.UpdatePost(2, 10, input)
+	if !errors.Is(err, repositories.ErrForbidden) {
+		t.Fatalf("expected ErrForbidden, got %v", err)
+	}
+}
+
+func TestUpdatePost_SlideCountMismatch(t *testing.T) {
+	repo := &updatePostRepo{updateErr: repositories.ErrSlideCountMismatch}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+
+	input := &models.UpdatePostInput{
+		Slides: []models.UpdateSlideInput{{Text: "a"}, {Text: "b"}},
+	}
+	_, err := postSvc.UpdatePost(1, 10, input)
+	if !errors.Is(err, repositories.ErrSlideCountMismatch) {
+		t.Fatalf("expected ErrSlideCountMismatch, got %v", err)
 	}
 }

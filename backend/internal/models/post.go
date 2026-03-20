@@ -61,6 +61,17 @@ type CreatePostInput struct {
 	Slides []SlideInput `json:"slides" binding:"required,min=1,max=10,dive"`
 }
 
+// UpdateSlideInput はスライド更新時の入力
+type UpdateSlideInput struct {
+	Text     string `json:"text"`
+	FlavorID *int   `json:"flavor_id"`
+}
+
+// UpdatePostInput は投稿更新時の入力
+type UpdatePostInput struct {
+	Slides []UpdateSlideInput `json:"slides" binding:"required,min=1,max=10,dive"`
+}
+
 // PostsResponse represents the response for post list
 type PostsResponse struct {
 	Posts []Post `json:"posts"`

@@ -87,7 +87,7 @@ func main() {
 	}
 	r.Use(func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", frontendURL)
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		c.Header("Access-Control-Allow-Credentials", "true")
 
@@ -188,6 +188,7 @@ func main() {
 		api.POST("/posts/:id/like", middleware.AuthMiddleware(), postHandler.LikePost)
 		api.POST("/posts/:id/unlike", middleware.AuthMiddleware(), postHandler.UnlikePost)
 		api.DELETE("/posts/:id", middleware.AuthMiddleware(), postHandler.DeletePost)
+		api.PATCH("/posts/:id", middleware.AuthMiddleware(), postHandler.UpdatePost)
 
 		// Users endpoints
 		api.GET("/users", userHandler.GetAllUsers)
