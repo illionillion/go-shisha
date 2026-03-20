@@ -6,7 +6,7 @@
 
 1. **応答言語**: 質問への回答は常に日本語で行ってください。
 2. **確認メッセージ**: ルールを参照したことを示すため、回答の冒頭に「ルールを参照しました！」と表示してください。
-3. **領域別ルールの必須参照**: 作業開始前に、対象領域のルールファイルを**必ず**参照する。Frontend作業→`instructions/frontend.instructions.md`、Backend作業→`instructions/backend.instructions.md`、レビュー→`instructions/review.instructions.md`、VRT実行→`skills/vrt-run/SKILL.md`、Git/GitHub操作→`skills/github-ops/SKILL.md`。参照したファイル名を確認メッセージに明記する（例: "frontend.instructions.md のルールを参照しました！"）
+3. **領域別ルールの必須参照**: 作業開始前に、対象領域のルールファイルを**必ず**参照する。Frontend作業→`instructions/frontend.instructions.md`、Backend作業→`instructions/backend.instructions.md`、レビュー→`instructions/review.instructions.md`、VRT実行→`skills/vrt-run/SKILL.md`、Git/GitHub操作→`skills/github-ops/SKILL.md`、脆弱性対応→`skills/vuln-fix/SKILL.md`。参照したファイル名を確認メッセージに明記する（例: "frontend.instructions.md のルールを参照しました！"）
 4. **推論・想像の禁止**: 推論や想像で作業しない。事実に基づいて作業する。不明な点は確認を求める。
 5. **テスト実行の効率化と検証**: 変更したファイルがある場合、まずテスト内容が修正内容を正しく検証できるかを確認してから、全体実行ではなく単体で実行して時間を省略する。必要に応じてテストケースを追加してから実行する
 6. **ルール管理**: 重要なベストプラクティスを発見した際は、基本ルールへの昇格も検討し、動的ルールセクションまたは基本ルールへの追加を提案する
@@ -26,6 +26,7 @@
 - `github-ops/` : Issue作成・PR作成・コミット・ghコマンド操作の手順
 - `vrt-run/` : VRT実行・スナップショット更新手順
 - `swagger-gen/` : Swagger/OpenAPI の再生成手順
+- `vuln-fix/` : pnpm audit 脆弱性対応・バージョンアップ・overrides設定・PR作成の手順
 
 ## ディレクトリ構造の理解
 
