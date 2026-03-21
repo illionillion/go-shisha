@@ -633,6 +633,19 @@ func TestUpdatePost_SlideCountMismatch(t *testing.T) {
 	}
 }
 
+func TestUpdatePost_DuplicateSlideID(t *testing.T) {
+	repo := &updatePostRepo{updateErr: repositories.ErrDuplicateSlideID}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+
+	input := &models.UpdatePostInput{
+		Slides: []models.UpdateSlideInput{{ID: 1, Text: "a"}, {ID: 1, Text: "b"}},
+	}
+	_, err := postSvc.UpdatePost(1, 10, input)
+	if !errors.Is(err, repositories.ErrDuplicateSlideID) {
+		t.Fatalf("expected ErrDuplicateSlideID, got %v", err)
+	}
+}
+
 // mockFlavorRepoDBError は GetByID でDB障害エラーを返すモック
 type mockFlavorRepoDBError struct{}
 

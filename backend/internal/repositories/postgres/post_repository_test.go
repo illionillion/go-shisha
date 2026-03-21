@@ -517,6 +517,7 @@ func TestDeletePost_NotInGetByUserID(t *testing.T) {
 	}
 }
 
+// TestUpdatePost_UpdatesBySlideID はスライドID指定で順序に依存せず更新できることを検証する。
 func TestUpdatePost_UpdatesBySlideID(t *testing.T) {
 	db := setupTestDB(t)
 	repo := NewPostRepository(db)
@@ -583,6 +584,7 @@ func TestUpdatePost_UpdatesBySlideID(t *testing.T) {
 	}
 }
 
+// TestUpdatePost_ReturnsErrorWhenSlideBelongsToAnotherPost は他投稿のスライドID指定を拒否することを検証する。
 func TestUpdatePost_ReturnsErrorWhenSlideBelongsToAnotherPost(t *testing.T) {
 	db := setupTestDB(t)
 	repo := NewPostRepository(db)
@@ -624,7 +626,8 @@ func TestUpdatePost_ReturnsErrorWhenSlideBelongsToAnotherPost(t *testing.T) {
 	}
 }
 
-func TestUpdatePost_ReturnsSlideCountMismatchOnDuplicateSlideID(t *testing.T) {
+// TestUpdatePost_ReturnsDuplicateSlideIDOnDuplicateSlideID は同一スライドID重複指定を拒否することを検証する。
+func TestUpdatePost_ReturnsDuplicateSlideIDOnDuplicateSlideID(t *testing.T) {
 	db := setupTestDB(t)
 	repo := NewPostRepository(db)
 
@@ -655,7 +658,7 @@ func TestUpdatePost_ReturnsSlideCountMismatchOnDuplicateSlideID(t *testing.T) {
 		{ID: int(dbSlides[0].ID), Text: "changed"},
 		{ID: int(dbSlides[0].ID), Text: "changed-again"},
 	})
-	if !errors.Is(err, repositories.ErrSlideCountMismatch) {
-		t.Fatalf("expected ErrSlideCountMismatch, got %v", err)
+	if !errors.Is(err, repositories.ErrDuplicateSlideID) {
+		t.Fatalf("expected ErrDuplicateSlideID, got %v", err)
 	}
 }

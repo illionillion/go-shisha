@@ -17,6 +17,8 @@ var (
 	ErrForbidden = errors.New("forbidden")
 	// ErrSlideCountMismatch は、更新時のスライド枚数が既存と一致しない場合に返されるエラー
 	ErrSlideCountMismatch = errors.New("slide count mismatch")
+	// ErrDuplicateSlideID は、更新時に同一スライドIDが重複指定された場合に返されるエラー
+	ErrDuplicateSlideID = errors.New("duplicate slide id")
 	// ErrSlideNotBelongToPost は、更新対象スライドが指定投稿に属さない場合に返されるエラー
 	ErrSlideNotBelongToPost = errors.New("slide does not belong to post")
 )
@@ -61,6 +63,7 @@ type PostRepository interface {
 	// 投稿が存在しない場合は ErrPostNotFound を返す
 	// 投稿が userID に紐づかない場合は ErrForbidden を返す
 	// スライド枚数が既存と一致しない場合は ErrSlideCountMismatch を返す
+	// 入力スライドIDが重複している場合は ErrDuplicateSlideID を返す
 	// 入力スライドIDが対象投稿に属さない場合は ErrSlideNotBelongToPost を返す
 	UpdatePost(userID, postID int, slides []models.UpdateSlideInput) (*models.Post, error)
 }

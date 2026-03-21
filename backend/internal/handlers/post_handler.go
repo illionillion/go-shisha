@@ -408,6 +408,10 @@ func (h *PostHandler) UpdatePost(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 			return
 		}
+		if errors.Is(err, repositories.ErrDuplicateSlideID) {
+			c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
+			return
+		}
 		if errors.Is(err, repositories.ErrSlideNotBelongToPost) {
 			c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 			return

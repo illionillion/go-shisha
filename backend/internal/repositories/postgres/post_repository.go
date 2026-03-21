@@ -335,7 +335,7 @@ func (r *PostRepository) UpdatePost(userID, postID int, slides []models.UpdateSl
 
 	// 既存スライドを取得して枚数チェック
 	var existingSlides []slideModel
-	if err := r.db.Where("post_id = ?", postID).Find(&existingSlides).Error; err != nil {
+	if err := r.db.Where("post_id = ?", postID).Order("slide_order ASC").Find(&existingSlides).Error; err != nil {
 		logging.L.Error("failed to fetch slides for update", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "error", err)
 		return nil, fmt.Errorf("failed to fetch slides for post id=%d: %w", postID, err)
 	}
@@ -352,12 +352,13 @@ func (r *PostRepository) UpdatePost(userID, postID int, slides []models.UpdateSl
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		seenSlideIDs := make(map[int64]struct{}, len(slides))
 		for _, slide := range slides {
-			if _, duplicated := seenSlideIDs[int64(slide.ID)]; duplicated {
-				return repositories.ErrSlideCountMismatch
+			slideID := int64(slide.ID)
+			if _, duplicated := seenSlideIDs[slideID]; duplicated {
+				return repositories.ErrDuplicateSlideID
 			}
-			seenSlideIDs[int64(slide.ID)] = struct{}{}
+			seenSlideIDs[slideID] = struct{}{}
 
-			sm, ok := existingSlideByID[int64(slide.ID)]
+			sm, ok := existingSlideByID[slideID]
 			if !ok {
 				return repositories.ErrSlideNotBelongToPost
 			}
@@ -371,15 +372,15 @@ func (r *PostRepository) UpdatePost(userID, postID int, slides []models.UpdateSl
 				"text":      slide.Text,
 				"flavor_id": flavorID,
 			}
-			if err := tx.Model(&slideModel{}).Where("id = ? AND post_id = ?", sm.ID, postID).Updates(updates).Error; err != nil {
+			if err := tx.Model(&slideModel{}).Where("id = ?", sm.ID).Updates(updates).Error; err != nil {
 				return fmt.Errorf("failed to update slide id=%d: %w", sm.ID, err)
 			}
 		}
 		return nil
 	})
 	if err != nil {
-		if errors.Is(err, repositories.ErrSlideCountMismatch) {
-			return nil, repositories.ErrSlideCountMismatch
+		if errors.Is(err, repositories.ErrDuplicateSlideID) {
+			return nil, repositories.ErrDuplicateSlideID
 		}
 		if errors.Is(err, repositories.ErrSlideNotBelongToPost) {
 			logging.L.Warn("slide does not belong to post", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "user_id", userID, "error", err)
