@@ -1091,6 +1091,11 @@ func TestUpdatePost_Success(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
+	var response models.Post
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, response.ID)
+	assert.Equal(t, 1, response.UserID)
 }
 
 func TestUpdatePost_NoAuth(t *testing.T) {
@@ -1115,6 +1120,10 @@ func TestUpdatePost_NoAuth(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	var response models.UnauthorizedError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeUnauthorized, response.Error)
 }
 
 func TestUpdatePost_NotFound(t *testing.T) {
@@ -1248,6 +1257,10 @@ func TestUpdatePost_InvalidID(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
 }
 
 func TestUpdatePost_InvalidBody(t *testing.T) {
