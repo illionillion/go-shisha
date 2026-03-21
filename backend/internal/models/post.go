@@ -61,6 +61,22 @@ type CreatePostInput struct {
 	Slides []SlideInput `json:"slides" binding:"required,min=1,max=10,dive"`
 }
 
+// UpdateSlideInput はスライド更新時の入力
+// このAPIはスライドの全フィールドを上書きする（全上書き型）。
+// text を省略すると空文字で上書きされ、flavor_id を省略または null で渡すとフレーバーが解除される。
+// クライアントは編集画面で既存データを取得し、変更したフィールドも含めて全フィールドを送信すること。
+type UpdateSlideInput struct {
+	// スライドのテキスト。省略すると空文字で上書きされる
+	Text string `json:"text"`
+	// フレーバーID。省略または null を指定するとフレーバーが解除される
+	FlavorID *int `json:"flavor_id" example:"1"`
+}
+
+// UpdatePostInput は投稿更新時の入力
+type UpdatePostInput struct {
+	Slides []UpdateSlideInput `json:"slides" binding:"required,min=1,max=10,dive"`
+}
+
 // PostsResponse represents the response for post list
 type PostsResponse struct {
 	Posts []Post `json:"posts"`

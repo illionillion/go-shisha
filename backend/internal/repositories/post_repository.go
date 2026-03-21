@@ -15,6 +15,8 @@ var (
 	ErrPostNotFound = errors.New("post not found")
 	// ErrForbidden は、ユーザーに許可されていない操作を実行しようとしたときに返されるエラー
 	ErrForbidden = errors.New("forbidden")
+	// ErrSlideCountMismatch は、更新時のスライド枚数が既存と一致しない場合に返されるエラー
+	ErrSlideCountMismatch = errors.New("slide count mismatch")
 )
 
 // PostRepository は投稿データアクセスのインターフェースを定義する
@@ -52,4 +54,10 @@ type PostRepository interface {
 	// 投稿が存在しない、またはすでに削除されている場合は ErrPostNotFound を返す
 	// 投稿が userID に紐づかない場合は ErrForbidden を返す
 	DeletePost(userID, postID int) error
+
+	// UpdatePost は、指定された postID のスライドの text/flavor_id を更新する
+	// 投稿が存在しない場合は ErrPostNotFound を返す
+	// 投稿が userID に紐づかない場合は ErrForbidden を返す
+	// スライド枚数が既存と一致しない場合は ErrSlideCountMismatch を返す
+	UpdatePost(userID, postID int, slides []models.UpdateSlideInput) (*models.Post, error)
 }

@@ -308,6 +308,70 @@ func (r *PostRepository) DeletePost(userID, postID int) error {
 	return nil
 }
 
+// UpdatePost は postID を指定して投稿のスライドの text/flavor_id を更新する
+// 投稿が存在しない場合は ErrPostNotFound を返す
+// 投稿が userID に紐づかない場合は ErrForbidden を返す
+// スライド枚数が既存と一致しない場合は ErrSlideCountMismatch を返す
+func (r *PostRepository) UpdatePost(userID, postID int, slides []models.UpdateSlideInput) (*models.Post, error) {
+	logging.L.Debug("updating post slides", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "user_id", userID)
+
+	// まず投稿の存在を確認する
+	var pm postModel
+	if err := r.db.First(&pm, "id = ?", postID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			logging.L.Debug("post not found for update", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID)
+			return nil, repositories.ErrPostNotFound
+		}
+		logging.L.Error("failed to find post for update", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "error", err)
+		return nil, fmt.Errorf("failed to find post id=%d: %w", postID, err)
+	}
+
+	// 所有権チェック
+	if int(pm.UserID) != userID {
+		logging.L.Debug("user does not own post", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "user_id", userID, "owner_id", pm.UserID)
+		return nil, repositories.ErrForbidden
+	}
+
+	// 既存スライドを取得して枚数チェック
+	var existingSlides []slideModel
+	if err := r.db.Where("post_id = ?", postID).Order("slide_order ASC").Find(&existingSlides).Error; err != nil {
+		logging.L.Error("failed to fetch slides for update", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "error", err)
+		return nil, fmt.Errorf("failed to fetch slides for post id=%d: %w", postID, err)
+	}
+	if len(existingSlides) != len(slides) {
+		logging.L.Debug("slide count mismatch", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "existing", len(existingSlides), "input", len(slides))
+		return nil, repositories.ErrSlideCountMismatch
+	}
+
+	// トランザクション内でスライドを更新する
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		for i, slide := range slides {
+			sm := existingSlides[i]
+			// slides.flavor_id は BIGINT のため *int64 に変換して渡す
+			var flavorID *int64
+			if slide.FlavorID != nil {
+				v := int64(*slide.FlavorID)
+				flavorID = &v
+			}
+			updates := map[string]interface{}{
+				"text":      slide.Text,
+				"flavor_id": flavorID,
+			}
+			if err := tx.Model(&slideModel{}).Where("id = ?", sm.ID).Updates(updates).Error; err != nil {
+				return fmt.Errorf("failed to update slide id=%d: %w", sm.ID, err)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		logging.L.Error("failed to update post slides", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "error", err)
+		return nil, err
+	}
+
+	logging.L.Info("post updated", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "user_id", userID)
+	return r.GetByID(postID, &userID)
+}
+
 func (r *PostRepository) GetByUserID(userID int, currentUserID *int) ([]models.Post, error) {
 	logging.L.Debug("querying posts by user ID", "repository", "PostRepository", "method", "GetByUserID", "user_id", userID)
 	var pms []postModel

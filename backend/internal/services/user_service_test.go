@@ -38,6 +38,9 @@ func (n *noopPostRepo) AddLike(userID, postID int) error            { return nil
 func (n *noopPostRepo) RemoveLike(userID, postID int) error         { return nil }
 func (n *noopPostRepo) HasLiked(userID, postID int) (bool, error)   { return false, nil }
 func (n *noopPostRepo) DeletePost(userID, postID int) error         { return nil }
+func (n *noopPostRepo) UpdatePost(userID, postID int, slides []models.UpdateSlideInput) (*models.Post, error) {
+	return nil, nil
+}
 
 func TestGetAllUsers(t *testing.T) {
 	svc := NewUserService(&mockUserRepo{}, &noopPostRepo{})

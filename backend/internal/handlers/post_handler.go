@@ -21,6 +21,7 @@ type PostServiceInterface interface {
 	LikePost(userID, postID int) (*models.Post, error)
 	UnlikePost(userID, postID int) (*models.Post, error)
 	DeletePost(userID, postID int) error
+	UpdatePost(userID, postID int, input *models.UpdatePostInput) (*models.Post, error)
 }
 
 // PostHandler は投稿関連のHTTPリクエストを処理する
@@ -348,5 +349,70 @@ func (h *PostHandler) UnlikePost(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, post)
+}
+
+// UpdatePost は PATCH /api/v1/posts/:id を処理する
+// @Summary 投稿編集
+// @Description 指定された投稿のスライドのテキスト・フレーバーを更新します（認証必須・投稿所有者のみ）。全上書き型のため、全スライドの全フィールドを送信してください。text を省略すると空文字、flavor_id を省略または null で渡すとフレーバーが解除されます。
+// @Tags posts
+// @Accept json
+// @Produce json
+// @Param id path int true "投稿ID"
+// @Param post body models.UpdatePostInput true "更新内容"
+// @Success 200 {object} models.Post "更新された投稿"
+// @Failure 400 {object} models.ValidationError "バリデーションエラー"
+// @Failure 401 {object} models.UnauthorizedError "認証エラー"
+// @Failure 403 {object} models.ForbiddenError "権限エラー（投稿所有者でない）"
+// @Failure 404 {object} models.NotFoundError "投稿が見つかりません"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
+// @Security BearerAuth
+// @Router /posts/{id} [patch]
+func (h *PostHandler) UpdatePost(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
+		return
+	}
+
+	userIDValue, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
+		return
+	}
+	userID, ok := userIDValue.(int)
+	if !ok {
+		logging.L.Error("invalid user_id type in context", "handler", "PostHandler", "method", "UpdatePost")
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
+		return
+	}
+
+	var input models.UpdatePostInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		logging.L.Warn("invalid request body", "handler", "PostHandler", "method", "UpdatePost", "user_id", userID, "error", err)
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
+		return
+	}
+
+	post, err := h.postService.UpdatePost(userID, id, &input)
+	if err != nil {
+		if errors.Is(err, repositories.ErrPostNotFound) {
+			c.JSON(http.StatusNotFound, models.NotFoundError{Error: models.ErrCodeNotFound})
+			return
+		}
+		if errors.Is(err, repositories.ErrForbidden) {
+			c.JSON(http.StatusForbidden, models.ForbiddenError{Error: models.ErrCodeForbidden})
+			return
+		}
+		if errors.Is(err, repositories.ErrSlideCountMismatch) {
+			c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
+			return
+		}
+		logging.L.Error("failed to update post", "handler", "PostHandler", "method", "UpdatePost", "user_id", userID, "post_id", id, "error", err)
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
+		return
+	}
+
+	logging.L.Info("post updated", "handler", "PostHandler", "method", "UpdatePost", "user_id", userID, "post_id", id)
 	c.JSON(http.StatusOK, post)
 }

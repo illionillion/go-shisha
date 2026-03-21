@@ -472,6 +472,80 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "指定された投稿のスライドのテキスト・フレーバーを更新します（認証必須・投稿所有者のみ）。全上書き型のため、全スライドの全フィールドを送信してください。text を省略すると空文字、flavor_id を省略または null で渡すとフレーバーが解除されます。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "投稿編集",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "投稿ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新内容",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UpdatePostInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新された投稿",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.Post"
+                        }
+                    },
+                    "400": {
+                        "description": "バリデーションエラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ValidationError"
+                        }
+                    },
+                    "401": {
+                        "description": "認証エラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UnauthorizedError"
+                        }
+                    },
+                    "403": {
+                        "description": "権限エラー（投稿所有者でない）",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ForbiddenError"
+                        }
+                    },
+                    "404": {
+                        "description": "投稿が見つかりません",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.NotFoundError"
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
+                        }
+                    }
+                }
             }
         },
         "/posts/{id}/like": {
@@ -1050,6 +1124,36 @@ const docTemplate = `{
                         "unauthorized"
                     ],
                     "example": "unauthorized"
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.UpdatePostInput": {
+            "type": "object",
+            "required": [
+                "slides"
+            ],
+            "properties": {
+                "slides": {
+                    "type": "array",
+                    "maxItems": 10,
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/go-shisha-backend_internal_models.UpdateSlideInput"
+                    }
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.UpdateSlideInput": {
+            "type": "object",
+            "properties": {
+                "flavor_id": {
+                    "description": "フレーバーID。省略または null を指定するとフレーバーが解除される",
+                    "type": "integer",
+                    "example": 1
+                },
+                "text": {
+                    "description": "スライドのテキスト。省略すると空文字で上書きされる",
+                    "type": "string"
                 }
             }
         },
