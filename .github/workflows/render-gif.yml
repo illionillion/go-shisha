@@ -21,6 +21,9 @@ jobs:
   render:
     name: Render Promo GIF & MP4
     runs-on: ubuntu-latest
+    env:
+      # Remotion で Chromium サンドボックスを無効化（CI環境に必要）
+      REMOTION_NO_SANDBOX: "1"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -78,9 +81,6 @@ jobs:
             --codec=gif \
             --scale=0.5 \
             --gl=angle
-        env:
-          # Remotion で Chromium サンドボックスを無効化（CI環境に必要）
-          REMOTION_NO_SANDBOX: "1"
 
       - name: Render Promo MP4
         working-directory: ./frontend
@@ -89,8 +89,6 @@ jobs:
             --codec=h264 \
             --scale=0.5 \
             --gl=angle
-        env:
-          REMOTION_NO_SANDBOX: "1"
 
       - name: Show rendered file info
         run: ls -lh docs/demo.gif docs/demo.mp4
