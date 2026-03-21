@@ -690,3 +690,50 @@ func TestUpdatePost_FlavorRepoDBError(t *testing.T) {
 		t.Fatal("expected error for flavor repo DB error, got nil")
 	}
 }
+
+func TestUpdatePost_TextOmittedBecomesEmpty(t *testing.T) {
+	// 全上書き仕様の確認: text を省略（ゼロ値 ""）した場合、"" のまま repo に渡ることを確認する
+	repo := &updatePostRepo{updateResult: &models.Post{ID: 10, UserID: 1}}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+
+	input := &models.UpdatePostInput{
+		Slides: []models.UpdateSlideInput{
+			{}, // Text・FlavorID ともにゼロ値
+		},
+	}
+	_, err := postSvc.UpdatePost(1, 10, input)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if len(repo.capturedSlides) != 1 {
+		t.Fatalf("expected 1 captured slide, got %d", len(repo.capturedSlides))
+	}
+	if repo.capturedSlides[0].Text != "" {
+		t.Fatalf("expected empty text, got %q", repo.capturedSlides[0].Text)
+	}
+	if repo.capturedSlides[0].FlavorID != nil {
+		t.Fatalf("expected nil FlavorID, got %v", repo.capturedSlides[0].FlavorID)
+	}
+}
+
+func TestUpdatePost_FlavorIDNilPassThrough(t *testing.T) {
+	// 全上書き仕様の確認: flavor_id を明示的に nil で渡すと nil のまま repo に渡ること（フレーバー解除）を確認する
+	repo := &updatePostRepo{updateResult: &models.Post{ID: 10, UserID: 1}}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+
+	input := &models.UpdatePostInput{
+		Slides: []models.UpdateSlideInput{
+			{Text: "テスト", FlavorID: nil},
+		},
+	}
+	_, err := postSvc.UpdatePost(1, 10, input)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if len(repo.capturedSlides) != 1 {
+		t.Fatalf("expected 1 captured slide, got %d", len(repo.capturedSlides))
+	}
+	if repo.capturedSlides[0].FlavorID != nil {
+		t.Fatalf("expected nil FlavorID (flavor removal), got %v", repo.capturedSlides[0].FlavorID)
+	}
+}

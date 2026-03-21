@@ -1249,3 +1249,62 @@ func TestUpdatePost_InvalidID(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
+
+func TestUpdatePost_InvalidBody(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdatePost(c)
+	})
+
+	// slides が空配列（min=1 バリデーション違反）
+	body, _ := json.Marshal(map[string]interface{}{"slides": []interface{}{}})
+	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
+func TestUpdatePost_ServerError(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		updatePostFunc: func(userID, postID int, input *models.UpdatePostInput) (*models.Post, error) {
+			return nil, errors.New("db connection failed")
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdatePost(c)
+	})
+
+	body, _ := json.Marshal(map[string]interface{}{
+		"slides": []map[string]interface{}{{"text": "updated"}},
+	})
+	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	var response models.ServerError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeInternalServer, response.Error)
+}
