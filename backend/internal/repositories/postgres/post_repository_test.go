@@ -516,3 +516,128 @@ func TestDeletePost_NotInGetByUserID(t *testing.T) {
 		}
 	}
 }
+
+// TestUpdatePost_UpdatesBySlideID はスライドID指定で順序に依存せず更新できることを検証する。
+func TestUpdatePost_UpdatesBySlideID(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewPostRepository(db)
+
+	if err := db.Create(&userModel{ID: 1, Email: "u1@example.com", DisplayName: "u1"}).Error; err != nil {
+		t.Fatalf("failed to create user: %v", err)
+	}
+	if err := db.Create(&flavorModel{ID: 1, Name: "Mint", Color: "#00FF"}).Error; err != nil {
+		t.Fatalf("failed to create flavor: %v", err)
+	}
+
+	p := &models.Post{
+		UserID: 1,
+		Slides: []models.Slide{
+			{ImageURL: "/img1.jpg", Text: "before-1"},
+			{ImageURL: "/img2.jpg", Text: "before-2"},
+		},
+	}
+	if err := repo.Create(p); err != nil {
+		t.Fatalf("Create failed: %v", err)
+	}
+
+	flavorID := 1
+	// 故意に逆順でID指定して更新し、index依存でないことを確認する
+	updated, err := repo.UpdatePost(1, p.ID, []models.UpdateSlideInput{
+		{ID: p.Slides[1].ID, Text: "after-2", FlavorID: &flavorID},
+		{ID: p.Slides[0].ID, Text: "after-1", FlavorID: nil},
+	})
+	if err != nil {
+		t.Fatalf("UpdatePost failed: %v", err)
+	}
+	if updated.ID != p.ID {
+		t.Fatalf("unexpected updated post id: got=%d want=%d", updated.ID, p.ID)
+	}
+
+	var s1 slideModel
+	if err := db.First(&s1, "id = ?", p.Slides[0].ID).Error; err != nil {
+		t.Fatalf("failed to query slide1: %v", err)
+	}
+	if s1.Text != "after-1" {
+		t.Fatalf("slide1 text mismatch: got=%q want=%q", s1.Text, "after-1")
+	}
+	if s1.FlavorID != nil {
+		t.Fatalf("slide1 flavor should be nil, got=%v", s1.FlavorID)
+	}
+
+	var s2 slideModel
+	if err := db.First(&s2, "id = ?", p.Slides[1].ID).Error; err != nil {
+		t.Fatalf("failed to query slide2: %v", err)
+	}
+	if s2.Text != "after-2" {
+		t.Fatalf("slide2 text mismatch: got=%q want=%q", s2.Text, "after-2")
+	}
+	if s2.FlavorID == nil || *s2.FlavorID != int64(flavorID) {
+		t.Fatalf("slide2 flavor mismatch: got=%v want=%d", s2.FlavorID, flavorID)
+	}
+}
+
+// TestUpdatePost_ReturnsErrorWhenSlideBelongsToAnotherPost は他投稿のスライドID指定を拒否することを検証する。
+func TestUpdatePost_ReturnsErrorWhenSlideBelongsToAnotherPost(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewPostRepository(db)
+
+	if err := db.Create(&userModel{ID: 1, Email: "u1@example.com", DisplayName: "u1"}).Error; err != nil {
+		t.Fatalf("failed to create user: %v", err)
+	}
+
+	post1 := &models.Post{
+		UserID: 1,
+		Slides: []models.Slide{
+			{ImageURL: "/p1-1.jpg", Text: "p1-1"},
+		},
+	}
+	if err := repo.Create(post1); err != nil {
+		t.Fatalf("Create post1 failed: %v", err)
+	}
+
+	post2 := &models.Post{
+		UserID: 1,
+		Slides: []models.Slide{
+			{ImageURL: "/p2-1.jpg", Text: "p2-1"},
+		},
+	}
+	if err := repo.Create(post2); err != nil {
+		t.Fatalf("Create post2 failed: %v", err)
+	}
+
+	_, err := repo.UpdatePost(1, post1.ID, []models.UpdateSlideInput{
+		{ID: post2.Slides[0].ID, Text: "tampered"},
+	})
+	if !errors.Is(err, repositories.ErrSlideNotBelongToPost) {
+		t.Fatalf("expected ErrSlideNotBelongToPost, got %v", err)
+	}
+}
+
+// TestUpdatePost_ReturnsDuplicateSlideIDOnDuplicateSlideID は同一スライドID重複指定を拒否することを検証する。
+func TestUpdatePost_ReturnsDuplicateSlideIDOnDuplicateSlideID(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewPostRepository(db)
+
+	if err := db.Create(&userModel{ID: 1, Email: "u1@example.com", DisplayName: "u1"}).Error; err != nil {
+		t.Fatalf("failed to create user: %v", err)
+	}
+
+	p := &models.Post{
+		UserID: 1,
+		Slides: []models.Slide{
+			{ImageURL: "/img1.jpg", Text: "s1"},
+			{ImageURL: "/img2.jpg", Text: "s2"},
+		},
+	}
+	if err := repo.Create(p); err != nil {
+		t.Fatalf("Create failed: %v", err)
+	}
+
+	_, err := repo.UpdatePost(1, p.ID, []models.UpdateSlideInput{
+		{ID: p.Slides[0].ID, Text: "changed"},
+		{ID: p.Slides[0].ID, Text: "changed-again"},
+	})
+	if !errors.Is(err, repositories.ErrDuplicateSlideID) {
+		t.Fatalf("expected ErrDuplicateSlideID, got %v", err)
+	}
+}

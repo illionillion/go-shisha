@@ -142,6 +142,8 @@ definitions:
     properties:
       flavor:
         $ref: '#/definitions/go-shisha-backend_internal_models.Flavor'
+      id:
+        type: integer
       image_url:
         type: string
       text:
@@ -189,9 +191,15 @@ definitions:
         description: フレーバーID。省略または null を指定するとフレーバーが解除される
         example: 1
         type: integer
+      id:
+        description: 更新対象のスライドID
+        example: 12
+        type: integer
       text:
         description: スライドのテキスト。省略すると空文字で上書きされる
         type: string
+    required:
+    - id
     type: object
   go-shisha-backend_internal_models.UploadImagesResponse:
     properties:
@@ -545,7 +553,7 @@ paths:
     patch:
       consumes:
       - application/json
-      description: 指定された投稿のスライドのテキスト・フレーバーを更新します（認証必須・投稿所有者のみ）。全上書き型のため、全スライドの全フィールドを送信してください。text
+      description: 指定された投稿のスライドのテキスト・フレーバーを更新します（認証必須・投稿所有者のみ）。各スライドは id で更新対象を指定します。全上書き型のため、全スライドの全フィールドを送信してください。text
         を省略すると空文字、flavor_id を省略または null で渡すとフレーバーが解除されます。
       parameters:
       - description: 投稿ID

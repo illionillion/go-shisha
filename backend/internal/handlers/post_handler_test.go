@@ -1080,7 +1080,7 @@ func TestUpdatePost_Success(t *testing.T) {
 
 	reqBody := map[string]interface{}{
 		"slides": []map[string]interface{}{
-			{"text": "updated text"},
+			{"id": 1, "text": "updated text"},
 		},
 	}
 	body, _ := json.Marshal(reqBody)
@@ -1109,7 +1109,7 @@ func TestUpdatePost_NoAuth(t *testing.T) {
 
 	reqBody := map[string]interface{}{
 		"slides": []map[string]interface{}{
-			{"text": "updated text"},
+			{"id": 1, "text": "updated text"},
 		},
 	}
 	body, _ := json.Marshal(reqBody)
@@ -1144,7 +1144,7 @@ func TestUpdatePost_NotFound(t *testing.T) {
 
 	reqBody := map[string]interface{}{
 		"slides": []map[string]interface{}{
-			{"text": "updated"},
+			{"id": 1, "text": "updated"},
 		},
 	}
 	body, _ := json.Marshal(reqBody)
@@ -1179,7 +1179,7 @@ func TestUpdatePost_Forbidden(t *testing.T) {
 
 	reqBody := map[string]interface{}{
 		"slides": []map[string]interface{}{
-			{"text": "updated"},
+			{"id": 1, "text": "updated"},
 		},
 	}
 	body, _ := json.Marshal(reqBody)
@@ -1214,8 +1214,79 @@ func TestUpdatePost_SlideCountMismatch(t *testing.T) {
 
 	reqBody := map[string]interface{}{
 		"slides": []map[string]interface{}{
-			{"text": "a"},
-			{"text": "b"},
+			{"id": 1, "text": "a"},
+			{"id": 2, "text": "b"},
+		},
+	}
+	body, _ := json.Marshal(reqBody)
+	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
+func TestUpdatePost_DuplicateSlideID(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		updatePostFunc: func(userID, postID int, input *models.UpdatePostInput) (*models.Post, error) {
+			return nil, repositories.ErrDuplicateSlideID
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdatePost(c)
+	})
+
+	reqBody := map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{"id": 1, "text": "a"},
+			{"id": 1, "text": "b"},
+		},
+	}
+	body, _ := json.Marshal(reqBody)
+	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
+func TestUpdatePost_SlideNotBelongToPost(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		updatePostFunc: func(userID, postID int, input *models.UpdatePostInput) (*models.Post, error) {
+			return nil, repositories.ErrSlideNotBelongToPost
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdatePost(c)
+	})
+
+	reqBody := map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{"id": 1, "text": "a"},
 		},
 	}
 	body, _ := json.Marshal(reqBody)
@@ -1246,7 +1317,7 @@ func TestUpdatePost_InvalidID(t *testing.T) {
 
 	reqBody := map[string]interface{}{
 		"slides": []map[string]interface{}{
-			{"text": "updated"},
+			{"id": 1, "text": "updated"},
 		},
 	}
 	body, _ := json.Marshal(reqBody)
@@ -1290,6 +1361,68 @@ func TestUpdatePost_InvalidBody(t *testing.T) {
 	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
 }
 
+func TestUpdatePost_MissingSlideID(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdatePost(c)
+	})
+
+	// id フィールドを省略（binding:"required" 違反）
+	body, _ := json.Marshal(map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{"text": "no id here"},
+		},
+	})
+	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
+func TestUpdatePost_ZeroSlideID(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdatePost(c)
+	})
+
+	// id=0 は binding:"required" の数値ゼロ値扱いで 400 になる
+	body, _ := json.Marshal(map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{"id": 0, "text": "zero id"},
+		},
+	})
+	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
 func TestUpdatePost_ServerError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -1307,7 +1440,7 @@ func TestUpdatePost_ServerError(t *testing.T) {
 	})
 
 	body, _ := json.Marshal(map[string]interface{}{
-		"slides": []map[string]interface{}{{"text": "updated"}},
+		"slides": []map[string]interface{}{{"id": 1, "text": "updated"}},
 	})
 	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")

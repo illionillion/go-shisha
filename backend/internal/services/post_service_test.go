@@ -583,7 +583,7 @@ func TestUpdatePost_Success(t *testing.T) {
 	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
 
 	input := &models.UpdatePostInput{
-		Slides: []models.UpdateSlideInput{{Text: "updated"}},
+		Slides: []models.UpdateSlideInput{{ID: 1, Text: "updated"}},
 	}
 	post, err := postSvc.UpdatePost(1, 10, input)
 	if err != nil {
@@ -599,7 +599,7 @@ func TestUpdatePost_NotFound(t *testing.T) {
 	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
 
 	input := &models.UpdatePostInput{
-		Slides: []models.UpdateSlideInput{{Text: "updated"}},
+		Slides: []models.UpdateSlideInput{{ID: 1, Text: "updated"}},
 	}
 	_, err := postSvc.UpdatePost(1, 999, input)
 	if !errors.Is(err, repositories.ErrPostNotFound) {
@@ -612,7 +612,7 @@ func TestUpdatePost_Forbidden(t *testing.T) {
 	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
 
 	input := &models.UpdatePostInput{
-		Slides: []models.UpdateSlideInput{{Text: "updated"}},
+		Slides: []models.UpdateSlideInput{{ID: 1, Text: "updated"}},
 	}
 	_, err := postSvc.UpdatePost(2, 10, input)
 	if !errors.Is(err, repositories.ErrForbidden) {
@@ -625,11 +625,37 @@ func TestUpdatePost_SlideCountMismatch(t *testing.T) {
 	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
 
 	input := &models.UpdatePostInput{
-		Slides: []models.UpdateSlideInput{{Text: "a"}, {Text: "b"}},
+		Slides: []models.UpdateSlideInput{{ID: 1, Text: "a"}, {ID: 2, Text: "b"}},
 	}
 	_, err := postSvc.UpdatePost(1, 10, input)
 	if !errors.Is(err, repositories.ErrSlideCountMismatch) {
 		t.Fatalf("expected ErrSlideCountMismatch, got %v", err)
+	}
+}
+
+func TestUpdatePost_DuplicateSlideID(t *testing.T) {
+	repo := &updatePostRepo{updateErr: repositories.ErrDuplicateSlideID}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+
+	input := &models.UpdatePostInput{
+		Slides: []models.UpdateSlideInput{{ID: 1, Text: "a"}, {ID: 1, Text: "b"}},
+	}
+	_, err := postSvc.UpdatePost(1, 10, input)
+	if !errors.Is(err, repositories.ErrDuplicateSlideID) {
+		t.Fatalf("expected ErrDuplicateSlideID, got %v", err)
+	}
+}
+
+func TestUpdatePost_SlideNotBelongToPost(t *testing.T) {
+	repo := &updatePostRepo{updateErr: repositories.ErrSlideNotBelongToPost}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+
+	input := &models.UpdatePostInput{
+		Slides: []models.UpdateSlideInput{{ID: 999, Text: "a"}},
+	}
+	_, err := postSvc.UpdatePost(1, 10, input)
+	if !errors.Is(err, repositories.ErrSlideNotBelongToPost) {
+		t.Fatalf("expected ErrSlideNotBelongToPost, got %v", err)
 	}
 }
 
@@ -655,7 +681,7 @@ func TestUpdatePost_WithInvalidFlavorID(t *testing.T) {
 
 	input := &models.UpdatePostInput{
 		Slides: []models.UpdateSlideInput{
-			{Text: "テスト", FlavorID: &invalidFlavorID},
+			{ID: 1, Text: "テスト", FlavorID: &invalidFlavorID},
 		},
 	}
 	post, err := postSvc.UpdatePost(1, 10, input)
@@ -682,7 +708,7 @@ func TestUpdatePost_FlavorRepoDBError(t *testing.T) {
 
 	input := &models.UpdatePostInput{
 		Slides: []models.UpdateSlideInput{
-			{Text: "テスト", FlavorID: &flavorID},
+			{ID: 1, Text: "テスト", FlavorID: &flavorID},
 		},
 	}
 	_, err := postSvc.UpdatePost(1, 10, input)
@@ -698,7 +724,7 @@ func TestUpdatePost_TextOmittedBecomesEmpty(t *testing.T) {
 
 	input := &models.UpdatePostInput{
 		Slides: []models.UpdateSlideInput{
-			{}, // Text・FlavorID ともにゼロ値
+			{ID: 1}, // Text・FlavorID はゼロ値
 		},
 	}
 	_, err := postSvc.UpdatePost(1, 10, input)
@@ -723,7 +749,7 @@ func TestUpdatePost_FlavorIDNilPassThrough(t *testing.T) {
 
 	input := &models.UpdatePostInput{
 		Slides: []models.UpdateSlideInput{
-			{Text: "テスト", FlavorID: nil},
+			{ID: 1, Text: "テスト", FlavorID: nil},
 		},
 	}
 	_, err := postSvc.UpdatePost(1, 10, input)

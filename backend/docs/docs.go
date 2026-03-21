@@ -479,7 +479,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "指定された投稿のスライドのテキスト・フレーバーを更新します（認証必須・投稿所有者のみ）。全上書き型のため、全スライドの全フィールドを送信してください。text を省略すると空文字、flavor_id を省略または null で渡すとフレーバーが解除されます。",
+                "description": "指定された投稿のスライドのテキスト・フレーバーを更新します（認証必須・投稿所有者のみ）。各スライドは id で更新対象を指定します。全上書き型のため、全スライドの全フィールドを送信してください。text を省略すると空文字、flavor_id を省略または null で渡すとフレーバーが解除されます。",
                 "consumes": [
                     "application/json"
                 ],
@@ -1085,6 +1085,9 @@ const docTemplate = `{
                 "flavor": {
                     "$ref": "#/definitions/go-shisha-backend_internal_models.Flavor"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "image_url": {
                     "type": "string"
                 },
@@ -1145,11 +1148,19 @@ const docTemplate = `{
         },
         "go-shisha-backend_internal_models.UpdateSlideInput": {
             "type": "object",
+            "required": [
+                "id"
+            ],
             "properties": {
                 "flavor_id": {
                     "description": "フレーバーID。省略または null を指定するとフレーバーが解除される",
                     "type": "integer",
                     "example": 1
+                },
+                "id": {
+                    "description": "更新対象のスライドID",
+                    "type": "integer",
+                    "example": 12
                 },
                 "text": {
                     "description": "スライドのテキスト。省略すると空文字で上書きされる",
