@@ -13,7 +13,14 @@ const mockUser: User = {
 
 describe("ProfileHeader", () => {
   test("ユーザー名・説明・外部URL を表示する", () => {
-    render(<ProfileHeader user={mockUser} />);
+    render(
+      <ProfileHeader
+        displayName={mockUser.display_name}
+        iconUrl={mockUser.icon_url}
+        bio={mockUser.description}
+        externalUrl={mockUser.external_url}
+      />
+    );
     expect(screen.getByText("テストユーザー")).toBeInTheDocument();
     expect(screen.getByText("これは自己紹介です")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: mockUser.external_url })).toHaveAttribute(
@@ -23,38 +30,74 @@ describe("ProfileHeader", () => {
   });
 
   test("external_url がない場合はリンクを表示しない", () => {
-    const u = { ...mockUser, external_url: undefined };
-    render(<ProfileHeader user={u} />);
+    render(
+      <ProfileHeader
+        displayName={mockUser.display_name}
+        iconUrl={mockUser.icon_url}
+        bio={mockUser.description}
+        externalUrl={undefined}
+      />
+    );
     expect(screen.queryByRole("link")).toBeNull();
   });
 
   test("display_name が undefined の場合は「名無しのユーザー」を表示する", () => {
-    const u = { ...mockUser, display_name: undefined };
-    render(<ProfileHeader user={u} />);
+    render(
+      <ProfileHeader
+        displayName={undefined}
+        iconUrl={mockUser.icon_url}
+        bio={mockUser.description}
+        externalUrl={mockUser.external_url}
+      />
+    );
     expect(screen.getByText("名無しのユーザー")).toBeInTheDocument();
   });
 
   test("display_name が null の場合は「名無しのユーザー」を表示する", () => {
-    const u = { ...mockUser, display_name: null } as unknown as User;
-    render(<ProfileHeader user={u} />);
+    render(
+      <ProfileHeader
+        displayName={null}
+        iconUrl={mockUser.icon_url}
+        bio={mockUser.description}
+        externalUrl={mockUser.external_url}
+      />
+    );
     expect(screen.getByText("名無しのユーザー")).toBeInTheDocument();
   });
 
   test("description が undefined の場合は説明を表示しない", () => {
-    const u = { ...mockUser, description: undefined };
-    render(<ProfileHeader user={u} />);
+    render(
+      <ProfileHeader
+        displayName={mockUser.display_name}
+        iconUrl={mockUser.icon_url}
+        bio={undefined}
+        externalUrl={mockUser.external_url}
+      />
+    );
     expect(screen.queryByText("これは自己紹介です")).toBeNull();
   });
 
   test("description が null の場合は説明を表示しない", () => {
-    const u = { ...mockUser, description: null } as unknown as User;
-    render(<ProfileHeader user={u} />);
+    render(
+      <ProfileHeader
+        displayName={mockUser.display_name}
+        iconUrl={mockUser.icon_url}
+        bio={null}
+        externalUrl={mockUser.external_url}
+      />
+    );
     expect(screen.queryByText("これは自己紹介です")).toBeNull();
   });
 
   test("icon_url が undefined の場合は null として Avatar に渡される", () => {
-    const u = { ...mockUser, icon_url: undefined };
-    render(<ProfileHeader user={u} />);
+    render(
+      <ProfileHeader
+        displayName={mockUser.display_name}
+        iconUrl={undefined}
+        bio={mockUser.description}
+        externalUrl={mockUser.external_url}
+      />
+    );
     // SVGフォールバックが表示される（imgタグがないことを確認）
     const avatarWrapper = screen.getByRole("img", { name: "テストユーザー" });
     expect(avatarWrapper).toBeInTheDocument();
@@ -63,8 +106,14 @@ describe("ProfileHeader", () => {
   });
 
   test("icon_url が null の場合は Avatar にそのまま渡される", () => {
-    const u = { ...mockUser, icon_url: null } as unknown as User;
-    render(<ProfileHeader user={u} />);
+    render(
+      <ProfileHeader
+        displayName={mockUser.display_name}
+        iconUrl={null}
+        bio={mockUser.description}
+        externalUrl={mockUser.external_url}
+      />
+    );
     const avatarWrapper = screen.getByRole("img", { name: "テストユーザー" });
     expect(avatarWrapper).toBeInTheDocument();
     expect(avatarWrapper.querySelector("img")).toBeNull();
