@@ -28,6 +28,7 @@ func (r *PostRepository) toDomain(pm *postModel) models.Post {
 	var slides []models.Slide
 	for _, sm := range pm.Slides {
 		slide := models.Slide{
+			ID:       int(sm.ID),
 			ImageURL: sm.ImageURL,
 			Text:     sm.Text,
 		}

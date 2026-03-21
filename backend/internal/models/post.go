@@ -20,6 +20,7 @@ func (SlideDB) TableName() string {
 
 // Slide represents a single image + text + flavor in a post (API response)
 type Slide struct {
+	ID       int     `json:"id"`
 	ImageURL string  `json:"image_url" binding:"required"`
 	Text     string  `json:"text"`
 	Flavor   *Flavor `json:"flavor,omitempty"`

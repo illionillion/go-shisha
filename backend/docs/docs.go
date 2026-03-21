@@ -1085,6 +1085,9 @@ const docTemplate = `{
                 "flavor": {
                     "$ref": "#/definitions/go-shisha-backend_internal_models.Flavor"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "image_url": {
                     "type": "string"
                 },
