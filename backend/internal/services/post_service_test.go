@@ -646,6 +646,19 @@ func TestUpdatePost_DuplicateSlideID(t *testing.T) {
 	}
 }
 
+func TestUpdatePost_SlideNotBelongToPost(t *testing.T) {
+	repo := &updatePostRepo{updateErr: repositories.ErrSlideNotBelongToPost}
+	postSvc := NewPostService(repo, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
+
+	input := &models.UpdatePostInput{
+		Slides: []models.UpdateSlideInput{{ID: 999, Text: "a"}},
+	}
+	_, err := postSvc.UpdatePost(1, 10, input)
+	if !errors.Is(err, repositories.ErrSlideNotBelongToPost) {
+		t.Fatalf("expected ErrSlideNotBelongToPost, got %v", err)
+	}
+}
+
 // mockFlavorRepoDBError は GetByID でDB障害エラーを返すモック
 type mockFlavorRepoDBError struct{}
 
