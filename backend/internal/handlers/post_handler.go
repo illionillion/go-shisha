@@ -354,7 +354,7 @@ func (h *PostHandler) UnlikePost(c *gin.Context) {
 
 // UpdatePost は PATCH /api/v1/posts/:id を処理する
 // @Summary 投稿編集
-// @Description 指定された投稿のスライドのテキスト・フレーバーを更新します（認証必須・投稿所有者のみ）
+// @Description 指定された投稿のスライドのテキスト・フレーバーを更新します（認証必須・投稿所有者のみ）。全上書き型のため、全スライドの全フィールドを送信してください。text を省略すると空文字、flavor_id を省略または null で渡すとフレーバーが解除されます。
 // @Tags posts
 // @Accept json
 // @Produce json

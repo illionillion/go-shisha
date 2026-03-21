@@ -476,7 +476,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "指定された投稿のスライドのテキスト・フレーバーを更新します（認証必須・投稿所有者のみ）",
+                "description": "指定された投稿のスライドのテキスト・フレーバーを更新します（認証必須・投稿所有者のみ）。全上書き型のため、全スライドの全フィールドを送信してください。text を省略すると空文字、flavor_id を省略または null で渡すとフレーバーが解除されます。",
                 "consumes": [
                     "application/json"
                 ],
@@ -1144,12 +1144,12 @@
             "type": "object",
             "properties": {
                 "flavor_id": {
-                    "description": "フレーバーID。null を指定するとフレーバーを解除する",
+                    "description": "フレーバーID。省略または null を指定するとフレーバーが解除される",
                     "type": "integer",
                     "example": 1
                 },
                 "text": {
-                    "description": "スライドのテキスト",
+                    "description": "スライドのテキスト。省略すると空文字で上書きされる",
                     "type": "string"
                 }
             }
