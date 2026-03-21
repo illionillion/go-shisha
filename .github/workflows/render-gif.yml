@@ -1,4 +1,4 @@
-name: Render Promo GIF
+name: Render Promo GIF & MP4
 
 on:
   push:
@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   render:
-    name: Render Promo GIF
+    name: Render Promo GIF & MP4
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -82,13 +82,23 @@ jobs:
           # Remotion で Chromium サンドボックスを無効化（CI環境に必要）
           REMOTION_NO_SANDBOX: "1"
 
-      - name: Show rendered file info
-        run: ls -lh docs/demo.gif
+      - name: Render Promo MP4
+        working-directory: ./frontend
+        run: |
+          pnpm exec remotion render remotion/src/index.ts ShishaPromo ../docs/demo.mp4 \
+            --codec=h264 \
+            --scale=0.5 \
+            --gl=angle
+        env:
+          REMOTION_NO_SANDBOX: "1"
 
-      - name: Commit and push GIF
+      - name: Show rendered file info
+        run: ls -lh docs/demo.gif docs/demo.mp4
+
+      - name: Commit and push GIF and MP4
         uses: EndBug/add-and-commit@v9
         with:
-          add: "docs/demo.gif"
+          add: "docs/demo.gif docs/demo.mp4"
           default_author: github_actions
-          message: "ci: プロモGIFを自動生成・更新 [skip ci]"
+          message: "ci: プロモGIF・MP4を自動生成・更新 [skip ci]"
           pull: "--rebase --autostash"
