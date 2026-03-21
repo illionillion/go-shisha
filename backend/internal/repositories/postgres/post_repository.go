@@ -312,6 +312,7 @@ func (r *PostRepository) DeletePost(userID, postID int) error {
 // 投稿が存在しない場合は ErrPostNotFound を返す
 // 投稿が userID に紐づかない場合は ErrForbidden を返す
 // スライド枚数が既存と一致しない場合は ErrSlideCountMismatch を返す
+// 入力スライドIDが重複している場合は ErrDuplicateSlideID を返す
 // 入力スライドIDが対象投稿に属さない場合は ErrSlideNotBelongToPost を返す
 func (r *PostRepository) UpdatePost(userID, postID int, slides []models.UpdateSlideInput) (*models.Post, error) {
 	logging.L.Debug("updating post slides", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "user_id", userID)

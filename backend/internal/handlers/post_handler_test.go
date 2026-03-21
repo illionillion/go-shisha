@@ -1268,6 +1268,41 @@ func TestUpdatePost_DuplicateSlideID(t *testing.T) {
 	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
 }
 
+func TestUpdatePost_SlideNotBelongToPost(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{
+		updatePostFunc: func(userID, postID int, input *models.UpdatePostInput) (*models.Post, error) {
+			return nil, repositories.ErrSlideNotBelongToPost
+		},
+	}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdatePost(c)
+	})
+
+	reqBody := map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{"id": 1, "text": "a"},
+		},
+	}
+	body, _ := json.Marshal(reqBody)
+	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
 func TestUpdatePost_InvalidID(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

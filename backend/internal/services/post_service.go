@@ -187,6 +187,7 @@ func (s *PostService) DeletePost(userID, postID int) error {
 // 投稿の所有者でない場合は repositories.ErrForbidden を返す
 // スライド枚数が既存と一致しない場合は repositories.ErrSlideCountMismatch を返す
 // スライドIDが重複している場合は repositories.ErrDuplicateSlideID を返す
+// スライドIDが投稿に紐づかない場合は repositories.ErrSlideNotBelongToPost を返す
 func (s *PostService) UpdatePost(userID, postID int, input *models.UpdatePostInput) (*models.Post, error) {
 	// 存在しない flavor_id によるFK違反を防ぐため事前に検証する
 	// ErrFlavorNotFound の場合は警告ログを出して nil に落として続行する
