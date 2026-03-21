@@ -516,3 +516,146 @@ func TestDeletePost_NotInGetByUserID(t *testing.T) {
 		}
 	}
 }
+
+func TestUpdatePost_UpdatesBySlideID(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewPostRepository(db)
+
+	if err := db.Create(&userModel{ID: 1, Email: "u1@example.com", DisplayName: "u1"}).Error; err != nil {
+		t.Fatalf("failed to create user: %v", err)
+	}
+	if err := db.Create(&flavorModel{ID: 1, Name: "Mint", Color: "#00FF"}).Error; err != nil {
+		t.Fatalf("failed to create flavor: %v", err)
+	}
+
+	p := &models.Post{
+		UserID: 1,
+		Slides: []models.Slide{
+			{ImageURL: "/img1.jpg", Text: "before-1"},
+			{ImageURL: "/img2.jpg", Text: "before-2"},
+		},
+	}
+	if err := repo.Create(p); err != nil {
+		t.Fatalf("Create failed: %v", err)
+	}
+
+	var dbSlides []slideModel
+	if err := db.Where("post_id = ?", p.ID).Order("slide_order ASC").Find(&dbSlides).Error; err != nil {
+		t.Fatalf("failed to fetch created slides: %v", err)
+	}
+	if len(dbSlides) != 2 {
+		t.Fatalf("expected 2 slides, got %d", len(dbSlides))
+	}
+
+	flavorID := 1
+	// 故意に逆順でID指定して更新し、index依存でないことを確認する
+	updated, err := repo.UpdatePost(1, p.ID, []models.UpdateSlideInput{
+		{ID: int(dbSlides[1].ID), Text: "after-2", FlavorID: &flavorID},
+		{ID: int(dbSlides[0].ID), Text: "after-1", FlavorID: nil},
+	})
+	if err != nil {
+		t.Fatalf("UpdatePost failed: %v", err)
+	}
+	if updated.ID != p.ID {
+		t.Fatalf("unexpected updated post id: got=%d want=%d", updated.ID, p.ID)
+	}
+
+	var s1 slideModel
+	if err := db.First(&s1, "id = ?", dbSlides[0].ID).Error; err != nil {
+		t.Fatalf("failed to query slide1: %v", err)
+	}
+	if s1.Text != "after-1" {
+		t.Fatalf("slide1 text mismatch: got=%q want=%q", s1.Text, "after-1")
+	}
+	if s1.FlavorID != nil {
+		t.Fatalf("slide1 flavor should be nil, got=%v", s1.FlavorID)
+	}
+
+	var s2 slideModel
+	if err := db.First(&s2, "id = ?", dbSlides[1].ID).Error; err != nil {
+		t.Fatalf("failed to query slide2: %v", err)
+	}
+	if s2.Text != "after-2" {
+		t.Fatalf("slide2 text mismatch: got=%q want=%q", s2.Text, "after-2")
+	}
+	if s2.FlavorID == nil || *s2.FlavorID != int64(flavorID) {
+		t.Fatalf("slide2 flavor mismatch: got=%v want=%d", s2.FlavorID, flavorID)
+	}
+}
+
+func TestUpdatePost_ReturnsErrorWhenSlideBelongsToAnotherPost(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewPostRepository(db)
+
+	if err := db.Create(&userModel{ID: 1, Email: "u1@example.com", DisplayName: "u1"}).Error; err != nil {
+		t.Fatalf("failed to create user: %v", err)
+	}
+
+	post1 := &models.Post{
+		UserID: 1,
+		Slides: []models.Slide{
+			{ImageURL: "/p1-1.jpg", Text: "p1-1"},
+		},
+	}
+	if err := repo.Create(post1); err != nil {
+		t.Fatalf("Create post1 failed: %v", err)
+	}
+
+	post2 := &models.Post{
+		UserID: 1,
+		Slides: []models.Slide{
+			{ImageURL: "/p2-1.jpg", Text: "p2-1"},
+		},
+	}
+	if err := repo.Create(post2); err != nil {
+		t.Fatalf("Create post2 failed: %v", err)
+	}
+
+	var post2Slide slideModel
+	if err := db.Where("post_id = ?", post2.ID).First(&post2Slide).Error; err != nil {
+		t.Fatalf("failed to fetch post2 slide: %v", err)
+	}
+
+	_, err := repo.UpdatePost(1, post1.ID, []models.UpdateSlideInput{
+		{ID: int(post2Slide.ID), Text: "tampered"},
+	})
+	if !errors.Is(err, repositories.ErrSlideNotBelongToPost) {
+		t.Fatalf("expected ErrSlideNotBelongToPost, got %v", err)
+	}
+}
+
+func TestUpdatePost_ReturnsSlideCountMismatchOnDuplicateSlideID(t *testing.T) {
+	db := setupTestDB(t)
+	repo := NewPostRepository(db)
+
+	if err := db.Create(&userModel{ID: 1, Email: "u1@example.com", DisplayName: "u1"}).Error; err != nil {
+		t.Fatalf("failed to create user: %v", err)
+	}
+
+	p := &models.Post{
+		UserID: 1,
+		Slides: []models.Slide{
+			{ImageURL: "/img1.jpg", Text: "s1"},
+			{ImageURL: "/img2.jpg", Text: "s2"},
+		},
+	}
+	if err := repo.Create(p); err != nil {
+		t.Fatalf("Create failed: %v", err)
+	}
+
+	var dbSlides []slideModel
+	if err := db.Where("post_id = ?", p.ID).Order("slide_order ASC").Find(&dbSlides).Error; err != nil {
+		t.Fatalf("failed to fetch created slides: %v", err)
+	}
+	if len(dbSlides) != 2 {
+		t.Fatalf("expected 2 slides, got %d", len(dbSlides))
+	}
+
+	_, err := repo.UpdatePost(1, p.ID, []models.UpdateSlideInput{
+		{ID: int(dbSlides[0].ID), Text: "changed"},
+		{ID: int(dbSlides[0].ID), Text: "changed-again"},
+	})
+	if !errors.Is(err, repositories.ErrSlideCountMismatch) {
+		t.Fatalf("expected ErrSlideCountMismatch, got %v", err)
+	}
+}

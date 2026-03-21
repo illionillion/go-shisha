@@ -66,6 +66,8 @@ type CreatePostInput struct {
 // text を省略すると空文字で上書きされ、flavor_id を省略または null で渡すとフレーバーが解除される。
 // クライアントは編集画面で既存データを取得し、変更したフィールドも含めて全フィールドを送信すること。
 type UpdateSlideInput struct {
+	// 更新対象のスライドID
+	ID int `json:"id" binding:"required" example:"12"`
 	// スライドのテキスト。省略すると空文字で上書きされる
 	Text string `json:"text"`
 	// フレーバーID。省略または null を指定するとフレーバーが解除される

@@ -312,6 +312,7 @@ func (r *PostRepository) DeletePost(userID, postID int) error {
 // 投稿が存在しない場合は ErrPostNotFound を返す
 // 投稿が userID に紐づかない場合は ErrForbidden を返す
 // スライド枚数が既存と一致しない場合は ErrSlideCountMismatch を返す
+// 入力スライドIDが対象投稿に属さない場合は ErrSlideNotBelongToPost を返す
 func (r *PostRepository) UpdatePost(userID, postID int, slides []models.UpdateSlideInput) (*models.Post, error) {
 	logging.L.Debug("updating post slides", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "user_id", userID)
 
@@ -334,7 +335,7 @@ func (r *PostRepository) UpdatePost(userID, postID int, slides []models.UpdateSl
 
 	// 既存スライドを取得して枚数チェック
 	var existingSlides []slideModel
-	if err := r.db.Where("post_id = ?", postID).Order("slide_order ASC").Find(&existingSlides).Error; err != nil {
+	if err := r.db.Where("post_id = ?", postID).Find(&existingSlides).Error; err != nil {
 		logging.L.Error("failed to fetch slides for update", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "error", err)
 		return nil, fmt.Errorf("failed to fetch slides for post id=%d: %w", postID, err)
 	}
@@ -342,11 +343,24 @@ func (r *PostRepository) UpdatePost(userID, postID int, slides []models.UpdateSl
 		logging.L.Debug("slide count mismatch", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "existing", len(existingSlides), "input", len(slides))
 		return nil, repositories.ErrSlideCountMismatch
 	}
+	existingSlideByID := make(map[int64]slideModel, len(existingSlides))
+	for i := range existingSlides {
+		existingSlideByID[existingSlides[i].ID] = existingSlides[i]
+	}
 
 	// トランザクション内でスライドを更新する
 	err := r.db.Transaction(func(tx *gorm.DB) error {
-		for i, slide := range slides {
-			sm := existingSlides[i]
+		seenSlideIDs := make(map[int64]struct{}, len(slides))
+		for _, slide := range slides {
+			if _, duplicated := seenSlideIDs[int64(slide.ID)]; duplicated {
+				return repositories.ErrSlideCountMismatch
+			}
+			seenSlideIDs[int64(slide.ID)] = struct{}{}
+
+			sm, ok := existingSlideByID[int64(slide.ID)]
+			if !ok {
+				return repositories.ErrSlideNotBelongToPost
+			}
 			// slides.flavor_id は BIGINT のため *int64 に変換して渡す
 			var flavorID *int64
 			if slide.FlavorID != nil {
@@ -357,13 +371,20 @@ func (r *PostRepository) UpdatePost(userID, postID int, slides []models.UpdateSl
 				"text":      slide.Text,
 				"flavor_id": flavorID,
 			}
-			if err := tx.Model(&slideModel{}).Where("id = ?", sm.ID).Updates(updates).Error; err != nil {
+			if err := tx.Model(&slideModel{}).Where("id = ? AND post_id = ?", sm.ID, postID).Updates(updates).Error; err != nil {
 				return fmt.Errorf("failed to update slide id=%d: %w", sm.ID, err)
 			}
 		}
 		return nil
 	})
 	if err != nil {
+		if errors.Is(err, repositories.ErrSlideCountMismatch) {
+			return nil, repositories.ErrSlideCountMismatch
+		}
+		if errors.Is(err, repositories.ErrSlideNotBelongToPost) {
+			logging.L.Warn("slide does not belong to post", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "user_id", userID, "error", err)
+			return nil, repositories.ErrSlideNotBelongToPost
+		}
 		logging.L.Error("failed to update post slides", "repository", "PostRepository", "method", "UpdatePost", "post_id", postID, "error", err)
 		return nil, err
 	}

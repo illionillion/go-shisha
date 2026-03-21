@@ -1080,7 +1080,7 @@ func TestUpdatePost_Success(t *testing.T) {
 
 	reqBody := map[string]interface{}{
 		"slides": []map[string]interface{}{
-			{"text": "updated text"},
+			{"id": 1, "text": "updated text"},
 		},
 	}
 	body, _ := json.Marshal(reqBody)
@@ -1109,7 +1109,7 @@ func TestUpdatePost_NoAuth(t *testing.T) {
 
 	reqBody := map[string]interface{}{
 		"slides": []map[string]interface{}{
-			{"text": "updated text"},
+			{"id": 1, "text": "updated text"},
 		},
 	}
 	body, _ := json.Marshal(reqBody)
@@ -1144,7 +1144,7 @@ func TestUpdatePost_NotFound(t *testing.T) {
 
 	reqBody := map[string]interface{}{
 		"slides": []map[string]interface{}{
-			{"text": "updated"},
+			{"id": 1, "text": "updated"},
 		},
 	}
 	body, _ := json.Marshal(reqBody)
@@ -1179,7 +1179,7 @@ func TestUpdatePost_Forbidden(t *testing.T) {
 
 	reqBody := map[string]interface{}{
 		"slides": []map[string]interface{}{
-			{"text": "updated"},
+			{"id": 1, "text": "updated"},
 		},
 	}
 	body, _ := json.Marshal(reqBody)
@@ -1214,8 +1214,8 @@ func TestUpdatePost_SlideCountMismatch(t *testing.T) {
 
 	reqBody := map[string]interface{}{
 		"slides": []map[string]interface{}{
-			{"text": "a"},
-			{"text": "b"},
+			{"id": 1, "text": "a"},
+			{"id": 2, "text": "b"},
 		},
 	}
 	body, _ := json.Marshal(reqBody)
@@ -1246,7 +1246,7 @@ func TestUpdatePost_InvalidID(t *testing.T) {
 
 	reqBody := map[string]interface{}{
 		"slides": []map[string]interface{}{
-			{"text": "updated"},
+			{"id": 1, "text": "updated"},
 		},
 	}
 	body, _ := json.Marshal(reqBody)
@@ -1307,7 +1307,7 @@ func TestUpdatePost_ServerError(t *testing.T) {
 	})
 
 	body, _ := json.Marshal(map[string]interface{}{
-		"slides": []map[string]interface{}{{"text": "updated"}},
+		"slides": []map[string]interface{}{{"id": 1, "text": "updated"}},
 	})
 	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
