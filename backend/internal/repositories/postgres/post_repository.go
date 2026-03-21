@@ -143,6 +143,7 @@ func (r *PostRepository) Create(post *models.Post) error {
 			if err := tx.Create(&sm).Error; err != nil {
 				return fmt.Errorf("failed to create slide %d: %w", i, err)
 			}
+			post.Slides[i].ID = int(sm.ID)
 		}
 
 		post.ID = int(pm.ID)

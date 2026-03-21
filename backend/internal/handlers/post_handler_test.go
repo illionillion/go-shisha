@@ -1361,6 +1361,68 @@ func TestUpdatePost_InvalidBody(t *testing.T) {
 	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
 }
 
+func TestUpdatePost_MissingSlideID(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdatePost(c)
+	})
+
+	// id フィールドを省略（binding:"required" 違反）
+	body, _ := json.Marshal(map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{"text": "no id here"},
+		},
+	})
+	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
+func TestUpdatePost_ZeroSlideID(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockPostService{}
+	handler := NewPostHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/posts/:id", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdatePost(c)
+	})
+
+	// id=0 は binding:"required" の数値ゼロ値扱いで 400 になる
+	body, _ := json.Marshal(map[string]interface{}{
+		"slides": []map[string]interface{}{
+			{"id": 0, "text": "zero id"},
+		},
+	})
+	req := httptest.NewRequest(http.MethodPatch, "/posts/1", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
 func TestUpdatePost_ServerError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

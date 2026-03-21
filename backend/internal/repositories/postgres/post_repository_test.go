@@ -540,19 +540,11 @@ func TestUpdatePost_UpdatesBySlideID(t *testing.T) {
 		t.Fatalf("Create failed: %v", err)
 	}
 
-	var dbSlides []slideModel
-	if err := db.Where("post_id = ?", p.ID).Order("slide_order ASC").Find(&dbSlides).Error; err != nil {
-		t.Fatalf("failed to fetch created slides: %v", err)
-	}
-	if len(dbSlides) != 2 {
-		t.Fatalf("expected 2 slides, got %d", len(dbSlides))
-	}
-
 	flavorID := 1
 	// 故意に逆順でID指定して更新し、index依存でないことを確認する
 	updated, err := repo.UpdatePost(1, p.ID, []models.UpdateSlideInput{
-		{ID: int(dbSlides[1].ID), Text: "after-2", FlavorID: &flavorID},
-		{ID: int(dbSlides[0].ID), Text: "after-1", FlavorID: nil},
+		{ID: p.Slides[1].ID, Text: "after-2", FlavorID: &flavorID},
+		{ID: p.Slides[0].ID, Text: "after-1", FlavorID: nil},
 	})
 	if err != nil {
 		t.Fatalf("UpdatePost failed: %v", err)
@@ -562,7 +554,7 @@ func TestUpdatePost_UpdatesBySlideID(t *testing.T) {
 	}
 
 	var s1 slideModel
-	if err := db.First(&s1, "id = ?", dbSlides[0].ID).Error; err != nil {
+	if err := db.First(&s1, "id = ?", p.Slides[0].ID).Error; err != nil {
 		t.Fatalf("failed to query slide1: %v", err)
 	}
 	if s1.Text != "after-1" {
@@ -573,7 +565,7 @@ func TestUpdatePost_UpdatesBySlideID(t *testing.T) {
 	}
 
 	var s2 slideModel
-	if err := db.First(&s2, "id = ?", dbSlides[1].ID).Error; err != nil {
+	if err := db.First(&s2, "id = ?", p.Slides[1].ID).Error; err != nil {
 		t.Fatalf("failed to query slide2: %v", err)
 	}
 	if s2.Text != "after-2" {
@@ -613,13 +605,8 @@ func TestUpdatePost_ReturnsErrorWhenSlideBelongsToAnotherPost(t *testing.T) {
 		t.Fatalf("Create post2 failed: %v", err)
 	}
 
-	var post2Slide slideModel
-	if err := db.Where("post_id = ?", post2.ID).First(&post2Slide).Error; err != nil {
-		t.Fatalf("failed to fetch post2 slide: %v", err)
-	}
-
 	_, err := repo.UpdatePost(1, post1.ID, []models.UpdateSlideInput{
-		{ID: int(post2Slide.ID), Text: "tampered"},
+		{ID: post2.Slides[0].ID, Text: "tampered"},
 	})
 	if !errors.Is(err, repositories.ErrSlideNotBelongToPost) {
 		t.Fatalf("expected ErrSlideNotBelongToPost, got %v", err)
@@ -646,17 +633,9 @@ func TestUpdatePost_ReturnsDuplicateSlideIDOnDuplicateSlideID(t *testing.T) {
 		t.Fatalf("Create failed: %v", err)
 	}
 
-	var dbSlides []slideModel
-	if err := db.Where("post_id = ?", p.ID).Order("slide_order ASC").Find(&dbSlides).Error; err != nil {
-		t.Fatalf("failed to fetch created slides: %v", err)
-	}
-	if len(dbSlides) != 2 {
-		t.Fatalf("expected 2 slides, got %d", len(dbSlides))
-	}
-
 	_, err := repo.UpdatePost(1, p.ID, []models.UpdateSlideInput{
-		{ID: int(dbSlides[0].ID), Text: "changed"},
-		{ID: int(dbSlides[0].ID), Text: "changed-again"},
+		{ID: p.Slides[0].ID, Text: "changed"},
+		{ID: p.Slides[0].ID, Text: "changed-again"},
 	})
 	if !errors.Is(err, repositories.ErrDuplicateSlideID) {
 		t.Fatalf("expected ErrDuplicateSlideID, got %v", err)
