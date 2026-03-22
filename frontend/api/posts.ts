@@ -31,6 +31,7 @@ import type {
   GoShishaBackendInternalModelsPostsResponse,
   GoShishaBackendInternalModelsServerError,
   GoShishaBackendInternalModelsUnauthorizedError,
+  GoShishaBackendInternalModelsUpdatePostInput,
   GoShishaBackendInternalModelsValidationError,
 } from "./model";
 
@@ -627,6 +628,152 @@ export function useGetPostsId<
   return { ...query, queryKey: queryOptions.queryKey };
 }
 
+/**
+ * 指定された投稿のスライドのテキスト・フレーバーを更新します（認証必須・投稿所有者のみ）。各スライドは id で更新対象を指定します。全上書き型のため、全スライドの全フィールドを送信してください。text を省略すると空文字、flavor_id を省略または null で渡すとフレーバーが解除されます。
+ * @summary 投稿編集
+ */
+export type patchPostsIdResponse200 = {
+  data: GoShishaBackendInternalModelsPost;
+  status: 200;
+};
+
+export type patchPostsIdResponse400 = {
+  data: GoShishaBackendInternalModelsValidationError;
+  status: 400;
+};
+
+export type patchPostsIdResponse401 = {
+  data: GoShishaBackendInternalModelsUnauthorizedError;
+  status: 401;
+};
+
+export type patchPostsIdResponse403 = {
+  data: GoShishaBackendInternalModelsForbiddenError;
+  status: 403;
+};
+
+export type patchPostsIdResponse404 = {
+  data: GoShishaBackendInternalModelsNotFoundError;
+  status: 404;
+};
+
+export type patchPostsIdResponse500 = {
+  data: GoShishaBackendInternalModelsServerError;
+  status: 500;
+};
+
+export type patchPostsIdResponseSuccess = patchPostsIdResponse200 & {
+  headers: Headers;
+};
+export type patchPostsIdResponseError = (
+  | patchPostsIdResponse400
+  | patchPostsIdResponse401
+  | patchPostsIdResponse403
+  | patchPostsIdResponse404
+  | patchPostsIdResponse500
+) & {
+  headers: Headers;
+};
+
+export type patchPostsIdResponse = patchPostsIdResponseSuccess | patchPostsIdResponseError;
+
+export const getPatchPostsIdUrl = (id: number) => {
+  return `/posts/${id}`;
+};
+
+export const patchPostsId = async (
+  id: number,
+  goShishaBackendInternalModelsUpdatePostInput: GoShishaBackendInternalModelsUpdatePostInput,
+  options?: RequestInit
+): Promise<patchPostsIdResponse> => {
+  return apiFetch<patchPostsIdResponse>(getPatchPostsIdUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(goShishaBackendInternalModelsUpdatePostInput),
+  });
+};
+
+export const getPatchPostsIdMutationOptions = <
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsForbiddenError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof patchPostsId>>,
+    TError,
+    { id: number; data: GoShishaBackendInternalModelsUpdatePostInput },
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof patchPostsId>>,
+  TError,
+  { id: number; data: GoShishaBackendInternalModelsUpdatePostInput },
+  TContext
+> => {
+  const mutationKey = ["patchPostsId"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof patchPostsId>>,
+    { id: number; data: GoShishaBackendInternalModelsUpdatePostInput }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return patchPostsId(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PatchPostsIdMutationResult = NonNullable<Awaited<ReturnType<typeof patchPostsId>>>;
+export type PatchPostsIdMutationBody = GoShishaBackendInternalModelsUpdatePostInput;
+export type PatchPostsIdMutationError =
+  | GoShishaBackendInternalModelsValidationError
+  | GoShishaBackendInternalModelsUnauthorizedError
+  | GoShishaBackendInternalModelsForbiddenError
+  | GoShishaBackendInternalModelsNotFoundError
+  | GoShishaBackendInternalModelsServerError;
+
+/**
+ * @summary 投稿編集
+ */
+export const usePatchPostsId = <
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsForbiddenError
+    | GoShishaBackendInternalModelsNotFoundError
+    | GoShishaBackendInternalModelsServerError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof patchPostsId>>,
+      TError,
+      { id: number; data: GoShishaBackendInternalModelsUpdatePostInput },
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof patchPostsId>>,
+  TError,
+  { id: number; data: GoShishaBackendInternalModelsUpdatePostInput },
+  TContext
+> => {
+  return useMutation(getPatchPostsIdMutationOptions(options), queryClient);
+};
 /**
  * 指定された投稿にいいねを追加します（認証必須）
  * @summary 投稿にいいね
