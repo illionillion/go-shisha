@@ -155,7 +155,7 @@ describe("PostDetailHeader", () => {
     });
 
     it("display_nameが空文字の場合は「匿名」と表示され、アバターのラベルは「ユーザー」になる", () => {
-      render(
+      const { container } = render(
         <PostDetailHeader
           userDisplayName=""
           userIconUrl={mockUser.icon_url}
@@ -166,7 +166,9 @@ describe("PostDetailHeader", () => {
       );
 
       expect(screen.getByText("匿名")).toBeInTheDocument();
-      expect(screen.getByLabelText("ユーザー")).toBeInTheDocument();
+      const avatar = container.querySelector('[role="img"]');
+      expect(avatar).toBeInTheDocument();
+      expect(avatar).toHaveAttribute("aria-label", "ユーザー");
     });
   });
 
