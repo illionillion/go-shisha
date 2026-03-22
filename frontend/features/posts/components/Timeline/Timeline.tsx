@@ -20,6 +20,8 @@ export interface TimelineProps {
   currentUserId?: number | null;
   /** 投稿削除コールバック */
   onDelete?: (postId: number) => void;
+  /** 投稿編集コールバック */
+  onEdit?: (postId: number) => void;
 }
 
 /**
@@ -41,6 +43,7 @@ export function Timeline({
   onUnlike,
   currentUserId,
   onDelete,
+  onEdit,
 }: TimelineProps) {
   const handleLike = (postId: number) => {
     if (onLike) return onLike(postId);
@@ -87,6 +90,7 @@ export function Timeline({
             onUnlike={onUnlike}
             currentUserId={currentUserId}
             onDelete={onDelete}
+            onEdit={onEdit}
           />
         ))}
       </div>

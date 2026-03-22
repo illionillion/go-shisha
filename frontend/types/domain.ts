@@ -21,6 +21,8 @@ import type { GoShishaBackendInternalModelsSlide } from "@/api/model/goShishaBac
 import type { GoShishaBackendInternalModelsSlideInput } from "@/api/model/goShishaBackendInternalModelsSlideInput";
 import type { GoShishaBackendInternalModelsUnauthorizedError } from "@/api/model/goShishaBackendInternalModelsUnauthorizedError";
 import { GoShishaBackendInternalModelsUnauthorizedErrorError } from "@/api/model/goShishaBackendInternalModelsUnauthorizedErrorError";
+import type { GoShishaBackendInternalModelsUpdatePostInput } from "@/api/model/goShishaBackendInternalModelsUpdatePostInput";
+import type { GoShishaBackendInternalModelsUpdateSlideInput } from "@/api/model/goShishaBackendInternalModelsUpdateSlideInput";
 import type { GoShishaBackendInternalModelsUploadImagesResponse } from "@/api/model/goShishaBackendInternalModelsUploadImagesResponse";
 import type { GoShishaBackendInternalModelsUser } from "@/api/model/goShishaBackendInternalModelsUser";
 import type { GoShishaBackendInternalModelsValidationError } from "@/api/model/goShishaBackendInternalModelsValidationError";
@@ -138,6 +140,22 @@ export type SlideInput = GoShishaBackendInternalModelsSlideInput;
 
 /** 投稿作成時のバリデーションエラーレスポンス */
 export type PostPosts400 = GeneratedPostPosts400;
+
+/**
+ * 投稿更新入力（スライドの配列を含む）
+ * - 既存スライドのテキスト・フレーバーを更新する
+ * - 投稿編集フォーム（EditPostModal）で使用
+ */
+export type UpdatePostInput = GoShishaBackendInternalModelsUpdatePostInput;
+
+/**
+ * スライド更新入力（ID・テキスト・フレーバーIDを含む）
+ * - id: 必須（更新対象のスライドID）
+ * - text: オプション（省略すると空文字で上書き）
+ * - flavor_id: オプション（省略またはnullでフレーバー解除）
+ * - 投稿編集フォーム（EditPostModal）で使用
+ */
+export type UpdateSlideInput = GoShishaBackendInternalModelsUpdateSlideInput;
 
 // ========================================
 // フレーバー関連
