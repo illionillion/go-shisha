@@ -1,6 +1,7 @@
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, cleanup } from "@/test/utils";
+import type { UpdatePostInput } from "@/types/domain";
 import * as useUpdatePostModule from "../../hooks/useUpdatePost";
 import { EditPostModal } from "./EditPostModal";
 
@@ -42,7 +43,7 @@ afterEach(() => {
 });
 
 describe("EditPostModal", () => {
-  let mockOnUpdate: ReturnType<typeof vi.fn>;
+  let mockOnUpdate: ReturnType<typeof vi.fn<(postId: number, input: UpdatePostInput) => void>>;
 
   beforeEach(() => {
     vi.clearAllMocks();
