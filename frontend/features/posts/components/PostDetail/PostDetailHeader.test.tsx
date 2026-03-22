@@ -153,6 +153,21 @@ describe("PostDetailHeader", () => {
 
       expect(screen.getByText("匿名")).toBeInTheDocument();
     });
+
+    it("display_nameが空文字の場合は「匿名」と表示され、アバターのラベルは「ユーザー」になる", () => {
+      render(
+        <PostDetailHeader
+          userDisplayName=""
+          userIconUrl={mockUser.icon_url}
+          userId={mockUser.id}
+          createdAt="2024-01-01"
+          onBack={vi.fn()}
+        />
+      );
+
+      expect(screen.getByText("匿名")).toBeInTheDocument();
+      expect(screen.getByLabelText("ユーザー")).toBeInTheDocument();
+    });
   });
 
   describe("日時表示", () => {

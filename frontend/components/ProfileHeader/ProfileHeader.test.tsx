@@ -65,6 +65,18 @@ describe("ProfileHeader", () => {
     expect(screen.getByText("名無しのユーザー")).toBeInTheDocument();
   });
 
+  test("display_name が空文字の場合は「名無しのユーザー」を表示する", () => {
+    render(
+      <ProfileHeader
+        displayName=""
+        iconUrl={mockUser.icon_url}
+        bio={mockUser.description}
+        externalUrl={mockUser.external_url}
+      />
+    );
+    expect(screen.getByText("名無しのユーザー")).toBeInTheDocument();
+  });
+
   test("description が undefined の場合は説明を表示しない", () => {
     render(
       <ProfileHeader
