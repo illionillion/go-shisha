@@ -10,7 +10,7 @@ interface Props {
   userDisplayName?: string | null;
   userIconUrl?: string | null;
   userId?: number;
-  createdAt?: string | undefined;
+  createdAt?: string;
   onBack: () => void;
   /** 自分の投稿の場合のみ渡す削除コールバック */
   onDelete?: () => void;
@@ -56,7 +56,7 @@ export function PostDetailHeader({
         <div className={clsx(["flex-1"])}>
           <div className={clsx(["font-medium"])}>{userDisplayName || "匿名"}</div>
           <div className={clsx(["text-sm", "text-gray-500"])}>
-            <time dateTime={createdAt ?? undefined}>{formatDate(createdAt)}</time>
+            <time dateTime={createdAt ? createdAt : undefined}>{formatDate(createdAt)}</time>
           </div>
         </div>
 

@@ -331,7 +331,7 @@ describe("PostDetailHeader", () => {
       expect(screen.getByLabelText("戻る")).toBeInTheDocument();
     });
 
-    it("userのプロパティが部分的にnullでも表示される", () => {
+    it("ユーザー関連Propsが部分的にundefinedでも表示される", () => {
       render(
         <PostDetailHeader
           userDisplayName={undefined}

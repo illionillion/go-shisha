@@ -15,7 +15,7 @@ interface Props {
  * - 表示専用のプロフィールヘッダー
  */
 export const ProfileHeader: FC<Props> = ({ displayName, iconUrl, bio: bioText, externalUrl }) => {
-  const name = displayName ?? "名無しのユーザー";
+  const name = displayName || "名無しのユーザー";
   const bio = bioText ?? "";
   const external = externalUrl ?? null;
 
