@@ -141,7 +141,9 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
 
         <div>
           <PostDetailHeader
-            user={post.user}
+            userDisplayName={post.user?.display_name}
+            userIconUrl={post.user?.icon_url}
+            userId={post.user?.id}
             createdAt={post.created_at}
             onBack={handleBack}
             onDelete={isOwner ? handleDelete : undefined}

@@ -39,7 +39,12 @@ export default async function Page({ params }: Props) {
 
   return (
     <div>
-      <ProfileHeader user={userResponse.data} />
+      <ProfileHeader
+        displayName={userResponse.data.display_name}
+        iconUrl={userResponse.data.icon_url}
+        bio={userResponse.data.description}
+        externalUrl={userResponse.data.external_url}
+      />
       <main className={clsx(["max-w-3xl", "mx-auto", "py-6"])}>
         <BackButton />
         <TimelineContainer initialPosts={initialPosts} userId={id} />

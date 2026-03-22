@@ -505,7 +505,9 @@ describe("PostDetail", () => {
 
     render(
       <PostDetailHeader
-        user={mockPost.user}
+        userDisplayName={mockPost.user?.display_name}
+        userIconUrl={mockPost.user?.icon_url}
+        userId={mockPost.user?.id}
         createdAt={mockPost.created_at}
         onBack={() => window.history.back()}
       />

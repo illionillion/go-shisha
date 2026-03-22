@@ -1,21 +1,23 @@
 import { clsx } from "clsx";
 import Link from "next/link";
 import type { FC } from "react";
-import type { User } from "@/types/domain";
 import { Avatar } from "../Avatar";
 
 interface Props {
-  user: User;
+  displayName?: string | null;
+  iconUrl?: string | null;
+  bio?: string | null;
+  externalUrl?: string | null;
 }
 
 /**
  * ProfileHeader
  * - 表示専用のプロフィールヘッダー
  */
-export const ProfileHeader: FC<Props> = ({ user }) => {
-  const name = user.display_name ?? "名無しのユーザー";
-  const bio = user.description ?? "";
-  const external = user.external_url ?? null;
+export const ProfileHeader: FC<Props> = ({ displayName, iconUrl, bio: bioText, externalUrl }) => {
+  const name = displayName || "名無しのユーザー";
+  const bio = bioText ?? "";
+  const external = externalUrl ?? null;
 
   return (
     <div className={clsx(["w-full", "bg-white", "border-b", "border-gray-100"])}>
@@ -30,12 +32,7 @@ export const ProfileHeader: FC<Props> = ({ user }) => {
           "space-x-4",
         ])}
       >
-        <Avatar
-          src={user.icon_url ?? null}
-          alt={name}
-          size={80}
-          className={clsx(["flex-shrink-0"])}
-        />
+        <Avatar src={iconUrl ?? null} alt={name} size={80} className={clsx(["flex-shrink-0"])} />
         <div className={clsx(["flex-1"])}>
           <div className={clsx(["flex", "items-center", "justify-between"])}>
             <h2 className={clsx(["text-2xl", "font-semibold", "text-gray-900"])}>{name}</h2>

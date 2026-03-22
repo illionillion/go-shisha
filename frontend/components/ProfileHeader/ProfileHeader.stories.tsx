@@ -13,16 +13,11 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const sampleUser = {
-  id: 1,
-  display_name: "山田 太郎",
-  description: "シーシャ好きのフロントエンドエンジニア\n週末は友人とカフェ巡りをします。",
-  external_url: "https://example.com",
-  icon_url: "",
-};
-
 export const Default: Story = {
   args: {
-    user: sampleUser,
+    displayName: "山田 太郎",
+    bio: "シーシャ好きのフロントエンドエンジニア\n週末は友人とカフェ巡りをします。",
+    externalUrl: "https://example.com",
+    iconUrl: "",
   },
 };
