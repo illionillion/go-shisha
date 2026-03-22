@@ -7,7 +7,7 @@ import { formatDate } from "@/lib/formatDate";
 import { PostOwnerMenu } from "../PostOwnerMenu";
 
 interface Props {
-  userDisplayName?: string;
+  userDisplayName?: string | null;
   userIconUrl?: string | null;
   userId?: number;
   createdAt?: string | undefined;
@@ -48,7 +48,7 @@ export function PostDetailHeader({
       <div className={clsx(["relative", "flex", "items-center", "gap-3", "mb-3"])}>
         <Avatar
           src={userIconUrl ?? null}
-          alt={userDisplayName ?? "ユーザー"}
+          alt={userDisplayName || "ユーザー"}
           size={40}
           userId={userId}
           linkMode="link"

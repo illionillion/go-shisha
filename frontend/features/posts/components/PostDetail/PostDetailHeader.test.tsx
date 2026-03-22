@@ -127,7 +127,7 @@ describe("PostDetailHeader", () => {
       const { container } = render(
         <PostDetailHeader
           userDisplayName={mockUser.display_name}
-          userIconUrl={undefined}
+          userIconUrl={null}
           userId={mockUser.id}
           createdAt="2024-01-01"
           onBack={vi.fn()}
@@ -143,7 +143,7 @@ describe("PostDetailHeader", () => {
     it("display_nameがnullの場合は「匿名」と表示される", () => {
       render(
         <PostDetailHeader
-          userDisplayName={undefined}
+          userDisplayName={null}
           userIconUrl={mockUser.icon_url}
           userId={mockUser.id}
           createdAt="2024-01-01"
