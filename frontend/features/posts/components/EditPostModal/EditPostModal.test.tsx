@@ -117,6 +117,25 @@ describe("EditPostModal", () => {
 
       expect(onClose).not.toHaveBeenCalled();
     });
+
+    it("isPendingがtrueのとき、バックドロップクリックでonCloseが呼ばれない", async () => {
+      vi.mocked(useUpdatePostModule.useUpdatePost).mockReturnValue({
+        onUpdate: mockOnUpdate,
+        isPending: true,
+      });
+
+      const user = userEvent.setup();
+      const onClose = vi.fn();
+
+      const { container } = render(
+        <EditPostModal postId={1} slides={mockSlides} onClose={onClose} onCancel={vi.fn()} />
+      );
+
+      const backdrop = container.querySelector('[aria-hidden="true"]') as HTMLElement;
+      await user.click(backdrop);
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
   });
 
   describe("フォーム送信", () => {

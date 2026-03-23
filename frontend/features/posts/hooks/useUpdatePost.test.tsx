@@ -158,6 +158,44 @@ describe("useUpdatePost", () => {
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ["/posts"] });
     });
 
+    it("onSuccess: ユーザー別投稿リストキャッシュがpredicateでinvalidateされる", () => {
+      const mockMutate = vi.fn();
+      vi.mocked(postsApi.usePatchPostsId).mockReturnValue({
+        mutate: mockMutate,
+        isPending: false,
+      } as unknown as ReturnType<typeof postsApi.usePatchPostsId>);
+
+      const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+      const { result } = renderHook(() => useUpdatePost(), { wrapper });
+
+      act(() => {
+        result.current.onUpdate(1, { slides: [{ id: 1 }] });
+      });
+
+      const { onSuccess } = getMutateCallbacks(mockMutate);
+      act(() => {
+        onSuccess?.();
+      });
+
+      // predicate を使った呼び出しが存在することを確認
+      const predicateCall = invalidateSpy.mock.calls.find(
+        (call) => "predicate" in (call[0] as object)
+      );
+      expect(predicateCall).toBeDefined();
+
+      // predicate が /users/:id/posts 形式の queryKey に true を返すことを確認
+      const { predicate } = predicateCall![0] as {
+        predicate: (query: { queryKey: unknown }) => boolean;
+      };
+      expect(predicate({ queryKey: ["/users/1/posts"] })).toBe(true);
+      expect(predicate({ queryKey: ["/users/42/posts"] })).toBe(true);
+      // 関係ないキーには false を返すことを確認
+      expect(predicate({ queryKey: ["/posts"] })).toBe(false);
+      expect(predicate({ queryKey: ["/users/1"] })).toBe(false);
+      expect(predicate({ queryKey: ["/users/1/posts/extra"] })).toBe(false);
+    });
+
     it("onSuccess: options.onSuccessコールバックが呼ばれる", () => {
       const mockMutate = vi.fn();
       const onSuccessCallback = vi.fn();
