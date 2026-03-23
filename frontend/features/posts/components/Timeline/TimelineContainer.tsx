@@ -132,7 +132,7 @@ export function TimelineContainer({ initialPosts, userId }: TimelineContainerPro
       />
 
       {/* 投稿編集モーダル */}
-      {editingPost?.id != null && (
+      {editingPost?.id != null && (editingPost.slides?.length ?? 0) > 0 && (
         <EditPostModal
           postId={editingPost.id}
           slides={editingPost.slides ?? []}

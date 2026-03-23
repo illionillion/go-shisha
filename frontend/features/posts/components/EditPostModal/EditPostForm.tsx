@@ -47,16 +47,16 @@ export function EditPostForm({
   onCancel,
   disabled = false,
 }: EditPostFormProps) {
-  const [editableSlides, setEditableSlides] = useState<EditablePostSlide[]>(() =>
-    slides
-      .filter((s): s is Slide & { id: number } => s.id !== undefined)
-      .map((s) => ({
-        id: s.id,
-        imageUrl: s.image_url,
-        text: s.text ?? "",
-        flavorId: s.flavor?.id,
-      }))
-  );
+  const [hasInvalidSlides] = useState(() => slides.some((s) => s.id === undefined));
+  const [editableSlides, setEditableSlides] = useState<EditablePostSlide[]>(() => {
+    if (slides.some((s) => s.id === undefined)) return [];
+    return slides.map((s) => ({
+      id: s.id as number,
+      imageUrl: s.image_url,
+      text: s.text ?? "",
+      flavorId: s.flavor?.id,
+    }));
+  });
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const currentSlide = editableSlides[currentIndex];
@@ -91,7 +91,71 @@ export function EditPostForm({
     onSubmit(postId, { slides: slideInputs });
   };
 
-  if (!currentSlide) return null;
+  if (hasInvalidSlides || !currentSlide) {
+    const message = hasInvalidSlides
+      ? "スライドデータが無効なため編集できません。"
+      : "表示できるスライドがありません。";
+    return (
+      <div className={clsx(["flex", "flex-col", "h-full"])}>
+        <div
+          className={clsx([
+            "flex",
+            "items-center",
+            "justify-between",
+            "px-6",
+            "py-4",
+            "border-b",
+            "border-gray-200",
+          ])}
+        >
+          <h2 className={clsx(["text-lg", "font-semibold"])}>投稿を編集</h2>
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              aria-label="閉じる"
+              className={clsx(["p-1", "rounded", "text-gray-500", "hover:bg-gray-100"])}
+            >
+              <XIcon />
+            </button>
+          )}
+        </div>
+        <div className={clsx(["flex-1", "flex", "items-center", "justify-center", "px-6", "py-8"])}>
+          <p className={clsx(["text-sm", "text-gray-500"])}>{message}</p>
+        </div>
+        <div
+          className={clsx([
+            "flex",
+            "justify-end",
+            "gap-3",
+            "px-6",
+            "py-4",
+            "border-t",
+            "border-gray-200",
+          ])}
+        >
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className={clsx([
+                "px-4",
+                "py-2",
+                "rounded-md",
+                "text-sm",
+                "font-medium",
+                "text-gray-700",
+                "bg-gray-100",
+                "hover:bg-gray-200",
+              ])}
+            >
+              閉じる
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className={clsx(["flex", "flex-col", "h-full"])}>

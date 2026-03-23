@@ -102,7 +102,7 @@ export function EditPostModal({ postId, slides, onClose, onCancel, disabled }: E
             flavors={flavors ?? []}
             onSubmit={onUpdate}
             onCancel={onCancel}
-            disabled={disabled ?? isPending}
+            disabled={isPending || !!disabled}
           />
         </div>
       </div>
