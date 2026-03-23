@@ -9,6 +9,8 @@ import { useOutsideClickAndEsc } from "../../hooks/useOutsideClickAndEsc";
 interface PostOwnerMenuProps {
   /** 削除アクションのコールバック */
   onDelete: () => void;
+  /** 編集アクションのコールバック（指定した場合のみ「編集」メニューを表示） */
+  onEdit?: () => void;
   /** メニューの表示位置（'top': ボタン上, 'bottom': ボタン下（デフォルト）） */
   menuPosition?: "top" | "bottom";
   /** ボタンのバリアント（'card': 画像オーバーレイ用, 'detail': テキスト用（デフォルト）） */
@@ -45,6 +47,7 @@ const buttonVariants = cva([], {
  */
 export function PostOwnerMenu({
   onDelete,
+  onEdit,
   menuPosition = "bottom",
   variant = "detail",
   stopPropagation = false,
@@ -79,6 +82,16 @@ export function PostOwnerMenu({
     onDelete();
   };
 
+  /** 編集ボタンクリック */
+  const handleEditClick = (e: React.MouseEvent) => {
+    if (stopPropagation) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setIsMenuOpen(false);
+    onEdit?.();
+  };
+
   return (
     <div ref={menuRef} className={clsx(["relative", className])}>
       <button
@@ -109,6 +122,25 @@ export function PostOwnerMenu({
           role="menu"
           aria-orientation="vertical"
         >
+          {onEdit && (
+            <button
+              type="button"
+              onClick={handleEditClick}
+              role="menuitem"
+              className={clsx([
+                "w-full",
+                "px-4",
+                "py-2",
+                "text-sm",
+                "text-left",
+                "text-gray-700",
+                "hover:bg-gray-50",
+                "transition-colors",
+              ])}
+            >
+              編集
+            </button>
+          )}
           <button
             type="button"
             onClick={handleDeleteClick}

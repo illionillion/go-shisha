@@ -10,6 +10,7 @@ import { useLike } from "@/features/posts/hooks/useLike";
 import { isSuccessResponse } from "@/lib/api-helpers";
 import { useConfirm } from "@/lib/useConfirm";
 import type { Post } from "@/types/domain";
+import { EditPostModal } from "../EditPostModal";
 import PostDetailCarousel from "./PostDetailCarousel";
 import PostDetailFooter from "./PostDetailFooter";
 import PostDetailHeader from "./PostDetailHeader";
@@ -35,6 +36,7 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
   const router = useRouter();
   const currentUser = useAuthStore((state) => state.user);
   const confirm = useConfirm();
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const { onDelete } = useDeletePost({ redirectOnSuccess: true });
 
   // Orval 8.x: レスポンスから成功時のデータを取り出す
@@ -110,6 +112,11 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
     onDelete(post.id);
   };
 
+  /** 投稿編集モーダルを開く */
+  const handleEdit = () => {
+    setIsEditOpen(true);
+  };
+
   const handleLike = () => {
     if (!post.id) return;
     if (isLiked) {
@@ -128,36 +135,49 @@ export function PostDetail({ postId, initialPost }: PostDetailProps) {
   const currentSlide = slides.length > 0 ? slides[current] : undefined;
 
   return (
-    <div className={clsx(["mx-auto", "max-w-3xl", "px-4", "py-6"])}>
-      <div className={clsx(["flex", "flex-col", "md:flex-row", "gap-6"])}>
-        <PostDetailCarousel
-          slides={slides}
-          current={current}
-          onPrev={handlePrev}
-          onNext={handleNext}
-          onDotClick={(i) => setCurrent(i)}
-          handleBack={handleBack}
-        />
-
-        <div>
-          <PostDetailHeader
-            userDisplayName={post.user?.display_name}
-            userIconUrl={post.user?.icon_url}
-            userId={post.user?.id}
-            createdAt={post.created_at}
-            onBack={handleBack}
-            onDelete={isOwner ? handleDelete : undefined}
+    <>
+      <div className={clsx(["mx-auto", "max-w-3xl", "px-4", "py-6"])}>
+        <div className={clsx(["flex", "flex-col", "md:flex-row", "gap-6"])}>
+          <PostDetailCarousel
+            slides={slides}
+            current={current}
+            onPrev={handlePrev}
+            onNext={handleNext}
+            onDotClick={(i) => setCurrent(i)}
+            handleBack={handleBack}
           />
 
-          <PostDetailFooter
-            currentSlide={currentSlide}
-            optimisticLikes={optimisticLikes}
-            isLiked={isLiked}
-            onLike={handleLike}
-          />
+          <div>
+            <PostDetailHeader
+              userDisplayName={post.user?.display_name}
+              userIconUrl={post.user?.icon_url}
+              userId={post.user?.id}
+              createdAt={post.created_at}
+              onBack={handleBack}
+              onDelete={isOwner ? handleDelete : undefined}
+              onEdit={isOwner ? handleEdit : undefined}
+            />
+
+            <PostDetailFooter
+              currentSlide={currentSlide}
+              optimisticLikes={optimisticLikes}
+              isLiked={isLiked}
+              onLike={handleLike}
+            />
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* 投稿編集モーダル */}
+      {isEditOpen && post.id && (
+        <EditPostModal
+          postId={post.id}
+          slides={slides}
+          onClose={() => setIsEditOpen(false)}
+          onCancel={() => setIsEditOpen(false)}
+        />
+      )}
+    </>
   );
 }
 

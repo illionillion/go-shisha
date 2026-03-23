@@ -10,6 +10,7 @@ import { getUserPostsErrorMessage } from "@/features/posts/utils/userPostsErrors
 import { isSuccessResponse } from "@/lib/api-helpers";
 import { useConfirm } from "@/lib/useConfirm";
 import type { Flavor, Post } from "@/types/domain";
+import { EditPostModal } from "../EditPostModal";
 import { Timeline } from "./Timeline";
 
 interface TimelineContainerProps {
@@ -27,6 +28,7 @@ interface TimelineContainerProps {
  */
 export function TimelineContainer({ initialPosts, userId }: TimelineContainerProps) {
   const [selectedFlavorIds, setSelectedFlavorIds] = useState<number[]>([]);
+  const [editingPostId, setEditingPostId] = useState<number | null>(null);
   const currentUser = useAuthStore((state) => state.user);
 
   // ユーザーページであればそのユーザーの投稿を取得、そうでなければ全投稿を取得
@@ -104,19 +106,40 @@ export function TimelineContainer({ initialPosts, userId }: TimelineContainerPro
     }
   };
 
+  /** 編集モーダルを開く */
+  const handleEdit = (postId: number) => {
+    setEditingPostId(postId);
+  };
+
+  /** 編集対象の投稿を取得 */
+  const editingPost = editingPostId != null ? posts.find((p) => p.id === editingPostId) : null;
+
   return (
-    <Timeline
-      posts={filteredPosts}
-      isLoading={!initialPosts && isLoading}
-      error={error}
-      errorMessage={errorMessage}
-      availableFlavors={availableFlavors}
-      selectedFlavorIds={selectedFlavorIds}
-      onFlavorToggle={handleFlavorToggle}
-      onLike={onLike}
-      onUnlike={onUnlike}
-      currentUserId={currentUser?.id ?? null}
-      onDelete={handleDelete}
-    />
+    <>
+      <Timeline
+        posts={filteredPosts}
+        isLoading={!initialPosts && isLoading}
+        error={error}
+        errorMessage={errorMessage}
+        availableFlavors={availableFlavors}
+        selectedFlavorIds={selectedFlavorIds}
+        onFlavorToggle={handleFlavorToggle}
+        onLike={onLike}
+        onUnlike={onUnlike}
+        currentUserId={currentUser?.id ?? null}
+        onDelete={handleDelete}
+        onEdit={handleEdit}
+      />
+
+      {/* 投稿編集モーダル */}
+      {editingPost?.id != null && (editingPost.slides?.length ?? 0) > 0 && (
+        <EditPostModal
+          postId={editingPost.id}
+          slides={editingPost.slides ?? []}
+          onClose={() => setEditingPostId(null)}
+          onCancel={() => setEditingPostId(null)}
+        />
+      )}
+    </>
   );
 }

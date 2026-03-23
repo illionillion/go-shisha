@@ -22,6 +22,8 @@ interface PostCardProps {
   currentUserId?: number | null;
   /** 投稿削除コールバック（自分の投稿にのみ表示） */
   onDelete?: (postId: number) => void;
+  /** 投稿編集コールバック（自分の投稿にのみ表示） */
+  onEdit?: (postId: number) => void;
   /** 投稿詳細ページへのリンク */
   href?: string;
 }
@@ -78,6 +80,7 @@ export function PostCard({
   autoPlayInterval = 3000,
   currentUserId,
   onDelete,
+  onEdit,
   href,
 }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(post.is_liked || false);
@@ -275,6 +278,13 @@ export function PostCard({
                 onDelete={() => {
                   if (post.id) onDelete?.(post.id);
                 }}
+                onEdit={
+                  onEdit
+                    ? () => {
+                        if (post.id) onEdit(post.id);
+                      }
+                    : undefined
+                }
                 variant="card"
                 menuPosition="top"
                 stopPropagation

@@ -39,6 +39,8 @@ export * from "./goShishaBackendInternalModelsSlide";
 export * from "./goShishaBackendInternalModelsSlideInput";
 export * from "./goShishaBackendInternalModelsUnauthorizedError";
 export * from "./goShishaBackendInternalModelsUnauthorizedErrorError";
+export * from "./goShishaBackendInternalModelsUpdatePostInput";
+export * from "./goShishaBackendInternalModelsUpdateSlideInput";
 export * from "./goShishaBackendInternalModelsUploadImagesResponse";
 export * from "./goShishaBackendInternalModelsUser";
 export * from "./goShishaBackendInternalModelsUsersResponse";

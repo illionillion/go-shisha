@@ -14,6 +14,8 @@ interface Props {
   onBack: () => void;
   /** 自分の投稿の場合のみ渡す削除コールバック */
   onDelete?: () => void;
+  /** 自分の投稿の場合のみ渡す編集コールバック */
+  onEdit?: () => void;
 }
 
 export function PostDetailHeader({
@@ -23,6 +25,7 @@ export function PostDetailHeader({
   createdAt,
   onBack,
   onDelete,
+  onEdit,
 }: Props) {
   return (
     <>
@@ -61,7 +64,7 @@ export function PostDetailHeader({
         </div>
 
         {/* 3点リーダーメニュー（投稿者のみ表示） */}
-        {onDelete && <PostOwnerMenu onDelete={onDelete} />}
+        {onDelete && <PostOwnerMenu onDelete={onDelete} onEdit={onEdit} />}
       </div>
     </>
   );
