@@ -138,12 +138,18 @@ echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env
 # 3. 依存関係をインストール
 pnpm install
 
-# 4a. Backendを起動（Docker）
+# 4. OpenAPIスペックを初回コピー（frontend/openapi/openapi.yml が未生成の場合）
+mkdir -p frontend/openapi
+cp backend/docs/swagger.yaml frontend/openapi/openapi.yml
+
+# 5a. Backendを起動（Docker）
 docker compose up -d
 
-# 4b. Frontendを起動（別ターミナルで実行）
+# 5b. Frontendを起動（別ターミナルで実行）
 pnpm dev
 ```
+
+> **補足**: `pnpm dev`（ルート）は `scripts/watch-openapi.ts` と Frontend 開発サーバーを同時起動します。`scripts/watch-openapi.ts` が `frontend/openapi/openapi.yml` を自動生成しますが、初回はコピー完了前に Orval が実行されてしまうことがあるため、ステップ4の手動コピーを先に行うことを推奨します。
 
 起動後、以下のURLにアクセス:
 - **Frontend**: http://localhost:3000
@@ -241,7 +247,7 @@ pnpm dev
 
 #### モノレポルート
 ```bash
-pnpm dev              # Frontend開発サーバー起動 + OpenAPI自動コピー監視
+pnpm dev              # Frontend開発サーバー起動 + OpenAPI自動コピー監視（※初回は後述の注意事項を参照）
 pnpm build            # Frontendビルド
 pnpm lint             # Frontendリント
 pnpm format           # Frontendフォーマット
@@ -258,6 +264,12 @@ pnpm vrt:run          # VRT実行（PC + SP）
 pnpm vrt:update       # VRTスナップショット更新
 pnpm vrt:down         # VRT Docker環境停止
 ```
+
+> **`pnpm dev` の初回起動について**: ルートの `pnpm dev` は `scripts/watch-openapi.ts`（OpenAPI自動コピー）と Frontend 開発サーバーを**同時起動**します。Frontend 開発サーバーは起動直後に `pnpm gen:api`（Orval）を実行するため、`frontend/openapi/openapi.yml` が存在しない初回クローン時はコピー完了前に Orval が走り失敗することがあります。この場合は `frontend/openapi/openapi.yml` を手動でコピーしてから再実行してください:
+> ```bash
+> mkdir -p frontend/openapi && cp backend/docs/swagger.yaml frontend/openapi/openapi.yml
+> pnpm dev
+> ```
 
 #### Backend（Go）
 ```bash
