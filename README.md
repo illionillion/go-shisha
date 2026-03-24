@@ -13,7 +13,7 @@ go-shisha/
 ├── frontend/          # Next.js アプリケーション
 ├── backend/           # Go API サーバー
 ├── scripts/           # 自動化スクリプト（OpenAPI同期など）
-└── docs/              # GitHub Pages 用 API ドキュメント
+└── docs/              # GitHub Pages 用の静的アセット（API docs + デモ）
 ```
 
 ### Frontend ディレクトリ構成
