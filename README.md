@@ -91,7 +91,7 @@ backend/
 
 ### インフラ
 - **開発環境**: Docker + Docker Compose
-- **DBマイグレーション**: migrate/migrate（コンテナ起動時に自動実行）
+- **DBマイグレーション**: migrate/migrate（コンテナ起動時に自動実行。`docker compose` 利用時は `postgres` → `migrate` → `backend` の順で起動される想定です。初回起動などで DB 接続エラーにより backend コンテナが終了した場合は、マイグレーション完了後に backend コンテナを再起動してください）
 - **CI/CD**: GitHub Actions
 
 ## 実装済み機能
