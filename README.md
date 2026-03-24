@@ -34,7 +34,7 @@ frontend/
 │   ├── FlavorLabel/   # フレーバーラベル
 │   └── icons/         # アイコン群
 ├── api/               # Orval自動生成 API クライアント（git管理対象）
-├── openapi/           # OpenAPI仕様ファイル（git管理対象外・自動コピー）
+├── openapi/           # OpenAPI仕様ファイル（git管理対象外・自動コピー、初回は scripts/watch-openapi.ts により自動生成）
 ├── types/             # 共通型定義（domain.ts で生成型を再エクスポート）
 ├── lib/               # ユーティリティ関数・hooks
 ├── remotion/          # Remotion動画コンポーネント（デモGIF生成用）
