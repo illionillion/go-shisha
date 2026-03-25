@@ -10,8 +10,10 @@ const config: StorybookConfig = {
   addons: ["@storybook/addon-a11y", "@storybook/addon-docs", "@storybook/addon-onboarding"],
   framework: "@storybook/nextjs-vite",
   staticDirs: ["../public"],
-  viteFinal: async (config: InlineConfig) => {
-    config.base = "./";
+  viteFinal: async (config: InlineConfig, { configType }) => {
+    if (configType === "PRODUCTION") {
+      config.base = "./";
+    }
     return config;
   },
 };
