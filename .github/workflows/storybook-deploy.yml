@@ -12,6 +12,11 @@ on:
       - "frontend/api/**"
       - "frontend/types/**"
       - "frontend/lib/**"
+      - "frontend/public/**"
+      - "frontend/package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/actions/setup-frontend/**"
       - ".github/workflows/storybook-deploy.yml"
   workflow_dispatch:
 
