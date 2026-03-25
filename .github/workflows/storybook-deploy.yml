@@ -14,6 +14,7 @@ on:
       - "frontend/lib/**"
       - "frontend/public/**"
       - "frontend/package.json"
+      - "package.json"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - ".github/actions/setup-frontend/**"
