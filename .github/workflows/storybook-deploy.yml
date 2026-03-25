@@ -1,0 +1,57 @@
+name: Deploy Storybook to docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/components/**"
+      - "frontend/features/**"
+      - "frontend/app/**"
+      - "frontend/.storybook/**"
+      - "frontend/api/**"
+      - "frontend/types/**"
+      - "frontend/lib/**"
+      - "frontend/public/**"
+      - "frontend/package.json"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/actions/setup-frontend/**"
+      - ".github/workflows/storybook-deploy.yml"
+      - "frontend/tsconfig.json"
+      - "frontend/next.config.ts"
+      - "frontend/postcss.config.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: storybook-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and Deploy Storybook
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Frontend Environment
+        uses: ./.github/actions/setup-frontend
+
+      - name: Build Storybook
+        run: pnpm exec storybook build --output-dir ../docs/storybook
+
+      - name: Commit and push Storybook
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: "docs/storybook"
+          default_author: github_actions
+          message: "docs: Storybookを自動ビルド・更新 [skip ci]"
+          pull: "--rebase --autostash"
