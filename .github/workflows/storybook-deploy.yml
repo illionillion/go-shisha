@@ -18,6 +18,9 @@ on:
       - "pnpm-workspace.yaml"
       - ".github/actions/setup-frontend/**"
       - ".github/workflows/storybook-deploy.yml"
+      - "frontend/tsconfig.json"
+      - "frontend/next.config.ts"
+      - "frontend/postcss.config.mjs"
   workflow_dispatch:
 
 permissions:
