@@ -84,11 +84,11 @@ Dockerfile はマルチステージビルド構成になっており、用途に
 | `prod` | `alpine:3.20` | 本番用（ECS Fargate デプロイ用軽量イメージ）|
 
 ```bash
-# 開発用イメージ（compose.yml が利用するステージ）
-docker build --target dev -t go-shisha-backend:dev .
+# 開発用イメージ（compose.yml が利用するステージ / プロジェクトルートで実行）
+docker build --target dev -t go-shisha-backend:dev ./backend
 
-# 本番用イメージ（ECS Fargate へのデプロイ用）
-docker build --target prod -t go-shisha-backend:prod .
+# 本番用イメージ（ECS Fargate へのデプロイ用 / プロジェクトルートで実行）
+docker build --target prod -t go-shisha-backend:prod ./backend
 ```
 
 > Docker Compose での開発起動（`docker compose up -d`）は自動的に `dev` ステージが使われます。

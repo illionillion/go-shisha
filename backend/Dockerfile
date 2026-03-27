@@ -15,6 +15,7 @@ COPY . .
 # Swagger docs を生成してからビルド
 RUN swag init -g cmd/main.go --parseDependency --parseInternal -o docs
 
+RUN mkdir -p tmp
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -ldflags="-s -w" -o ./tmp/main ./cmd/main.go
 
