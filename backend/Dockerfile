@@ -21,7 +21,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 
 
 # ---- dev: 開発用（air + swag によるホットリロード） ----
-FROM golang:1.25-alpine AS dev
+FROM golang:1.24-alpine AS dev
 
 WORKDIR /app
 
@@ -54,6 +54,9 @@ WORKDIR /app
 
 COPY --from=builder /app/tmp/main ./main
 COPY --from=builder /app/db/migrations ./db/migrations
+
+# アップロード画像などを保存するため /app 配下を appuser が書き込み可能にする
+RUN chown -R appuser:appgroup /app
 
 USER appuser
 
