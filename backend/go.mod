@@ -1,8 +1,8 @@
 module go-shisha-backend
 
-go 1.24.0
+go 1.26.1
 
-toolchain go1.24.10
+toolchain go1.26.1
 
 require (
 	gorm.io/driver/sqlite v1.6.0 // test only

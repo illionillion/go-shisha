@@ -1,7 +1,7 @@
 # 必須ツール・セットアップ手順
 
 ## Go
-- バージョン: 1.24.x 以上
+- バージョン: 1.26.x 以上
 - インストール: https://go.dev/doc/install
 - ※ `go` コマンドがPATHに通っている必要あり
 
@@ -80,7 +80,7 @@ Dockerfile はマルチステージビルド構成になっており、用途に
 
 | ターゲット | ベースイメージ | 用途 |
 |---|---|---|
-| `dev` | `golang:1.25-alpine` | 開発用（Air ホットリロード + swag）|
+| `dev` | `golang:1.26-alpine` | 開発用（Air ホットリロード + swag）|
 | `prod` | `alpine:3.20` | 本番用（ECS Fargate デプロイ用軽量イメージ）|
 
 ```bash
