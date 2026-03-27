@@ -1,19 +1,16 @@
 # ---- builder: 本番用バイナリをコンパイル ----
-FROM golang:1.26-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
 RUN apk add --no-cache git
 # swag インストール（Swagger docs 生成に必要）
-RUN GOBIN=/usr/local/bin go install github.com/swaggo/swag/cmd/swag@v1.16.6
+RUN GOBIN=/usr/local/bin go install github.com/swaggo/swag/cmd/swag@latest
 
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-
-# go.mod を最新状態に更新してから Swagger docs を生成・ビルド
-RUN go mod tidy
 
 # Swagger docs を生成してからビルド
 RUN swag init -g cmd/main.go --parseDependency --parseInternal -o docs
@@ -23,7 +20,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 
 
 # ---- dev: 開発用（air + swag によるホットリロード） ----
-FROM golang:1.26-alpine AS dev
+FROM golang:1.25-alpine AS dev
 
 WORKDIR /app
 
@@ -32,7 +29,7 @@ RUN apk add --no-cache git curl make
 # airインストール（公式移行先）
 RUN go install github.com/air-verse/air@v1.63.4
 # swagインストール（GOBIN指定でパスを明示）
-RUN GOBIN=/usr/local/bin go install github.com/swaggo/swag/cmd/swag@v1.16.6
+RUN GOBIN=/usr/local/bin go install github.com/swaggo/swag/cmd/swag@latest
 
 COPY go.mod go.sum ./
 RUN go mod tidy

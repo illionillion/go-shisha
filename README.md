@@ -78,7 +78,7 @@ backend/
 - **Remotion**（デモGIF・動画生成）
 
 ### Backend
-- **Go 1.26+**
+- **Go 1.24+**
 - **Gin Framework**（HTTPルーター）
 - **GORM**（ORM）
 - **PostgreSQL 15**
@@ -117,7 +117,7 @@ backend/
 ### 要求事項
 - **Node.js** 20.19.0 以上（21系を除く）または 22.12.0 以上
 - **pnpm 9+**
-- **Go 1.26+**
+- **Go 1.24+**
 - **Docker & Docker Compose**（PostgreSQL・Backendはコンテナで動作）
 
 ### クイックスタート（初めての方向け）
