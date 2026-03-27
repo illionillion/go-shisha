@@ -286,6 +286,18 @@ make lint-fix         # golangci-lint 自動修正
 make fix-all          # goimports + gofmt + golangci-lint --fix を一括実行
 ```
 
+#### Backend Docker ビルド
+
+Dockerfile はマルチステージビルド構成です。`--target` で用途に合わせてビルドできます。
+
+```bash
+# 開発用（docker compose up -d が利用するステージ）
+docker build --target dev -t go-shisha-backend:dev ./backend
+
+# 本番用（ECS Fargate デプロイ用軽量イメージ）
+docker build --target prod -t go-shisha-backend:prod ./backend
+```
+
 ### 開発フロー
 
 1. Backendでswagger定義を更新 → `make swagger`

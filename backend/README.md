@@ -73,4 +73,25 @@ docker compose exec -T -i postgres psql -U ${POSTGRES_USER} -d ${POSTGRES_DB} < 
    ```
 
 ---
+
+## Docker イメージのビルド
+
+Dockerfile はマルチステージビルド構成になっており、用途に応じて `--target` でステージを指定してビルドします。
+
+| ターゲット | ベースイメージ | 用途 |
+|---|---|---|
+| `dev` | `golang:1.25-alpine` | 開発用（Air ホットリロード + swag）|
+| `prod` | `alpine:3.20` | 本番用（ECS Fargate デプロイ用軽量イメージ）|
+
+```bash
+# 開発用イメージ（compose.yml が利用するステージ）
+docker build --target dev -t go-shisha-backend:dev .
+
+# 本番用イメージ（ECS Fargate へのデプロイ用）
+docker build --target prod -t go-shisha-backend:prod .
+```
+
+> Docker Compose での開発起動（`docker compose up -d`）は自動的に `dev` ステージが使われます。
+
+---
 品質チェックは必ず上記手順でセットアップした上で実施してください。
