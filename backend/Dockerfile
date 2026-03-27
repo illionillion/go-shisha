@@ -21,7 +21,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 
 
 # ---- dev: 開発用（air + swag によるホットリロード） ----
-FROM golang:1.24-alpine AS dev
+# air v1.63.4 が Go 1.25 以上を要求するため dev ステージは 1.25 を使用
+FROM golang:1.25-alpine AS dev
 
 WORKDIR /app
 
