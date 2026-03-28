@@ -1,4 +1,28 @@
-FROM golang:1.25-alpine
+# ---- builder: 本番用バイナリをコンパイル ----
+FROM golang:1.25-alpine AS builder
+
+WORKDIR /app
+
+RUN apk add --no-cache git
+# swag インストール（Swagger docs 生成に必要）
+RUN GOBIN=/usr/local/bin go install github.com/swaggo/swag/cmd/swag@latest
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+# Swagger docs を生成してからビルド
+RUN swag init -g cmd/main.go --parseDependency --parseInternal -o docs
+
+RUN mkdir -p tmp
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -ldflags="-s -w" -o ./tmp/main ./cmd/main.go
+
+
+# ---- dev: 開発用（air + swag によるホットリロード） ----
+# air v1.63.4 が Go 1.25 以上を要求するため dev ステージは 1.25 を使用
+FROM golang:1.25-alpine AS dev
 
 WORKDIR /app
 
@@ -17,3 +41,26 @@ COPY . .
 COPY .air.toml .
 
 CMD ["make", "dev"]
+
+
+# ---- prod: 軽量本番イメージ（ECS Fargate 用） ----
+FROM alpine:3.20 AS prod
+
+RUN apk add --no-cache ca-certificates tzdata
+
+# 非rootユーザーで起動
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+COPY --from=builder /app/tmp/main ./main
+COPY --from=builder /app/db/migrations ./db/migrations
+
+# アップロード画像などを保存するため /app 配下を appuser が書き込み可能にする
+RUN chown -R appuser:appgroup /app
+
+USER appuser
+
+EXPOSE 8080
+
+CMD ["./main"]
