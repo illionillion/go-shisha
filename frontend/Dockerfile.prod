@@ -6,6 +6,7 @@ WORKDIR /app
 RUN npm i -g pnpm@9.15.0
 
 COPY package.json ./
+# pnpm-lock.yaml はモノレポルートに存在するため --no-frozen-lockfile を使用
 RUN pnpm install --no-frozen-lockfile
 
 

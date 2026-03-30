@@ -58,13 +58,12 @@ docker compose up
 docker build -f Dockerfile.prod --target prod -t go-shisha-frontend-prod .
 ```
 
-起動例：
+起動例（`BACKEND_URL` はビルド時に `.env` から焼き込まれているため、起動時に指定不要）：
 
 ```bash
 docker run -d --rm \
   --name go-shisha-frontend \
   --network <プロジェクトディレクトリ名>_default \
-  -e BACKEND_URL=http://<バックエンドコンテナ名>:8080 \
   -p 3000:3000 \
   go-shisha-frontend-prod
 ```
