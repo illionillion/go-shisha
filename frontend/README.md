@@ -58,7 +58,26 @@ docker compose up
 docker build -f Dockerfile.prod --target prod -t go-shisha-frontend-prod .
 ```
 
-> **注意**: `BACKEND_URL` はブラウザには公開されません（Next.jsサーバーが内部でバックエンドにリクエストをプロキシするために使用）。ブラウザ向けには `NEXT_PUBLIC_BACKEND_URL` を使用してください。
+起動例：
+
+```bash
+docker run -d --rm \
+  --name go-shisha-frontend \
+  --network <プロジェクトディレクトリ名>_default \
+  -e BACKEND_URL=http://<バックエンドコンテナ名>:8080 \
+  -p 3000:3000 \
+  go-shisha-frontend-prod
+```
+
+停止（FE・BE 両方）：
+
+```bash
+# フロントエンドコンテナを停止
+docker stop go-shisha-frontend
+
+# バックエンド・DB を停止（プロジェクトルートで実行）
+docker compose down
+```
 
 ### ローカル環境で直接実行する場合
 
