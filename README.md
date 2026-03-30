@@ -204,8 +204,7 @@ echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env
 **frontend/.env (Frontend用)**
 | 変数名 | 説明 | デフォルト値 | 必須 |
 |--------|------|--------------|------|
-| `NEXT_PUBLIC_BACKEND_URL` | バックエンドURL（画像などの公開URL） | `http://localhost:8080` | ✅ |
-| `BACKEND_URL` | Next.js rewrites用バックエンドURL（内部プロキシ先） | `http://localhost:8080` | ✅ |
+| `BACKEND_URL` | Next.js rewrites用バックエンドURL（`/api/v1` および `/images` の転送先）。ビルド時に焼き込まれ、ランタイムにもサーバーサイドAPIが参照 | `http://localhost:8080` | ✅ |
 | `REDIRECT_SECRET` | ログイン後リダイレクト先暗号化キー | - | ✅ |
 
 > **注意**: `JWT_SECRET`と`REDIRECT_SECRET`は**本番環境では必ずランダムな値に変更**してください。
@@ -241,7 +240,7 @@ pnpm dev
 
 **ポート競合が発生した場合**
 - `.env`の`BACKEND_PORT`を変更（例: `8081`）
-- `frontend/.env`の`NEXT_PUBLIC_BACKEND_URL`と`BACKEND_URL`も合わせて変更
+- `frontend/.env`の`BACKEND_URL`も合わせて変更
 
 ### 開発コマンド
 

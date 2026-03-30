@@ -34,7 +34,9 @@ const nextConfig: NextConfig = {
   async rewrites() {
     const backendUrl = process.env.BACKEND_URL;
     if (!backendUrl) {
-      throw new Error("BACKEND_URL が設定されていません。frontend/.env を確認してください。");
+      throw new Error(
+        "BACKEND_URL が設定されていません。環境変数または frontend/.env を確認してください。"
+      );
     }
     return [
       {
