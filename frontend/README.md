@@ -72,12 +72,14 @@ docker run -d --rm \
 停止（FE・BE 両方）：
 
 ```bash
-# フロントエンドコンテナを停止
+# フロントエンドコンテナを停止（docker run の --name に指定した名前に読み替える）
 docker stop go-shisha-frontend
 
 # バックエンド・DB を停止（プロジェクトルートで実行）
 docker compose down
 ```
+
+> **補足**: `--rm` フラグを付けて起動した場合、停止と同時にコンテナは自動削除されます。
 
 ### ローカル環境で直接実行する場合
 
