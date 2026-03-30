@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
     const backendUrl = process.env.BACKEND_URL;
     if (!backendUrl) {
       throw new Error(
-        "BACKEND_URL が設定されていません。環境変数または frontend/.env を確認してください。"
+        "BACKEND_URL が設定されていません。.env またはデプロイ環境の環境変数設定を確認してください。"
       );
     }
     return [
