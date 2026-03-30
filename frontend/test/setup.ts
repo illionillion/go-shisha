@@ -54,23 +54,7 @@ vi.mock("next/image", () => ({
   default: (props: ImageProps) => {
     const { src, alt, ...rest } = props;
     const srcStr = typeof src === "string" ? src : (src?.src ?? "");
-    let finalSrc = srcStr;
-    // If relative path and backend URL is set, mimic next/image loader encoding
-    const backend = process.env.NEXT_PUBLIC_BACKEND_URL;
-    if (typeof srcStr === "string") {
-      if (srcStr.startsWith("/")) {
-        if (backend) {
-          const joined = backend.replace(/\/$/, "") + srcStr;
-          finalSrc = encodeURIComponent(joined);
-        }
-      } else if (backend && srcStr.includes(backend)) {
-        // If getImageUrl already produced an absolute URL pointing to backend,
-        // mimic next/image's loader behavior by encoding it so tests expecting
-        // encoded backend URLs pass.
-        finalSrc = encodeURIComponent(srcStr);
-      }
-    }
-    return React.createElement("img", { src: finalSrc, alt, ...rest });
+    return React.createElement("img", { src: srcStr, alt, ...rest });
   },
 }));
 

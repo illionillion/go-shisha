@@ -152,10 +152,7 @@ describe("PostCard", () => {
     expect(img).toHaveAttribute("src", expect.stringContaining("placehold.co"));
   });
 
-  it("image_urlが相対パスの場合、NEXT_PUBLIC_BACKEND_URLが設定されていれば結合される", () => {
-    const originalEnv = process.env.NEXT_PUBLIC_BACKEND_URL;
-    process.env.NEXT_PUBLIC_BACKEND_URL = "http://localhost:8080";
-
+  it("image_urlが相対パスの場合、そのまま使用される", () => {
     const postWithRelativeImage = {
       ...mockPost,
       slides: [
@@ -170,20 +167,15 @@ describe("PostCard", () => {
     render(<PostCard post={postWithRelativeImage} onLike={onLike} />);
 
     const img = screen.getByAltText("今日のシーシャは最高でした！");
-    expect(img).toHaveAttribute("src", expect.stringContaining("localhost%3A8080"));
-
-    process.env.NEXT_PUBLIC_BACKEND_URL = originalEnv;
+    expect(img).toHaveAttribute("src", "/images/test.jpg");
   });
 
-  it("image_urlが相対パスの場合、NEXT_PUBLIC_BACKEND_URLが未設定ならフォールバック画像", () => {
-    const originalEnv = process.env.NEXT_PUBLIC_BACKEND_URL;
-    delete process.env.NEXT_PUBLIC_BACKEND_URL;
-
+  it("image_urlが相対パスで空の場合はフォールバック画像", () => {
     const postWithRelativeImage = {
       ...mockPost,
       slides: [
         {
-          image_url: "/images/test.jpg",
+          image_url: "",
           text: "今日のシーシャは最高でした！",
         },
       ],
@@ -194,8 +186,6 @@ describe("PostCard", () => {
 
     const img = screen.getByAltText("今日のシーシャは最高でした！");
     expect(img).toHaveAttribute("src", expect.stringContaining("placehold.co"));
-
-    process.env.NEXT_PUBLIC_BACKEND_URL = originalEnv;
   });
 
   it("image_urlが絶対パスの場合、そのまま使用される", () => {
