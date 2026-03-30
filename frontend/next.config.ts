@@ -32,7 +32,10 @@ const nextConfig: NextConfig = {
   // バックエンドAPIをプロキシして同一オリジン化（Cookie問題の解決）
   // /images/:path* も BACKEND_URL に転送することで、next/image の SSRF 制限を回避する
   async rewrites() {
-    const backendUrl = process.env.BACKEND_URL || "http://localhost:8080";
+    const backendUrl = process.env.BACKEND_URL;
+    if (!backendUrl) {
+      throw new Error("BACKEND_URL が設定されていません。frontend/.env を確認してください。");
+    }
     return [
       {
         source: "/api/v1/:path*",
