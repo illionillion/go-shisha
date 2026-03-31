@@ -1,0 +1,52 @@
+# ビルドコンテキスト: リポジトリルート
+# docker build -f Dockerfile.frontend.prod --target prod -t go-shisha-frontend-prod .
+
+# ---- deps: 依存関係インストール ----
+FROM node:22.12-alpine AS deps
+
+WORKDIR /app
+
+RUN npm i -g pnpm@9.15.0
+
+# ルートの lockfile・workspace 設定と frontend の package.json をコピー
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY frontend/package.json ./frontend/
+# --ignore-scripts で prepare（lefthook install）をスキップ
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+
+# ---- builder: Next.js ビルド ----
+FROM node:22.12-alpine AS builder
+
+WORKDIR /app
+
+RUN npm i -g pnpm@9.15.0
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/frontend/node_modules ./frontend/node_modules
+COPY . .
+
+RUN pnpm -F frontend build
+
+
+# ---- prod: 軽量本番イメージ（ECS Fargate 用） ----
+FROM node:22.12-alpine AS prod
+
+WORKDIR /app
+
+# 非rootユーザーで起動
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# pnpm monorepo では standalone 出力が standalone/frontend/server.js になる
+COPY --from=builder --chown=appuser:appgroup /app/frontend/.next/standalone ./
+COPY --from=builder --chown=appuser:appgroup /app/frontend/.next/static ./frontend/.next/static
+COPY --from=builder --chown=appuser:appgroup /app/frontend/public ./frontend/public
+
+USER appuser
+
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+EXPOSE 3000
+
+CMD ["node", "frontend/server.js"]
