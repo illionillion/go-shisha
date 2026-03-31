@@ -1,0 +1,34 @@
+# フロントエンド本番ビルド用 .dockerignore（ビルドコンテキスト: リポジトリルート）
+
+# バックエンドはフロントエンドビルドに不要
+backend/
+
+# ルートのビルド不要ファイル
+node_modules
+docs/
+scripts/
+.github/
+lefthook.yml
+tsconfig.json
+*.md
+
+# フロントエンドのビルド成果物・キャッシュ
+frontend/node_modules
+frontend/.next
+frontend/__image_snapshots__
+frontend/storybook-static
+frontend/coverage
+frontend/tsconfig.tsbuildinfo
+
+# フロントエンドのテスト・開発ツール設定
+frontend/test
+frontend/vitest.config.ts
+frontend/eslint.config.ts
+frontend/orval.config.ts
+frontend/compose.vrt.yml
+frontend/Dockerfile.vrt
+frontend/*.md
+
+# Git・ログ
+.git
+*.log

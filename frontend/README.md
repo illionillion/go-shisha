@@ -54,8 +54,8 @@ docker compose up
 > **コンテナ名について**: Docker Compose で起動したバックエンドのコンテナ名はプロジェクトのディレクトリ名に依存します（例: ディレクトリが `go-shisha-2` なら `go-shisha-2-backend-1`）。環境ごとに適宜読み替えてください。
 
 ```bash
-# frontend/ ディレクトリで実行
-docker build -f Dockerfile.prod --target prod -t go-shisha-frontend-prod .
+# リポジトリルートで実行
+docker build -f Dockerfile.frontend.prod --target prod -t go-shisha-frontend-prod .
 ```
 
 起動例（`BACKEND_URL` と `REDIRECT_SECRET` はランタイムにも必須）：
