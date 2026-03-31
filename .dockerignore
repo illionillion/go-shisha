@@ -29,9 +29,9 @@ frontend/compose.vrt.yml
 frontend/Dockerfile.vrt
 frontend/*.md
 
-# 機密情報（ルートの .env は COPY . . で含まれないよう除外）
-.env
-.env.*
+# 機密情報（ルート直下の .env のみ除外、frontend/.env はビルドで必要なため対象外）
+/.env
+/.env.*
 
 # Git・ログ
 .git
