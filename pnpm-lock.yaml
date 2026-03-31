@@ -11,13 +11,14 @@ overrides:
   undici: '>=6.24.0'
   yauzl: '>=3.2.1'
   node-polyfill-webpack-plugin: '>=4.1.0'
-  '@isaacs/brace-expansion@<=5.0.0': '>=5.0.1'
+  '@isaacs/brace-expansion@<=5.0.0': '>=5.0.5'
+  brace-expansion: '>=5.0.5'
   minimatch: '>=10.2.3'
   rollup: '>=4.59.0'
   bn.js: '>=5.2.3'
   ajv@<6.14.0: 6.14.0
   ajv@>=7.0.0-alpha.0 <8.18.0: 8.18.0
-  serialize-javascript: '>=7.0.3'
+  serialize-javascript: '>=7.0.5'
   fast-xml-parser: '>=5.5.7'
   handlebars: '>=4.7.9'
   picomatch@<2.3.2: 2.3.2
@@ -3068,8 +3069,8 @@ packages:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
     engines: {node: '>=8'}
 
-  brace-expansion@5.0.4:
-    resolution: {integrity: sha512-h+DEnpVvxmfVefa4jFbCf5HdH5YMDXRsmKflpf1pILZWRFlTbJpxeU55nJl4Smt5HQaGzg1o6RHFPJaOqnmBDg==}
+  brace-expansion@5.0.5:
+    resolution: {integrity: sha512-VZznLgtwhn+Mact9tfiwx64fA9erHH/MCXEUfB/0bX/6Fz6ny5EGTXYltMocqg4xFAQZtnO3DHWWXi8RiuN7cQ==}
     engines: {node: 18 || 20 || >=22}
 
   braces@3.0.3:
@@ -5864,8 +5865,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  serialize-javascript@7.0.4:
-    resolution: {integrity: sha512-DuGdB+Po43Q5Jxwpzt1lhyFSYKryqoNjQSA9M92tyw0lyHIOur+XCalOUe0KTJpyqzT8+fQ5A0Jf7vCx/NKmIg==}
+  serialize-javascript@7.0.5:
+    resolution: {integrity: sha512-F4LcB0UqUl1zErq+1nYEEzSHJnIwb3AF2XWB94b+afhrekOUijwooAYqFyRbjYkm2PAKBabx6oYv/xDxNi8IBw==}
     engines: {node: '>=20.0.0'}
 
   set-blocking@2.0.0:
@@ -9874,7 +9875,7 @@ snapshots:
 
   binary-extensions@2.3.0: {}
 
-  brace-expansion@5.0.4:
+  brace-expansion@5.0.5:
     dependencies:
       balanced-match: 4.0.4
 
@@ -12349,7 +12350,7 @@ snapshots:
 
   minimatch@10.2.4:
     dependencies:
-      brace-expansion: 5.0.4
+      brace-expansion: 5.0.5
 
   minimist@1.2.6: {}
 
@@ -13183,7 +13184,7 @@ snapshots:
 
   semver@7.7.4: {}
 
-  serialize-javascript@7.0.4: {}
+  serialize-javascript@7.0.5: {}
 
   set-blocking@2.0.0: {}
 
@@ -13626,7 +13627,7 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
       schema-utils: 4.3.3
-      serialize-javascript: 7.0.4
+      serialize-javascript: 7.0.5
       terser: 5.46.0
       webpack: 5.105.0(@swc/core@1.15.11)(esbuild@0.27.3)
     optionalDependencies:
