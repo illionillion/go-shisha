@@ -96,6 +96,7 @@ jobs:
     needs: [eslint, prettier, type_check]
     env:
       REDIRECT_SECRET: dummy-secret-for-build-only-not-used-in-runtime
+      BACKEND_URL: http://localhost:8080
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

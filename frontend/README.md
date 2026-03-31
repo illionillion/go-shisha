@@ -18,16 +18,14 @@ echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> .env
 
 **環境変数の説明:**
 
-| 変数名                    | 説明                                                | デフォルト値            | 必須 |
-| ------------------------- | --------------------------------------------------- | ----------------------- | ---- |
-| `NEXT_PUBLIC_BACKEND_URL` | バックエンドURL（画像などの公開URL）                | `http://localhost:8080` | ✅   |
-| `BACKEND_URL`             | Next.js rewrites用バックエンドURL（内部プロキシ先） | `http://localhost:8080` | ✅   |
-| `REDIRECT_SECRET`         | ログイン後リダイレクト先暗号化キー                  | -                       | ✅   |
+| 変数名            | 説明                                                                                                                   | デフォルト値            | 必須 |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------- | ---- |
+| `BACKEND_URL`     | Next.js rewrites用バックエンドURL（`/api/v1/:path*` および `/images/:path*` の転送先）。Dockerビルド前に書き換えること | `http://localhost:8080` | ✅   |
+| `REDIRECT_SECRET` | ログイン後リダイレクト先暗号化キー                                                                                     | -                       | ✅   |
 
 > **Codespacesで開発する場合**:
 >
 > - `BACKEND_URL`を`https://<workspace>-8080.app.github.dev`に変更してください
-> - `NEXT_PUBLIC_BACKEND_URL`も同様に`https://<workspace>-8080.app.github.dev`に変更してください（画像などの公開URLとして使用）
 
 > **注意**: プロジェクトルートの`.env`（Backend用）も別途必要です。詳細はルートの[README.md](../README.md)を参照してください。
 
@@ -42,6 +40,47 @@ docker compose up
 - Frontend: [http://localhost:3000](http://localhost:3000)
 - Backend: [http://localhost:8080](http://localhost:8080)
 - OpenAPI仕様の変更を自動検知してAPI型を再生成します
+
+### 本番イメージのビルド（ECS Fargate 用）
+
+`BACKEND_URL` は `rewrites()` の設定としてビルド時に焼き込まれ、また `api-client.ts` がサーバーサイドでランタイムに参照します。
+ビルド前に `.env` の `BACKEND_URL` をバックエンドのURLに変更してからビルドしてください。
+
+```bash
+# frontend/.env の BACKEND_URL を書き換える
+# 例: BACKEND_URL=http://<バックエンドコンテナ名>:8080
+```
+
+> **コンテナ名について**: Docker Compose で起動したバックエンドのコンテナ名はプロジェクトのディレクトリ名に依存します（例: ディレクトリが `go-shisha-2` なら `go-shisha-2-backend-1`）。環境ごとに適宜読み替えてください。
+
+```bash
+# frontend/ ディレクトリで実行
+docker build -f Dockerfile.prod --target prod -t go-shisha-frontend-prod .
+```
+
+起動例（`BACKEND_URL` と `REDIRECT_SECRET` はランタイムにも必須）：
+
+```bash
+docker run -d --rm \
+  --name go-shisha-frontend \
+  --network <プロジェクトディレクトリ名>_default \
+  -e BACKEND_URL=http://<バックエンドコンテナ名>:8080 \
+  -e REDIRECT_SECRET=<32バイト16進数> \
+  -p 3000:3000 \
+  go-shisha-frontend-prod
+```
+
+停止（FE・BE 両方）：
+
+```bash
+# フロントエンドコンテナを停止（docker run の --name に指定した名前に読み替える）
+docker stop go-shisha-frontend
+
+# バックエンド・DB を停止（プロジェクトルートで実行）
+docker compose down
+```
+
+> **補足**: `--rm` フラグを付けて起動した場合、停止と同時にコンテナは自動削除されます。
 
 ### ローカル環境で直接実行する場合
 
