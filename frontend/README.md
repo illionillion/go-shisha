@@ -55,7 +55,7 @@ docker compose up
 
 **ローカルでビルドする場合：**
 
-`.env.local` に `BACKEND_URL` を設定するか、`--build-arg` で直接渡します。
+`frontend/.env.local` はビルドコンテキストから除外されるため、`--build-arg BACKEND_URL=...` の指定が必須です。
 
 ```bash
 # リポジトリルートで実行
