@@ -199,12 +199,12 @@ echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env.local
 | `FRONTEND_URL` | フロントエンドURL（CORS設定用） | `http://localhost:3000` | ✅ |
 | `JWT_SECRET` | JWT認証用シークレットキー（64文字以上） | - | ✅ |
 
-**frontend/.env.local (Frontend用機密情報)**
+**frontend/.env.local (Frontend用ローカル設定・機密情報を含み得る)**
 | 変数名 | 説明 | 必須 |
 |--------|------|------|
 | `REDIRECT_SECRET` | ログイン後リダイレクト先暗号化キー | ✅ |
 
-> `BACKEND_URL` はデフォルト値（`http://localhost:8080`）が `frontend/.env.development` に git 管理されているため、ローカル開発では設定不要です。
+> `BACKEND_URL` はデフォルト値（`http://localhost:8080`）が `frontend/.env.development` に git 管理されているため、ローカル開発では設定不要です。Codespaces 等の環境では `.env.local` で上書きしてください。
 
 > **注意**: `JWT_SECRET`と`REDIRECT_SECRET`は**本番環境では必ずランダムな値に変更**してください。
 
