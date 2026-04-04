@@ -25,10 +25,10 @@ echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> .env.local
 
 **環境変数の説明:**
 
-| 変数名            | ファイル           | 説明                               | 必須 |
-| ----------------- | ------------------ | ---------------------------------- | ---- |
-| `BACKEND_URL`     | `.env.development` | `pnpm dev` 時のバックエンドURL     | ✅   |
-| `REDIRECT_SECRET` | `.env.local`       | ログイン後リダイレクト先暗号化キー | ✅   |
+| 変数名            | ファイル                           | 説明                                                                   | 必須 |
+| ----------------- | ---------------------------------- | ---------------------------------------------------------------------- | ---- |
+| `BACKEND_URL`     | `.env.development` / `--build-arg` | バックエンドURL（dev: `.env.development`、本番: `--build-arg` で渡す） | ✅   |
+| `REDIRECT_SECRET` | `.env.local`                       | ログイン後リダイレクト先暗号化キー                                     | ✅   |
 
 > **Codespacesで開発する場合**:
 >
