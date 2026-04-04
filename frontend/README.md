@@ -16,21 +16,19 @@
 
 **セットアップ手順（ローカル開発）：**
 
-```bash
-# frontend/.env.local.example をコピー
-cp .env.local.example .env.local
+`.env.development` に必要な変数とコメントが記載されています。機密情報のみ `.env.local` に設定してください。
 
-# REDIRECT_SECRET にランダムな値を設定
-echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> .env.local
+```bash
+# REDIRECT_SECRET を生成して .env.local に追加
+echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env.local
 ```
 
 **環境変数の説明:**
 
-| 変数名            | ファイル                         | 説明                                | 必須 |
-| ----------------- | -------------------------------- | ----------------------------------- | ---- |
-| `BACKEND_URL`     | `.env.development`               | `pnpm dev` 時のバックエンドURL      | ✅   |
-| `BACKEND_URL`     | `.env.local`（本番ビルド時のみ） | Docker本番ビルド時のバックエンドURL | ✅   |
-| `REDIRECT_SECRET` | `.env.local`                     | ログイン後リダイレクト先暗号化キー  | ✅   |
+| 変数名            | ファイル           | 説明                               | 必須 |
+| ----------------- | ------------------ | ---------------------------------- | ---- |
+| `BACKEND_URL`     | `.env.development` | `pnpm dev` 時のバックエンドURL     | ✅   |
+| `REDIRECT_SECRET` | `.env.local`       | ログイン後リダイレクト先暗号化キー | ✅   |
 
 > **Codespacesで開発する場合**:
 >
