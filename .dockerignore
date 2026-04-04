@@ -32,6 +32,9 @@ frontend/*.md
 # 機密情報（ルート直下の .env のみ除外、frontend/.env はビルドで必要なため対象外）
 /.env
 /.env.*
+# .env.local はローカルの機密情報を含むためビルドコンテキストから除外
+frontend/.env.local
+frontend/.env.*.local
 
 # Git・ログ
 .git

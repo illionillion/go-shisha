@@ -19,8 +19,8 @@
 `.env.development` に必要な変数とコメントが記載されています。機密情報のみ `.env.local` に設定してください。
 
 ```bash
-# REDIRECT_SECRET を生成して .env.local に追加
-echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env.local
+# frontend/ ディレクトリで実行
+echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> .env.local
 ```
 
 **環境変数の説明:**
