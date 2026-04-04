@@ -71,7 +71,7 @@ docker build \
 
 CI の Secrets に `BACKEND_URL` を設定し、`--build-arg` で渡します。
 
-起動例（`REDIRECT_SECRET` はランタイムのみで渡す）：
+起動例（`BACKEND_URL` と `REDIRECT_SECRET` はランタイムで渡す）：
 
 ```bash
 docker run -d --rm \
