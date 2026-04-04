@@ -7,7 +7,7 @@ import (
 )
 
 type testExternalURLStruct struct {
-	ExternalURL string `validate:"omitempty,externalurl"`
+	ExternalURL *string `validate:"omitempty,externalurl"`
 }
 
 func TestValidateExternalURL(t *testing.T) {
@@ -17,24 +17,27 @@ func TestValidateExternalURL(t *testing.T) {
 		t.Fatalf("failed to register validation: %v", err)
 	}
 
+	strPtr := func(s string) *string { return &s }
+
 	tests := []struct {
 		name      string
-		url       string
+		url       *string
 		wantValid bool
 	}{
 		// 有効なケース
-		{name: "HTTPS URL", url: "https://example.com/profile", wantValid: true},
-		{name: "HTTP URL", url: "http://example.com/", wantValid: true},
-		{name: "空文字列（省略）", url: "", wantValid: true},
+		{name: "HTTPS URL", url: strPtr("https://example.com/profile"), wantValid: true},
+		{name: "HTTP URL", url: strPtr("http://example.com/"), wantValid: true},
+		{name: "空文字列（クリア用途）", url: strPtr(""), wantValid: true},
+		{name: "nil（フィールド省略）", url: nil, wantValid: true},
 		// 無効なケース
-		{name: "javascript: スキーム", url: "javascript:alert(1)", wantValid: false},
-		{name: "data: スキーム", url: "data:text/html,<script>alert(1)</script>", wantValid: false},
-		{name: "file: スキーム", url: "file:///etc/passwd", wantValid: false},
-		{name: "vbscript: スキーム", url: "vbscript:msgbox(1)", wantValid: false},
-		{name: "相対パス", url: "/profile/123", wantValid: false},
-		{name: "先頭に空白", url: " https://example.com", wantValid: false},
-		{name: "末尾に空白", url: "https://example.com ", wantValid: false},
-		{name: "スキームなし", url: "example.com", wantValid: false},
+		{name: "javascript: スキーム", url: strPtr("javascript:alert(1)"), wantValid: false},
+		{name: "data: スキーム", url: strPtr("data:text/html,<script>alert(1)</script>"), wantValid: false},
+		{name: "file: スキーム", url: strPtr("file:///etc/passwd"), wantValid: false},
+		{name: "vbscript: スキーム", url: strPtr("vbscript:msgbox(1)"), wantValid: false},
+		{name: "相対パス", url: strPtr("/profile/123"), wantValid: false},
+		{name: "先頭に空白", url: strPtr(" https://example.com"), wantValid: false},
+		{name: "末尾に空白", url: strPtr("https://example.com "), wantValid: false},
+		{name: "スキームなし", url: strPtr("example.com"), wantValid: false},
 	}
 
 	for _, tt := range tests {
@@ -43,7 +46,7 @@ func TestValidateExternalURL(t *testing.T) {
 			e := v.Struct(ts)
 			isValid := e == nil
 			if isValid != tt.wantValid {
-				t.Errorf("ValidateExternalURL(%q) = %v, want %v (error: %v)",
+				t.Errorf("ValidateExternalURL(%v) = %v, want %v (error: %v)",
 					tt.url, isValid, tt.wantValid, e)
 			}
 		})
