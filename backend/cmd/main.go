@@ -194,6 +194,7 @@ func main() {
 		api.GET("/users", userHandler.GetAllUsers)
 		api.GET("/users/:id", userHandler.GetUser)
 		api.GET("/users/:id/posts", middleware.OptionalAuthMiddleware(), userHandler.GetUserPosts)
+		api.PATCH("/users/me", middleware.AuthMiddleware(), userHandler.UpdateMe)
 
 		// Flavors endpoints
 		api.GET("/flavors", flavorHandler.GetAllFlavors)

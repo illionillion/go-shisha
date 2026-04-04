@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -15,9 +16,10 @@ import (
 
 // mockUserService はテスト用の UserService モック
 type mockUserService struct {
-	getAllUsersFunc  func() ([]models.User, error)
-	getUserByIDFunc  func(id int) (*models.User, error)
-	getUserPostsFunc func(userID int, currentUserID *int) ([]models.Post, error)
+	getAllUsersFunc      func() ([]models.User, error)
+	getUserByIDFunc      func(id int) (*models.User, error)
+	getUserPostsFunc     func(userID int, currentUserID *int) ([]models.Post, error)
+	updateMyProfileFunc  func(userID int, input models.UpdateUserInput) (*models.User, error)
 }
 
 func (m *mockUserService) GetAllUsers() ([]models.User, error) {
@@ -37,6 +39,13 @@ func (m *mockUserService) GetUserByID(id int) (*models.User, error) {
 func (m *mockUserService) GetUserPosts(userID int, currentUserID *int) ([]models.Post, error) {
 	if m.getUserPostsFunc != nil {
 		return m.getUserPostsFunc(userID, currentUserID)
+	}
+	return nil, nil
+}
+
+func (m *mockUserService) UpdateMyProfile(userID int, input models.UpdateUserInput) (*models.User, error) {
+	if m.updateMyProfileFunc != nil {
+		return m.updateMyProfileFunc(userID, input)
 	}
 	return nil, nil
 }
@@ -312,4 +321,122 @@ func TestGetUserPosts_WithAuthContext(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.NotNil(t, capturedCurrentUserID)
 	assert.Equal(t, 42, *capturedCurrentUserID)
+}
+
+// --- UpdateMe ---
+
+func TestUpdateMe_Success(t *testing.T) {
+gin.SetMode(gin.TestMode)
+
+name := "New Name"
+desc := "New description"
+mockService := &mockUserService{
+updateMyProfileFunc: func(userID int, input models.UpdateUserInput) (*models.User, error) {
+return &models.User{
+ID:          userID,
+DisplayName: *input.DisplayName,
+Description: *input.Description,
+Email:       "test@example.com",
+}, nil
+},
+}
+handler := NewUserHandler(mockService)
+
+router := gin.New()
+router.PATCH("/users/me", func(c *gin.Context) {
+c.Set("user_id", 1)
+handler.UpdateMe(c)
+})
+
+body, _ := json.Marshal(map[string]string{
+"display_name": name,
+"description":  desc,
+})
+req := httptest.NewRequest(http.MethodPatch, "/users/me", bytes.NewReader(body))
+req.Header.Set("Content-Type", "application/json")
+rec := httptest.NewRecorder()
+router.ServeHTTP(rec, req)
+
+assert.Equal(t, http.StatusOK, rec.Code)
+var response models.User
+err := json.Unmarshal(rec.Body.Bytes(), &response)
+assert.NoError(t, err)
+assert.Equal(t, 1, response.ID)
+assert.Equal(t, name, response.DisplayName)
+assert.Equal(t, desc, response.Description)
+}
+
+func TestUpdateMe_Unauthorized(t *testing.T) {
+gin.SetMode(gin.TestMode)
+
+mockService := &mockUserService{}
+handler := NewUserHandler(mockService)
+
+router := gin.New()
+router.PATCH("/users/me", handler.UpdateMe)
+
+body, _ := json.Marshal(map[string]string{"display_name": "Name"})
+req := httptest.NewRequest(http.MethodPatch, "/users/me", bytes.NewReader(body))
+req.Header.Set("Content-Type", "application/json")
+rec := httptest.NewRecorder()
+router.ServeHTTP(rec, req)
+
+assert.Equal(t, http.StatusUnauthorized, rec.Code)
+var response models.UnauthorizedError
+err := json.Unmarshal(rec.Body.Bytes(), &response)
+assert.NoError(t, err)
+assert.Equal(t, models.ErrCodeUnauthorized, response.Error)
+}
+
+func TestUpdateMe_InvalidBody(t *testing.T) {
+gin.SetMode(gin.TestMode)
+
+mockService := &mockUserService{}
+handler := NewUserHandler(mockService)
+
+router := gin.New()
+router.PATCH("/users/me", func(c *gin.Context) {
+c.Set("user_id", 1)
+handler.UpdateMe(c)
+})
+
+req := httptest.NewRequest(http.MethodPatch, "/users/me", bytes.NewReader([]byte(`invalid json`)))
+req.Header.Set("Content-Type", "application/json")
+rec := httptest.NewRecorder()
+router.ServeHTTP(rec, req)
+
+assert.Equal(t, http.StatusBadRequest, rec.Code)
+var response models.ValidationError
+err := json.Unmarshal(rec.Body.Bytes(), &response)
+assert.NoError(t, err)
+assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
+func TestUpdateMe_ServerError(t *testing.T) {
+gin.SetMode(gin.TestMode)
+
+mockService := &mockUserService{
+updateMyProfileFunc: func(userID int, input models.UpdateUserInput) (*models.User, error) {
+return nil, assert.AnError
+},
+}
+handler := NewUserHandler(mockService)
+
+router := gin.New()
+router.PATCH("/users/me", func(c *gin.Context) {
+c.Set("user_id", 1)
+handler.UpdateMe(c)
+})
+
+body, _ := json.Marshal(map[string]string{"display_name": "Name"})
+req := httptest.NewRequest(http.MethodPatch, "/users/me", bytes.NewReader(body))
+req.Header.Set("Content-Type", "application/json")
+rec := httptest.NewRecorder()
+router.ServeHTTP(rec, req)
+
+assert.Equal(t, http.StatusInternalServerError, rec.Code)
+var response models.ServerError
+err := json.Unmarshal(rec.Body.Bytes(), &response)
+assert.NoError(t, err)
+assert.Equal(t, models.ErrCodeInternalServer, response.Error)
 }

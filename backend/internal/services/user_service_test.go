@@ -24,6 +24,10 @@ func (m *mockUserRepo) GetByID(id int) (*models.User, error) {
 	return nil, nil
 }
 
+func (m *mockUserRepo) Update(id int, input models.UpdateUserInput) (*models.User, error) {
+	return &models.User{ID: id}, nil
+}
+
 type noopPostRepo struct{}
 
 func (n *noopPostRepo) GetAll(userID *int) ([]models.Post, error)         { return nil, nil }
@@ -74,6 +78,9 @@ type mockUserRepoError struct{}
 
 func (m *mockUserRepoError) GetAll() ([]models.User, error)       { return nil, errors.New("db error") }
 func (m *mockUserRepoError) GetByID(id int) (*models.User, error) { return nil, errors.New("db error") }
+func (m *mockUserRepoError) Update(id int, input models.UpdateUserInput) (*models.User, error) {
+	return nil, errors.New("db error")
+}
 
 func TestGetAllUsers_Error(t *testing.T) {
 	svc := NewUserService(&mockUserRepoError{}, &noopPostRepo{})

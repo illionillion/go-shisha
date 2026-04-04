@@ -24,4 +24,7 @@ type UserRepository interface {
 
 	// GetByID returns a user by ID
 	GetByID(id int) (*models.User, error)
+
+	// Update は指定ユーザーのプロフィール情報を更新して最新のユーザーを返す
+	Update(id int, input models.UpdateUserInput) (*models.User, error)
 }
