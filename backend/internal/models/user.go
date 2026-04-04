@@ -51,8 +51,8 @@ type UpdateUserInput struct {
 	DisplayName *string `json:"display_name"`
 	// 自己紹介文（省略可）
 	Description *string `json:"description"`
-	// 外部URL（省略可）
-	ExternalURL *string `json:"external_url"`
+	// 外部URL（省略可、http(s)://...のみ許可）
+	ExternalURL *string `json:"external_url" binding:"omitempty,externalurl"`
 	// アイコン画像URL（省略可、/images/... または http(s)://...）
 	IconURL *string `json:"icon_url" binding:"omitempty,imageurl"`
 }

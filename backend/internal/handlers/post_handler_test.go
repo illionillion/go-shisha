@@ -24,6 +24,7 @@ func init() {
 	// テスト用にカスタムバリデータを登録
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("imageurl", validation.ValidateImageURL)
+		_ = v.RegisterValidation("externalurl", validation.ValidateExternalURL)
 	}
 }
 

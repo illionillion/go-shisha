@@ -1237,7 +1237,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "external_url": {
-                    "description": "外部URL（省略可）",
+                    "description": "外部URL（省略可、http(s)://...のみ許可）",
                     "type": "string"
                 },
                 "icon_url": {

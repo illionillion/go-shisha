@@ -172,6 +172,11 @@ func (h *UserHandler) UpdateMe(c *gin.Context) {
 
 	user, err := h.userService.UpdateMyProfile(userID, input)
 	if err != nil {
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			logging.L.Warn("user not found while updating own profile", "handler", "UserHandler", "method", "UpdateMe", "user_id", userID, "error", err)
+			c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
+			return
+		}
 		logging.L.Error("failed to update user profile", "handler", "UserHandler", "method", "UpdateMe", "user_id", userID, "error", err)
 		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
 		return
