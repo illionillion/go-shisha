@@ -6,26 +6,33 @@
 
 ### 環境変数の設定
 
-**Frontend専用の環境変数**を設定します。
+環境変数は役割ごとにファイルを分けて管理します。
+
+| ファイル           | git管理 | 読み込まれるタイミング              | 用途                                              |
+| ------------------ | ------- | ----------------------------------- | ------------------------------------------------- |
+| `.env.development` | ✅      | `pnpm dev`（NODE_ENV=development）  | ローカル開発のデフォルト値                        |
+| `.env.production`  | ✅      | `next build`（NODE_ENV=production） | 本番ビルド時の設定（BACKEND_URLは意図的に未設定） |
+| `.env.local`       | ❌      | 常に読み込み（両環境で上書き）      | 機密情報・個人環境の値                            |
+
+**セットアップ手順（ローカル開発）：**
+
+`.env.development` に必要な変数とコメントが記載されています。機密情報や環境別の上書き値は `.env.local` で管理してください（gitignore対象）。
 
 ```bash
-# frontend/.env.exampleをコピー
-cp .env.example .env
-
-# REDIRECT_SECRETにランダムな値を設定（32バイトの16進数）
-echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> .env
+# frontend/ ディレクトリで実行
+echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> .env.local
 ```
 
 **環境変数の説明:**
 
-| 変数名            | 説明                                                                                                                   | デフォルト値            | 必須 |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------- | ---- |
-| `BACKEND_URL`     | Next.js rewrites用バックエンドURL（`/api/v1/:path*` および `/images/:path*` の転送先）。Dockerビルド前に書き換えること | `http://localhost:8080` | ✅   |
-| `REDIRECT_SECRET` | ログイン後リダイレクト先暗号化キー                                                                                     | -                       | ✅   |
+| 変数名            | ファイル                           | 説明                                                                   | 必須 |
+| ----------------- | ---------------------------------- | ---------------------------------------------------------------------- | ---- |
+| `BACKEND_URL`     | `.env.development` / `--build-arg` | バックエンドURL（dev: `.env.development`、本番: `--build-arg` で渡す） | ✅   |
+| `REDIRECT_SECRET` | `.env.local`                       | ログイン後リダイレクト先暗号化キー                                     | ✅   |
 
 > **Codespacesで開発する場合**:
 >
-> - `BACKEND_URL`を`https://<workspace>-8080.app.github.dev`に変更してください
+> `.env.local` に `BACKEND_URL=https://<workspace>-8080.app.github.dev` を追加してください。
 
 > **注意**: プロジェクトルートの`.env`（Backend用）も別途必要です。詳細はルートの[README.md](../README.md)を参照してください。
 
@@ -44,21 +51,27 @@ docker compose up
 ### 本番イメージのビルド（ECS Fargate 用）
 
 `BACKEND_URL` は `rewrites()` の設定としてビルド時に焼き込まれ、また `api-client.ts` がサーバーサイドでランタイムに参照します。
-ビルド前に `.env` の `BACKEND_URL` をバックエンドのURLに変更してからビルドしてください。
+`.env.production` では `BACKEND_URL` を意図的に未設定にしているため、`--build-arg` で渡さないとビルドエラーになります。
+
+**ローカルでビルドする場合：**
+
+`frontend/.env.local` はビルドコンテキストから除外されるため、`--build-arg BACKEND_URL=...` の指定が必須です。
 
 ```bash
-# frontend/.env の BACKEND_URL を書き換える
-# 例: BACKEND_URL=http://<バックエンドコンテナ名>:8080
+# リポジトリルートで実行
+docker build \
+  --build-arg BACKEND_URL=http://<バックエンドコンテナ名>:8080 \
+  -f Dockerfile.frontend.prod --target prod \
+  -t go-shisha-frontend-prod .
 ```
 
 > **コンテナ名について**: Docker Compose で起動したバックエンドのコンテナ名はプロジェクトのディレクトリ名に依存します（例: ディレクトリが `go-shisha-2` なら `go-shisha-2-backend-1`）。環境ごとに適宜読み替えてください。
 
-```bash
-# リポジトリルートで実行
-docker build -f Dockerfile.frontend.prod --target prod -t go-shisha-frontend-prod .
-```
+**CI/CD（GitHub Actions 等）でビルドする場合：**
 
-起動例（`BACKEND_URL` と `REDIRECT_SECRET` はランタイムにも必須）：
+CI の Secrets に `BACKEND_URL` を設定し、`--build-arg` で渡します。
+
+起動例（`BACKEND_URL` と `REDIRECT_SECRET` はランタイムで渡す）：
 
 ```bash
 docker run -d --rm \

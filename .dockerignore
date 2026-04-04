@@ -29,9 +29,14 @@ frontend/compose.vrt.yml
 frontend/Dockerfile.vrt
 frontend/*.md
 
-# 機密情報（ルート直下の .env のみ除外、frontend/.env はビルドで必要なため対象外）
+# 機密情報の除外
+# ルート直下の .env 系（DB接続情報・JWT_SECRET 等）
 /.env
 /.env.*
+# frontend の .env.local 系（REDIRECT_SECRET 等）はビルドコンテキストから除外
+# .env.development / .env.production はコミット対象のため除外しない
+frontend/.env.local
+frontend/.env.*.local
 
 # Git・ログ
 .git
