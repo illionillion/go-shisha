@@ -131,9 +131,9 @@ cd go-shisha
 
 # 2. 環境変数を一括セットアップ（ルート + Frontend）
 cp .env.example .env
-cp frontend/.env.example frontend/.env
 echo "JWT_SECRET=$(openssl rand -base64 64 | tr -d '\n')" >> .env
-echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env
+# frontend/.env.development は git 管理済みのため BACKEND_URL の設定不要
+echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env.local
 
 # 3. 依存関係をインストール
 pnpm install
@@ -178,11 +178,9 @@ echo "JWT_SECRET=$(openssl rand -base64 64 | tr -d '\n')" >> .env
 
 ##### Frontend環境変数
 ```bash
-# frontend/.env.exampleをコピー
-cp frontend/.env.example frontend/.env
-
-# REDIRECT_SECRETにランダムな値を設定（32バイトの16進数）
-echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env
+# frontend/.env.development は git 管理済みのため BACKEND_URL の設定不要
+# REDIRECT_SECRET のみ .env.local に設定
+echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env.local
 ```
 
 **環境変数の説明:**
@@ -201,11 +199,12 @@ echo "REDIRECT_SECRET=$(openssl rand -hex 32)" >> frontend/.env
 | `FRONTEND_URL` | フロントエンドURL（CORS設定用） | `http://localhost:3000` | ✅ |
 | `JWT_SECRET` | JWT認証用シークレットキー（64文字以上） | - | ✅ |
 
-**frontend/.env (Frontend用)**
-| 変数名 | 説明 | デフォルト値 | 必須 |
-|--------|------|--------------|------|
-| `BACKEND_URL` | Next.js rewrites用バックエンドURL（`/api/v1` および `/images` の転送先）。ビルド時に焼き込まれ、ランタイムにもサーバーサイドAPIが参照 | `http://localhost:8080` | ✅ |
-| `REDIRECT_SECRET` | ログイン後リダイレクト先暗号化キー | - | ✅ |
+**frontend/.env.local (Frontend用機密情報)**
+| 変数名 | 説明 | 必須 |
+|--------|------|------|
+| `REDIRECT_SECRET` | ログイン後リダイレクト先暗号化キー | ✅ |
+
+> `BACKEND_URL` はデフォルト値（`http://localhost:8080`）が `frontend/.env.development` に git 管理されているため、ローカル開発では設定不要です。
 
 > **注意**: `JWT_SECRET`と`REDIRECT_SECRET`は**本番環境では必ずランダムな値に変更**してください。
 
@@ -235,12 +234,12 @@ pnpm dev
 #### トラブルシューティング
 
 **環境変数が反映されない場合**
-- `.env`ファイルと`frontend/.env`ファイルが存在することを確認
+- `.env`ファイルと`frontend/.env.local`ファイルが存在することを確認
 - Docker環境の場合は`docker compose down`後に再度`docker compose up -d`
 
 **ポート競合が発生した場合**
 - `.env`の`BACKEND_PORT`を変更（例: `8081`）
-- `frontend/.env`の`BACKEND_URL`も合わせて変更
+- `frontend/.env.local`に`BACKEND_URL=http://localhost:<変更後ポート>`を追加
 
 ### 開発コマンド
 
