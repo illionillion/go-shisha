@@ -158,5 +158,11 @@ func (r *UserRepository) Update(id int, input models.UpdateUserInput) (*models.U
 		}
 	}
 
-	return r.GetByID(id)
+	user, err := r.GetByID(id)
+	if err != nil {
+		logging.L.Error("failed to fetch user after update", "repository", "UserRepository", "method", "Update", "user_id", id, "error", err)
+		return nil, fmt.Errorf("failed to fetch user after update id=%d: %w", id, err)
+	}
+	logging.L.Info("user profile updated", "repository", "UserRepository", "method", "Update", "user_id", id)
+	return user, nil
 }

@@ -165,6 +165,7 @@ func (h *UserHandler) UpdateMe(c *gin.Context) {
 
 	var input models.UpdateUserInput
 	if err := c.ShouldBindJSON(&input); err != nil {
+		logging.L.Warn("invalid request body", "handler", "UserHandler", "method", "UpdateMe", "user_id", userID, "error", err)
 		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 		return
 	}
