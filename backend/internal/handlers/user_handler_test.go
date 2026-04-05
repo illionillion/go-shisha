@@ -440,3 +440,84 @@ func TestUpdateMe_ServerError(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, models.ErrCodeInternalServer, response.Error)
 }
+
+func TestUpdateMe_EmptyBody(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockUserService{
+		updateMyProfileFunc: func(userID int, input models.UpdateUserInput) (*models.User, error) {
+			return &models.User{
+				ID:    userID,
+				Email: "test@example.com",
+			}, nil
+		},
+	}
+	handler := NewUserHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/users/me", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdateMe(c)
+	})
+
+	req := httptest.NewRequest(http.MethodPatch, "/users/me", bytes.NewReader([]byte(`{}`)))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	var response models.User
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, 1, response.ID)
+}
+
+func TestUpdateMe_InvalidExternalURL(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockUserService{}
+	handler := NewUserHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/users/me", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdateMe(c)
+	})
+
+	body, _ := json.Marshal(map[string]string{"external_url": "javascript:alert(1)"})
+	req := httptest.NewRequest(http.MethodPatch, "/users/me", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
+func TestUpdateMe_InvalidIconURL(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	mockService := &mockUserService{}
+	handler := NewUserHandler(mockService)
+
+	router := gin.New()
+	router.PATCH("/users/me", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UpdateMe(c)
+	})
+
+	body, _ := json.Marshal(map[string]string{"icon_url": "javascript:evil()"})
+	req := httptest.NewRequest(http.MethodPatch, "/users/me", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	var response models.ValidationError
+	err := json.Unmarshal(rec.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
