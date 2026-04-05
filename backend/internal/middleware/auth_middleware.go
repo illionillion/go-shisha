@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"go-shisha-backend/internal/models"
 	"go-shisha-backend/pkg/auth"
 	"go-shisha-backend/pkg/logging"
 
@@ -35,7 +36,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			logging.L.Warn("no access token provided",
 				"middleware", "AuthMiddleware",
 				"path", c.Request.URL.Path)
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "authorization required"})
+			c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
 			c.Abort()
 			return
 		}
@@ -46,7 +47,7 @@ func AuthMiddleware() gin.HandlerFunc {
 				"middleware", "AuthMiddleware",
 				"path", c.Request.URL.Path,
 				"error", err)
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired token"})
+			c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
 			c.Abort()
 			return
 		}

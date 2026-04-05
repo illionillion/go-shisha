@@ -32,8 +32,9 @@ func ValidateExternalURL(fl validator.FieldLevel) bool {
 		return true
 	}
 
-	// HTTP(S) URLのみ許可する。
-	if strings.HasPrefix(externalURL, "http://") || strings.HasPrefix(externalURL, "https://") {
+	// HTTP(S) URLのみ許可する（スキームは大文字小文字を区別しない）。
+	normalizedURL := strings.ToLower(externalURL)
+	if strings.HasPrefix(normalizedURL, "http://") || strings.HasPrefix(normalizedURL, "https://") {
 		return true
 	}
 
