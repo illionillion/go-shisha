@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"net/url"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -9,7 +10,7 @@ import (
 // ValidateExternalURL は外部URLを検証する。
 // 許可:
 //   - 空文字列（URLのクリア/未設定用途として許可）
-//   - http:// または https:// で始まるURL
+//   - http:// または https:// で始まるURL（スキームは大文字小文字を区別しない）
 //
 // 禁止:
 //   - javascript:, data:, file:, vbscript:, about: などの危険なスキーム（XSS/SSRF対策）
@@ -32,11 +33,12 @@ func ValidateExternalURL(fl validator.FieldLevel) bool {
 		return true
 	}
 
-	// HTTP(S) URLのみ許可する（スキームは大文字小文字を区別しない）。
-	normalizedURL := strings.ToLower(externalURL)
-	if strings.HasPrefix(normalizedURL, "http://") || strings.HasPrefix(normalizedURL, "https://") {
-		return true
+	// url.Parse でスキームを取得し、大文字小文字を区別せず http/https のみ許可する。
+	// これにより、パスやクエリパラメータを変更せずにスキームのみを正規化できる。
+	u, err := url.Parse(externalURL)
+	if err != nil {
+		return false
 	}
-
-	return false
+	scheme := strings.ToLower(u.Scheme)
+	return scheme == "http" || scheme == "https"
 }

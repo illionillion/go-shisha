@@ -20,8 +20,12 @@ import (
 func init() {
 	// このファイルのテストで使用するカスタムバリデータを登録
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		_ = v.RegisterValidation("imageurl", validation.ValidateImageURL)
-		_ = v.RegisterValidation("externalurl", validation.ValidateExternalURL)
+		if err := v.RegisterValidation("imageurl", validation.ValidateImageURL); err != nil {
+			panic(err)
+		}
+		if err := v.RegisterValidation("externalurl", validation.ValidateExternalURL); err != nil {
+			panic(err)
+		}
 	}
 }
 
