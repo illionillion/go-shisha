@@ -9,25 +9,10 @@ import (
 
 	"go-shisha-backend/internal/models"
 	"go-shisha-backend/internal/repositories"
-	"go-shisha-backend/pkg/validation"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/assert"
 )
-
-func init() {
-	// このファイルのテストで使用するカスタムバリデータを登録
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		if err := v.RegisterValidation("imageurl", validation.ValidateImageURL); err != nil {
-			panic(err)
-		}
-		if err := v.RegisterValidation("externalurl", validation.ValidateExternalURL); err != nil {
-			panic(err)
-		}
-	}
-}
 
 // mockUserService はテスト用の UserService モック
 type mockUserService struct {

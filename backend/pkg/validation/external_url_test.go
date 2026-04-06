@@ -38,6 +38,8 @@ func TestValidateExternalURL(t *testing.T) {
 		{name: "先頭に空白", url: strPtr(" https://example.com"), wantValid: false},
 		{name: "末尾に空白", url: strPtr("https://example.com "), wantValid: false},
 		{name: "スキームなし", url: strPtr("example.com"), wantValid: false},
+		{name: "http://なし（不完全なURL）", url: strPtr("http:example.com"), wantValid: false},
+		{name: "https://なし（不完全なURL）", url: strPtr("https:example.com"), wantValid: false},
 	}
 
 	for _, tt := range tests {
