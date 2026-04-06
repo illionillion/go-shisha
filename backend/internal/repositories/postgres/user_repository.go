@@ -127,3 +127,42 @@ func (r *UserRepository) Create(user *models.User) error {
 		"email", user.Email)
 	return nil
 }
+
+// Update は指定ユーザーのプロフィール情報を更新して最新のユーザーを返す
+func (r *UserRepository) Update(id int, input models.UpdateUserInput) (*models.User, error) {
+	logging.L.Debug("updating user profile", "repository", "UserRepository", "method", "Update", "user_id", id)
+
+	updates := map[string]interface{}{}
+	if input.DisplayName != nil {
+		updates["display_name"] = *input.DisplayName
+	}
+	if input.Description != nil {
+		updates["description"] = *input.Description
+	}
+	if input.ExternalURL != nil {
+		updates["external_url"] = *input.ExternalURL
+	}
+	if input.IconURL != nil {
+		updates["icon_url"] = *input.IconURL
+	}
+
+	if len(updates) > 0 {
+		result := r.db.Model(&userModel{}).Where("id = ?", id).Updates(updates)
+		if result.Error != nil {
+			logging.L.Error("failed to update user", "repository", "UserRepository", "method", "Update", "user_id", id, "error", result.Error)
+			return nil, fmt.Errorf("failed to update user id=%d: %w", id, result.Error)
+		}
+		if result.RowsAffected == 0 {
+			logging.L.Debug("user not found for update", "repository", "UserRepository", "method", "Update", "user_id", id)
+			return nil, repositories.ErrUserNotFound
+		}
+		logging.L.Info("user profile updated", "repository", "UserRepository", "method", "Update", "user_id", id)
+	}
+
+	user, err := r.GetByID(id)
+	if err != nil {
+		logging.L.Error("failed to fetch user after update", "repository", "UserRepository", "method", "Update", "user_id", id, "error", err)
+		return nil, fmt.Errorf("failed to fetch user after update id=%d: %w", id, err)
+	}
+	return user, nil
+}

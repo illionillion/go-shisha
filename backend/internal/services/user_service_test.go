@@ -24,6 +24,10 @@ func (m *mockUserRepo) GetByID(id int) (*models.User, error) {
 	return nil, nil
 }
 
+func (m *mockUserRepo) Update(id int, input models.UpdateUserInput) (*models.User, error) {
+	return &models.User{ID: id}, nil
+}
+
 type noopPostRepo struct{}
 
 func (n *noopPostRepo) GetAll(userID *int) ([]models.Post, error)         { return nil, nil }
@@ -74,6 +78,9 @@ type mockUserRepoError struct{}
 
 func (m *mockUserRepoError) GetAll() ([]models.User, error)       { return nil, errors.New("db error") }
 func (m *mockUserRepoError) GetByID(id int) (*models.User, error) { return nil, errors.New("db error") }
+func (m *mockUserRepoError) Update(id int, input models.UpdateUserInput) (*models.User, error) {
+	return nil, errors.New("db error")
+}
 
 func TestGetAllUsers_Error(t *testing.T) {
 	svc := NewUserService(&mockUserRepoError{}, &noopPostRepo{})
@@ -96,5 +103,44 @@ func TestGetUserPosts_UserNotFound(t *testing.T) {
 	_, err := svc.GetUserPosts(1, nil)
 	if err == nil {
 		t.Fatalf("expected error when user not found, got nil")
+	}
+}
+
+// --- UpdateMyProfile ---
+
+type mockUserRepoUpdateSuccess struct{}
+
+func (m *mockUserRepoUpdateSuccess) GetAll() ([]models.User, error) { return nil, nil }
+func (m *mockUserRepoUpdateSuccess) GetByID(id int) (*models.User, error) {
+	return &models.User{ID: id, Email: "a@example.com", DisplayName: "A"}, nil
+}
+func (m *mockUserRepoUpdateSuccess) Update(id int, input models.UpdateUserInput) (*models.User, error) {
+	name := ""
+	if input.DisplayName != nil {
+		name = *input.DisplayName
+	}
+	return &models.User{ID: id, DisplayName: name, Email: "a@example.com"}, nil
+}
+
+func TestUpdateMyProfile_Success(t *testing.T) {
+	svc := NewUserService(&mockUserRepoUpdateSuccess{}, &noopPostRepo{})
+	name := "New Name"
+	input := models.UpdateUserInput{DisplayName: &name}
+	user, err := svc.UpdateMyProfile(1, input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if user == nil || user.DisplayName != name {
+		t.Fatalf("expected DisplayName %q, got %+v", name, user)
+	}
+}
+
+func TestUpdateMyProfile_RepoError(t *testing.T) {
+	svc := NewUserService(&mockUserRepoError{}, &noopPostRepo{})
+	name := "New Name"
+	input := models.UpdateUserInput{DisplayName: &name}
+	_, err := svc.UpdateMyProfile(1, input)
+	if err == nil {
+		t.Fatalf("expected error from UpdateMyProfile, got nil")
 	}
 }

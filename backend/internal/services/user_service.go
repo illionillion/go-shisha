@@ -50,3 +50,8 @@ func (s *UserService) GetUserPosts(userID int, currentUserID *int) ([]models.Pos
 	// Get posts by user ID with optional like status for the current user
 	return s.postRepo.GetByUserID(userID, currentUserID)
 }
+
+// UpdateMyProfile は認証ユーザー自身のプロフィール情報を更新する
+func (s *UserService) UpdateMyProfile(userID int, input models.UpdateUserInput) (*models.User, error) {
+	return s.userRepo.Update(userID, input)
+}

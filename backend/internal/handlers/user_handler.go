@@ -17,6 +17,7 @@ type UserServiceInterface interface {
 	GetAllUsers() ([]models.User, error)
 	GetUserByID(id int) (*models.User, error)
 	GetUserPosts(userID int, currentUserID *int) ([]models.Post, error)
+	UpdateMyProfile(userID int, input models.UpdateUserInput) (*models.User, error)
 }
 
 // UserHandler はユーザー関連のHTTPリクエストを処理する
@@ -134,4 +135,52 @@ func (h *UserHandler) GetUserPosts(c *gin.Context) {
 		Total: len(posts),
 	}
 	c.JSON(http.StatusOK, response)
+}
+
+// UpdateMe は PATCH /api/v1/users/me を処理する
+// @Summary 自分のプロフィール更新
+// @Description 認証ユーザー自身のプロフィール情報を更新します
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body models.UpdateUserInput true "更新するフィールド（省略可能）"
+// @Success 200 {object} models.User "更新後のユーザー情報"
+// @Failure 400 {object} models.ValidationError "バリデーションエラー"
+// @Failure 401 {object} models.UnauthorizedError "認証エラー"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
+// @Router /users/me [patch]
+func (h *UserHandler) UpdateMe(c *gin.Context) {
+	userIDVal, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
+		return
+	}
+	userID, ok := userIDVal.(int)
+	if !ok {
+		logging.L.Error("invalid user_id type in context", "handler", "UserHandler", "method", "UpdateMe")
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
+		return
+	}
+
+	var input models.UpdateUserInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		logging.L.Warn("invalid request body", "handler", "UserHandler", "method", "UpdateMe", "user_id", userID, "error", err)
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
+		return
+	}
+
+	user, err := h.userService.UpdateMyProfile(userID, input)
+	if err != nil {
+		if errors.Is(err, repositories.ErrUserNotFound) {
+			logging.L.Warn("user not found while updating own profile", "handler", "UserHandler", "method", "UpdateMe", "user_id", userID, "error", err)
+			c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
+			return
+		}
+		logging.L.Error("failed to update user profile", "handler", "UserHandler", "method", "UpdateMe", "user_id", userID, "error", err)
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }

@@ -57,6 +57,14 @@ func main() {
 			panic("imageurl validation registration failed")
 		}
 		logging.L.Info("custom validation registered", "name", "imageurl")
+		if err := v.RegisterValidation("externalurl", validation.ValidateExternalURL); err != nil {
+			logging.L.Error("critical: custom validation registration failed",
+				"validation", "externalurl",
+				"error", err,
+				"action", "aborting startup")
+			panic("externalurl validation registration failed")
+		}
+		logging.L.Info("custom validation registered", "name", "externalurl")
 	} else {
 		// validator.Validateの型アサーション失敗もアプリケーション起動時の致命的エラーとして扱う
 		logging.L.Error("critical: validator engine type assertion failed",
@@ -194,6 +202,7 @@ func main() {
 		api.GET("/users", userHandler.GetAllUsers)
 		api.GET("/users/:id", userHandler.GetUser)
 		api.GET("/users/:id/posts", middleware.OptionalAuthMiddleware(), userHandler.GetUserPosts)
+		api.PATCH("/users/me", middleware.AuthMiddleware(), userHandler.UpdateMe)
 
 		// Flavors endpoints
 		api.GET("/flavors", flavorHandler.GetAllFlavors)

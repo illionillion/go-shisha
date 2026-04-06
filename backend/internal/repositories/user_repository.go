@@ -15,13 +15,14 @@ var (
 	ErrFlavorNotFound = errors.New("flavor not found")
 )
 
-/**
- * UserRepository defines the interface for user data access
- */
+// UserRepository はユーザーデータアクセスのインターフェース
 type UserRepository interface {
-	// GetAll returns all users
+	// GetAll は全ユーザーを返す
 	GetAll() ([]models.User, error)
 
-	// GetByID returns a user by ID
+	// GetByID は指定IDのユーザーを返す
 	GetByID(id int) (*models.User, error)
+
+	// Update は指定ユーザーのプロフィール情報を更新して最新のユーザーを返す
+	Update(id int, input models.UpdateUserInput) (*models.User, error)
 }

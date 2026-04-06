@@ -89,6 +89,9 @@ func (m *mockUserRepoForPost) GetAll() ([]models.User, error) { return nil, nil 
 func (m *mockUserRepoForPost) GetByID(id int) (*models.User, error) {
 	return &models.User{ID: id, Email: "u@example.com", DisplayName: "U"}, nil
 }
+func (m *mockUserRepoForPost) Update(id int, input models.UpdateUserInput) (*models.User, error) {
+	return &models.User{ID: id}, nil
+}
 
 type mockFlavorRepo struct{}
 
@@ -300,6 +303,9 @@ type mockUserRepoMissing struct{}
 
 func (m *mockUserRepoMissing) GetAll() ([]models.User, error) { return nil, nil }
 func (m *mockUserRepoMissing) GetByID(id int) (*models.User, error) {
+	return nil, errors.New("user not found")
+}
+func (m *mockUserRepoMissing) Update(id int, input models.UpdateUserInput) (*models.User, error) {
 	return nil, errors.New("user not found")
 }
 

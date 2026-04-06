@@ -44,6 +44,19 @@ type CreateUserInput struct {
 	DisplayName string `json:"display_name"`
 }
 
+// UpdateUserInput はプロフィール更新のリクエストボディ
+// 各フィールドはポインタ型で省略可能（nil = 変更しない）
+type UpdateUserInput struct {
+	// 表示名（省略可）
+	DisplayName *string `json:"display_name"`
+	// 自己紹介文（省略可）
+	Description *string `json:"description"`
+	// 外部URL（省略可、http(s)://...のみ許可）
+	ExternalURL *string `json:"external_url" binding:"omitempty,externalurl"`
+	// アイコン画像URL（省略可、/images/... または http(s)://...）
+	IconURL *string `json:"icon_url" binding:"omitempty,imageurl"`
+}
+
 // LoginInput represents the input for user login
 type LoginInput struct {
 	Email    string `json:"email" binding:"required,email"`
