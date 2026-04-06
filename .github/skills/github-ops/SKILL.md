@@ -110,7 +110,7 @@ gh api --paginate "repos/${REPO}/issues/<PR番号>/comments?per_page=100"
    - `<!-- ignored: true -->`（対応不要として明示）
    - `<!-- wontfix: true -->`（対応しない判断を明示）
 - PR review comment は `in_reply_to_id` で親子関係を解釈し、親コメント自身にマーカーが無くても返信にマーカーがあれば親コメントも対応済みとして扱う
-- 返信がなく、かつスレッド内のどのコメントにもマーカーが無い親コメントのみを「未対応」として扱う
+- スレッド内のどのコメントにもマーカーが無いスレッドは、その親コメントを「未対応」として扱う
 - PRのissueコメント（会話欄コメント）は review comment のような親子スレッド構造が無いため、コメント単体でマーカー有無を判定する
 - `gh pr view --comments` は補助的に使ってよいが、最終判定は `gh api --paginate` で取得した全件を用い、PR review comment はスレッド単位、issueコメントはコメント単体で行う
 
