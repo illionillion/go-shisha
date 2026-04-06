@@ -103,27 +103,33 @@ gh api --paginate "repos/${REPO}/issues/<PR番号>/comments?per_page=100"
 
 # PR Review本文コメント（Approve / Request changes など）を全件取得
 gh api --paginate "repos/${REPO}/pulls/<PR番号>/reviews?per_page=100"
+
+# 判定対象の Review 本文コメントのみ抽出（本文あり + COMMENTED/CHANGES_REQUESTED）
+gh api --paginate "repos/${REPO}/pulls/<PR番号>/reviews?per_page=100" \
+   --jq '.[] | select((.state == "COMMENTED" or .state == "CHANGES_REQUESTED") and (.body // "" | length) > 0)'
 ```
 
 ### 判定ルール（ステータスマーカー運用）
 
 - 対応状況の判定単位は、PR review comment ではコメント単体ではなくスレッド単位とする
-- スレッド内コメント本文に以下のマーカーがある場合は、そのスレッド全体を「対応済み」として扱う
+- スレッド単位の対応済み判定は時系列を考慮し、最新コメント（スレッド末尾）が以下のマーカーを含む場合のみ「対応済み」として扱う
    - `<!-- resolved: true -->`（修正完了）
    - `<!-- ignored: true -->`（対応不要として明示）
    - `<!-- wontfix: true -->`（対応しない判断を明示）
-- PR review comment は `in_reply_to_id` で親子関係を解釈し、親コメント自身にマーカーが無くても返信にマーカーがあれば親コメントも対応済みとして扱う
+- マーカー付き返信の後にレビュアーが追記した場合は、そのスレッドを再オープン（未対応）として扱う
+- PR review comment は `in_reply_to_id` で親子関係を解釈し、親コメント自身にマーカーが無くてもスレッド末尾コメントがマーカー付きなら親コメントも対応済みとして扱う
 - スレッド内のどのコメントにもマーカーが無いスレッドは、その親コメントを「未対応」として扱う
 - PRのissueコメント（会話欄コメント）と PR Review本文コメント（`pulls/<PR番号>/reviews`）は review comment のような親子スレッド構造が無いため、コメント単体でマーカー有無を判定する
+- PR Review本文コメントは、本文が空のレビュー（例: APPROVED）を判定対象外とし、本文あり + `COMMENTED` / `CHANGES_REQUESTED` のみを判定対象とする
 - `gh pr view --comments` は補助的に使ってよいが、最終判定は `gh api --paginate` で取得した全件を用い、PR review comment はスレッド単位、issueコメントとReview本文コメントはコメント単体で行う
 
 ### 運用ルール
 
 - 対応完了コメントには、親コメントではなく返信の末尾に `<!-- resolved: true -->` を付与する
 - 対応不要・対応しない判断をした場合は、理由を書いたうえで親コメントではなく返信の末尾にそれぞれのマーカーを付与する
-- 親コメント（レビュー指摘そのもの）にはマーカーを直接付与できない前提のため、返信側マーカーでスレッド全体の状態を表す
+- 親コメント（レビュー指摘そのもの）にはマーカーを直接付与できない前提のため、スレッド末尾の返信マーカーで状態を表す
 - 修正を行った場合は、必要に応じて返信内に修正コミットへのリンク（または短縮SHA）を1行添えてよい
-- これにより次回確認時は、マーカー付き返信を含むスレッドを自動的にスキップして未対応のみ確認する
+- これにより次回確認時は、スレッド末尾がマーカー付きのスレッドをスキップし、未対応のみ確認する
 
 GitHubのWeb UIではなくCLIで確認する。
 
