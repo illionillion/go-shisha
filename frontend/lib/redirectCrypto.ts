@@ -6,11 +6,6 @@ const IV_LENGTH = 12;
 
 const SECRET = process.env.REDIRECT_SECRET;
 
-if (!SECRET) {
-  console.error("REDIRECT_SECRET is not set");
-  throw new Error("REDIRECT_SECRET not set");
-}
-
 function base64urlEncode(bytes: Uint8Array): string {
   let binary = "";
   const len = bytes.byteLength;
