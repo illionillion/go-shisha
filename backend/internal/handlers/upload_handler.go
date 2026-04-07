@@ -15,6 +15,7 @@ import (
 // UploadServiceInterface 画像アップロードサービスのインターフェース
 type UploadServiceInterface interface {
 	UploadImages(userID int, files []*multipart.FileHeader) ([]string, error)
+	UploadProfileImage(userID int, file *multipart.FileHeader) (string, error)
 }
 
 // UploadHandler 画像アップロードハンドラー
@@ -108,5 +109,86 @@ func (h *UploadHandler) UploadImages(c *gin.Context) {
 
 	c.JSON(http.StatusOK, models.UploadImagesResponse{
 		URLs: urls,
+	})
+}
+
+// UploadProfileImage プロフィール画像アップロードエンドポイント
+// @Summary プロフィール画像アップロード
+// @Description プロフィール画像を1枚アップロードし、保存されたURLを返却します
+// @Tags uploads
+// @Accept multipart/form-data
+// @Produce json
+// @Param image formData file true "アップロードするプロフィール画像（1枚のみ）"
+// @Success 200 {object} go-shisha-backend_internal_models.UploadProfileImageResponse
+// @Failure 400 {object} models.ValidationError "バリデーションエラー"
+// @Failure 401 {object} models.UnauthorizedError "認証エラー"
+// @Failure 413 {object} models.PayloadTooLargeError "ファイルサイズ超過"
+// @Failure 500 {object} models.ServerError "サーバーエラー"
+// @Security BearerAuth
+// @Router /uploads/profile-images [post]
+func (h *UploadHandler) UploadProfileImage(c *gin.Context) {
+	// 認証確認
+	userID, exists := c.Get("user_id")
+	if !exists {
+		h.logger.Warn("未認証のプロフィール画像アップロードリクエスト")
+		c.JSON(http.StatusUnauthorized, models.UnauthorizedError{Error: models.ErrCodeUnauthorized})
+		return
+	}
+
+	h.logger.Info("プロフィール画像アップロードリクエスト受信", "user_id", userID)
+
+	// multipart/form-dataからファイル取得
+	form, err := c.MultipartForm()
+	if err != nil {
+		h.logger.Error("フォーム取得失敗", "error", err)
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
+		return
+	}
+
+	files := form.File["image"]
+	if len(files) == 0 {
+		h.logger.Warn("ファイルが指定されていない")
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
+		return
+	}
+	if len(files) > 1 {
+		h.logger.Warn("プロフィール画像は1枚のみ指定可能", "count", len(files))
+		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
+		return
+	}
+
+	// user_idを整数型に変換
+	uid, ok := userID.(int)
+	if !ok {
+		h.logger.Error("user_idの型が不正", "user_id", userID)
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
+		return
+	}
+
+	// サービス層でアップロード処理
+	url, err := h.uploadService.UploadProfileImage(uid, files[0])
+	if err != nil {
+		h.logger.Error("プロフィール画像アップロード失敗",
+			"error", err,
+			"user_id", userID)
+		if errors.Is(err, services.ErrNoFiles) || errors.Is(err, services.ErrTooManyProfileImages) ||
+			errors.Is(err, services.ErrInvalidFileType) || errors.Is(err, services.ErrInvalidExtension) {
+			c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
+			return
+		}
+		if errors.Is(err, services.ErrFileTooLarge) {
+			c.JSON(http.StatusRequestEntityTooLarge, models.PayloadTooLargeError{Error: models.ErrCodePayloadTooLarge})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, models.ServerError{Error: models.ErrCodeInternalServer})
+		return
+	}
+
+	h.logger.Info("プロフィール画像アップロード成功",
+		"user_id", userID,
+		"url", url)
+
+	c.JSON(http.StatusOK, models.UploadProfileImageResponse{
+		URL: url,
 	})
 }

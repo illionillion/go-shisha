@@ -214,10 +214,211 @@ func (m *mockUploadService) UploadImages(userID int, files []*multipart.FileHead
 	return []string{"/images/test.jpg"}, nil
 }
 
+func (m *mockUploadService) UploadProfileImage(userID int, file *multipart.FileHeader) (string, error) {
+	return "/images/profiles/test.jpg", nil
+}
+
 type mockUploadServiceFileTooLarge struct{}
 
 func (m *mockUploadServiceFileTooLarge) UploadImages(userID int, files []*multipart.FileHeader) ([]string, error) {
 	return nil, services.ErrFileTooLarge
+}
+
+func (m *mockUploadServiceFileTooLarge) UploadProfileImage(userID int, file *multipart.FileHeader) (string, error) {
+	return "", services.ErrFileTooLarge
+}
+
+func TestUploadHandler_UploadProfileImage_Unauthorized(t *testing.T) {
+	handler := &UploadHandler{
+		uploadService: &mockUploadService{},
+		logger:        logging.L,
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, _ := writer.CreateFormFile("image", "profile.jpg")
+	_, _ = io.WriteString(part, "fake image content")
+	_ = writer.Close()
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/profile-images", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	w := httptest.NewRecorder()
+	router := setupTestRouter()
+	router.POST("/api/v1/uploads/profile-images", func(c *gin.Context) {
+		handler.UploadProfileImage(c)
+	})
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
+
+	var response models.UnauthorizedError
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeUnauthorized, response.Error)
+}
+
+func TestUploadHandler_UploadProfileImage_NoFiles(t *testing.T) {
+	handler := &UploadHandler{
+		uploadService: &mockUploadService{},
+		logger:        logging.L,
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	_ = writer.Close()
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/profile-images", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	w := httptest.NewRecorder()
+	router := setupTestRouter()
+	router.POST("/api/v1/uploads/profile-images", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UploadProfileImage(c)
+	})
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	var response models.ValidationError
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
+func TestUploadHandler_UploadProfileImage_TooManyFiles(t *testing.T) {
+	handler := &UploadHandler{
+		uploadService: &mockUploadService{},
+		logger:        logging.L,
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	for i := 0; i < 2; i++ {
+		part, _ := writer.CreateFormFile("image", "profile.jpg")
+		_, _ = part.Write([]byte{0xFF, 0xD8, 0xFF, 0xE0})
+	}
+	_ = writer.Close()
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/profile-images", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	w := httptest.NewRecorder()
+	router := setupTestRouter()
+	router.POST("/api/v1/uploads/profile-images", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UploadProfileImage(c)
+	})
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	var response models.ValidationError
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeValidationFailed, response.Error)
+}
+
+func TestUploadHandler_UploadProfileImage_Success(t *testing.T) {
+	_ = os.MkdirAll("public/images/profiles", 0755)
+	defer func() { _ = os.RemoveAll("public/images") }()
+
+	handler := &UploadHandler{
+		uploadService: &mockUploadService{},
+		logger:        logging.L,
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, _ := writer.CreateFormFile("image", "profile.jpg")
+	_, _ = part.Write([]byte{0xFF, 0xD8, 0xFF, 0xE0})
+	_, _ = io.WriteString(part, "fake jpeg content")
+	_ = writer.Close()
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/profile-images", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	w := httptest.NewRecorder()
+	router := setupTestRouter()
+	router.POST("/api/v1/uploads/profile-images", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UploadProfileImage(c)
+	})
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), "url")
+}
+
+func TestUploadHandler_UploadProfileImage_FileTooLarge(t *testing.T) {
+	handler := &UploadHandler{
+		uploadService: &mockUploadServiceFileTooLarge{},
+		logger:        logging.L,
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, _ := writer.CreateFormFile("image", "large.jpg")
+	_, _ = part.Write([]byte{0xFF, 0xD8, 0xFF, 0xE0})
+	largeData := make([]byte, 6*1024*1024)
+	_, _ = part.Write(largeData)
+	_ = writer.Close()
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/profile-images", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	w := httptest.NewRecorder()
+	router := setupTestRouter()
+	router.POST("/api/v1/uploads/profile-images", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UploadProfileImage(c)
+	})
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusRequestEntityTooLarge, w.Code)
+
+	var response models.PayloadTooLargeError
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodePayloadTooLarge, response.Error)
+}
+
+func TestUploadHandler_UploadProfileImage_InvalidUserIDType(t *testing.T) {
+	handler := &UploadHandler{
+		uploadService: &mockUploadService{},
+		logger:        logging.L,
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, _ := writer.CreateFormFile("image", "profile.jpg")
+	_, _ = part.Write([]byte{0xFF, 0xD8, 0xFF, 0xE0})
+	_ = writer.Close()
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/profile-images", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	w := httptest.NewRecorder()
+	router := setupTestRouter()
+	router.POST("/api/v1/uploads/profile-images", func(c *gin.Context) {
+		c.Set("user_id", "not-an-int")
+		handler.UploadProfileImage(c)
+	})
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	var response models.ServerError
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodeInternalServer, response.Error)
 }
 
 // クリーンアップ

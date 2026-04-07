@@ -24,3 +24,8 @@ func (UploadDB) TableName() string {
 type UploadImagesResponse struct {
 	URLs []string `json:"urls"`
 }
+
+// UploadProfileImageResponse プロフィール画像アップロードレスポンス
+type UploadProfileImageResponse struct {
+	URL string `json:"url"`
+}

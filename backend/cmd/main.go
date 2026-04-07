@@ -211,6 +211,7 @@ func main() {
 		uploads := api.Group("/uploads")
 		{
 			uploads.POST("/images", middleware.AuthMiddleware(), uploadHandler.UploadImages)
+			uploads.POST("/profile-images", middleware.AuthMiddleware(), uploadHandler.UploadProfileImage)
 		}
 	}
 

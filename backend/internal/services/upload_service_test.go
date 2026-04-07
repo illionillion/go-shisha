@@ -255,3 +255,77 @@ func createTestImageFiles(t *testing.T, testFiles []testFile) []*multipart.FileH
 
 	return files
 }
+
+// createTestImageFile は1枚のテスト用multipart.FileHeaderを生成するヘルパー
+func createTestImageFile(t *testing.T, tf testFile) *multipart.FileHeader {
+	t.Helper()
+	files := createTestImageFiles(t, []testFile{tf})
+	return files[0]
+}
+
+func TestUploadService_UploadProfileImage(t *testing.T) {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	defer func() {
+		_ = os.RemoveAll("public/images")
+	}()
+
+	t.Run("正常系_プロフィール画像アップロード", func(t *testing.T) {
+		mockRepo := new(MockUploadRepository)
+		service := NewUploadService(mockRepo, logger)
+		mockRepo.On("Create", mock.AnythingOfType("*models.UploadDB")).Return(nil).Once()
+
+		file := createTestImageFile(t, testFile{filename: "profile.jpg", contentType: "image/jpeg", size: 1024})
+
+		url, err := service.UploadProfileImage(1, file)
+
+		assert.NoError(t, err)
+		assert.True(t, strings.HasPrefix(url, "/images/profiles/"))
+		relativeURL := strings.TrimPrefix(url, "/")
+		filePath := filepath.Join("public", relativeURL)
+		_, statErr := os.Stat(filePath)
+		assert.NoError(t, statErr)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("異常系_ファイルサイズ超過", func(t *testing.T) {
+		mockRepo := new(MockUploadRepository)
+		service := NewUploadService(mockRepo, logger)
+
+		file := createTestImageFile(t, testFile{filename: "large.jpg", contentType: "image/jpeg", size: 11 * 1024 * 1024})
+
+		url, err := service.UploadProfileImage(1, file)
+
+		assert.Error(t, err)
+		assert.Empty(t, url)
+		assert.Contains(t, err.Error(), "ファイルサイズが10MBを超えています")
+	})
+
+	t.Run("異常系_不正なファイル形式", func(t *testing.T) {
+		mockRepo := new(MockUploadRepository)
+		service := NewUploadService(mockRepo, logger)
+
+		file := createTestImageFile(t, testFile{filename: "test.txt", contentType: "text/plain", size: 1024})
+
+		url, err := service.UploadProfileImage(1, file)
+
+		assert.Error(t, err)
+		assert.Empty(t, url)
+		assert.Contains(t, err.Error(), "サポートされていないファイル形式です")
+	})
+
+	t.Run("異常系_DB保存失敗", func(t *testing.T) {
+		mockRepo := new(MockUploadRepository)
+		service := NewUploadService(mockRepo, logger)
+		mockRepo.On("Create", mock.AnythingOfType("*models.UploadDB")).Return(errors.New("DB error")).Once()
+
+		file := createTestImageFile(t, testFile{filename: "profile.jpg", contentType: "image/jpeg", size: 1024})
+
+		url, err := service.UploadProfileImage(1, file)
+
+		assert.Error(t, err)
+		assert.Empty(t, url)
+		assert.Contains(t, err.Error(), "画像情報の保存に失敗しました")
+		mockRepo.AssertExpectations(t)
+	})
+}

@@ -20,11 +20,12 @@ import (
 
 // カスタムエラー型
 var (
-	ErrNoFiles          = errors.New("ファイルが指定されていません")
-	ErrTooManyFiles     = errors.New("一度に10枚までアップロード可能です")
-	ErrFileTooLarge     = errors.New("ファイルサイズが10MBを超えています")
-	ErrInvalidFileType  = errors.New("サポートされていないファイル形式です")
-	ErrInvalidExtension = errors.New("サポートされていない拡張子です")
+	ErrNoFiles                    = errors.New("ファイルが指定されていません")
+	ErrTooManyFiles               = errors.New("一度に10枚までアップロード可能です")
+	ErrTooManyProfileImages       = errors.New("プロフィール画像は1枚のみアップロード可能です")
+	ErrFileTooLarge               = errors.New("ファイルサイズが10MBを超えています")
+	ErrInvalidFileType            = errors.New("サポートされていないファイル形式です")
+	ErrInvalidExtension           = errors.New("サポートされていない拡張子です")
 )
 
 // UploadService 画像アップロードサービス
@@ -51,8 +52,9 @@ var allowedMimeTypes = map[string]bool{
 
 // 定数定義
 const (
-	maxFileSize = 10 * 1024 * 1024 // 最大ファイルサイズ（10MB）
-	maxFiles    = 10               // 最大ファイル数（スライド上限と一致）
+	maxFileSize    = 10 * 1024 * 1024 // 最大ファイルサイズ（10MB）
+	maxFiles       = 10               // 最大ファイル数（スライド上限と一致）
+	profileUploadDir = "public/images/profiles"
 )
 
 // UploadImages 複数の画像をアップロードする
@@ -226,4 +228,116 @@ func getExtensionFromMIME(mimeType string) string {
 		"image/gif":  "gif",
 	}
 	return mimeToExt[mimeType]
+}
+
+// UploadProfileImage プロフィール画像を1枚アップロードする
+func (s *UploadService) UploadProfileImage(userID int, file *multipart.FileHeader) (string, error) {
+	if file == nil {
+		s.logger.Warn("アップロードファイルが指定されていない")
+		return "", ErrNoFiles
+	}
+
+	// 保存先ディレクトリの確保
+	if err := os.MkdirAll(profileUploadDir, 0755); err != nil {
+		s.logger.Error("ディレクトリ作成失敗", "error", err, "path", profileUploadDir)
+		return "", fmt.Errorf("ディレクトリの作成に失敗しました")
+	}
+
+	// ファイルサイズチェック
+	if file.Size > maxFileSize {
+		s.logger.Warn("ファイルサイズ超過",
+			"filename", file.Filename,
+			"size", file.Size,
+			"max", maxFileSize)
+		return "", fmt.Errorf("%w: %s", ErrFileTooLarge, file.Filename)
+	}
+
+	// ファイルを開く
+	f, err := file.Open()
+	if err != nil {
+		s.logger.Error("ファイルオープン失敗", "error", err, "filename", file.Filename)
+		return "", fmt.Errorf("ファイルの読み込みに失敗しました")
+	}
+	defer func() { _ = f.Close() }()
+
+	// MIMEタイプチェック（実データから検証）
+	buffer := make([]byte, 512)
+	n, err := f.Read(buffer)
+	if err != nil && err != io.EOF {
+		s.logger.Error("ファイル読み込み失敗", "error", err, "filename", file.Filename)
+		return "", fmt.Errorf("ファイルの読み込みに失敗しました")
+	}
+	detectedType := http.DetectContentType(buffer[:n])
+	if !allowedMimeTypes[detectedType] {
+		s.logger.Warn("不正なファイル形式",
+			"filename", file.Filename,
+			"detectedType", detectedType)
+		return "", fmt.Errorf("%w: %s (検出: %s)", ErrInvalidFileType, file.Filename, detectedType)
+	}
+
+	// ファイルポインタを先頭に戻す
+	if _, err := f.Seek(0, 0); err != nil {
+		s.logger.Error("ファイルシーク失敗", "error", err, "filename", file.Filename)
+		return "", fmt.Errorf("ファイルの読み込みに失敗しました")
+	}
+
+	// MIMEタイプから拡張子を決定（セキュリティ向上）
+	ext := getExtensionFromMIME(detectedType)
+	if ext == "" {
+		s.logger.Warn("サポートされていないMIMEタイプ", "filename", file.Filename, "mimeType", detectedType)
+		return "", fmt.Errorf("%w: %s", ErrInvalidExtension, detectedType)
+	}
+
+	timestamp := time.Now().Format("20060102")
+	filename := fmt.Sprintf("%s_%s.%s", timestamp, uuid.New().String(), ext)
+	savePath := filepath.Join(profileUploadDir, filename)
+
+	// ファイル保存
+	dst, err := os.Create(savePath)
+	if err != nil {
+		s.logger.Error("ファイル作成失敗", "error", err, "path", savePath)
+		return "", fmt.Errorf("ファイルの保存に失敗しました")
+	}
+
+	_, copyErr := io.Copy(dst, f)
+	_ = dst.Close()
+
+	if copyErr != nil {
+		s.logger.Error("ファイル書き込み失敗", "error", copyErr, "path", savePath)
+		if removeErr := os.Remove(savePath); removeErr != nil {
+			s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
+		}
+		return "", fmt.Errorf("ファイルの保存に失敗しました")
+	}
+
+	// URLを生成（publicからの相対パス）
+	url := fmt.Sprintf("/images/profiles/%s", filename)
+
+	// DB記録を作成
+	uploadRecord := models.UploadDB{
+		UserID:       userID,
+		FilePath:     url,
+		OriginalName: file.Filename,
+		MimeType:     detectedType,
+		FileSize:     file.Size,
+		Status:       "uploaded",
+		CreatedAt:    time.Now(),
+	}
+
+	// DBに保存
+	if err := s.uploadRepo.Create(&uploadRecord); err != nil {
+		s.logger.Error("DB保存失敗", "error", err, "path", url)
+		if removeErr := os.Remove(savePath); removeErr != nil {
+			s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
+		}
+		return "", fmt.Errorf("画像情報の保存に失敗しました")
+	}
+
+	s.logger.Info("プロフィール画像アップロード成功",
+		"user_id", userID,
+		"filename", file.Filename,
+		"savedAs", filename,
+		"size", file.Size)
+
+	return url, nil
 }
