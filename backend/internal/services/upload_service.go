@@ -52,9 +52,9 @@ var allowedMimeTypes = map[string]bool{
 
 // 定数定義
 const (
-	maxFileSize    = 10 * 1024 * 1024 // 最大ファイルサイズ（10MB）
-	maxFiles       = 10               // 最大ファイル数（スライド上限と一致）
-	profileUploadDir = "public/images/profiles"
+	maxFileSize      = 10 * 1024 * 1024   // 最大ファイルサイズ（10MB）
+	maxFiles         = 10                  // 最大ファイル数（スライド上限と一致）
+	profileUploadDir = "public/images/profiles" // プロフィール画像の保存先ディレクトリ
 )
 
 // UploadImages 複数の画像をアップロードする
@@ -230,7 +230,7 @@ func getExtensionFromMIME(mimeType string) string {
 	return mimeToExt[mimeType]
 }
 
-// UploadProfileImage プロフィール画像を1枚アップロードする
+// UploadProfileImage プロフィール画像を1枚アップロードし、保存先URLを返す
 func (s *UploadService) UploadProfileImage(userID int, file *multipart.FileHeader) (string, error) {
 	if file == nil {
 		s.logger.Warn("アップロードファイルが指定されていない")

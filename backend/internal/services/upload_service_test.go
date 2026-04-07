@@ -256,7 +256,7 @@ func createTestImageFiles(t *testing.T, testFiles []testFile) []*multipart.FileH
 	return files
 }
 
-// createTestImageFile は1枚のテスト用multipart.FileHeaderを生成するヘルパー
+// createTestImageFile は1枚のテスト用multipart.FileHeaderを生成するヘルパー関数
 func createTestImageFile(t *testing.T, tf testFile) *multipart.FileHeader {
 	t.Helper()
 	files := createTestImageFiles(t, []testFile{tf})
