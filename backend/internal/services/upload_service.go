@@ -20,12 +20,12 @@ import (
 
 // カスタムエラー型
 var (
-	ErrNoFiles                    = errors.New("ファイルが指定されていません")
-	ErrTooManyFiles               = errors.New("一度に10枚までアップロード可能です")
-	ErrTooManyProfileImages       = errors.New("プロフィール画像は1枚のみアップロード可能です")
-	ErrFileTooLarge               = errors.New("ファイルサイズが10MBを超えています")
-	ErrInvalidFileType            = errors.New("サポートされていないファイル形式です")
-	ErrInvalidExtension           = errors.New("サポートされていない拡張子です")
+	ErrNoFiles              = errors.New("ファイルが指定されていません")
+	ErrTooManyFiles         = errors.New("一度に10枚までアップロード可能です")
+	ErrTooManyProfileImages = errors.New("プロフィール画像は1枚のみアップロード可能です")
+	ErrFileTooLarge         = errors.New("ファイルサイズが10MBを超えています")
+	ErrInvalidFileType      = errors.New("サポートされていないファイル形式です")
+	ErrInvalidExtension     = errors.New("サポートされていない拡張子です")
 )
 
 // UploadService 画像アップロードサービス
@@ -52,10 +52,122 @@ var allowedMimeTypes = map[string]bool{
 
 // 定数定義
 const (
-	maxFileSize      = 10 * 1024 * 1024   // 最大ファイルサイズ（10MB）
-	maxFiles         = 10                  // 最大ファイル数（スライド上限と一致）
-	profileUploadDir = "public/images/profiles" // プロフィール画像の保存先ディレクトリ
+	maxFileSize      = 10 * 1024 * 1024          // 最大ファイルサイズ（10MB）
+	maxFiles         = 10                          // 最大ファイル数（スライド上限と一致）
+	profileUploadDir = "public/images/profiles"   // プロフィール画像の保存先ディレクトリ
 )
+
+// savedFileResult saveImageFileの戻り値
+type savedFileResult struct {
+	uploadRecord models.UploadDB
+	savePath     string
+}
+
+// saveImageFile 1ファイルのバリデーション・保存・DB登録を行う内部ヘルパー
+// dir にファイルを保存し、urlPrefix + ファイル名 をURLとして記録する
+func (s *UploadService) saveImageFile(userID int, fileHeader *multipart.FileHeader, dir, urlPrefix string) (*savedFileResult, error) {
+	// ファイルサイズチェック
+	if fileHeader.Size > maxFileSize {
+		s.logger.Warn("ファイルサイズ超過",
+			"filename", fileHeader.Filename,
+			"size", fileHeader.Size,
+			"max", maxFileSize)
+		return nil, fmt.Errorf("%w: %s", ErrFileTooLarge, fileHeader.Filename)
+	}
+
+	// ファイルを開く
+	file, err := fileHeader.Open()
+	if err != nil {
+		s.logger.Error("ファイルオープン失敗", "error", err, "filename", fileHeader.Filename)
+		return nil, fmt.Errorf("ファイルの読み込みに失敗しました")
+	}
+	defer func() { _ = file.Close() }()
+
+	// MIMEタイプチェック（実データから検証）
+	buffer := make([]byte, 512)
+	n, err := file.Read(buffer)
+	if err != nil && err != io.EOF {
+		s.logger.Error("ファイル読み込み失敗", "error", err, "filename", fileHeader.Filename)
+		return nil, fmt.Errorf("ファイルの読み込みに失敗しました")
+	}
+	detectedType := http.DetectContentType(buffer[:n])
+	if !allowedMimeTypes[detectedType] {
+		s.logger.Warn("不正なファイル形式",
+			"filename", fileHeader.Filename,
+			"detectedType", detectedType)
+		return nil, fmt.Errorf("%w: %s (検出: %s)", ErrInvalidFileType, fileHeader.Filename, detectedType)
+	}
+
+	// ファイルポインタを先頭に戻す
+	if _, err := file.Seek(0, 0); err != nil {
+		s.logger.Error("ファイルシーク失敗", "error", err, "filename", fileHeader.Filename)
+		return nil, fmt.Errorf("ファイルの読み込みに失敗しました")
+	}
+
+	// MIMEタイプから拡張子を決定（セキュリティ向上）
+	ext := getExtensionFromMIME(detectedType)
+	if ext == "" {
+		s.logger.Warn("サポートされていないMIMEタイプ", "filename", fileHeader.Filename, "mimeType", detectedType)
+		return nil, fmt.Errorf("%w: %s", ErrInvalidExtension, detectedType)
+	}
+
+	// 保存先ディレクトリの確保
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		s.logger.Error("ディレクトリ作成失敗", "error", err, "path", dir)
+		return nil, fmt.Errorf("ディレクトリの作成に失敗しました")
+	}
+
+	timestamp := time.Now().Format("20060102")
+	filename := fmt.Sprintf("%s_%s.%s", timestamp, uuid.New().String(), ext)
+	savePath := filepath.Join(dir, filename)
+
+	// ファイル保存
+	dst, err := os.Create(savePath)
+	if err != nil {
+		s.logger.Error("ファイル作成失敗", "error", err, "path", savePath)
+		return nil, fmt.Errorf("ファイルの保存に失敗しました")
+	}
+
+	_, copyErr := io.Copy(dst, file)
+	_ = dst.Close()
+
+	if copyErr != nil {
+		s.logger.Error("ファイル書き込み失敗", "error", copyErr, "path", savePath)
+		if removeErr := os.Remove(savePath); removeErr != nil {
+			s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
+		}
+		return nil, fmt.Errorf("ファイルの保存に失敗しました")
+	}
+
+	// URLを生成
+	url := urlPrefix + filename
+
+	// DB記録を作成・保存
+	uploadRecord := models.UploadDB{
+		UserID:       userID,
+		FilePath:     url,
+		OriginalName: fileHeader.Filename,
+		MimeType:     detectedType,
+		FileSize:     fileHeader.Size,
+		Status:       "uploaded",
+		CreatedAt:    time.Now(),
+	}
+	if err := s.uploadRepo.Create(&uploadRecord); err != nil {
+		s.logger.Error("DB保存失敗", "error", err, "path", url)
+		if removeErr := os.Remove(savePath); removeErr != nil {
+			s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
+		}
+		return nil, fmt.Errorf("画像情報の保存に失敗しました")
+	}
+
+	s.logger.Info("画像アップロード成功",
+		"user_id", userID,
+		"filename", fileHeader.Filename,
+		"savedAs", filename,
+		"size", fileHeader.Size)
+
+	return &savedFileResult{uploadRecord: uploadRecord, savePath: savePath}, nil
+}
 
 // UploadImages 複数の画像をアップロードする
 func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) ([]string, error) {
@@ -69,133 +181,17 @@ func (s *UploadService) UploadImages(userID int, files []*multipart.FileHeader) 
 		return nil, ErrTooManyFiles
 	}
 
-	// 保存先ディレクトリの確保
-	uploadDir := "public/images"
-	if err := os.MkdirAll(uploadDir, 0755); err != nil {
-		s.logger.Error("ディレクトリ作成失敗", "error", err, "path", uploadDir)
-		return nil, fmt.Errorf("ディレクトリの作成に失敗しました")
-	}
-
 	var urls []string
 	var uploadRecords []models.UploadDB
 
 	for _, fileHeader := range files {
-		// ファイルサイズチェック
-		if fileHeader.Size > maxFileSize {
-			s.logger.Warn("ファイルサイズ超過",
-				"filename", fileHeader.Filename,
-				"size", fileHeader.Size,
-				"max", maxFileSize)
-			// 既に保存したファイルをロールバック
-			s.rollbackFiles(uploadRecords)
-			return nil, fmt.Errorf("%w: %s", ErrFileTooLarge, fileHeader.Filename)
-		}
-
-		// ファイルを開く
-		file, err := fileHeader.Open()
+		result, err := s.saveImageFile(userID, fileHeader, "public/images", "/images/")
 		if err != nil {
-			s.logger.Error("ファイルオープン失敗", "error", err, "filename", fileHeader.Filename)
 			s.rollbackFiles(uploadRecords)
-			return nil, fmt.Errorf("ファイルの読み込みに失敗しました")
+			return nil, err
 		}
-
-		// MIMEタイプチェック（実データから検証）
-		buffer := make([]byte, 512)
-		n, err := file.Read(buffer)
-		if err != nil && err != io.EOF {
-			_ = file.Close()
-			s.logger.Error("ファイル読み込み失敗", "error", err, "filename", fileHeader.Filename)
-			s.rollbackFiles(uploadRecords)
-			return nil, fmt.Errorf("ファイルの読み込みに失敗しました")
-		}
-		detectedType := http.DetectContentType(buffer[:n])
-		if !allowedMimeTypes[detectedType] {
-			_ = file.Close()
-			s.logger.Warn("不正なファイル形式",
-				"filename", fileHeader.Filename,
-				"detectedType", detectedType)
-			s.rollbackFiles(uploadRecords)
-			return nil, fmt.Errorf("%w: %s (検出: %s)", ErrInvalidFileType, fileHeader.Filename, detectedType)
-		}
-
-		// ファイルポインタを先頭に戻す
-		if _, err := file.Seek(0, 0); err != nil {
-			_ = file.Close()
-			s.logger.Error("ファイルシーク失敗", "error", err, "filename", fileHeader.Filename)
-			s.rollbackFiles(uploadRecords)
-			return nil, fmt.Errorf("ファイルの読み込みに失敗しました")
-		}
-
-		// MIMEタイプから拡張子を決定（セキュリティ向上）
-		ext := getExtensionFromMIME(detectedType)
-		if ext == "" {
-			_ = file.Close()
-			s.logger.Warn("サポートされていないMIMEタイプ", "filename", fileHeader.Filename, "mimeType", detectedType)
-			s.rollbackFiles(uploadRecords)
-			return nil, fmt.Errorf("%w: %s", ErrInvalidExtension, detectedType)
-		}
-
-		timestamp := time.Now().Format("20060102")
-		filename := fmt.Sprintf("%s_%s.%s", timestamp, uuid.New().String(), ext)
-		savePath := filepath.Join(uploadDir, filename)
-
-		// ファイル保存
-		dst, err := os.Create(savePath)
-		if err != nil {
-			_ = file.Close()
-			s.logger.Error("ファイル作成失敗", "error", err, "path", savePath)
-			s.rollbackFiles(uploadRecords)
-			return nil, fmt.Errorf("ファイルの保存に失敗しました")
-		}
-
-		// io.Copyとクローズ処理
-		_, copyErr := io.Copy(dst, file)
-		_ = file.Close()
-		_ = dst.Close()
-
-		if copyErr != nil {
-			s.logger.Error("ファイル書き込み失敗", "error", copyErr, "path", savePath)
-			// 失敗したファイルを削除
-			if removeErr := os.Remove(savePath); removeErr != nil {
-				s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
-			}
-			s.rollbackFiles(uploadRecords)
-			return nil, fmt.Errorf("ファイルの保存に失敗しました")
-		}
-
-		// URLを生成（publicからの相対パス）
-		url := fmt.Sprintf("/images/%s", filename)
-
-		// DB記録を作成
-		uploadRecord := models.UploadDB{
-			UserID:       userID,
-			FilePath:     url,
-			OriginalName: fileHeader.Filename,
-			MimeType:     detectedType,
-			FileSize:     fileHeader.Size,
-			Status:       "uploaded",
-			CreatedAt:    time.Now(),
-		}
-
-		// DBに保存
-		if err := s.uploadRepo.Create(&uploadRecord); err != nil {
-			s.logger.Error("DB保存失敗", "error", err, "path", url)
-			// ファイルを削除
-			if removeErr := os.Remove(savePath); removeErr != nil {
-				s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
-			}
-			s.rollbackFiles(uploadRecords)
-			return nil, fmt.Errorf("画像情報の保存に失敗しました")
-		}
-
-		uploadRecords = append(uploadRecords, uploadRecord)
-		urls = append(urls, url)
-
-		s.logger.Info("画像アップロード成功",
-			"user_id", userID,
-			"filename", fileHeader.Filename,
-			"savedAs", filename,
-			"size", fileHeader.Size)
+		uploadRecords = append(uploadRecords, result.uploadRecord)
+		urls = append(urls, result.uploadRecord.FilePath)
 	}
 
 	return urls, nil
@@ -231,113 +227,51 @@ func getExtensionFromMIME(mimeType string) string {
 }
 
 // UploadProfileImage プロフィール画像を1枚アップロードし、保存先URLを返す
+// 既存のプロフィール画像が存在する場合は自動的に削除して置き換える
 func (s *UploadService) UploadProfileImage(userID int, file *multipart.FileHeader) (string, error) {
 	if file == nil {
 		s.logger.Warn("アップロードファイルが指定されていない")
 		return "", ErrNoFiles
 	}
 
-	// 保存先ディレクトリの確保
-	if err := os.MkdirAll(profileUploadDir, 0755); err != nil {
-		s.logger.Error("ディレクトリ作成失敗", "error", err, "path", profileUploadDir)
-		return "", fmt.Errorf("ディレクトリの作成に失敗しました")
+	// 既存のプロフィール画像を確認し、存在する場合は置き換え（削除）
+	existingUploads, err := s.uploadRepo.GetByUserID(userID)
+	if err != nil && !errors.Is(err, repositories.ErrUploadNotFound) {
+		s.logger.Error("既存プロフィール画像確認失敗",
+			"method", "UploadProfileImage",
+			"user_id", userID,
+			"error", err)
+		return "", fmt.Errorf("プロフィール画像の確認に失敗しました")
 	}
-
-	// ファイルサイズチェック
-	if file.Size > maxFileSize {
-		s.logger.Warn("ファイルサイズ超過",
-			"filename", file.Filename,
-			"size", file.Size,
-			"max", maxFileSize)
-		return "", fmt.Errorf("%w: %s", ErrFileTooLarge, file.Filename)
-	}
-
-	// ファイルを開く
-	f, err := file.Open()
-	if err != nil {
-		s.logger.Error("ファイルオープン失敗", "error", err, "filename", file.Filename)
-		return "", fmt.Errorf("ファイルの読み込みに失敗しました")
-	}
-	defer func() { _ = f.Close() }()
-
-	// MIMEタイプチェック（実データから検証）
-	buffer := make([]byte, 512)
-	n, err := f.Read(buffer)
-	if err != nil && err != io.EOF {
-		s.logger.Error("ファイル読み込み失敗", "error", err, "filename", file.Filename)
-		return "", fmt.Errorf("ファイルの読み込みに失敗しました")
-	}
-	detectedType := http.DetectContentType(buffer[:n])
-	if !allowedMimeTypes[detectedType] {
-		s.logger.Warn("不正なファイル形式",
-			"filename", file.Filename,
-			"detectedType", detectedType)
-		return "", fmt.Errorf("%w: %s (検出: %s)", ErrInvalidFileType, file.Filename, detectedType)
-	}
-
-	// ファイルポインタを先頭に戻す
-	if _, err := f.Seek(0, 0); err != nil {
-		s.logger.Error("ファイルシーク失敗", "error", err, "filename", file.Filename)
-		return "", fmt.Errorf("ファイルの読み込みに失敗しました")
-	}
-
-	// MIMEタイプから拡張子を決定（セキュリティ向上）
-	ext := getExtensionFromMIME(detectedType)
-	if ext == "" {
-		s.logger.Warn("サポートされていないMIMEタイプ", "filename", file.Filename, "mimeType", detectedType)
-		return "", fmt.Errorf("%w: %s", ErrInvalidExtension, detectedType)
-	}
-
-	timestamp := time.Now().Format("20060102")
-	filename := fmt.Sprintf("%s_%s.%s", timestamp, uuid.New().String(), ext)
-	savePath := filepath.Join(profileUploadDir, filename)
-
-	// ファイル保存
-	dst, err := os.Create(savePath)
-	if err != nil {
-		s.logger.Error("ファイル作成失敗", "error", err, "path", savePath)
-		return "", fmt.Errorf("ファイルの保存に失敗しました")
-	}
-
-	_, copyErr := io.Copy(dst, f)
-	_ = dst.Close()
-
-	if copyErr != nil {
-		s.logger.Error("ファイル書き込み失敗", "error", copyErr, "path", savePath)
-		if removeErr := os.Remove(savePath); removeErr != nil {
-			s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
+	for _, upload := range existingUploads {
+		if upload.Status != "deleted" && strings.HasPrefix(upload.FilePath, "/images/profiles/") {
+			// ディスク上のファイルを削除
+			relativePath := strings.TrimPrefix(upload.FilePath, "/")
+			diskPath := filepath.Join("public", relativePath)
+			if removeErr := os.Remove(diskPath); removeErr != nil {
+				s.logger.Warn("既存プロフィール画像削除失敗",
+					"user_id", userID,
+					"path", diskPath,
+					"error", removeErr)
+			}
+			// DBのステータスを'deleted'に更新
+			if statusErr := s.uploadRepo.UpdateStatus(upload.ID, "deleted"); statusErr != nil {
+				s.logger.Warn("既存プロフィール画像DB更新失敗",
+					"user_id", userID,
+					"upload_id", upload.ID,
+					"error", statusErr)
+			}
+			s.logger.Info("既存プロフィール画像を削除（置き換え）",
+				"user_id", userID,
+				"old_path", upload.FilePath)
 		}
-		return "", fmt.Errorf("ファイルの保存に失敗しました")
 	}
 
-	// URLを生成（publicからの相対パス）
-	url := fmt.Sprintf("/images/profiles/%s", filename)
-
-	// DB記録を作成
-	uploadRecord := models.UploadDB{
-		UserID:       userID,
-		FilePath:     url,
-		OriginalName: file.Filename,
-		MimeType:     detectedType,
-		FileSize:     file.Size,
-		Status:       "uploaded",
-		CreatedAt:    time.Now(),
+	result, err := s.saveImageFile(userID, file, profileUploadDir, "/images/profiles/")
+	if err != nil {
+		return "", err
 	}
 
-	// DBに保存
-	if err := s.uploadRepo.Create(&uploadRecord); err != nil {
-		s.logger.Error("DB保存失敗", "error", err, "path", url)
-		if removeErr := os.Remove(savePath); removeErr != nil {
-			s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
-		}
-		return "", fmt.Errorf("画像情報の保存に失敗しました")
-	}
-
-	s.logger.Info("プロフィール画像アップロード成功",
-		"user_id", userID,
-		"filename", file.Filename,
-		"savedAs", filename,
-		"size", file.Size)
-
-	return url, nil
+	return result.uploadRecord.FilePath, nil
 }
+
