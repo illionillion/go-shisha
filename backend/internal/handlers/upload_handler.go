@@ -61,6 +61,11 @@ func (h *UploadHandler) UploadImages(c *gin.Context) {
 	form, err := c.MultipartForm()
 	if err != nil {
 		h.logger.Error("フォーム取得失敗", "error", err)
+		var maxBytesErr *http.MaxBytesError
+		if errors.As(err, &maxBytesErr) {
+			c.JSON(http.StatusRequestEntityTooLarge, models.PayloadTooLargeError{Error: models.ErrCodePayloadTooLarge})
+			return
+		}
 		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 		return
 	}
@@ -141,6 +146,11 @@ func (h *UploadHandler) UploadProfileImage(c *gin.Context) {
 	form, err := c.MultipartForm()
 	if err != nil {
 		h.logger.Error("フォーム取得失敗", "error", err)
+		var maxBytesErr *http.MaxBytesError
+		if errors.As(err, &maxBytesErr) {
+			c.JSON(http.StatusRequestEntityTooLarge, models.PayloadTooLargeError{Error: models.ErrCodePayloadTooLarge})
+			return
+		}
 		c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 		return
 	}

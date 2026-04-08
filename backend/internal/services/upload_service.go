@@ -129,10 +129,17 @@ func (s *UploadService) saveImageFile(userID int, fileHeader *multipart.FileHead
 	}
 
 	_, copyErr := io.Copy(dst, file)
-	_ = dst.Close()
+	closeErr := dst.Close()
 
 	if copyErr != nil {
 		s.logger.Error("ファイル書き込み失敗", "error", copyErr, "path", savePath)
+		if removeErr := os.Remove(savePath); removeErr != nil {
+			s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
+		}
+		return nil, fmt.Errorf("ファイルの保存に失敗しました")
+	}
+	if closeErr != nil {
+		s.logger.Error("ファイルクローズ失敗", "error", closeErr, "path", savePath)
 		if removeErr := os.Remove(savePath); removeErr != nil {
 			s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
 		}
@@ -234,42 +241,56 @@ func (s *UploadService) UploadProfileImage(userID int, file *multipart.FileHeade
 		return "", ErrNoFiles
 	}
 
-	// 既存のプロフィール画像を確認し、存在する場合は置き換え（削除）
+	// 既存のプロフィール画像を確認（置き換え対象を収集）
+	// GetByUserIDはFindを使用するため、0件の場合もエラーなし（[]と nil を返す）
 	existingUploads, err := s.uploadRepo.GetByUserID(userID)
-	if err != nil && !errors.Is(err, repositories.ErrUploadNotFound) {
+	if err != nil {
 		s.logger.Error("既存プロフィール画像確認失敗",
 			"method", "UploadProfileImage",
 			"user_id", userID,
 			"error", err)
 		return "", fmt.Errorf("プロフィール画像の確認に失敗しました")
 	}
-	for _, upload := range existingUploads {
-		if upload.Status != "deleted" && strings.HasPrefix(upload.FilePath, "/images/profiles/") {
-			// ディスク上のファイルを削除
-			relativePath := strings.TrimPrefix(upload.FilePath, "/")
-			diskPath := filepath.Join("public", relativePath)
-			if removeErr := os.Remove(diskPath); removeErr != nil {
-				s.logger.Warn("既存プロフィール画像削除失敗",
-					"user_id", userID,
-					"path", diskPath,
-					"error", removeErr)
-			}
-			// DBのステータスを'deleted'に更新
-			if statusErr := s.uploadRepo.UpdateStatus(upload.ID, "deleted"); statusErr != nil {
-				s.logger.Warn("既存プロフィール画像DB更新失敗",
-					"user_id", userID,
-					"upload_id", upload.ID,
-					"error", statusErr)
-			}
-			s.logger.Info("既存プロフィール画像を削除（置き換え）",
-				"user_id", userID,
-				"old_path", upload.FilePath)
-		}
-	}
 
+	// 先に新規画像をアップロード（成功後に旧画像を削除することで、失敗時のデータ消失を防ぐ）
 	result, err := s.saveImageFile(userID, file, profileUploadDir, "/images/profiles/")
 	if err != nil {
 		return "", err
+	}
+
+	// 新規アップロード成功後に旧プロフィール画像を削除
+	profilesBase := filepath.Clean(profileUploadDir)
+	for _, upload := range existingUploads {
+		if upload.Status == "deleted" || !strings.HasPrefix(upload.FilePath, "/images/profiles/") {
+			continue
+		}
+		// パストラバーサル防止: public/images/profiles 配下のファイルであることを検証
+		relativePath := strings.TrimPrefix(upload.FilePath, "/")
+		diskPath := filepath.Clean(filepath.Join("public", relativePath))
+		rel, relErr := filepath.Rel(profilesBase, diskPath)
+		if relErr != nil || strings.HasPrefix(rel, "..") || filepath.IsAbs(rel) {
+			s.logger.Warn("不正なパスをスキップ（パストラバーサル防止）",
+				"user_id", userID,
+				"file_path", upload.FilePath)
+			continue
+		}
+		// ディスク上のファイルを削除
+		if removeErr := os.Remove(diskPath); removeErr != nil {
+			s.logger.Warn("既存プロフィール画像削除失敗",
+				"user_id", userID,
+				"path", diskPath,
+				"error", removeErr)
+		}
+		// DBのステータスを'deleted'に更新
+		if statusErr := s.uploadRepo.UpdateStatus(upload.ID, "deleted"); statusErr != nil {
+			s.logger.Warn("既存プロフィール画像DB更新失敗",
+				"user_id", userID,
+				"upload_id", upload.ID,
+				"error", statusErr)
+		}
+		s.logger.Info("既存プロフィール画像を削除（置き換え）",
+			"user_id", userID,
+			"old_path", upload.FilePath)
 	}
 
 	return result.uploadRecord.FilePath, nil
