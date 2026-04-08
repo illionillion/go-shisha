@@ -8,6 +8,7 @@ import (
 	"go-shisha-backend/internal/repositories"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // UploadRepository はアップロードデータ操作を扱う
@@ -106,4 +107,44 @@ func (r *UploadRepository) DeleteUnusedOlderThan(duration time.Duration) (int64,
 	threshold := time.Now().Add(-duration)
 	result := r.db.Where("status = ? AND created_at < ?", "uploaded", threshold).Delete(&models.UploadDB{})
 	return result.RowsAffected, result.Error
+}
+
+// ReplaceProfileImage はトランザクション内でプロフィール画像を原子的に置き換える。
+// FOR UPDATE でユーザーの既存プロフィール画像をロックしてから deleted 状態に更新し、
+// 新規レコードを作成する。これにより同一ユーザーの同時リクエストでも「1枚のみ」が保証される。
+// 削除された旧レコードのファイルパス一覧を返す（ディスク上のファイル削除は呼び出し元が行う）。
+func (r *UploadRepository) ReplaceProfileImage(newUpload *models.UploadDB) ([]string, error) {
+	var oldPaths []string
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		// ユーザーの既存プロフィール画像を FOR UPDATE でロック
+		// READ COMMITTED 分離レベルにより、別トランザクションがコミット済みのレコードも検出できる
+		var existing []models.UploadDB
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("user_id = ? AND status != ? AND file_path LIKE ?",
+				newUpload.UserID, "deleted", repositories.ProfileImageURLPrefix+"%").
+			Find(&existing).Error; err != nil {
+			return err
+		}
+
+		// 既存レコードを deleted 状態に更新
+		if len(existing) > 0 {
+			ids := make([]int, len(existing))
+			for i, u := range existing {
+				ids[i] = u.ID
+				oldPaths = append(oldPaths, u.FilePath)
+			}
+			if err := tx.Model(&models.UploadDB{}).
+				Where("id IN ?", ids).
+				Update("status", "deleted").Error; err != nil {
+				return err
+			}
+		}
+
+		// 新規レコードを作成
+		return tx.Create(newUpload).Error
+	})
+	if err != nil {
+		return nil, err
+	}
+	return oldPaths, nil
 }

@@ -181,7 +181,7 @@ func (h *UploadHandler) UploadProfileImage(c *gin.Context) {
 		h.logger.Error("プロフィール画像アップロード失敗",
 			"error", err,
 			"user_id", userID)
-		if errors.Is(err, services.ErrNoFiles) || errors.Is(err, services.ErrTooManyProfileImages) ||
+		if errors.Is(err, services.ErrNoFiles) ||
 			errors.Is(err, services.ErrInvalidFileType) || errors.Is(err, services.ErrInvalidExtension) {
 			c.JSON(http.StatusBadRequest, models.ValidationError{Error: models.ErrCodeValidationFailed})
 			return

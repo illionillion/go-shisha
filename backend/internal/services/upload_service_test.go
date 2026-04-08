@@ -64,6 +64,11 @@ func (m *MockUploadRepository) DeleteUnusedOlderThan(duration time.Duration) (in
 	return args.Get(0).(int64), args.Error(1)
 }
 
+func (m *MockUploadRepository) ReplaceProfileImage(newUpload *models.UploadDB) ([]string, error) {
+	args := m.Called(newUpload)
+	return args.Get(0).([]string), args.Error(1)
+}
+
 func TestUploadService_UploadImages(t *testing.T) {
 	// テスト用ロガー
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -273,9 +278,8 @@ func TestUploadService_UploadProfileImage(t *testing.T) {
 	t.Run("正常系_プロフィール画像アップロード（既存なし）", func(t *testing.T) {
 		mockRepo := new(MockUploadRepository)
 		service := NewUploadService(mockRepo, logger)
-		// GetByUserID: 既存画像なし
-		mockRepo.On("GetByUserID", 1).Return([]models.UploadDB{}, nil).Once()
-		mockRepo.On("Create", mock.AnythingOfType("*models.UploadDB")).Return(nil).Once()
+		// ReplaceProfileImage: 既存画像なし → 旧パス空で返す
+		mockRepo.On("ReplaceProfileImage", mock.AnythingOfType("*models.UploadDB")).Return([]string{}, nil).Once()
 
 		file := createTestImageFile(t, testFile{filename: "profile.jpg", contentType: "image/jpeg", size: 1024})
 
@@ -294,16 +298,9 @@ func TestUploadService_UploadProfileImage(t *testing.T) {
 		mockRepo := new(MockUploadRepository)
 		service := NewUploadService(mockRepo, logger)
 
-		// 既存プロフィール画像レコード（statusがuploaded）
-		existing := models.UploadDB{
-			ID:       99,
-			UserID:   1,
-			FilePath: "/images/profiles/existing.jpg",
-			Status:   "uploaded",
-		}
-		mockRepo.On("GetByUserID", 1).Return([]models.UploadDB{existing}, nil).Once()
-		mockRepo.On("UpdateStatus", 99, "deleted").Return(nil).Once()
-		mockRepo.On("Create", mock.AnythingOfType("*models.UploadDB")).Return(nil).Once()
+		// ReplaceProfileImage: 既存画像のパスを返す（トランザクション内で削除済み）
+		mockRepo.On("ReplaceProfileImage", mock.AnythingOfType("*models.UploadDB")).
+			Return([]string{"/images/profiles/existing.jpg"}, nil).Once()
 
 		file := createTestImageFile(t, testFile{filename: "new_profile.jpg", contentType: "image/jpeg", size: 1024})
 
@@ -318,15 +315,9 @@ func TestUploadService_UploadProfileImage(t *testing.T) {
 		mockRepo := new(MockUploadRepository)
 		service := NewUploadService(mockRepo, logger)
 
-		// 既存のプロフィール画像だが status='deleted'
-		deleted := models.UploadDB{
-			ID:       88,
-			UserID:   1,
-			FilePath: "/images/profiles/old.jpg",
-			Status:   "deleted",
-		}
-		mockRepo.On("GetByUserID", 1).Return([]models.UploadDB{deleted}, nil).Once()
-		mockRepo.On("Create", mock.AnythingOfType("*models.UploadDB")).Return(nil).Once()
+		// ReplaceProfileImage: deleted 状態のレコードはリポジトリ側で無視されるため旧パス空
+		mockRepo.On("ReplaceProfileImage", mock.AnythingOfType("*models.UploadDB")).
+			Return([]string{}, nil).Once()
 
 		file := createTestImageFile(t, testFile{filename: "profile.jpg", contentType: "image/jpeg", size: 1024})
 
@@ -340,7 +331,6 @@ func TestUploadService_UploadProfileImage(t *testing.T) {
 	t.Run("異常系_ファイルサイズ超過", func(t *testing.T) {
 		mockRepo := new(MockUploadRepository)
 		service := NewUploadService(mockRepo, logger)
-		mockRepo.On("GetByUserID", 1).Return([]models.UploadDB{}, nil).Once()
 
 		file := createTestImageFile(t, testFile{filename: "large.jpg", contentType: "image/jpeg", size: 11 * 1024 * 1024})
 
@@ -355,7 +345,6 @@ func TestUploadService_UploadProfileImage(t *testing.T) {
 	t.Run("異常系_不正なファイル形式", func(t *testing.T) {
 		mockRepo := new(MockUploadRepository)
 		service := NewUploadService(mockRepo, logger)
-		mockRepo.On("GetByUserID", 1).Return([]models.UploadDB{}, nil).Once()
 
 		file := createTestImageFile(t, testFile{filename: "test.txt", contentType: "text/plain", size: 1024})
 
@@ -370,8 +359,8 @@ func TestUploadService_UploadProfileImage(t *testing.T) {
 	t.Run("異常系_DB保存失敗", func(t *testing.T) {
 		mockRepo := new(MockUploadRepository)
 		service := NewUploadService(mockRepo, logger)
-		mockRepo.On("GetByUserID", 1).Return([]models.UploadDB{}, nil).Once()
-		mockRepo.On("Create", mock.AnythingOfType("*models.UploadDB")).Return(errors.New("DB error")).Once()
+		mockRepo.On("ReplaceProfileImage", mock.AnythingOfType("*models.UploadDB")).
+			Return([]string{}, errors.New("DB error")).Once()
 
 		file := createTestImageFile(t, testFile{filename: "profile.jpg", contentType: "image/jpeg", size: 1024})
 
@@ -379,7 +368,7 @@ func TestUploadService_UploadProfileImage(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.Empty(t, url)
-		assert.Contains(t, err.Error(), "画像情報の保存に失敗しました")
+		assert.Contains(t, err.Error(), "プロフィール画像の保存に失敗しました")
 		mockRepo.AssertExpectations(t)
 	})
 }

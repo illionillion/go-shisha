@@ -20,12 +20,11 @@ import (
 
 // カスタムエラー型
 var (
-	ErrNoFiles              = errors.New("ファイルが指定されていません")
-	ErrTooManyFiles         = errors.New("一度に10枚までアップロード可能です")
-	ErrTooManyProfileImages = errors.New("プロフィール画像は1枚のみアップロード可能です")
-	ErrFileTooLarge         = errors.New("ファイルサイズが10MBを超えています")
-	ErrInvalidFileType      = errors.New("サポートされていないファイル形式です")
-	ErrInvalidExtension     = errors.New("サポートされていない拡張子です")
+	ErrNoFiles          = errors.New("ファイルが指定されていません")
+	ErrTooManyFiles     = errors.New("一度に10枚までアップロード可能です")
+	ErrFileTooLarge     = errors.New("ファイルサイズが10MBを超えています")
+	ErrInvalidFileType  = errors.New("サポートされていないファイル形式です")
+	ErrInvalidExtension = errors.New("サポートされていない拡張子です")
 )
 
 // UploadService 画像アップロードサービス
@@ -63,9 +62,9 @@ type savedFileResult struct {
 	savePath     string
 }
 
-// saveImageFile 1ファイルのバリデーション・保存・DB登録を行う内部ヘルパー
-// dir にファイルを保存し、urlPrefix + ファイル名 をURLとして記録する
-func (s *UploadService) saveImageFile(userID int, fileHeader *multipart.FileHeader, dir, urlPrefix string) (*savedFileResult, error) {
+// saveImageFileToDisk 1ファイルのバリデーションとディスク保存を行い、DB登録前の状態を返す。
+// DB登録は行わないため、呼び出し元が Create または ReplaceProfileImage を選択できる。
+func (s *UploadService) saveImageFileToDisk(userID int, fileHeader *multipart.FileHeader, dir, urlPrefix string) (*savedFileResult, error) {
 	// ファイルサイズチェック
 	if fileHeader.Size > maxFileSize {
 		s.logger.Warn("ファイルサイズ超過",
@@ -149,7 +148,6 @@ func (s *UploadService) saveImageFile(userID int, fileHeader *multipart.FileHead
 	// URLを生成
 	url := urlPrefix + filename
 
-	// DB記録を作成・保存
 	uploadRecord := models.UploadDB{
 		UserID:       userID,
 		FilePath:     url,
@@ -159,10 +157,29 @@ func (s *UploadService) saveImageFile(userID int, fileHeader *multipart.FileHead
 		Status:       "uploaded",
 		CreatedAt:    time.Now(),
 	}
-	if err := s.uploadRepo.Create(&uploadRecord); err != nil {
-		s.logger.Error("DB保存失敗", "error", err, "path", url)
-		if removeErr := os.Remove(savePath); removeErr != nil {
-			s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", savePath)
+
+	s.logger.Info("画像ディスク保存成功",
+		"user_id", userID,
+		"filename", fileHeader.Filename,
+		"savedAs", filename,
+		"size", fileHeader.Size)
+
+	return &savedFileResult{uploadRecord: uploadRecord, savePath: savePath}, nil
+}
+
+// saveImageFile 1ファイルのバリデーション・保存・DB登録を行う内部ヘルパー
+// dir にファイルを保存し、urlPrefix + ファイル名 をURLとして記録する
+func (s *UploadService) saveImageFile(userID int, fileHeader *multipart.FileHeader, dir, urlPrefix string) (*savedFileResult, error) {
+	result, err := s.saveImageFileToDisk(userID, fileHeader, dir, urlPrefix)
+	if err != nil {
+		return nil, err
+	}
+
+	// DB記録を作成・保存
+	if err := s.uploadRepo.Create(&result.uploadRecord); err != nil {
+		s.logger.Error("DB保存失敗", "error", err, "path", result.uploadRecord.FilePath)
+		if removeErr := os.Remove(result.savePath); removeErr != nil {
+			s.logger.Warn("失敗ファイル削除エラー", "error", removeErr, "path", result.savePath)
 		}
 		return nil, fmt.Errorf("画像情報の保存に失敗しました")
 	}
@@ -170,10 +187,10 @@ func (s *UploadService) saveImageFile(userID int, fileHeader *multipart.FileHead
 	s.logger.Info("画像アップロード成功",
 		"user_id", userID,
 		"filename", fileHeader.Filename,
-		"savedAs", filename,
+		"savedAs", filepath.Base(result.savePath),
 		"size", fileHeader.Size)
 
-	return &savedFileResult{uploadRecord: uploadRecord, savePath: savePath}, nil
+	return result, nil
 }
 
 // UploadImages 複数の画像をアップロードする
@@ -234,65 +251,60 @@ func getExtensionFromMIME(mimeType string) string {
 }
 
 // UploadProfileImage プロフィール画像を1枚アップロードし、保存先URLを返す
-// 既存のプロフィール画像が存在する場合は自動的に削除して置き換える
+// 既存のプロフィール画像が存在する場合はトランザクション内で原子的に置き換える
 func (s *UploadService) UploadProfileImage(userID int, file *multipart.FileHeader) (string, error) {
 	if file == nil {
 		s.logger.Warn("アップロードファイルが指定されていない")
 		return "", ErrNoFiles
 	}
 
-	// 既存のプロフィール画像を確認（置き換え対象を収集）
-	// GetByUserIDはFindを使用するため、0件の場合もエラーなし（[]と nil を返す）
-	existingUploads, err := s.uploadRepo.GetByUserID(userID)
-	if err != nil {
-		s.logger.Error("既存プロフィール画像確認失敗",
-			"method", "UploadProfileImage",
-			"user_id", userID,
-			"error", err)
-		return "", fmt.Errorf("プロフィール画像の確認に失敗しました")
-	}
-
-	// 先に新規画像をアップロード（成功後に旧画像を削除することで、失敗時のデータ消失を防ぐ）
-	result, err := s.saveImageFile(userID, file, profileUploadDir, "/images/profiles/")
+	// バリデーションとディスク保存のみ行う（DB登録は ReplaceProfileImage でアトミックに実施）
+	pending, err := s.saveImageFileToDisk(userID, file, profileUploadDir, repositories.ProfileImageURLPrefix)
 	if err != nil {
 		return "", err
 	}
 
-	// 新規アップロード成功後に旧プロフィール画像を削除
-	profilesBase := filepath.Clean(profileUploadDir)
-	for _, upload := range existingUploads {
-		if upload.Status == "deleted" || !strings.HasPrefix(upload.FilePath, "/images/profiles/") {
-			continue
-		}
-		// パストラバーサル防止: public/images/profiles 配下のファイルであることを検証
-		relativePath := strings.TrimPrefix(upload.FilePath, "/")
-		diskPath := filepath.Clean(filepath.Join("public", relativePath))
-		rel, relErr := filepath.Rel(profilesBase, diskPath)
-		if relErr != nil || strings.HasPrefix(rel, "..") || filepath.IsAbs(rel) {
-			s.logger.Warn("不正なパスをスキップ（パストラバーサル防止）",
+	// トランザクション内でアトミックに旧画像を deleted に更新し、新規レコードを作成する。
+	// FOR UPDATE ロックにより同一ユーザーの同時リクエストでも「1枚のみ」が保証される。
+	oldPaths, err := s.uploadRepo.ReplaceProfileImage(&pending.uploadRecord)
+	if err != nil {
+		s.logger.Error("プロフィール画像DB置き換え失敗",
+			"user_id", userID,
+			"error", err)
+		// DB操作が失敗したため、先に保存したディスクファイルをロールバック
+		if removeErr := os.Remove(pending.savePath); removeErr != nil {
+			s.logger.Warn("ロールバック時ファイル削除失敗",
 				"user_id", userID,
-				"file_path", upload.FilePath)
+				"path", pending.savePath,
+				"error", removeErr)
+		}
+		return "", fmt.Errorf("プロフィール画像の保存に失敗しました")
+	}
+
+	// DB置き換え成功後、旧プロフィール画像のディスクファイルを削除（ベストエフォート）
+	// filepath.Base でファイル名のみを抽出することで、DB値に不正なパスが含まれていても
+	// profileUploadDir 配下にしか削除が及ばない（パストラバーサル防止）
+	for _, oldPath := range oldPaths {
+		baseName := filepath.Base(oldPath)
+		if baseName == "." || baseName == ".." {
+			s.logger.Warn("不正なベースネームをスキップ（パストラバーサル防止）",
+				"user_id", userID,
+				"file_path", oldPath)
 			continue
 		}
-		// ディスク上のファイルを削除
+		diskPath := filepath.Join(profileUploadDir, baseName)
 		if removeErr := os.Remove(diskPath); removeErr != nil {
 			s.logger.Warn("既存プロフィール画像削除失敗",
 				"user_id", userID,
 				"path", diskPath,
 				"error", removeErr)
-		}
-		// DBのステータスを'deleted'に更新
-		if statusErr := s.uploadRepo.UpdateStatus(upload.ID, "deleted"); statusErr != nil {
-			s.logger.Warn("既存プロフィール画像DB更新失敗",
+		} else {
+			s.logger.Info("既存プロフィール画像を削除（置き換え）",
 				"user_id", userID,
-				"upload_id", upload.ID,
-				"error", statusErr)
+				"old_path", oldPath)
 		}
-		s.logger.Info("既存プロフィール画像を削除（置き換え）",
-			"user_id", userID,
-			"old_path", upload.FilePath)
 	}
 
-	return result.uploadRecord.FilePath, nil
+	return pending.uploadRecord.FilePath, nil
 }
 
