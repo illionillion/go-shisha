@@ -147,7 +147,18 @@ func (r *UploadRepository) ReplaceProfileImage(newUpload *models.UploadDB) ([]st
 		}
 
 		// 新規レコードを作成
-		return tx.Create(newUpload).Error
+		if err := tx.Create(newUpload).Error; err != nil {
+			return err
+		}
+
+		// used 状態で作成する場合は used_at も同一トランザクション内で更新する
+		if newUpload.Status == "used" {
+			if err := tx.Model(newUpload).Update("used_at", time.Now()).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
 	})
 	if err != nil {
 		return nil, err
