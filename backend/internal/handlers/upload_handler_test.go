@@ -421,6 +421,80 @@ func TestUploadHandler_UploadProfileImage_InvalidUserIDType(t *testing.T) {
 	assert.Equal(t, models.ErrCodeInternalServer, response.Error)
 }
 
+// TestUploadHandler_UploadImages_MultipartFormMaxBytesError は
+// c.MultipartForm() が *http.MaxBytesError を返した場合に 413 が返ることを確認する
+func TestUploadHandler_UploadImages_MultipartFormMaxBytesError(t *testing.T) {
+	handler := &UploadHandler{
+		uploadService: &mockUploadService{},
+		logger:        logging.L,
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, _ := writer.CreateFormFile("images", "test.jpg")
+	_, _ = part.Write(make([]byte, 100))
+	_ = writer.Close()
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/images", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	w := httptest.NewRecorder()
+	// 1バイトに制限して MultipartForm が MaxBytesError を返すようにする
+	req.Body = http.MaxBytesReader(w, req.Body, 1)
+
+	router := setupTestRouter()
+	router.POST("/api/v1/uploads/images", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UploadImages(c)
+	})
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusRequestEntityTooLarge, w.Code)
+
+	var response models.PayloadTooLargeError
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodePayloadTooLarge, response.Error)
+}
+
+// TestUploadHandler_UploadProfileImage_MultipartFormMaxBytesError は
+// c.MultipartForm() が *http.MaxBytesError を返した場合に 413 が返ることを確認する
+func TestUploadHandler_UploadProfileImage_MultipartFormMaxBytesError(t *testing.T) {
+	handler := &UploadHandler{
+		uploadService: &mockUploadService{},
+		logger:        logging.L,
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, _ := writer.CreateFormFile("image", "profile.jpg")
+	_, _ = part.Write(make([]byte, 100))
+	_ = writer.Close()
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/uploads/profile-images", body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	w := httptest.NewRecorder()
+	// 1バイトに制限して MultipartForm が MaxBytesError を返すようにする
+	req.Body = http.MaxBytesReader(w, req.Body, 1)
+
+	router := setupTestRouter()
+	router.POST("/api/v1/uploads/profile-images", func(c *gin.Context) {
+		c.Set("user_id", 1)
+		handler.UploadProfileImage(c)
+	})
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusRequestEntityTooLarge, w.Code)
+
+	var response models.PayloadTooLargeError
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, models.ErrCodePayloadTooLarge, response.Error)
+}
+
 // クリーンアップ
 func TestMain(m *testing.M) {
 	code := m.Run()

@@ -8,7 +8,6 @@ import (
 	"go-shisha-backend/internal/repositories"
 
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 // UploadRepository はアップロードデータ操作を扱う
@@ -110,18 +109,25 @@ func (r *UploadRepository) DeleteUnusedOlderThan(duration time.Duration) (int64,
 }
 
 // ReplaceProfileImage はトランザクション内でプロフィール画像を原子的に置き換える。
-// FOR UPDATE でユーザーの既存プロフィール画像をロックしてから deleted 状態に更新し、
-// 新規レコードを作成する。これにより同一ユーザーの同時リクエストでも「1枚のみ」が保証される。
+// pg_advisory_xact_lock でユーザー単位の排他ロックを取得してから既存レコードを deleted 状態に更新し、
+// 新規レコードを作成する。advisory lock はトランザクション終了時に自動解放されるため
+// 同一ユーザーの並列リクエストが0件→複数件 insert するケースも確実に排除できる。
 // 削除された旧レコードのファイルパス一覧を返す（ディスク上のファイル削除は呼び出し元が行う）。
 func (r *UploadRepository) ReplaceProfileImage(newUpload *models.UploadDB) ([]string, error) {
 	var oldPaths []string
 	err := r.db.Transaction(func(tx *gorm.DB) error {
-		// ユーザーの既存プロフィール画像を FOR UPDATE でロック
-		// READ COMMITTED 分離レベルにより、別トランザクションがコミット済みのレコードも検出できる
+		// ユーザー単位の advisory lock（トランザクション自動解放）。
+		// FOR UPDATE と異なり既存行が0件でもロックが取得できるため、
+		// 初回アップロードの並列リクエストでも「1枚のみ」が保証される。
+		// pg_advisory_xact_lock は bigint (int64) を要求するため明示的にキャスト。
+		if err := tx.Exec("SELECT pg_advisory_xact_lock(?)", int64(newUpload.UserID)).Error; err != nil {
+			return err
+		}
+
+		// 既存プロフィール画像を検索（advisory lock で排他制御済みのため FOR UPDATE 不要）
 		var existing []models.UploadDB
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
-			Where("user_id = ? AND status != ? AND file_path LIKE ?",
-				newUpload.UserID, "deleted", repositories.ProfileImageURLPrefix+"%").
+		if err := tx.Where("user_id = ? AND status != ? AND file_path LIKE ?",
+			newUpload.UserID, "deleted", repositories.ProfileImageURLPrefix+"%").
 			Find(&existing).Error; err != nil {
 			return err
 		}

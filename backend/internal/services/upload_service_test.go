@@ -364,11 +364,19 @@ func TestUploadService_UploadProfileImage(t *testing.T) {
 
 		file := createTestImageFile(t, testFile{filename: "profile.jpg", contentType: "image/jpeg", size: 1024})
 
+		// 呼び出し前のファイル数を記録
+		beforeFiles, _ := filepath.Glob(profileUploadDir + "/*")
+		beforeCount := len(beforeFiles)
+
 		url, err := service.UploadProfileImage(1, file)
 
 		assert.Error(t, err)
 		assert.Empty(t, url)
 		assert.Contains(t, err.Error(), "プロフィール画像の保存に失敗しました")
 		mockRepo.AssertExpectations(t)
+
+		// ロールバック確認: DB失敗時にディスクファイルが増えていないこと
+		afterFiles, _ := filepath.Glob(profileUploadDir + "/*")
+		assert.Equal(t, beforeCount, len(afterFiles), "DB失敗時にディスクファイルがロールバックされていること")
 	})
 }
