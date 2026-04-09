@@ -215,7 +215,7 @@ func (m *mockUploadService) UploadImages(userID int, files []*multipart.FileHead
 }
 
 func (m *mockUploadService) UploadProfileImage(userID int, file *multipart.FileHeader) (string, error) {
-	return "/images/profiles/test.jpg", nil
+	return "/images/profiles/profile.jpg", nil
 }
 
 type mockUploadServiceFileTooLarge struct{}
