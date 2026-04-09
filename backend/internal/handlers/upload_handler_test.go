@@ -352,7 +352,11 @@ func TestUploadHandler_UploadProfileImage_Success(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Contains(t, w.Body.String(), "url")
+
+	var response models.UploadProfileImageResponse
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "/images/profiles/profile.jpg", response.URL)
 }
 
 func TestUploadHandler_UploadProfileImage_FileTooLarge(t *testing.T) {
