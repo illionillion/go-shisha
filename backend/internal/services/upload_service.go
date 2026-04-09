@@ -264,8 +264,13 @@ func (s *UploadService) UploadProfileImage(userID int, file *multipart.FileHeade
 		return "", err
 	}
 
+	// プロフィール画像は常に使用中とみなすため "used" に設定する。
+	// "uploaded" のままにすると DeleteUnusedOlderThan の対象になり、誤って削除される恐れがある。
+	pending.uploadRecord.Status = "used"
+
 	// トランザクション内でアトミックに旧画像を deleted に更新し、新規レコードを作成する。
-	// FOR UPDATE ロックにより同一ユーザーの同時リクエストでも「1枚のみ」が保証される。
+	// pg_advisory_xact_lock によりユーザー単位の排他ロックを取得し、
+	// 初回アップロード時（既存行0件）の並列リクエストでも「1枚のみ」が保証される。
 	oldPaths, err := s.uploadRepo.ReplaceProfileImage(&pending.uploadRecord)
 	if err != nil {
 		s.logger.Error("プロフィール画像DB置き換え失敗",
