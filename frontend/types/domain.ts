@@ -23,7 +23,9 @@ import type { GoShishaBackendInternalModelsUnauthorizedError } from "@/api/model
 import { GoShishaBackendInternalModelsUnauthorizedErrorError } from "@/api/model/goShishaBackendInternalModelsUnauthorizedErrorError";
 import type { GoShishaBackendInternalModelsUpdatePostInput } from "@/api/model/goShishaBackendInternalModelsUpdatePostInput";
 import type { GoShishaBackendInternalModelsUpdateSlideInput } from "@/api/model/goShishaBackendInternalModelsUpdateSlideInput";
+import type { GoShishaBackendInternalModelsUpdateUserInput } from "@/api/model/goShishaBackendInternalModelsUpdateUserInput";
 import type { GoShishaBackendInternalModelsUploadImagesResponse } from "@/api/model/goShishaBackendInternalModelsUploadImagesResponse";
+import type { GoShishaBackendInternalModelsUploadProfileImageResponse } from "@/api/model/goShishaBackendInternalModelsUploadProfileImageResponse";
 import type { GoShishaBackendInternalModelsUser } from "@/api/model/goShishaBackendInternalModelsUser";
 import type { GoShishaBackendInternalModelsValidationError } from "@/api/model/goShishaBackendInternalModelsValidationError";
 import { GoShishaBackendInternalModelsValidationErrorError } from "@/api/model/goShishaBackendInternalModelsValidationErrorError";
@@ -113,6 +115,15 @@ export const PayloadTooLargeErrorCode = GoShishaBackendInternalModelsPayloadTooL
 /** ユーザー情報 */
 export type User = GoShishaBackendInternalModelsUser;
 
+/**
+ * プロフィール更新入力（PATCH /api/v1/users/me のリクエストボディ）
+ * - display_name: 表示名（省略可）
+ * - description: 自己紹介文（省略可）
+ * - external_url: 外部URL（省略可、http(s)://...のみ許可）
+ * - icon_url: アイコン画像URL（省略可、/images/... または http(s)://...）
+ */
+export type UpdateUserInput = GoShishaBackendInternalModelsUpdateUserInput;
+
 // ========================================
 // 投稿関連
 // ========================================
@@ -177,6 +188,13 @@ export type Flavor = GoShishaBackendInternalModelsFlavor;
  * - 画像アップロードUI（ImageUploader）で使用
  */
 export type UploadImagesResponse = GoShishaBackendInternalModelsUploadImagesResponse;
+
+/**
+ * プロフィール画像アップロードレスポンス（アップロードされた画像のURLを含む）
+ * - url: アップロード成功したプロフィール画像のパス
+ * - POST /api/v1/uploads/profile-images のレスポンス
+ */
+export type UploadProfileImageResponse = GoShishaBackendInternalModelsUploadProfileImageResponse;
 
 // ========================================
 // フロントエンド専用型（API非依存）
