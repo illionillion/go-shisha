@@ -223,6 +223,11 @@ definitions:
           type: string
         type: array
     type: object
+  go-shisha-backend_internal_models.UploadProfileImageResponse:
+    properties:
+      url:
+        type: string
+    type: object
   go-shisha-backend_internal_models.User:
     properties:
       description:
@@ -737,6 +742,45 @@ paths:
       security:
       - BearerAuth: []
       summary: 画像アップロード
+      tags:
+      - uploads
+  /uploads/profile-images:
+    post:
+      consumes:
+      - multipart/form-data
+      description: プロフィール画像を1枚アップロードし、保存されたURLを返却します
+      parameters:
+      - description: アップロードするプロフィール画像（1枚のみ）
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.UploadProfileImageResponse'
+        "400":
+          description: バリデーションエラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ValidationError'
+        "401":
+          description: 認証エラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.UnauthorizedError'
+        "413":
+          description: ファイルサイズ超過
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.PayloadTooLargeError'
+        "500":
+          description: サーバーエラー
+          schema:
+            $ref: '#/definitions/go-shisha-backend_internal_models.ServerError'
+      security:
+      - BearerAuth: []
+      summary: プロフィール画像アップロード
       tags:
       - uploads
   /users:

@@ -743,6 +743,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/uploads/profile-images": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "プロフィール画像を1枚アップロードし、保存されたURLを返却します",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "uploads"
+                ],
+                "summary": "プロフィール画像アップロード",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "アップロードするプロフィール画像（1枚のみ）",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UploadProfileImageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "バリデーションエラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ValidationError"
+                        }
+                    },
+                    "401": {
+                        "description": "認証エラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.UnauthorizedError"
+                        }
+                    },
+                    "413": {
+                        "description": "ファイルサイズ超過",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.PayloadTooLargeError"
+                        }
+                    },
+                    "500": {
+                        "description": "サーバーエラー",
+                        "schema": {
+                            "$ref": "#/definitions/go-shisha-backend_internal_models.ServerError"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "全てのユーザーの一覧を取得します（総数付き）",
@@ -1254,6 +1315,14 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "go-shisha-backend_internal_models.UploadProfileImageResponse": {
+            "type": "object",
+            "properties": {
+                "url": {
+                    "type": "string"
                 }
             }
         },

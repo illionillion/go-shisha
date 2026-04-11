@@ -133,6 +133,9 @@ func (m *mockUploadRepo) MarkAsUsed(filePath string) error                  { re
 func (m *mockUploadRepo) DeleteUnusedOlderThan(duration time.Duration) (int64, error) {
 	return 0, nil
 }
+func (m *mockUploadRepo) ReplaceProfileImage(newUpload *models.UploadDB) ([]string, error) {
+	return []string{}, nil
+}
 
 func TestCreatePost(t *testing.T) {
 	postSvc := NewPostService(&mockPostRepo{}, &mockUserRepoForPost{}, &mockFlavorRepo{}, &mockUploadRepo{})
