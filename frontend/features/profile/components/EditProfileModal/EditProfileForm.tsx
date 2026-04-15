@@ -11,10 +11,10 @@ import type { UpdateUserInput, User } from "@/types/domain";
 const editProfileSchema = z.object({
   display_name: z.string().max(50, "表示名は50文字以内で入力してください"),
   description: z.string().max(200, "自己紹介は200文字以内で入力してください"),
-  external_url: z.string().refine(
-    (v) => v === "" || /^https?:\/\/.+/.test(v),
-    "URLはhttp://またはhttps://で始まる必要があります"
-  ),
+  external_url: z.union([
+    z.string().url("URLはhttp://またはhttps://で始まる必要があります"),
+    z.literal(""),
+  ]),
   icon_url: z.string(),
 });
 

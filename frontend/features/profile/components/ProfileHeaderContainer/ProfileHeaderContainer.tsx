@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { useAuthStore } from "@/features/auth/stores/authStore";
-import type { User } from "@/types/domain";
 import { EditProfileModal } from "../EditProfileModal";
 
 export type ProfileHeaderContainerProps = {
@@ -50,19 +49,14 @@ export function ProfileHeaderContainer({
 
   const isOwner = currentUser?.id != null && currentUser.id === userId;
 
-  const initialUser: Pick<User, "display_name" | "description" | "external_url" | "icon_url"> = {
-    display_name: displayName ?? undefined,
-    description: bio ?? undefined,
-    external_url: externalUrl ?? undefined,
-    icon_url: iconUrl ?? undefined,
-  };
-
   const handleClose = () => {
+    // 保存成功時（useUpdateProfileのonSuccessから呼ばれる）: モーダルを閉じてページをリフレッシュし最新データを反映する
     setIsEditOpen(false);
     router.refresh();
   };
 
   const handleCancel = () => {
+    // キャンセル時: モーダルを閉じるだけ（サーバーデータの変更なし）
     setIsEditOpen(false);
   };
 
@@ -79,7 +73,12 @@ export function ProfileHeaderContainer({
       {isEditOpen && (
         <EditProfileModal
           userId={userId}
-          initialUser={initialUser}
+          initialUser={{
+            display_name: displayName ?? undefined,
+            description: bio ?? undefined,
+            external_url: externalUrl ?? undefined,
+            icon_url: iconUrl ?? undefined,
+          }}
           onClose={handleClose}
           onCancel={handleCancel}
         />
