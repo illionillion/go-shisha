@@ -2,6 +2,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, cleanup } from "@/test/utils";
 import type { UpdateUserInput } from "@/types/domain";
+import * as uploadsModule from "@/api/uploads";
 import * as useUpdateProfileModule from "../../hooks/useUpdateProfile";
 import { EditProfileModal } from "./EditProfileModal";
 
@@ -12,6 +13,9 @@ vi.mock("focus-trap-react", () => ({
 
 // useUpdateProfile をモック
 vi.mock("../../hooks/useUpdateProfile");
+
+// usePostUploadsProfileImages をモック
+vi.mock("@/api/uploads");
 
 /** テスト用ユーザー初期値 */
 const mockInitialUser = {
@@ -28,14 +32,24 @@ afterEach(() => {
 
 describe("EditProfileModal", () => {
   let mockOnUpdate: ReturnType<typeof vi.fn<(input: UpdateUserInput) => void>>;
+  let mockMutateAsync: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockOnUpdate = vi.fn();
+    mockMutateAsync = vi.fn().mockResolvedValue({
+      status: 200,
+      data: { url: "https://example.com/avatar.png" },
+    });
     vi.mocked(useUpdateProfileModule.useUpdateProfile).mockReturnValue({
       onUpdate: mockOnUpdate,
       isPending: false,
     });
+    vi.mocked(uploadsModule.usePostUploadsProfileImages).mockReturnValue({
+      mutateAsync: mockMutateAsync,
+      isPending: false,
+      isError: false,
+    } as unknown as ReturnType<typeof uploadsModule.usePostUploadsProfileImages>);
   });
 
   describe("基本的なレンダリング", () => {
@@ -91,6 +105,32 @@ describe("EditProfileModal", () => {
 
       const textarea = screen.getByLabelText("自己紹介");
       expect(textarea).toHaveValue("自己紹介文");
+    });
+
+    it("アバター画像変更ボタンが表示される", () => {
+      render(
+        <EditProfileModal
+          userId={1}
+          initialUser={mockInitialUser}
+          onClose={vi.fn()}
+          onCancel={vi.fn()}
+        />
+      );
+
+      expect(screen.getByLabelText("プロフィール画像を変更")).toBeInTheDocument();
+    });
+
+    it("icon_url の手入力フィールドは表示されない", () => {
+      render(
+        <EditProfileModal
+          userId={1}
+          initialUser={mockInitialUser}
+          onClose={vi.fn()}
+          onCancel={vi.fn()}
+        />
+      );
+
+      expect(screen.queryByLabelText("アイコン画像URL")).not.toBeInTheDocument();
     });
   });
 
@@ -198,6 +238,54 @@ describe("EditProfileModal", () => {
       await user.click(screen.getByRole("button", { name: "キャンセル" }));
 
       expect(onCancel).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("アバター画像アップロード", () => {
+    it("ファイル選択後にアップロードAPIが呼ばれる", async () => {
+      const user = userEvent.setup();
+
+      render(
+        <EditProfileModal
+          userId={1}
+          initialUser={mockInitialUser}
+          onClose={vi.fn()}
+          onCancel={vi.fn()}
+        />
+      );
+
+      const fileInput = screen.getByLabelText("プロフィール画像ファイル選択");
+      const file = new File(["dummy"], "avatar.png", { type: "image/png" });
+      await user.upload(fileInput, file);
+
+      expect(mockMutateAsync).toHaveBeenCalledWith({
+        data: { image: file },
+      });
+    });
+
+    it("アップロード失敗時にエラーメッセージが表示される", async () => {
+      const user = userEvent.setup();
+      mockMutateAsync.mockRejectedValueOnce(new Error("upload failed"));
+      vi.mocked(uploadsModule.usePostUploadsProfileImages).mockReturnValue({
+        mutateAsync: mockMutateAsync,
+        isPending: false,
+        isError: true,
+      } as unknown as ReturnType<typeof uploadsModule.usePostUploadsProfileImages>);
+
+      render(
+        <EditProfileModal
+          userId={1}
+          initialUser={mockInitialUser}
+          onClose={vi.fn()}
+          onCancel={vi.fn()}
+        />
+      );
+
+      const fileInput = screen.getByLabelText("プロフィール画像ファイル選択");
+      const file = new File(["dummy"], "avatar.png", { type: "image/png" });
+      await user.upload(fileInput, file);
+
+      expect(screen.getByText("画像のアップロードに失敗しました")).toBeInTheDocument();
     });
   });
 });
