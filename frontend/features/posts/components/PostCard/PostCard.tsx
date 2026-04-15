@@ -185,7 +185,7 @@ export function PostCard({
                 ])}
               >
                 <div
-                  key={index === currentSlideIndex ? `bar-${currentSlideIndex}` : index}
+                  key={index === currentSlideIndex ? `bar-${currentSlideIndex}` : `${index}`}
                   className={clsx([
                     "h-full",
                     "bg-white",
