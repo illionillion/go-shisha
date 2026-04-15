@@ -1,6 +1,6 @@
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, act } from "@/test/utils";
+import { render, screen, act, fireEvent } from "@/test/utils";
 import type { Post, PostPosts400 } from "@/types/domain";
 import { PostCard } from ".";
 
@@ -712,5 +712,49 @@ describe("PostCard", () => {
     // メニュー外をクリック
     await user.click(screen.getByTestId("outside"));
     expect(screen.queryByText("削除")).not.toBeInTheDocument();
+  });
+
+  it("手動切替後に旧タイマーによる自動スライドが発生しない", () => {
+    vi.useFakeTimers();
+
+    const multiSlidePost = {
+      ...mockPost,
+      slides: [
+        { image_url: "https://picsum.photos/400/600?random=1", text: "1枚目" },
+        { image_url: "https://picsum.photos/400/600?random=2", text: "2枚目" },
+        { image_url: "https://picsum.photos/400/600?random=3", text: "3枚目" },
+      ],
+    };
+
+    render(<PostCard post={multiSlidePost} onLike={() => {}} autoPlayInterval={3000} />);
+
+    // 初期スライドは1枚目
+    expect(screen.getByText("1枚目")).toBeInTheDocument();
+
+    // タイマー開始から1000ms後（まだ切り替わらない）に手動で次へ
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    act(() => {
+      fireEvent.click(screen.getByLabelText("次のスライド"));
+    });
+
+    // 手動切替直後: 2枚目が表示される
+    expect(screen.getByText("2枚目")).toBeInTheDocument();
+
+    // 旧タイマーの残り2000ms（計3000ms）が経過しても、3枚目に自動切替されないことを確認
+    // （旧タイマーがキャンセルされていれば、新しいタイマーは手動切替後から3000msで動く）
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(screen.getByText("2枚目")).toBeInTheDocument();
+
+    // 新タイマーの残り1000ms（合計3000ms）が経過すると3枚目に切り替わる
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(screen.getByText("3枚目")).toBeInTheDocument();
+
+    vi.useRealTimers();
   });
 });

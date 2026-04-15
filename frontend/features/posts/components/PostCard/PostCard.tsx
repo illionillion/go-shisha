@@ -101,7 +101,10 @@ export function PostCard({
     }, autoPlayInterval);
 
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
     };
   }, [hasMultipleSlides, slides.length, autoPlayInterval, currentSlideIndex]);
 
