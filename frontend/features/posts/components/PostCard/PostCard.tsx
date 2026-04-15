@@ -4,7 +4,7 @@ import { cva } from "class-variance-authority";
 import { clsx } from "clsx";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/Avatar/Avatar";
 import { FlavorLabel } from "@/components/FlavorLabel";
 import { HeartIcon, NextIcon, PrevIcon } from "@/components/icons";
@@ -85,6 +85,7 @@ export function PostCard({
 }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(post.is_liked || false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const slides = post.slides || [];
   const hasMultipleSlides = slides.length > 1;
   // 自分の投稿かつ onDelete が指定された場合のみメニューを表示
@@ -95,12 +96,12 @@ export function PostCard({
     if (!hasMultipleSlides) return;
 
     // スライド切り替えタイマー
-    const slideTimer = setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
     }, autoPlayInterval);
 
     return () => {
-      clearTimeout(slideTimer);
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, [hasMultipleSlides, slides.length, autoPlayInterval, currentSlideIndex]);
 
@@ -112,6 +113,7 @@ export function PostCard({
   const handlePrevSlide = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (timerRef.current) clearTimeout(timerRef.current);
     if (slides.length > 0) {
       setCurrentSlideIndex((prev) => (prev - 1 + slides.length) % slides.length);
     }
@@ -121,6 +123,7 @@ export function PostCard({
   const handleNextSlide = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (timerRef.current) clearTimeout(timerRef.current);
     if (slides.length > 0) {
       setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
     }
@@ -182,6 +185,7 @@ export function PostCard({
                 ])}
               >
                 <div
+                  key={index === currentSlideIndex ? `bar-${currentSlideIndex}` : index}
                   className={clsx([
                     "h-full",
                     "bg-white",
