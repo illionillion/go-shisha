@@ -19,8 +19,10 @@ import type {
   GoShishaBackendInternalModelsServerError,
   GoShishaBackendInternalModelsUnauthorizedError,
   GoShishaBackendInternalModelsUploadImagesResponse,
+  GoShishaBackendInternalModelsUploadProfileImageResponse,
   GoShishaBackendInternalModelsValidationError,
   PostUploadsImagesBody,
+  PostUploadsProfileImagesBody,
 } from "./model";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -166,4 +168,146 @@ export const usePostUploadsImages = <
   TContext
 > => {
   return useMutation(getPostUploadsImagesMutationOptions(options), queryClient);
+};
+/**
+ * プロフィール画像を1枚アップロードし、保存されたURLを返却します
+ * @summary プロフィール画像アップロード
+ */
+export type postUploadsProfileImagesResponse200 = {
+  data: GoShishaBackendInternalModelsUploadProfileImageResponse;
+  status: 200;
+};
+
+export type postUploadsProfileImagesResponse400 = {
+  data: GoShishaBackendInternalModelsValidationError;
+  status: 400;
+};
+
+export type postUploadsProfileImagesResponse401 = {
+  data: GoShishaBackendInternalModelsUnauthorizedError;
+  status: 401;
+};
+
+export type postUploadsProfileImagesResponse413 = {
+  data: GoShishaBackendInternalModelsPayloadTooLargeError;
+  status: 413;
+};
+
+export type postUploadsProfileImagesResponse500 = {
+  data: GoShishaBackendInternalModelsServerError;
+  status: 500;
+};
+
+export type postUploadsProfileImagesResponseSuccess = postUploadsProfileImagesResponse200 & {
+  headers: Headers;
+};
+export type postUploadsProfileImagesResponseError = (
+  | postUploadsProfileImagesResponse400
+  | postUploadsProfileImagesResponse401
+  | postUploadsProfileImagesResponse413
+  | postUploadsProfileImagesResponse500
+) & {
+  headers: Headers;
+};
+
+export type postUploadsProfileImagesResponse =
+  | postUploadsProfileImagesResponseSuccess
+  | postUploadsProfileImagesResponseError;
+
+export const getPostUploadsProfileImagesUrl = () => {
+  return `/uploads/profile-images`;
+};
+
+export const postUploadsProfileImages = async (
+  postUploadsProfileImagesBody: PostUploadsProfileImagesBody,
+  options?: RequestInit
+): Promise<postUploadsProfileImagesResponse> => {
+  const formData = new FormData();
+  formData.append(`image`, postUploadsProfileImagesBody.image);
+
+  return apiFetch<postUploadsProfileImagesResponse>(getPostUploadsProfileImagesUrl(), {
+    ...options,
+    method: "POST",
+    body: formData,
+  });
+};
+
+export const getPostUploadsProfileImagesMutationOptions = <
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsPayloadTooLargeError
+    | GoShishaBackendInternalModelsServerError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postUploadsProfileImages>>,
+    TError,
+    { data: PostUploadsProfileImagesBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postUploadsProfileImages>>,
+  TError,
+  { data: PostUploadsProfileImagesBody },
+  TContext
+> => {
+  const mutationKey = ["postUploadsProfileImages"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postUploadsProfileImages>>,
+    { data: PostUploadsProfileImagesBody }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postUploadsProfileImages(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostUploadsProfileImagesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postUploadsProfileImages>>
+>;
+export type PostUploadsProfileImagesMutationBody = PostUploadsProfileImagesBody;
+export type PostUploadsProfileImagesMutationError =
+  | GoShishaBackendInternalModelsValidationError
+  | GoShishaBackendInternalModelsUnauthorizedError
+  | GoShishaBackendInternalModelsPayloadTooLargeError
+  | GoShishaBackendInternalModelsServerError;
+
+/**
+ * @summary プロフィール画像アップロード
+ */
+export const usePostUploadsProfileImages = <
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsPayloadTooLargeError
+    | GoShishaBackendInternalModelsServerError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postUploadsProfileImages>>,
+      TError,
+      { data: PostUploadsProfileImagesBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof postUploadsProfileImages>>,
+  TError,
+  { data: PostUploadsProfileImagesBody },
+  TContext
+> => {
+  return useMutation(getPostUploadsProfileImagesMutationOptions(options), queryClient);
 };

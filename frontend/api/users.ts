@@ -6,15 +6,18 @@
 このAPIはシーシャの投稿、ユーザー管理を行います
  * OpenAPI spec version: 1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
@@ -23,6 +26,8 @@ import type {
   GoShishaBackendInternalModelsNotFoundError,
   GoShishaBackendInternalModelsPostsResponse,
   GoShishaBackendInternalModelsServerError,
+  GoShishaBackendInternalModelsUnauthorizedError,
+  GoShishaBackendInternalModelsUpdateUserInput,
   GoShishaBackendInternalModelsUser,
   GoShishaBackendInternalModelsUsersResponse,
   GoShishaBackendInternalModelsValidationError,
@@ -506,3 +511,131 @@ export function useGetUsersIdPosts<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * 認証ユーザー自身のプロフィール情報を更新します
+ * @summary 自分のプロフィール更新
+ */
+export type patchUsersMeResponse200 = {
+  data: GoShishaBackendInternalModelsUser;
+  status: 200;
+};
+
+export type patchUsersMeResponse400 = {
+  data: GoShishaBackendInternalModelsValidationError;
+  status: 400;
+};
+
+export type patchUsersMeResponse401 = {
+  data: GoShishaBackendInternalModelsUnauthorizedError;
+  status: 401;
+};
+
+export type patchUsersMeResponse500 = {
+  data: GoShishaBackendInternalModelsServerError;
+  status: 500;
+};
+
+export type patchUsersMeResponseSuccess = patchUsersMeResponse200 & {
+  headers: Headers;
+};
+export type patchUsersMeResponseError = (
+  | patchUsersMeResponse400
+  | patchUsersMeResponse401
+  | patchUsersMeResponse500
+) & {
+  headers: Headers;
+};
+
+export type patchUsersMeResponse = patchUsersMeResponseSuccess | patchUsersMeResponseError;
+
+export const getPatchUsersMeUrl = () => {
+  return `/users/me`;
+};
+
+export const patchUsersMe = async (
+  goShishaBackendInternalModelsUpdateUserInput: GoShishaBackendInternalModelsUpdateUserInput,
+  options?: RequestInit
+): Promise<patchUsersMeResponse> => {
+  return apiFetch<patchUsersMeResponse>(getPatchUsersMeUrl(), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(goShishaBackendInternalModelsUpdateUserInput),
+  });
+};
+
+export const getPatchUsersMeMutationOptions = <
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsServerError,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof patchUsersMe>>,
+    TError,
+    { data: GoShishaBackendInternalModelsUpdateUserInput },
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof patchUsersMe>>,
+  TError,
+  { data: GoShishaBackendInternalModelsUpdateUserInput },
+  TContext
+> => {
+  const mutationKey = ["patchUsersMe"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof patchUsersMe>>,
+    { data: GoShishaBackendInternalModelsUpdateUserInput }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return patchUsersMe(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PatchUsersMeMutationResult = NonNullable<Awaited<ReturnType<typeof patchUsersMe>>>;
+export type PatchUsersMeMutationBody = GoShishaBackendInternalModelsUpdateUserInput;
+export type PatchUsersMeMutationError =
+  | GoShishaBackendInternalModelsValidationError
+  | GoShishaBackendInternalModelsUnauthorizedError
+  | GoShishaBackendInternalModelsServerError;
+
+/**
+ * @summary 自分のプロフィール更新
+ */
+export const usePatchUsersMe = <
+  TError =
+    | GoShishaBackendInternalModelsValidationError
+    | GoShishaBackendInternalModelsUnauthorizedError
+    | GoShishaBackendInternalModelsServerError,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof patchUsersMe>>,
+      TError,
+      { data: GoShishaBackendInternalModelsUpdateUserInput },
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof patchUsersMe>>,
+  TError,
+  { data: GoShishaBackendInternalModelsUpdateUserInput },
+  TContext
+> => {
+  return useMutation(getPatchUsersMeMutationOptions(options), queryClient);
+};
