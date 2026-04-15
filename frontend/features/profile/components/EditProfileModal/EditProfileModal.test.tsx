@@ -1,8 +1,8 @@
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import * as uploadsModule from "@/api/uploads";
 import { render, screen, cleanup } from "@/test/utils";
 import type { UpdateUserInput } from "@/types/domain";
-import * as uploadsModule from "@/api/uploads";
 import * as useUpdateProfileModule from "../../hooks/useUpdateProfile";
 import { EditProfileModal } from "./EditProfileModal";
 
