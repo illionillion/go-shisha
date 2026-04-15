@@ -115,14 +115,7 @@ export function EditProfileForm({
         {errorMessage && (
           <div
             role="alert"
-            className={clsx([
-              "mb-4",
-              "rounded-md",
-              "bg-red-50",
-              "p-3",
-              "text-sm",
-              "text-red-600",
-            ])}
+            className={clsx(["mb-4", "rounded-md", "bg-red-50", "p-3", "text-sm", "text-red-600"])}
           >
             {errorMessage}
           </div>
@@ -285,9 +278,7 @@ export function EditProfileForm({
               ])}
             />
             {errors.icon_url && (
-              <p className={clsx(["mt-1", "text-sm", "text-red-600"])}>
-                {errors.icon_url.message}
-              </p>
+              <p className={clsx(["mt-1", "text-sm", "text-red-600"])}>{errors.icon_url.message}</p>
             )}
           </div>
         </div>
