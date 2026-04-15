@@ -113,7 +113,10 @@ export function PostCard({
   const handlePrevSlide = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (timerRef.current) clearTimeout(timerRef.current);
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
     if (slides.length > 0) {
       setCurrentSlideIndex((prev) => (prev - 1 + slides.length) % slides.length);
     }
@@ -123,7 +126,10 @@ export function PostCard({
   const handleNextSlide = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (timerRef.current) clearTimeout(timerRef.current);
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
     if (slides.length > 0) {
       setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
     }
