@@ -104,13 +104,13 @@ export function EditProfileForm({
     try {
       const url = await onUploadImage(file);
       setUploadedIconUrl(url);
-      // blob URLを解放してサーバーURLで更新
-      URL.revokeObjectURL(objectUrl);
       setPreviewUrl(getImageUrl(url));
     } catch {
       // アップロード失敗時はプレビューを元に戻す
-      URL.revokeObjectURL(objectUrl);
       setPreviewUrl(initialUser.icon_url ? getImageUrl(initialUser.icon_url) : undefined);
+    } finally {
+      // blob URLを解放
+      URL.revokeObjectURL(objectUrl);
     }
     // 同じファイルを再選択できるようにリセット
     e.target.value = "";
