@@ -74,7 +74,10 @@ export function EditProfileForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className={clsx(["flex", "flex-col", "h-full"])}>
+    <form
+      onSubmit={handleSubmit(handleFormSubmit)}
+      className={clsx(["flex", "flex-col", "h-full"])}
+    >
       {/* ヘッダー */}
       <div
         className={clsx([
