@@ -11,7 +11,7 @@ import { EditProfileForm } from "./EditProfileForm";
 export type EditProfileModalProps = Omit<EditProfileFormProps, "onSubmit" | "disabled"> & {
   /** 更新対象ユーザーのID */
   userId: number;
-  /** モーダルを閉じるコールバック */
+  /** 保存成功後にモーダルを閉じるコールバック */
   onClose: () => void;
 };
 
@@ -21,12 +21,15 @@ export type EditProfileModalProps = Omit<EditProfileFormProps, "onSubmit" | "dis
  * プロフィール情報（表示名・自己紹介・外部URL・アイコン画像URL）を編集するモーダルUI。
  * API呼び出し・キャッシュ更新・成功トーストを統合する。
  *
+ * - `onClose`: 保存成功後に呼ばれる（`useUpdateProfile.onSuccess` 経由）
+ * - `onCancel`: ESCキー・バックドロップクリック・キャンセルボタン押下時に呼ばれる
+ *
  * @example
  * ```tsx
  * <EditProfileModal
  *   userId={user.id}
  *   initialUser={user}
- *   onClose={() => setIsEditOpen(false)}
+ *   onClose={() => { setIsEditOpen(false); router.refresh(); }}
  *   onCancel={() => setIsEditOpen(false)}
  * />
  * ```
@@ -46,19 +49,19 @@ export function EditProfileModal({
     onUpdate(input);
   };
 
-  /** Escapeキーでモーダルを閉じる */
+  /** Escapeキーでキャンセル（保存中は無効） */
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && !isPending) {
         e.preventDefault();
-        onClose();
+        onCancel?.();
       }
     };
     document.addEventListener("keydown", handleEscape);
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [isPending, onClose]);
+  }, [isPending, onCancel]);
 
   return (
     <FocusTrap
@@ -81,11 +84,11 @@ export function EditProfileModal({
         aria-modal="true"
         aria-label="プロフィール編集"
       >
-        {/* バックドロップ */}
+        {/* バックドロップ: クリックでキャンセル（保存中は無効） */}
         <div
           className={clsx(["fixed", "inset-0", "bg-black/50"])}
           onClick={() => {
-            if (!isPending) onClose();
+            if (!isPending) onCancel?.();
           }}
           aria-hidden="true"
         />

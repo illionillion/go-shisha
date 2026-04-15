@@ -94,64 +94,64 @@ describe("EditProfileModal", () => {
   });
 
   describe("ESCキーとバックドロップ", () => {
-    it("ESCキーでonCloseが呼ばれる", async () => {
+    it("ESCキーでonCancelが呼ばれる", async () => {
       const user = userEvent.setup();
-      const onClose = vi.fn();
+      const onCancel = vi.fn();
 
       render(
         <EditProfileModal
           userId={1}
           initialUser={mockInitialUser}
-          onClose={onClose}
-          onCancel={vi.fn()}
+          onClose={vi.fn()}
+          onCancel={onCancel}
         />
       );
 
       await user.keyboard("{Escape}");
 
-      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(onCancel).toHaveBeenCalledTimes(1);
     });
 
-    it("バックドロップクリックでonCloseが呼ばれる", async () => {
+    it("バックドロップクリックでonCancelが呼ばれる", async () => {
       const user = userEvent.setup();
-      const onClose = vi.fn();
+      const onCancel = vi.fn();
 
       const { container } = render(
         <EditProfileModal
           userId={1}
           initialUser={mockInitialUser}
-          onClose={onClose}
-          onCancel={vi.fn()}
+          onClose={vi.fn()}
+          onCancel={onCancel}
         />
       );
 
       const backdrop = container.querySelector('[aria-hidden="true"]') as HTMLElement;
       await user.click(backdrop);
 
-      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(onCancel).toHaveBeenCalledTimes(1);
     });
 
-    it("isPendingがtrueのとき、ESCキーでonCloseが呼ばれない", async () => {
+    it("isPendingがtrueのとき、ESCキーでonCancelが呼ばれない", async () => {
       vi.mocked(useUpdateProfileModule.useUpdateProfile).mockReturnValue({
         onUpdate: mockOnUpdate,
         isPending: true,
       });
 
       const user = userEvent.setup();
-      const onClose = vi.fn();
+      const onCancel = vi.fn();
 
       render(
         <EditProfileModal
           userId={1}
           initialUser={mockInitialUser}
-          onClose={onClose}
-          onCancel={vi.fn()}
+          onClose={vi.fn()}
+          onCancel={onCancel}
         />
       );
 
       await user.keyboard("{Escape}");
 
-      expect(onClose).not.toHaveBeenCalled();
+      expect(onCancel).not.toHaveBeenCalled();
     });
   });
 

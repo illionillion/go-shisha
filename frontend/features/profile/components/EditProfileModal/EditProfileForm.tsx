@@ -15,7 +15,10 @@ const editProfileSchema = z.object({
     z.string().url("URLはhttp://またはhttps://で始まる必要があります"),
     z.literal(""),
   ]),
-  icon_url: z.string(),
+  icon_url: z.union([
+    z.string().url("URLはhttp://またはhttps://で始まる必要があります"),
+    z.literal(""),
+  ]),
 });
 
 type EditProfileFormValues = z.infer<typeof editProfileSchema>;
