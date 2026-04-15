@@ -8,13 +8,22 @@ interface Props {
   iconUrl?: string | null;
   bio?: string | null;
   externalUrl?: string | null;
+  /** 編集ボタンクリック時のコールバック。指定時のみ編集ボタンを表示する */
+  onEditClick?: () => void;
 }
 
 /**
  * ProfileHeader
- * - 表示専用のプロフィールヘッダー
+ * - プロフィールヘッダー
+ * - `onEditClick` を渡すと「プロフィールを編集」ボタンを表示する
  */
-export const ProfileHeader: FC<Props> = ({ displayName, iconUrl, bio: bioText, externalUrl }) => {
+export const ProfileHeader: FC<Props> = ({
+  displayName,
+  iconUrl,
+  bio: bioText,
+  externalUrl,
+  onEditClick,
+}) => {
   const name = displayName || "名無しのユーザー";
   const bio = bioText ?? "";
   const external = externalUrl ?? null;
@@ -36,6 +45,27 @@ export const ProfileHeader: FC<Props> = ({ displayName, iconUrl, bio: bioText, e
         <div className={clsx(["flex-1"])}>
           <div className={clsx(["flex", "items-center", "justify-between"])}>
             <h2 className={clsx(["text-2xl", "font-semibold", "text-gray-900"])}>{name}</h2>
+            {onEditClick && (
+              <button
+                type="button"
+                onClick={onEditClick}
+                className={clsx([
+                  "text-sm",
+                  "font-medium",
+                  "text-purple-600",
+                  "hover:text-purple-700",
+                  "border",
+                  "border-purple-300",
+                  "rounded-md",
+                  "px-3",
+                  "py-1.5",
+                  "hover:bg-purple-50",
+                  "transition-colors",
+                ])}
+              >
+                プロフィールを編集
+              </button>
+            )}
           </div>
           {bio && (
             <p className={clsx(["mt-2", "text-sm", "text-gray-700", "whitespace-pre-wrap"])}>

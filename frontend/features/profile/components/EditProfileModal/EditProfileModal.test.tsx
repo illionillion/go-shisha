@@ -1,0 +1,202 @@
+import userEvent from "@testing-library/user-event";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { render, screen, cleanup } from "@/test/utils";
+import * as useUpdateProfileModule from "../../hooks/useUpdateProfile";
+import { EditProfileModal } from "./EditProfileModal";
+
+// focus-trap-react をモック（子要素をそのままレンダリング）
+vi.mock("focus-trap-react", () => ({
+  FocusTrap: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+// useUpdateProfile をモック
+vi.mock("../../hooks/useUpdateProfile");
+
+/** テスト用ユーザー初期値 */
+const mockInitialUser = {
+  display_name: "テストユーザー",
+  description: "自己紹介文",
+  external_url: "https://example.com",
+  icon_url: "",
+};
+
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
+
+describe("EditProfileModal", () => {
+  let mockOnUpdate: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockOnUpdate = vi.fn();
+    vi.mocked(useUpdateProfileModule.useUpdateProfile).mockReturnValue({
+      onUpdate: mockOnUpdate,
+      isPending: false,
+    });
+  });
+
+  describe("基本的なレンダリング", () => {
+    it("dialog roleで表示される", () => {
+      render(
+        <EditProfileModal
+          userId={1}
+          initialUser={mockInitialUser}
+          onClose={vi.fn()}
+          onCancel={vi.fn()}
+        />
+      );
+
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+
+    it("モーダルの aria-label が 'プロフィール編集' である", () => {
+      render(
+        <EditProfileModal
+          userId={1}
+          initialUser={mockInitialUser}
+          onClose={vi.fn()}
+          onCancel={vi.fn()}
+        />
+      );
+
+      expect(screen.getByRole("dialog")).toHaveAttribute("aria-label", "プロフィール編集");
+    });
+
+    it("既存の表示名がプリセットされている", () => {
+      render(
+        <EditProfileModal
+          userId={1}
+          initialUser={mockInitialUser}
+          onClose={vi.fn()}
+          onCancel={vi.fn()}
+        />
+      );
+
+      const input = screen.getByLabelText("表示名");
+      expect(input).toHaveValue("テストユーザー");
+    });
+
+    it("既存の自己紹介がプリセットされている", () => {
+      render(
+        <EditProfileModal
+          userId={1}
+          initialUser={mockInitialUser}
+          onClose={vi.fn()}
+          onCancel={vi.fn()}
+        />
+      );
+
+      const textarea = screen.getByLabelText("自己紹介");
+      expect(textarea).toHaveValue("自己紹介文");
+    });
+  });
+
+  describe("ESCキーとバックドロップ", () => {
+    it("ESCキーでonCloseが呼ばれる", async () => {
+      const user = userEvent.setup();
+      const onClose = vi.fn();
+
+      render(
+        <EditProfileModal
+          userId={1}
+          initialUser={mockInitialUser}
+          onClose={onClose}
+          onCancel={vi.fn()}
+        />
+      );
+
+      await user.keyboard("{Escape}");
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it("バックドロップクリックでonCloseが呼ばれる", async () => {
+      const user = userEvent.setup();
+      const onClose = vi.fn();
+
+      const { container } = render(
+        <EditProfileModal
+          userId={1}
+          initialUser={mockInitialUser}
+          onClose={onClose}
+          onCancel={vi.fn()}
+        />
+      );
+
+      const backdrop = container.querySelector('[aria-hidden="true"]') as HTMLElement;
+      await user.click(backdrop);
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it("isPendingがtrueのとき、ESCキーでonCloseが呼ばれない", async () => {
+      vi.mocked(useUpdateProfileModule.useUpdateProfile).mockReturnValue({
+        onUpdate: mockOnUpdate,
+        isPending: true,
+      });
+
+      const user = userEvent.setup();
+      const onClose = vi.fn();
+
+      render(
+        <EditProfileModal
+          userId={1}
+          initialUser={mockInitialUser}
+          onClose={onClose}
+          onCancel={vi.fn()}
+        />
+      );
+
+      await user.keyboard("{Escape}");
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("フォーム送信", () => {
+    it("保存ボタンをクリックするとonUpdateが呼ばれる", async () => {
+      const user = userEvent.setup();
+
+      render(
+        <EditProfileModal
+          userId={1}
+          initialUser={mockInitialUser}
+          onClose={vi.fn()}
+          onCancel={vi.fn()}
+        />
+      );
+
+      await user.click(screen.getByRole("button", { name: "保存" }));
+
+      expect(mockOnUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          display_name: "テストユーザー",
+          description: "自己紹介文",
+          external_url: "https://example.com",
+        })
+      );
+    });
+  });
+
+  describe("キャンセル", () => {
+    it("キャンセルボタンをクリックするとonCancelが呼ばれる", async () => {
+      const user = userEvent.setup();
+      const onCancel = vi.fn();
+
+      render(
+        <EditProfileModal
+          userId={1}
+          initialUser={mockInitialUser}
+          onClose={vi.fn()}
+          onCancel={onCancel}
+        />
+      );
+
+      await user.click(screen.getByRole("button", { name: "キャンセル" }));
+
+      expect(onCancel).toHaveBeenCalledTimes(1);
+    });
+  });
+});
