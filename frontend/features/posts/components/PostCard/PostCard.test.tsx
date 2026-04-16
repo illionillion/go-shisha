@@ -377,42 +377,44 @@ describe("PostCard", () => {
   it("自動切り替えが動作する（タイマーテスト）", async () => {
     vi.useFakeTimers();
 
-    const multiSlidePost = {
-      ...mockPost,
-      slides: [
-        {
-          image_url: "https://picsum.photos/400/600?random=1",
-          text: "1枚目",
-        },
-        {
-          image_url: "https://picsum.photos/400/600?random=2",
-          text: "2枚目",
-        },
-      ],
-    };
-    const onLike = vi.fn();
+    try {
+      const multiSlidePost = {
+        ...mockPost,
+        slides: [
+          {
+            image_url: "https://picsum.photos/400/600?random=1",
+            text: "1枚目",
+          },
+          {
+            image_url: "https://picsum.photos/400/600?random=2",
+            text: "2枚目",
+          },
+        ],
+      };
+      const onLike = vi.fn();
 
-    render(<PostCard post={multiSlidePost} onLike={onLike} autoPlayInterval={1000} />);
+      render(<PostCard post={multiSlidePost} onLike={onLike} autoPlayInterval={1000} />);
 
-    expect(screen.getByText("1枚目")).toBeInTheDocument();
-
-    // 1秒後に次のスライドに切り替わる
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-    await vi.waitFor(() => {
-      expect(screen.getByText("2枚目")).toBeInTheDocument();
-    });
-
-    // さらに1秒後に最初のスライドに戻る
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-    await vi.waitFor(() => {
       expect(screen.getByText("1枚目")).toBeInTheDocument();
-    });
 
-    vi.useRealTimers();
+      // 1秒後に次のスライドに切り替わる
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      await vi.waitFor(() => {
+        expect(screen.getByText("2枚目")).toBeInTheDocument();
+      });
+
+      // さらに1秒後に最初のスライドに戻る
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      await vi.waitFor(() => {
+        expect(screen.getByText("1枚目")).toBeInTheDocument();
+      });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("onUnlikeが未定義の場合、いいね解除でonLikeが呼ばれる", async () => {
@@ -717,44 +719,118 @@ describe("PostCard", () => {
   it("手動切替後に旧タイマーによる自動スライドが発生しない", () => {
     vi.useFakeTimers();
 
+    try {
+      const multiSlidePost = {
+        ...mockPost,
+        slides: [
+          { image_url: "https://picsum.photos/400/600?random=1", text: "1枚目" },
+          { image_url: "https://picsum.photos/400/600?random=2", text: "2枚目" },
+          { image_url: "https://picsum.photos/400/600?random=3", text: "3枚目" },
+        ],
+      };
+
+      render(<PostCard post={multiSlidePost} onLike={() => {}} autoPlayInterval={3000} />);
+
+      // 初期スライドは1枚目
+      expect(screen.getByText("1枚目")).toBeInTheDocument();
+
+      // タイマー開始から1000ms後（まだ切り替わらない）に手動で次へ
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      act(() => {
+        fireEvent.click(screen.getByLabelText("次のスライド"));
+      });
+
+      // 手動切替直後: 2枚目が表示される
+      expect(screen.getByText("2枚目")).toBeInTheDocument();
+
+      // 旧タイマーの残り2000ms（計3000ms）が経過しても、3枚目に自動切替されないことを確認
+      // （旧タイマーがキャンセルされていれば、新しいタイマーは手動切替後から3000msで動く）
+      act(() => {
+        vi.advanceTimersByTime(2000);
+      });
+      expect(screen.getByText("2枚目")).toBeInTheDocument();
+
+      // 新タイマーの残り1000ms（合計3000ms）が経過すると3枚目に切り替わる
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      expect(screen.getByText("3枚目")).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("プログレスバーをクリックすると指定スライドへ移動できる", async () => {
+    const user = userEvent.setup();
     const multiSlidePost = {
       ...mockPost,
       slides: [
-        { image_url: "https://picsum.photos/400/600?random=1", text: "1枚目" },
-        { image_url: "https://picsum.photos/400/600?random=2", text: "2枚目" },
-        { image_url: "https://picsum.photos/400/600?random=3", text: "3枚目" },
+        { image_url: "https://picsum.photos/400/600?random=1", text: "S1" },
+        { image_url: "https://picsum.photos/400/600?random=2", text: "S2" },
+        { image_url: "https://picsum.photos/400/600?random=3", text: "S3" },
       ],
     };
 
     render(<PostCard post={multiSlidePost} onLike={() => {}} autoPlayInterval={3000} />);
 
-    // 初期スライドは1枚目
-    expect(screen.getByText("1枚目")).toBeInTheDocument();
+    // 初期は S1
+    expect(screen.getByText("S1")).toBeInTheDocument();
 
-    // タイマー開始から1000ms後（まだ切り替わらない）に手動で次へ
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-    act(() => {
-      fireEvent.click(screen.getByLabelText("次のスライド"));
-    });
+    // 3枚目のプログレスバー（インデックス2）をクリック
+    const progressBars = screen.getAllByRole("button", { name: /スライド .* へ移動/ });
+    expect(progressBars).toHaveLength(3);
 
-    // 手動切替直後: 2枚目が表示される
-    expect(screen.getByText("2枚目")).toBeInTheDocument();
+    await user.click(progressBars[2]);
 
-    // 旧タイマーの残り2000ms（計3000ms）が経過しても、3枚目に自動切替されないことを確認
-    // （旧タイマーがキャンセルされていれば、新しいタイマーは手動切替後から3000msで動く）
-    act(() => {
-      vi.advanceTimersByTime(2000);
-    });
-    expect(screen.getByText("2枚目")).toBeInTheDocument();
+    // S3 が表示される
+    expect(screen.getByText("S3")).toBeInTheDocument();
 
-    // 新タイマーの残り1000ms（合計3000ms）が経過すると3枚目に切り替わる
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-    expect(screen.getByText("3枚目")).toBeInTheDocument();
+    // 2枚目のプログレスバー（インデックス1）をクリック
+    await user.click(progressBars[1]);
 
-    vi.useRealTimers();
+    // S2 が表示される
+    expect(screen.getByText("S2")).toBeInTheDocument();
+  });
+
+  it("プログレスバークリック後に旧タイマーがキャンセルされる", () => {
+    vi.useFakeTimers();
+
+    try {
+      const multiSlidePost = {
+        ...mockPost,
+        slides: [
+          { image_url: "https://picsum.photos/400/600?random=1", text: "A1" },
+          { image_url: "https://picsum.photos/400/600?random=2", text: "A2" },
+          { image_url: "https://picsum.photos/400/600?random=3", text: "A3" },
+        ],
+      };
+
+      render(<PostCard post={multiSlidePost} onLike={() => {}} autoPlayInterval={3000} />);
+
+      // 初期は A1
+      expect(screen.getByText("A1")).toBeInTheDocument();
+
+      // 1000ms後に3枚目のプログレスバーをクリックして A3 に直接ジャンプ
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+      const progressBars = screen.getAllByRole("button", { name: /スライド .* へ移動/ });
+      act(() => {
+        fireEvent.click(progressBars[2]);
+      });
+
+      // A3 が表示される
+      expect(screen.getByText("A3")).toBeInTheDocument();
+
+      // 旧タイマーの残り2000msが経過しても、A1 に戻らない（旧タイマーがキャンセルされている）
+      act(() => {
+        vi.advanceTimersByTime(2000);
+      });
+      expect(screen.getByText("A3")).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

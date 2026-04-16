@@ -138,6 +138,17 @@ export function PostCard({
     }
   };
 
+  /** 指定インデックスのスライドへジャンプ */
+  const handleGoToSlide = (e: React.MouseEvent, index: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    setCurrentSlideIndex(index);
+  };
+
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -183,7 +194,8 @@ export function PostCard({
             className={clsx(["absolute", "top-2", "left-2", "right-2", "flex", "gap-1", "z-10"])}
           >
             {slides.map((_, index) => (
-              <div
+              <button
+                type="button"
                 key={index}
                 className={clsx([
                   "h-1",
@@ -191,7 +203,12 @@ export function PostCard({
                   "rounded-full",
                   "bg-white/30",
                   "overflow-hidden",
+                  "cursor-pointer",
+                  "border-0",
+                  "p-0",
                 ])}
+                onClick={(e) => handleGoToSlide(e, index)}
+                aria-label={`スライド ${index + 1} へ移動`}
               >
                 <div
                   key={index === currentSlideIndex ? `bar-${currentSlideIndex}` : `${index}`}
@@ -210,7 +227,7 @@ export function PostCard({
                       : undefined
                   }
                 />
-              </div>
+              </button>
             ))}
           </div>
         )}
