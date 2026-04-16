@@ -91,7 +91,11 @@ export function PostCard({
   // 自分の投稿かつ onDelete が指定された場合のみメニューを表示
   const isOwner = currentUserId != null && post.user_id === currentUserId && !!onDelete;
 
-  /** 自動再生タイマーをキャンセルして参照をクリアする */
+  /**
+   * 自動再生タイマーをキャンセルして参照をクリアする。
+   * 手動スライド切り替え時・プログレスバークリック時・コンポーネントアンマウント時に呼ばれる。
+   * 呼び出し後は timerRef.current が null になる。
+   */
   const clearAutoPlayTimer = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);

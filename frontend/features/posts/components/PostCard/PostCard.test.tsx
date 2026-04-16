@@ -30,6 +30,7 @@ const mockPost: Post = {
 };
 
 describe("PostCard", () => {
+  // vi.useFakeTimers() を使用するテストで cleanup を確実に行い、後続テストへの漏れを防ぐ
   afterEach(() => {
     vi.useRealTimers();
   });
