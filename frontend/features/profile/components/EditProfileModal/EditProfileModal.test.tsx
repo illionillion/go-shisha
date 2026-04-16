@@ -285,7 +285,7 @@ describe("EditProfileModal", () => {
       const file = new File(["dummy"], "avatar.png", { type: "image/png" });
       await user.upload(fileInput, file);
 
-      expect(screen.getByText("画像のアップロードに失敗しました")).toBeInTheDocument();
+      expect(await screen.findByText("画像のアップロードに失敗しました")).toBeInTheDocument();
     });
   });
 });
