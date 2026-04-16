@@ -30,6 +30,10 @@ const mockPost: Post = {
 };
 
 describe("PostCard", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("投稿内容が表示される", () => {
     const onLike = vi.fn();
 

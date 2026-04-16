@@ -91,6 +91,14 @@ export function PostCard({
   // 自分の投稿かつ onDelete が指定された場合のみメニューを表示
   const isOwner = currentUserId != null && post.user_id === currentUserId && !!onDelete;
 
+  /** 自動再生タイマーをキャンセルして参照をクリアする */
+  const clearAutoPlayTimer = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
   /** 自動切り替えタイマー */
   useEffect(() => {
     if (!hasMultipleSlides) return;
@@ -101,10 +109,7 @@ export function PostCard({
     }, autoPlayInterval);
 
     return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
+      clearAutoPlayTimer();
     };
   }, [hasMultipleSlides, slides.length, autoPlayInterval, currentSlideIndex]);
 
@@ -116,10 +121,7 @@ export function PostCard({
   const handlePrevSlide = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
+    clearAutoPlayTimer();
     if (slides.length > 0) {
       setCurrentSlideIndex((prev) => (prev - 1 + slides.length) % slides.length);
     }
@@ -129,10 +131,7 @@ export function PostCard({
   const handleNextSlide = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
+    clearAutoPlayTimer();
     if (slides.length > 0) {
       setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
     }
@@ -140,12 +139,8 @@ export function PostCard({
 
   /** 指定インデックスのスライドへジャンプし、既存の自動再生タイマーをキャンセルする */
   const handleGoToSlide = (e: React.MouseEvent, index: number) => {
-    e.preventDefault();
     e.stopPropagation();
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
+    clearAutoPlayTimer();
     setCurrentSlideIndex(index);
   };
 
