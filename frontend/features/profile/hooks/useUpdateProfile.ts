@@ -26,7 +26,10 @@ export function useUpdateProfile(options?: { userId?: number; onSuccess?: (user:
       { data: input },
       {
         onSuccess: (response) => {
-          if (response.status !== 200) return;
+          if (response.status !== 200) {
+            toast.error("プロフィールの更新に失敗しました");
+            return;
+          }
           const updatedUser = response.data;
 
           // AuthStoreのユーザー情報を更新

@@ -106,8 +106,8 @@ export function EditProfileForm({
       setUploadedIconUrl(url);
       setPreviewUrl(getImageUrl(url));
     } catch {
-      // アップロード失敗時はプレビューを元に戻す
-      setPreviewUrl(initialUser.icon_url ? getImageUrl(initialUser.icon_url) : undefined);
+      // アップロード失敗時はプレビューを直前の確定状態に戻す
+      setPreviewUrl(uploadedIconUrl ? getImageUrl(uploadedIconUrl) : undefined);
     } finally {
       // blob URLを解放
       URL.revokeObjectURL(objectUrl);
@@ -120,10 +120,10 @@ export function EditProfileForm({
 
   const handleFormSubmit = (values: EditProfileFormValues) => {
     const input: UpdateUserInput = {
-      display_name: values.display_name || undefined,
-      description: values.description || undefined,
-      external_url: values.external_url || undefined,
-      icon_url: uploadedIconUrl || undefined,
+      display_name: values.display_name,
+      description: values.description,
+      external_url: values.external_url,
+      icon_url: uploadedIconUrl ?? undefined,
     };
     onSubmit(input);
   };

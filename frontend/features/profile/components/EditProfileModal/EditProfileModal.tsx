@@ -44,11 +44,16 @@ export function EditProfileModal({
   /** アバター画像をアップロードしてURLを返す */
   const handleUploadImage = async (file: File): Promise<string> => {
     setUploadError(undefined);
-    const res = await uploadMut.mutateAsync({ data: { image: file } });
-    if (res.status === 200 && res.data.url) {
-      return res.data.url;
+    try {
+      const res = await uploadMut.mutateAsync({ data: { image: file } });
+      if (res.status === 200 && res.data.url) {
+        return res.data.url;
+      }
+      throw new Error("アップロードに失敗しました");
+    } catch (err) {
+      setUploadError("画像のアップロードに失敗しました");
+      throw err;
     }
-    throw new Error("アップロードに失敗しました");
   };
 
   const handleSubmit = (input: UpdateUserInput) => {
@@ -124,9 +129,7 @@ export function EditProfileModal({
             disabled={isPending}
             onUploadImage={handleUploadImage}
             isUploading={uploadMut.isPending}
-            uploadError={
-              uploadMut.isError || uploadError ? "画像のアップロードに失敗しました" : undefined
-            }
+            uploadError={uploadError}
           />
         </div>
       </div>
