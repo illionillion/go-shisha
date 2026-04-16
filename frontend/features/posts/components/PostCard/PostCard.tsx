@@ -200,8 +200,9 @@ export function PostCard({
                   "flex-1",
                   "flex",
                   "items-center",
-                  // 上下パディングでタップ/クリックのヒットエリアを広げる（見た目のバー高さは内部divで維持）
+                  // py-2 でヒットエリアを上下に拡大、-my-2 でレイアウト高さを相殺し見た目のバー位置を変えない
                   "py-2",
+                  "-my-2",
                   "px-0",
                   "cursor-pointer",
                   "border-0",
