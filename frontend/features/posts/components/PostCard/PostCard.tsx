@@ -4,7 +4,7 @@ import { cva } from "class-variance-authority";
 import { clsx } from "clsx";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/Avatar/Avatar";
 import { FlavorLabel } from "@/components/FlavorLabel";
 import { HeartIcon, NextIcon, PrevIcon } from "@/components/icons";
@@ -85,22 +85,35 @@ export function PostCard({
 }: PostCardProps) {
   const [isLiked, setIsLiked] = useState(post.is_liked || false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const slides = post.slides || [];
   const hasMultipleSlides = slides.length > 1;
   // 自分の投稿かつ onDelete が指定された場合のみメニューを表示
   const isOwner = currentUserId != null && post.user_id === currentUserId && !!onDelete;
+
+  /**
+   * 自動再生タイマーをキャンセルして参照をクリアする。
+   * 手動スライド切り替え時・プログレスバークリック時・コンポーネントアンマウント時に呼ばれる。
+   * 呼び出し後は timerRef.current が null になる。
+   */
+  const clearAutoPlayTimer = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
 
   /** 自動切り替えタイマー */
   useEffect(() => {
     if (!hasMultipleSlides) return;
 
     // スライド切り替えタイマー
-    const slideTimer = setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
     }, autoPlayInterval);
 
     return () => {
-      clearTimeout(slideTimer);
+      clearAutoPlayTimer();
     };
   }, [hasMultipleSlides, slides.length, autoPlayInterval, currentSlideIndex]);
 
@@ -112,6 +125,7 @@ export function PostCard({
   const handlePrevSlide = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    clearAutoPlayTimer();
     if (slides.length > 0) {
       setCurrentSlideIndex((prev) => (prev - 1 + slides.length) % slides.length);
     }
@@ -121,9 +135,17 @@ export function PostCard({
   const handleNextSlide = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    clearAutoPlayTimer();
     if (slides.length > 0) {
       setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
     }
+  };
+
+  /** 指定インデックスのスライドへジャンプし、既存の自動再生タイマーをキャンセルする */
+  const handleGoToSlide = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
+    clearAutoPlayTimer();
+    setCurrentSlideIndex(index);
   };
 
   const handleLike = (e: React.MouseEvent) => {
@@ -171,33 +193,52 @@ export function PostCard({
             className={clsx(["absolute", "top-2", "left-2", "right-2", "flex", "gap-1", "z-10"])}
           >
             {slides.map((_, index) => (
-              <div
+              <button
+                type="button"
                 key={index}
                 className={clsx([
-                  "h-1",
                   "flex-1",
-                  "rounded-full",
-                  "bg-white/30",
-                  "overflow-hidden",
+                  "flex",
+                  "items-center",
+                  // py-2 でヒットエリアを上下に拡大、-my-2 でレイアウト高さを相殺し見た目のバー位置を変えない
+                  "py-2",
+                  "-my-2",
+                  "px-0",
+                  "cursor-pointer",
+                  "border-0",
+                  "bg-transparent",
                 ])}
+                onClick={(e) => handleGoToSlide(e, index)}
+                aria-label={`スライド ${index + 1} へ移動`}
               >
                 <div
                   className={clsx([
-                    "h-full",
-                    "bg-white",
+                    "h-1",
+                    "w-full",
                     "rounded-full",
-                    index < currentSlideIndex && "w-full",
-                    // Tailwind configでanimate-[progress-bar_linear_forwards]を拡張している前提
-                    index === currentSlideIndex && "w-0 animate-[progress-bar_linear_forwards]",
-                    index > currentSlideIndex && "w-0",
+                    "bg-white/30",
+                    "overflow-hidden",
                   ])}
-                  style={
-                    index === currentSlideIndex
-                      ? { animationDuration: `${autoPlayInterval}ms` }
-                      : undefined
-                  }
-                />
-              </div>
+                >
+                  <div
+                    key={index === currentSlideIndex ? `bar-${currentSlideIndex}` : `${index}`}
+                    className={clsx([
+                      "h-full",
+                      "bg-white",
+                      "rounded-full",
+                      index < currentSlideIndex && "w-full",
+                      // Tailwind configでanimate-[progress-bar_linear_forwards]を拡張している前提
+                      index === currentSlideIndex && "w-0 animate-[progress-bar_linear_forwards]",
+                      index > currentSlideIndex && "w-0",
+                    ])}
+                    style={
+                      index === currentSlideIndex
+                        ? { animationDuration: `${autoPlayInterval}ms` }
+                        : undefined
+                    }
+                  />
+                </div>
+              </button>
             ))}
           </div>
         )}
