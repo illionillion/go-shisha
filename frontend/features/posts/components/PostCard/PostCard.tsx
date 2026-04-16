@@ -138,7 +138,7 @@ export function PostCard({
     }
   };
 
-  /** 指定インデックスのスライドへジャンプ */
+  /** 指定インデックスのスライドへジャンプし、既存の自動再生タイマーをキャンセルする */
   const handleGoToSlide = (e: React.MouseEvent, index: number) => {
     e.preventDefault();
     e.stopPropagation();

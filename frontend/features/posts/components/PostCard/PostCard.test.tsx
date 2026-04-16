@@ -781,14 +781,16 @@ describe("PostCard", () => {
     // 3枚目のプログレスバー（インデックス2）をクリック
     const progressBars = screen.getAllByRole("button", { name: /スライド .* へ移動/ });
     expect(progressBars).toHaveLength(3);
+    const thirdSlideBar = progressBars[2];
+    const secondSlideBar = progressBars[1];
 
-    await user.click(progressBars[2]);
+    await user.click(thirdSlideBar);
 
     // S3 が表示される
     expect(screen.getByText("S3")).toBeInTheDocument();
 
     // 2枚目のプログレスバー（インデックス1）をクリック
-    await user.click(progressBars[1]);
+    await user.click(secondSlideBar);
 
     // S2 が表示される
     expect(screen.getByText("S2")).toBeInTheDocument();
@@ -817,8 +819,9 @@ describe("PostCard", () => {
         vi.advanceTimersByTime(1000);
       });
       const progressBars = screen.getAllByRole("button", { name: /スライド .* へ移動/ });
+      const thirdSlideBar = progressBars[2];
       act(() => {
-        fireEvent.click(progressBars[2]);
+        fireEvent.click(thirdSlideBar);
       });
 
       // A3 が表示される
