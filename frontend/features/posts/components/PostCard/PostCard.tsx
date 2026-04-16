@@ -197,35 +197,46 @@ export function PostCard({
                 type="button"
                 key={index}
                 className={clsx([
-                  "h-1",
                   "flex-1",
-                  "rounded-full",
-                  "bg-white/30",
-                  "overflow-hidden",
+                  "flex",
+                  "items-center",
+                  // 上下パディングでタップ/クリックのヒットエリアを広げる（見た目のバー高さは内部divで維持）
+                  "py-2",
+                  "px-0",
                   "cursor-pointer",
                   "border-0",
-                  "p-0",
+                  "bg-transparent",
                 ])}
                 onClick={(e) => handleGoToSlide(e, index)}
                 aria-label={`スライド ${index + 1} へ移動`}
               >
                 <div
-                  key={index === currentSlideIndex ? `bar-${currentSlideIndex}` : `${index}`}
                   className={clsx([
-                    "h-full",
-                    "bg-white",
+                    "h-1",
+                    "w-full",
                     "rounded-full",
-                    index < currentSlideIndex && "w-full",
-                    // Tailwind configでanimate-[progress-bar_linear_forwards]を拡張している前提
-                    index === currentSlideIndex && "w-0 animate-[progress-bar_linear_forwards]",
-                    index > currentSlideIndex && "w-0",
+                    "bg-white/30",
+                    "overflow-hidden",
                   ])}
-                  style={
-                    index === currentSlideIndex
-                      ? { animationDuration: `${autoPlayInterval}ms` }
-                      : undefined
-                  }
-                />
+                >
+                  <div
+                    key={index === currentSlideIndex ? `bar-${currentSlideIndex}` : `${index}`}
+                    className={clsx([
+                      "h-full",
+                      "bg-white",
+                      "rounded-full",
+                      index < currentSlideIndex && "w-full",
+                      // Tailwind configでanimate-[progress-bar_linear_forwards]を拡張している前提
+                      index === currentSlideIndex && "w-0 animate-[progress-bar_linear_forwards]",
+                      index > currentSlideIndex && "w-0",
+                    ])}
+                    style={
+                      index === currentSlideIndex
+                        ? { animationDuration: `${autoPlayInterval}ms` }
+                        : undefined
+                    }
+                  />
+                </div>
               </button>
             ))}
           </div>

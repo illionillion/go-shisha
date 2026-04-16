@@ -464,7 +464,7 @@ describe("PostCard", () => {
     );
 
     // プログレスバーのコンテナを取得
-    const progressBars = container.querySelectorAll(".h-1.flex-1 > div");
+    const progressBars = container.querySelectorAll('button[aria-label*="へ移動"] > div > div');
     expect(progressBars).toHaveLength(3);
 
     // 1つ目（アクティブ）: w-0 + animate-[progress-bar_linear_forwards]
@@ -510,7 +510,7 @@ describe("PostCard", () => {
     // 次のスライドへ移動
     await user.click(nextButton);
 
-    const progressBars = container.querySelectorAll(".h-1.flex-1 > div");
+    const progressBars = container.querySelectorAll('button[aria-label*="へ移動"] > div > div');
 
     // 1つ目（完了）: w-fullに変化
     expect(progressBars[0]).toHaveClass("w-full");
@@ -546,7 +546,7 @@ describe("PostCard", () => {
     );
 
     // プログレスバーのコンテナを取得
-    const progressBars = container.querySelectorAll(".h-1.flex-1 > div");
+    const progressBars = container.querySelectorAll('button[aria-label*="へ移動"] > div > div');
 
     // 1つ目（アクティブ）のアニメーション時間を確認
     const activeProgressBar = progressBars[0] as HTMLElement;
@@ -606,7 +606,7 @@ describe("PostCard", () => {
     await user.click(next);
 
     // プログレスバー要素を取得して各状態を確認
-    const progressBars = container.querySelectorAll(".h-1.flex-1 > div");
+    const progressBars = container.querySelectorAll('button[aria-label*="へ移動"] > div > div');
     const first = progressBars[0] as HTMLElement;
     const second = progressBars[1] as HTMLElement;
     const third = progressBars[2] as HTMLElement;
