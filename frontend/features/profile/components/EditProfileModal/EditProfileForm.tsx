@@ -123,7 +123,7 @@ export function EditProfileForm({
       display_name: values.display_name,
       description: values.description,
       external_url: values.external_url,
-      icon_url: uploadedIconUrl ?? undefined,
+      icon_url: uploadedIconUrl,
     };
     onSubmit(input);
   };
