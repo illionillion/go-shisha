@@ -1,5 +1,10 @@
+import path from "path";
+import { fileURLToPath } from "url";
 import type { StorybookConfig } from "@storybook/nextjs-vite";
 import type { InlineConfig } from "vite";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const config: StorybookConfig = {
   stories: [
@@ -14,6 +19,13 @@ const config: StorybookConfig = {
     if (configType === "PRODUCTION") {
       viteConfig.base = "./";
     }
+    viteConfig.resolve = {
+      ...viteConfig.resolve,
+      alias: {
+        ...(viteConfig.resolve?.alias as Record<string, string> | undefined),
+        "focus-trap-react": path.resolve(__dirname, "__mocks__/focus-trap-react.tsx"),
+      },
+    };
     return viteConfig;
   },
 };
