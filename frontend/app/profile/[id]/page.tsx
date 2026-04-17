@@ -2,9 +2,9 @@ import { clsx } from "clsx";
 import { notFound } from "next/navigation";
 import { getUsersId, getUsersIdPosts } from "@/api/users";
 import { BackButton } from "@/components/BackButton";
-import { ProfileHeader } from "@/components/ProfileHeader";
 import { PostCreateContainer } from "@/features/posts/components/PostCreateContainer";
 import { TimelineContainer } from "@/features/posts/components/Timeline";
+import { ProfileHeaderContainer } from "@/features/profile/components/ProfileHeaderContainer";
 import { isSuccessResponse } from "@/lib/api-helpers";
 import { createServerRequestInit } from "@/lib/server-fetch";
 
@@ -39,7 +39,8 @@ export default async function Page({ params }: Props) {
 
   return (
     <div>
-      <ProfileHeader
+      <ProfileHeaderContainer
+        userId={id}
         displayName={userResponse.data.display_name}
         iconUrl={userResponse.data.icon_url}
         bio={userResponse.data.description}
